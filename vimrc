@@ -26,24 +26,29 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'tomasiser/vim-code-dark'
-Plugin 'tpope/vim-fugitive'
 Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'raimondi/delimitmate'
-Plugin 'yggdroot/indentline'
 Bundle 'vim-ruby/vim-ruby'
+Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-bundler'
 Plugin 'tpope/vim-projectionist'
 Plugin 'tpope/vim-rake'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-endwise'
 Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-repeat'
+Plugin 'raimondi/delimitmate'
 Plugin 'thoughtbot/vim-rspec'
 Plugin 'scrooloose/nerdtree'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'vim-airline/vim-airline'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'vim-airline/vim-airline'
 Plugin 'ecomba/vim-ruby-refactoring'
 Plugin 'fatih/vim-go'
+Plugin 'jeffkreeftmeijer/vim-numbertoggle'
+Plugin 'roman/golden-ratio'
+Plugin 'yggdroot/indentline'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'AndrewRadev/splitjoin.vim'
+
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -129,6 +134,8 @@ set incsearch
 " Don't redraw while executing macros (good performance config)
 set lazyredraw
 
+set cursorline
+
 " Show matching brackets when text indicator is over them
 set showmatch
 " How many tenths of a second to blink when matching brackets
@@ -142,6 +149,7 @@ map <C-j> <C-W>j
 map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
+:imap jj <Esc>
 
 " Fast saving
 nmap <leader>w :w!<cr>
@@ -151,17 +159,13 @@ set noerrorbells
 set novisualbell
 set t_vb=
 set tm=500
-
-" Display extra whitespace
-set list listchars=tab:»·,trail:·,nbsp:·
-set lcs+=space:·
 let g:indentLine_color_term = 239
 
 " Use one space, not two, after punctuation.
 set nojoinspaces
 
 " Make it obvious where 100 characters is
-set textwidth=100
+set textwidth=120
 set colorcolumn=+1
 
 " Numbers
@@ -216,6 +220,8 @@ endtry
 
 " Automatically displays all buffers when there's only one tab open
 let g:airline#extensions#tabline#enabled = 1
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#branch#enabled = 1
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
 
@@ -237,6 +243,12 @@ map <Leader>ra :call RunAllSpecs()<CR>
 
 map <Leader>n :NERDTreeToggle<CR>
 map <Leader>nf :NERDTreeFind<CR>
+
+let g:splitjoin_split_mapping = ''
+let g:splitjoin_join_mapping = ''
+
+nmap <Leader>j :SplitjoinJoin<cr>
+nmap <Leader>s :SplitjoinSplit<cr>
 
 " Return to last edit position when opening files (You want this!)
 autocmd BufReadPost *
@@ -263,6 +275,7 @@ function! HasPaste()
 endfunction
 
 let g:ctrlp_cmd = 'CtrlPMixed'
+let g:ctrlp_root_markers = ['Gemfile', '.git']
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
 let g:ctrlp_custom_ignore = {
@@ -270,3 +283,4 @@ let g:ctrlp_custom_ignore = {
   \ 'file': '\v\.(exe|so|dll)$',
   \ 'link': 'some_bad_symbolic_links',
   \ }
+
