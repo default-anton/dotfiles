@@ -144,6 +144,7 @@ set showmatch
 " How many tenths of a second to blink when matching brackets
 set mat=2
 
+cnoreabbrev Ack Ack!
 if executable('ag')
   let g:ackprg = 'ag --nogroup --nocolor --column'
 endif
