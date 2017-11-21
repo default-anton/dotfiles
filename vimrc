@@ -24,8 +24,7 @@ call vundle#begin()
 
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'flazz/vim-colorschemes'
-Plugin 'tomasiser/vim-code-dark'
+Plugin 'altercation/vim-colors-solarized'
 Plugin 'ctrlpvim/ctrlp.vim'
 Bundle 'vim-ruby/vim-ruby'
 Plugin 'tpope/vim-fugitive'
@@ -59,16 +58,14 @@ autocmd FileType ruby compiler ruby
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
 if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
-  syntax on
+  syntax enable
 endif
 
 " Enable 256 colors palette in Gnome Terminal
-if $COLORTERM == 'gnome-terminal'
-  set t_Co=256
-endif
-
+set t_Co=256
+set t_ut=
 set background=dark
-colorscheme jellybeans
+colorscheme solarized
 
 " When the type of shell script is /bin/sh, assume a POSIX-compatible
 " shell for syntax highlighting purposes.
