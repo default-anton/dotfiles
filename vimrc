@@ -30,6 +30,7 @@ Plugin 'ctrlpvim/ctrlp.vim'
 Bundle 'vim-ruby/vim-ruby'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-bundler'
+Plugin 'tpope/vim-projectionist'
 Plugin 'tpope/vim-rake'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-endwise'
@@ -65,6 +66,7 @@ if $COLORTERM == 'gnome-terminal'
     set t_Co=256
 endif
 
+set background=dark
 colorscheme jellybeans
 
 " When the type of shell script is /bin/sh, assume a POSIX-compatible
@@ -97,6 +99,7 @@ set so=5
 
 " Turn on the WiLd menu
 set wildmenu
+set clipboard=unnamedplus
 
 " Ignore compiled files
 set wildignore=*.o,*~,*.pyc
