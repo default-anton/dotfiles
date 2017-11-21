@@ -48,6 +48,7 @@ Plugin 'roman/golden-ratio'
 Plugin 'yggdroot/indentline'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'AndrewRadev/splitjoin.vim'
+Plugin 'mileszs/ack.vim'
 
 
 " All of your Plugins must be added before the following line
@@ -63,7 +64,7 @@ endif
 
 " Enable 256 colors palette in Gnome Terminal
 if $COLORTERM == 'gnome-terminal'
-    set t_Co=256
+  set t_Co=256
 endif
 
 set background=dark
@@ -143,8 +144,9 @@ set showmatch
 " How many tenths of a second to blink when matching brackets
 set mat=2
 
-" Map <Space> to / (search)
-map <space> /
+if executable('ag')
+  let g:ackprg = 'ag --nogroup --nocolor --column'
+endif
 
 " Smart way to move between windows
 map <C-j> <C-W>j
@@ -179,12 +181,12 @@ set numberwidth=4
 " will use completion if not at beginning
 set wildmode=list:longest,list:full
 function! InsertTabWrapper()
-    let col = col('.') - 1
-    if !col || getline('.')[col - 1] !~ '\k'
-        return "\<tab>"
-    else
-        return "\<c-p>"
-    endif
+  let col = col('.') - 1
+  if !col || getline('.')[col - 1] !~ '\k'
+    return "\<tab>"
+  else
+    return "\<c-p>"
+  endif
 endfunction
 inoremap <Tab> <c-r>=InsertTabWrapper()<cr>
 inoremap <S-Tab> <c-n>
@@ -254,9 +256,9 @@ nmap <Leader>s :SplitjoinSplit<cr>
 
 " Return to last edit position when opening files (You want this!)
 autocmd BufReadPost *
-     \ if line("'\"") > 0 && line("'\"") <= line("$") |
-     \   exe "normal! g`\"" |
-     \ endif
+      \ if line("'\"") > 0 && line("'\"") <= line("$") |
+      \   exe "normal! g`\"" |
+      \ endif
 " Remember info about open buffers on close
 set viminfo^=%
 
@@ -270,10 +272,10 @@ endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Returns true if paste mode is enabled
 function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    endif
-    return ''
+  if &paste
+    return 'PASTE MODE  '
+  endif
+  return ''
 endfunction
 
 let g:ctrlp_cmd = 'CtrlPMixed'
@@ -281,8 +283,8 @@ let g:ctrlp_root_markers = ['Gemfile', '.git']
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
 let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\v[\/]\.(git|hg|svn)$',
-  \ 'file': '\v\.(exe|so|dll)$',
-  \ 'link': 'some_bad_symbolic_links',
-  \ }
+      \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+      \ 'file': '\v\.(exe|so|dll)$',
+      \ 'link': 'some_bad_symbolic_links',
+      \ }
 
