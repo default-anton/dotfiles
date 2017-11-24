@@ -35,6 +35,7 @@ Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-endwise'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
+Plugin 'tpope/vim-haml'
 Plugin 'raimondi/delimitmate'
 Plugin 'thoughtbot/vim-rspec'
 Plugin 'scrooloose/nerdtree'
@@ -62,6 +63,7 @@ if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
 endif
 
 " Enable 256 colors palette in Gnome Terminal
+let g:solarized_termcolors=256
 set t_Co=256
 set t_ut=
 set background=dark
