@@ -164,6 +164,9 @@ map <C-l> <C-W>l
 " Fast saving
 nmap <leader>w :w!<cr>
 
+" Yank file path with line number
+nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
+
 " No annoying sound on errors
 set noerrorbells
 set novisualbell
