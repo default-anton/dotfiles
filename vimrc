@@ -150,7 +150,7 @@ if executable('ag')
   let g:ackprg = 'ag --nogroup --nocolor --column'
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag --literal --files-with-matches --nocolor --hidden --filename-pattern "" %s'
+  let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
 
   " ag is fast enough that CtrlP doesn't need to cache
   let g:ctrlp_use_caching = 0
