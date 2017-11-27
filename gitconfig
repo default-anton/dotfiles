@@ -3,25 +3,27 @@
 	email = antonkuzmenko.dev@gmail.com
 
 [push]
-  default = current
+	default = current
 
 [github]
-  user = antonkuzmenko
+	user = antonkuzmenko
 
 [alias]
-  log = log --color
-  co = checkout
-  br = branch
-  ci = commit
-  st = status
-  lg = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen%ar%Creset by %C(yellow)%an%Creset' --abbrev-commit
-  dw = diff --color-words
-  orb = "!f() { for branch in $(git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD)); do echo $(git show --format='%ci %cr %an' $branch | head -n 1) \\\\t$branch; done | sort -r; }; f"
+	log = log --color
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+	lg = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen%ar%Creset by %C(yellow)%an%Creset' --abbrev-commit
+	dw = diff --color-words
+	orb = "!f() { for branch in $(git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD)); do echo $(git show --format='%ci %cr %an' $branch | head -n 1) \\\\t$branch; done | sort -r; }; f"
 	dorb = "!f() { git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD) | sed 's!origin/!!' | xargs -n 1 git push --delete origin; }; f"
 
 [color]
-  ui = true
-  diff = auto
+	ui = true
+	diff = auto
 
 [diff]
-  mnemonicprefix = true
+	mnemonicprefix = true
+[merge]
+	ff = false
