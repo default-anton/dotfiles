@@ -290,6 +290,8 @@ function! HasPaste()
 endfunction
 
 let g:ctrlp_cmd = 'CtrlPMixed'
+let g:ctrlp_max_files = 0
+let g:ctrlp_max_depth = 40
 let g:ctrlp_root_markers = ['Gemfile', '.git']
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
