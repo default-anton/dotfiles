@@ -150,7 +150,7 @@ if executable('ag')
   let g:ackprg = 'ag --nogroup --nocolor --column'
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
+  let g:ctrlp_user_command = 'ag %s -l --ignore-case --nocolor --hidden --depth 100 -g ""'
 
   " ag is fast enough that CtrlP doesn't need to cache
   let g:ctrlp_use_caching = 0
@@ -291,7 +291,7 @@ endfunction
 
 let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_max_files = 0
-let g:ctrlp_max_depth = 40
+let g:ctrlp_max_depth = 100
 let g:ctrlp_root_markers = ['Gemfile', '.git']
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
