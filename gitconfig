@@ -18,6 +18,8 @@
 	dw = diff --color-words
 	orb = "!f() { for branch in $(git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD)); do echo $(git show --format='%ci %cr %an' $branch | head -n 1) \\\\t$branch; done | sort -r; }; f"
 	dorb = "!f() { git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD) | sed 's!origin/!!' | xargs -n 1 git push --delete origin; }; f"
+  fap = fetch --all -p
+  amend = commit --amend
 
 [color]
 	ui = true
