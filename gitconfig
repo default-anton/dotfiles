@@ -9,12 +9,13 @@
 	user = antonkuzmenko
 
 [alias]
-	log = log --color
 	co = checkout
 	br = branch
-	ci = commit
+	ci = commit --verbose
 	st = status
-	lg = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen%ar%Creset by %C(yellow)%an%Creset' --abbrev-commit -10
+  l = "!. ~/.dotfiles/githelpers && pretty_git_log"
+  r = !GIT_NO_PAGER=1 git l -30
+  la = !git l --all
 	orb = "!f() { for branch in $(git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD)); do echo $(git show --format='%ci %cr %an' $branch | head -n 1) \\\\t$branch; done | sort -r; }; f"
 	dorb = "!f() { git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD) | sed 's!origin/!!' | xargs -n 1 git push --delete origin; }; f"
   fap = fetch --all -p
