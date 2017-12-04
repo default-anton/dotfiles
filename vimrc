@@ -51,6 +51,7 @@ Plugin 'yggdroot/indentline'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'AndrewRadev/splitjoin.vim'
 Plugin 'mileszs/ack.vim'
+Plugin 'rbgrouleff/bclose.vim'
 
 
 " All of your Plugins must be added before the following line
@@ -209,16 +210,16 @@ nnoremap <Up> :echoe "Use k"<CR>
 nnoremap <Down> :echoe "Use j"<CR>
 
 " Close the current buffer
-map <leader>bd :bd<cr>
+map <silent> <leader>bd :Bclose<CR>
 " Close all the buffers
 map <leader>ba :bufdo bd<cr>
 map <leader>l :bnext<cr>
 map <leader>h :bprevious<cr>
 
 " Useful mappings for managing tabs
-map <leader>tn :tabnew<cr>
+map <leader>tc :tabnew<cr>
 map <leader>to :tabonly<cr>
-map <leader>tc :tabclose<cr>
+map <leader>td :tabclose<cr>
 map <leader>tm :tabmove
 map <leader>tt :tabnext<cr>
 
