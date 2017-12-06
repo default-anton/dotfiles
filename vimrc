@@ -130,6 +130,7 @@ set smarttab
 " Highlight search results
 set hlsearch
 highlight Search guibg=NONE guifg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
+highlight IncSearch guibg=NONE guifg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
 
 " Disable highlight when <leader><leader> is pressed
 map <silent> <leader><leader> :noh<cr>
