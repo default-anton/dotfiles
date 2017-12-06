@@ -52,6 +52,7 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'AndrewRadev/splitjoin.vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'rbgrouleff/bclose.vim'
+Plugin 'matchit.zip'
 
 
 " All of your Plugins must be added before the following line
