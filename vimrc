@@ -43,6 +43,7 @@ Plugin 'thoughtbot/vim-rspec'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 Plugin 'ecomba/vim-ruby-refactoring'
 Plugin 'fatih/vim-go'
 Plugin 'jeffkreeftmeijer/vim-numbertoggle'
@@ -242,6 +243,9 @@ let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#branch#enabled = 1
+let g:airline_theme='solarized'
+let g:airline_solarized_bg='dark'
+
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
 
