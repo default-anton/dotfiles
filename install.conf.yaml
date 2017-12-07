@@ -1,5 +1,14 @@
+- defaults:
+    link:
+      relink: true
+
 - clean: ['~']
 
 - link:
     ~/.gitconfig: gitconfig
     ~/.vimrc: vimrc
+
+- shell:
+  - [git submodule update --init --recursive, Installing submodules]
+  - command: git clone https://github.com/powerline/fonts.git --depth=1 && (cd fonts && ./install.sh) && rm -rf fonts
+    description: Install powerline fonts
