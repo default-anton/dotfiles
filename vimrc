@@ -37,6 +37,7 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-haml'
 Plugin 'tpope/vim-eunuch'
+Plugin 'tpope/vim-markdown'
 Plugin 'pbrisbin/vim-mkdir'
 Plugin 'raimondi/delimitmate'
 Plugin 'thoughtbot/vim-rspec'
@@ -152,7 +153,7 @@ set mat=2
 
 cnoreabbrev Ack Ack!
 if executable('ag')
-  let g:ackprg = 'ag --nogroup --nocolor --column'
+  let g:ackprg = 'ag --vimgrep'
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
   let g:ctrlp_user_command = 'ag %s -l --ignore-case --nocolor --hidden --depth 100 -g ""'
