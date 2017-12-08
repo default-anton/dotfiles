@@ -171,6 +171,7 @@ imap jj <Esc>
 
 " Fast saving
 nmap <leader>w :w!<cr>
+map <leader>k :setlocal spell! spelllang=en_us<cr>
 
 " Yank file path with line number
 nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
