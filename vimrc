@@ -56,6 +56,7 @@ Plugin 'mileszs/ack.vim'
 Plugin 'rbgrouleff/bclose.vim'
 Plugin 'matchit.zip'
 Plugin 'ntpeters/vim-better-whitespace'
+Plugin 'junegunn/vim-easy-align'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -275,6 +276,12 @@ let g:splitjoin_join_mapping = ''
 
 nmap <Leader>j :SplitjoinJoin<cr>
 nmap <Leader>s :SplitjoinSplit<cr>
+
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
 
 autocmd BufEnter * EnableStripWhitespaceOnSave
 
