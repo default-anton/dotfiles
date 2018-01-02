@@ -39,7 +39,6 @@ Plugin 'tpope/vim-haml'
 Plugin 'tpope/vim-eunuch'
 Plugin 'tpope/vim-markdown'
 Plugin 'pbrisbin/vim-mkdir'
-Plugin 'raimondi/delimitmate'
 Plugin 'thoughtbot/vim-rspec'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
@@ -57,6 +56,8 @@ Plugin 'rbgrouleff/bclose.vim'
 Plugin 'matchit.zip'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'junegunn/vim-easy-align'
+Plugin 'pangloss/vim-javascript'
+Plugin 'mxw/vim-jsx'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -171,7 +172,6 @@ map <C-l> <C-W>l
 imap jj <Esc>
 
 " Fast saving
-nmap <leader>w :w!<cr>
 map <leader>k :setlocal spell! spelllang=en_us<cr>
 
 " Yank file path with line number
@@ -183,6 +183,8 @@ set novisualbell
 set t_vb=
 set tm=500
 let g:indentLine_color_term = 239
+
+let g:jsx_ext_required = 0
 
 " Use one space, not two, after punctuation.
 set nojoinspaces
