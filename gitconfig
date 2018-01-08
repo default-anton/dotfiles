@@ -24,6 +24,7 @@
 	dw = diff --color-words
   df = diff
   all = add --all
+  up = standup -d 7
 
 [color]
 	ui = true

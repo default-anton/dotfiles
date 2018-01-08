@@ -12,3 +12,5 @@
   - [git submodule update --init --recursive, Installing submodules]
   - command: git clone https://github.com/powerline/fonts.git --depth=1 && (cd fonts && ./install.sh) && rm -rf fonts
     description: Install powerline fonts
+  - command: curl -L https://raw.githubusercontent.com/kamranahmedse/git-standup/master/installer.sh | sudo sh
+    description: Install git-standup
