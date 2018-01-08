@@ -58,6 +58,7 @@ Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'junegunn/vim-easy-align'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
+Plugin 'hashivim/vim-terraform'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
