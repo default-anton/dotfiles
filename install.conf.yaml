@@ -7,6 +7,8 @@
 - link:
     ~/.gitconfig: gitconfig
     ~/.vimrc: vimrc
+    ~/.bash_aliases: bash_aliases
+    ~/.profile: profile
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]

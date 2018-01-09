@@ -1,5 +1,5 @@
 [user]
-	name = Anton Kuzmenko
+	name  = Anton Kuzmenko
 	email = antonkuzmenko.dev@gmail.com
 
 [push]
@@ -9,25 +9,23 @@
 	user = antonkuzmenko
 
 [alias]
-	co = checkout
-	br = branch
-	ci = commit --verbose
-	st = status
-  l = "!. ~/.dotfiles/githelpers && pretty_git_log"
-  r = !GIT_NO_PAGER=1 git l -30
-  la = !git l --all
-	orb = "!f() { for branch in $(git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD)); do echo $(git show --format='%ci %cr %an' $branch | head -n 1) \\\\t$branch; done | sort -r; }; f"
-	dorb = "!f() { git branch -r --merged | grep -v HEAD | grep -v $(git rev-parse --abbrev-ref HEAD) | sed 's!origin/!!' | xargs -n 1 git push --delete origin; }; f"
-  fap = fetch --all -p
+	co    = checkout
+	br    = branch
+	ci    = commit --verbose
+	st    = status
+  l     = "!. ~/.dotfiles/githelpers && pretty_git_log"
+  r     = !GIT_NO_PAGER=1 git l -30
+  la    = !git l --all
+  fap   = fetch --all -p
   amend = commit --amend
-  dc = diff --cached
-	dw = diff --color-words
-  df = diff
-  all = add --all
-  up = standup -d 7
+  dc    = diff --cached
+	dw    = diff --color-words
+  df    = diff
+  all   = add --all
+  up    = standup -d 7
 
 [color]
-	ui = true
+	ui   = true
 	diff = auto
 
 [diff]
