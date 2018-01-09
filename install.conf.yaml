@@ -1,5 +1,6 @@
 - defaults:
     link:
+      create: true
       relink: true
 
 - clean: ['~']
@@ -9,6 +10,7 @@
     ~/.vimrc: vimrc
     ~/.bash_aliases: bash_aliases
     ~/.profile: profile
+    ~/.config/powerline/config.json: powerline/config.json
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
