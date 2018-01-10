@@ -16,21 +16,27 @@ if [ -n "${BASH_VERSION}" ]; then
     fi
 fi
 
-# set PATH so it includes user's private bin directories
-export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}"
-export PATH="${PATH}:/usr/local/go/bin"
-export PATH="${PATH}:${HOME}/Sources/go/bin"
-export GOPATH="${HOME}/Sources/go"
-
-if [ -f ~/.local_bash_aliases ]; then
-  . ~/.local_bash_aliases
+if [ -f "${HOME}/.local_bash_aliases" ]; then
+  . "${HOME}/.local_bash_aliases"
 fi
 
 if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
   source /etc/profile.d/vte.sh
 fi
 
-if [ -f ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh ]; then
-  source ~/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh
+if [ -f "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh" ]; then
+  powerline-daemon -q
+  export POWERLINE_BASH_CONTINUATION=1
+  export POWERLINE_BASH_SELECT=1
+  source "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh"
 fi
 
+# set PATH so it includes user's private bin directories
+export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}"
+export PATH="${PATH}:/usr/local/go/bin"
+export PATH="${PATH}:${HOME}/Sources/go/bin"
+export GOPATH="${HOME}/Sources/go"
+
+command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
+command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
+command -v helm >/dev/null 2>&1 && source <(helm completion bash)
