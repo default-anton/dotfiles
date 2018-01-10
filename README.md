@@ -2,7 +2,7 @@
 
 ## Installation
 
-`git clone $url && cd dotfiles && ./install`
+`git clone git@github.com:antonkuzmenko/dotfiles.git && cd dotfiles && ./install`
 
 ## Docs
 
