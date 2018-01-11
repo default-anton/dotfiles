@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-docker-compose run --rm --user "$(id -u):$(id -g)" "$1" /bin/bash
+if [ "$1" == "-u" ]; then
+  docker-compose run --rm --user "$(id -u):$(id -g)" "$2" /bin/bash
+else
+  docker-compose run --rm "$1" /bin/bash
+fi
