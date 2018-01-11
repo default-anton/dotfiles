@@ -32,7 +32,7 @@ if [ -f "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powe
 fi
 
 # set PATH so it includes user's private bin directories
-export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}"
+export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}:${HOME}/.dotfiles/bin"
 export PATH="${PATH}:/usr/local/go/bin"
 export PATH="${PATH}:${HOME}/Sources/go/bin"
 export GOPATH="${HOME}/Sources/go"
