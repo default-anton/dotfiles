@@ -19,3 +19,6 @@
     description: Install git-standup
   - command: git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     description: Install Vundle
+  - command: sudo apt install --reinstall bash-completion
+    description: Fix bash completion
+
