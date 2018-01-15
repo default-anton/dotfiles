@@ -32,3 +32,5 @@
 	mnemonicprefix = true
 [merge]
 	ff = false
+[core]
+	editor = vim

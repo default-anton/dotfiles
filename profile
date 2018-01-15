@@ -20,14 +20,7 @@ if [ -f "${HOME}/.local_bash_aliases" ]; then
   . "${HOME}/.local_bash_aliases"
 fi
 
-if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
-  source /etc/profile.d/vte.sh
-fi
-
 if [ -f "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh" ]; then
-  powerline-daemon -q
-  export POWERLINE_BASH_CONTINUATION=1
-  export POWERLINE_BASH_SELECT=1
   source "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh"
 fi
 
