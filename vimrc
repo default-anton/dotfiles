@@ -38,6 +38,7 @@ Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-haml'
 Plugin 'tpope/vim-eunuch'
 Plugin 'tpope/vim-markdown'
+Plugin 'raimondi/delimitmate'
 Plugin 'pbrisbin/vim-mkdir'
 Plugin 'thoughtbot/vim-rspec'
 Plugin 'scrooloose/nerdtree'
@@ -59,6 +60,7 @@ Plugin 'junegunn/vim-easy-align'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
 Plugin 'hashivim/vim-terraform'
+Plugin 'w0rp/ale'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -198,6 +200,13 @@ set colorcolumn=+1
 set number
 set numberwidth=4
 
+let g:ale_fixers = {}
+let g:ale_fixers['javascript'] = ['prettier']
+let g:ale_fix_on_save = 1
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_enter = 0
+let g:ale_javascript_prettier_use_local_config = 1
+
 " Tab completion
 " will insert tab at beginning of line,
 " will use completion if not at beginning
@@ -251,6 +260,7 @@ let g:airline_powerline_fonts = 1
 let g:airline#extensions#branch#enabled = 1
 let g:airline_theme='solarized'
 let g:airline_solarized_bg='dark'
+let g:airline#extensions#ale#enabled = 1
 
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
