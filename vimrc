@@ -61,6 +61,8 @@ Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
 Plugin 'hashivim/vim-terraform'
 Plugin 'w0rp/ale'
+Plugin 'xavierchow/vim-sequence-diagram'
+Plugin 'wannesm/wmgraphviz.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -206,6 +208,10 @@ let g:ale_fix_on_save = 1
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_lint_on_enter = 0
 let g:ale_javascript_prettier_use_local_config = 1
+
+let g:WMGraphviz_output = 'png'
+nmap <unique> <leader>ds <Plug>GenerateDiagram
+nmap <leader>df :GraphvizCompile<cr> :GraphvizShow<cr>
 
 " Tab completion
 " will insert tab at beginning of line,

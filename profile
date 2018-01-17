@@ -8,6 +8,12 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+# set PATH so it includes user's private bin directories
+export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}:${HOME}/.dotfiles/bin"
+export PATH="${PATH}:/usr/local/go/bin"
+export PATH="${PATH}:${HOME}/Sources/go/bin"
+export GOPATH="${HOME}/Sources/go"
+
 # if running bash
 if [ -n "${BASH_VERSION}" ]; then
     # include .bashrc if it exists
@@ -23,12 +29,6 @@ fi
 if [ -f "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh" ]; then
   source "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh"
 fi
-
-# set PATH so it includes user's private bin directories
-export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}:${HOME}/.dotfiles/bin"
-export PATH="${PATH}:/usr/local/go/bin"
-export PATH="${PATH}:${HOME}/Sources/go/bin"
-export GOPATH="${HOME}/Sources/go"
 
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
 command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
