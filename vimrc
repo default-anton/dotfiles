@@ -211,7 +211,7 @@ let g:ale_javascript_prettier_use_local_config = 1
 
 let g:WMGraphviz_output = 'png'
 nmap <unique> <leader>ds <Plug>GenerateDiagram
-nmap <leader>df :GraphvizCompile<cr> :GraphvizShow<cr>
+nmap <silent> <leader>df :GraphvizCompile<cr>:silent :GraphvizShow<cr>
 
 " Tab completion
 " will insert tab at beginning of line,
