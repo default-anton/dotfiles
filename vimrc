@@ -101,6 +101,8 @@ let g:ale_javascript_prettier_use_local_config = 1
 let g:terraform_fmt_on_save = 1
 let g:terraform_align=1
 
+let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml']
+
 set t_Co=256
 set t_ut=
 set background=dark
