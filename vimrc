@@ -179,6 +179,7 @@ au FileType python set indentkeys-=0#
 
 
 autocmd FileType ruby compiler ruby
+autocmd FileType ruby let b:delimitMate_quotes = "\" ' ` |"
 autocmd BufEnter * EnableStripWhitespaceOnSave
 " Return to last edit position when opening files (You want this!)
 autocmd BufReadPost *
