@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 
-if [ "$1" == "-u" ]; then
-  docker-compose run --rm --user "$(id -u):$(id -g)" "$2" /bin/bash
+service=$1
+
+if [ "$#" -eq 0 ]; then
+  echo "Usage: run <service> [<command>]"
+fi
+
+if [ -z "$2" ]; then
+  docker-compose run --rm "$service" /bin/bash
 else
-  docker-compose run --rm "$1" /bin/bash
+  shift
+  docker-compose run --rm "$service" "$@"
 fi
