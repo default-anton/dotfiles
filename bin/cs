@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+compressed="$1"
+csgo_path="/home/${USER}/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/csgo"
+latest_dump=$(ls "${csgo_path}" | grep condump | sort | tail -n 1)
+console_dump="${csgo_path}/${latest_dump}"
+materials=$(grep 'Discarding queued download of' "${console_dump}" | cut -f5 -d ' ' | tr -d '\r' | sed -e 's@//@/@g' |
+  sed -e 's@.bz2@@g' | uniq | sort)
+http_path_of_aborted_material=$(grep 'Downloading http' "${console_dump}" | cut -f2 -d ' ' | tr -d '\r' | sed -e 's@.bz2@@g')
+aborted_material=$(grep 'Aborting download of' "${console_dump}" | cut -f4 -d ' ' | tr -d '\r' | sed -e 's@.bz2@@g')
+file_server=$(echo "${http_path_of_aborted_material}" | sed -e "s@/${aborted_material}\.@@g")
+
+echo "Console dump: ${console_dump}"
+echo "File server: ${file_server}"
+
+function download_and_decompress() {
+  local material="$1.bz2"
+
+  echo "Downloading ${material}"
+  mkdir -p "$(dirname "${csgo_path}/${material}")"
+  cd "$(dirname "${csgo_path}/${material}")"
+  wget -q -O "$(basename "${material}")" "${file_server}/${material}"
+  bzip2 -qt "$(basename "${material}")" && \
+    bzip2 -fdk "$(basename "${material}")"
+}
+
+function download() {
+  local material="$1"
+
+  echo "Downloading ${material}"
+  mkdir -p "$(dirname "${csgo_path}/${material}")"
+  cd "$(dirname "${csgo_path}/${material}")"
+  wget -O material.tmp "${file_server}/${material}"
+
+  if [ -s material.tmp ]; then
+    mv material.tmp "$(basename "${material}")"
+  else
+    rm material.tmp
+  fi
+}
+
+if [[ "${compressed}" == "-c" ]]; then
+  download_and_decompress "${aborted_material}"
+else
+  download "${aborted_material}"
+fi
+
+for material in $materials
+do
+  if [[ "${compressed}" == "-c" ]]; then
+    download_and_decompress "${material}"
+  else
+    download "${material}"
+  fi
+done
+
+echo "Done"
