@@ -69,12 +69,13 @@ set shiftround
 set expandtab
 set ai "Auto indent
 set si "Smart indent
+
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
 if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
-  syntax enable
+  "syntax enable
 endif
-
+syntax on
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -218,6 +219,7 @@ map <Leader>nf :NERDTreeFind<CR>
 
 let g:splitjoin_split_mapping = ''
 let g:splitjoin_join_mapping = ''
+let g:splitjoin_ruby_hanging_args = 0
 nmap <Leader>j :SplitjoinJoin<cr>
 nmap <Leader>s :SplitjoinSplit<cr>
 
