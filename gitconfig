@@ -19,8 +19,9 @@
   fap   = fetch --all -p
   amend = commit --amend
   dc    = diff --cached
-	dw    = diff --color-words
+  dcw   = diff --cached --color-words
   df    = diff
+	dw    = diff --color-words
   all   = add --all
   up    = standup -d 7 -f
 
