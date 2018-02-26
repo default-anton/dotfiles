@@ -182,6 +182,7 @@ au FileType python set indentkeys-=0#
 
 
 let g:ruby_indent_block_style = 'do'
+let ruby_spellcheck_strings = 1
 
 autocmd FileType ruby compiler ruby
 autocmd FileType ruby let b:delimitMate_quotes = "\" ' ` |"
