@@ -63,6 +63,7 @@ set laststatus=2  " Always display the status line
 set exrc
 set secure
 set autoread
+set autowrite
 set tabstop=2
 set shiftwidth=2
 set shiftround
@@ -178,6 +179,56 @@ au FileType python set cindent
 au FileType python set cinkeys-=0#
 au FileType python set indentkeys-=0#
 
+
+""""""""""""""""""""""""""""""
+" => Go section
+""""""""""""""""""""""""""""""
+" all lists will be of type quickfix
+let g:go_list_type = "quickfix"
+let g:go_test_timeout = '10s'
+let g:go_fmt_command = "goimports"
+let g:go_highlight_types = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_function_calls = 1
+let g:go_highlight_build_constraints = 1
+let g:go_highlight_generate_tags = 1
+let g:go_updatetime = 300
+let g:go_jump_to_error = 0
+let g:go_metalinter_autosave = 1
+let g:go_metalinter_deadline = "5s"
+let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
+let g:go_metalinter_autosave_enabled = ['vet', 'golint']
+let g:go_gocode_unimported_packages = 1
+
+autocmd FileType go nmap <leader>r <Plug>(go-run-split)
+autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+autocmd FileType go nmap <leader>e <Plug>(go-rename)
+autocmd FileType go nmap <leader>t <Plug>(go-test)
+autocmd FileType go nmap <leader>tf <Plug>(go-test-func)
+autocmd FileType go nmap <leader>atj :GoAddTags json<cr>
+autocmd FileType go nmap <leader>atd :GoAddTags db<cr>
+autocmd FileType go nmap <leader>rtj :GoRemoveTags json<cr>
+autocmd FileType go nmap <leader>rtd :GoRemoveTags db<cr>
+autocmd FileType go nmap <leader>rt :GoRemoveTags<cr>
+autocmd FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
+autocmd FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
+autocmd FileType go nmap <Leader>d <Plug>(go-describe)
+autocmd FileType go nmap <Leader>i <Plug>(go-implements)
+autocmd FileType go nmap <Leader>m <Plug>(go-info)
+autocmd FileType go nmap <Leader>de :GoDecls<cr>
+autocmd FileType go nmap <Leader>ded :GoDeclsDir<cr>
+autocmd FileType go nmap <Leader>fc <Plug>(go-callers)
+autocmd FileType go nmap <Leader>fb <Plug>(go-callstack)
+autocmd FileType go nmap <Leader>we :GoWhicherrs<cr>
+autocmd FileType go nmap <Leader>sk :GoKeyify<cr>
+autocmd FileType go nmap <Leader>sf :GoFillStruct<cr>
+autocmd FileType go vmap <leader>p :GoPlay<cr>
+autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
 
 
 
@@ -328,4 +379,14 @@ function! VisualSelection(direction, extra_filter) range
 
   let @/ = l:pattern
   let @" = l:saved_reg
+endfunction
+
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
 endfunction
