@@ -180,6 +180,9 @@ au FileType python set indentkeys-=0#
 
 
 
+
+let g:ruby_indent_block_style = 'do'
+
 autocmd FileType ruby compiler ruby
 autocmd FileType ruby let b:delimitMate_quotes = "\" ' ` |"
 autocmd BufEnter * EnableStripWhitespaceOnSave
