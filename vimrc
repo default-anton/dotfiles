@@ -201,11 +201,11 @@ let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
 let g:go_metalinter_autosave_enabled = ['vet', 'golint']
 let g:go_gocode_unimported_packages = 1
 
-autocmd FileType go nmap <leader>r <Plug>(go-run-split)
-autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+autocmd FileType go nmap <leader>gr <Plug>(go-run-split)
+autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
 autocmd FileType go nmap <leader>e <Plug>(go-rename)
-autocmd FileType go nmap <leader>t <Plug>(go-test)
-autocmd FileType go nmap <leader>tf <Plug>(go-test-func)
+autocmd FileType go nmap <leader>rf <Plug>(go-test)
+autocmd FileType go nmap <leader>rs <Plug>(go-test-func)
 autocmd FileType go nmap <leader>atj :GoAddTags json<cr>
 autocmd FileType go nmap <leader>atd :GoAddTags db<cr>
 autocmd FileType go nmap <leader>rtj :GoRemoveTags json<cr>
@@ -215,7 +215,7 @@ autocmd FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
 autocmd FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
 autocmd FileType go nmap <Leader>d <Plug>(go-describe)
 autocmd FileType go nmap <Leader>i <Plug>(go-implements)
-autocmd FileType go nmap <Leader>m <Plug>(go-info)
+autocmd FileType go nmap <Leader>q <Plug>(go-info)
 autocmd FileType go nmap <Leader>de :GoDecls<cr>
 autocmd FileType go nmap <Leader>ded :GoDeclsDir<cr>
 autocmd FileType go nmap <Leader>fc <Plug>(go-callers)
