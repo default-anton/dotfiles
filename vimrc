@@ -45,6 +45,11 @@ Plugin 'hashivim/vim-terraform'
 Plugin 'w0rp/ale'
 Plugin 'xavierchow/vim-sequence-diagram'
 Plugin 'wannesm/wmgraphviz.vim'
+Plugin 'roxma/nvim-yarp'
+Plugin 'roxma/vim-hug-neovim-rpc'
+Plugin 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plugin 'zchee/deoplete-go', { 'do': 'make'}
+Plugin 'fszymanski/deoplete-emoji'
 
 call vundle#end()
 filetype plugin indent on
@@ -184,6 +189,10 @@ au FileType python set indentkeys-=0#
 " => Go section
 """"""""""""""""""""""""""""""
 " all lists will be of type quickfix
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_camel_case = 1
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+
 let g:go_list_type = "quickfix"
 let g:go_test_timeout = '10s'
 let g:go_fmt_command = "goimports"
