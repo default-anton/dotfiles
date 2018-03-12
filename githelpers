@@ -47,3 +47,35 @@ pretty_git_format() {
     less --quit-if-one-screen --no-init --RAW-CONTROL-CHARS --chop-long-lines
   fi
 }
+
+merged_branches() {
+  comm -12 \
+    <(local_merged_branches | remove_origin | remove_master) \
+    <(remote_merged_branches | remove_origin | remove_master)
+}
+
+local_merged_branches() {
+  git branch --merged | remove_origin | remove_master
+}
+
+remote_merged_branches() {
+  git branch -r --merged | remove_origin | remove_master
+}
+
+remove_origin() {
+  while read br; do
+    echo "${br}" | sed 's@origin/@@g'
+  done
+}
+
+remove_master() {
+  while read br; do
+    echo "${br}" | egrep -v master
+  done
+}
+
+delete_branches() {
+  while read br; do
+    git branch -d "${br}" && git push origin --delete "${br}"
+  done
+}
