@@ -111,6 +111,8 @@ let g:terraform_align=1
 
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml']
 
+let g:deoplete#enable_camel_case = 1
+
 set t_Co=256
 set t_ut=
 set background=dark
@@ -174,6 +176,16 @@ set splitright
 
 
 """"""""""""""""""""""""""""""
+" => Ruby section
+""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""""""
+let g:rubycomplete_buffer_loading = 1
+let g:rubycomplete_classes_in_global = 1
+let g:rubycomplete_include_object = 1
+let g:rubycomplete_include_objectspace = 1
+
+
 " => Python section
 """"""""""""""""""""""""""""""
 let python_highlight_all = 1
@@ -189,8 +201,6 @@ au FileType python set indentkeys-=0#
 " => Go section
 """"""""""""""""""""""""""""""
 " all lists will be of type quickfix
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#enable_camel_case = 1
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
 let g:go_list_type = "quickfix"
