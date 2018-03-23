@@ -1,0 +1,58 @@
+priority -50
+
+#
+# Global functions
+#
+
+global !p
+
+def write_instance_vars(arglist, snip):
+	args = str(arglist).split(',')
+	for arg in args:
+		name = arg.strip().replace(':', ' ').split(' ', 1)[0]
+		if name:
+			snip += '  @{} = {}'.format(name, name)
+		else:
+			snip += ''
+
+endglobal
+
+#
+# Snippets
+#
+
+snippet "^#!" "#!/usr/bin/env ruby" r
+#!/usr/bin/env ruby
+
+$0
+endsnippet
+
+snippet frozen "frozen_string_literal: true"
+# frozen_string_literal: true
+
+$0
+endsnippet
+
+snippet defi "def initialize ..."
+def initialize($1)`!p write_instance_vars(t[1],snip)`$0
+end
+endsnippet
+
+snippet specr "frozen + require rails_helper"
+# frozen_string_literal: true
+
+require 'rails_helper'
+require 'support/factory_bot'
+
+describe ${1:described_class} do
+end
+endsnippet
+
+snippet spec "frozen + require spec_helper"
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+describe ${1:described_class} do
+end
+endsnippet
