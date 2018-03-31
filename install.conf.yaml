@@ -22,6 +22,6 @@
     description: Install Vundle
   - command: sudo apt install --reinstall bash-completion
     description: Fix bash completion
-  - command: curl https://hub.github.com/standalone -Lo ~/bin/hub && chmod 755 ~/bin/hub
+  - command: mkdir -p ~/bin && curl https://hub.github.com/standalone -Lo ~/bin/hub && chmod 755 ~/bin/hub
     description: Install hub
 
