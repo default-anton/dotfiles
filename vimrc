@@ -337,6 +337,15 @@ endfunction
 inoremap <Tab> <c-r>=InsertTabWrapper()<cr>
 inoremap <S-Tab> <c-n>
 
+" n always search forward and N backward
+nnoremap <expr> n  'Nn'[v:searchforward]
+nnoremap <expr> N  'nN'[v:searchforward]
+
+" recall the command-line whose beginning matches the current command-line.
+" E.g. :echo <up> may change to :echo "Vim rocks!"
+cnoremap <c-n>  <down>
+cnoremap <c-p>  <up>
+
 " Get off my lawn
 nnoremap <Left> :echoe "Use h"<CR>
 nnoremap <Right> :echoe "Use l"<CR>
@@ -350,12 +359,6 @@ map <leader>ba :bufdo bd<cr>
 map <leader>l :bnext<cr>
 map <leader>h :bprevious<cr>
 
-" Useful mappings for managing tabs
-map <leader>tc :tabnew<cr>
-map <leader>to :tabonly<cr>
-map <leader>td :tabclose<cr>
-map <leader>tm :tabmove
-map <leader>tt :tabnext<cr>
 " Specify the behavior when switching between buffers
 try
   set switchbuf=useopen,usetab,newtab
