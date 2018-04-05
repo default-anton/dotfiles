@@ -6,6 +6,11 @@ priority -50
 
 global !p
 
+def ruby_vars_list(arglist):
+	args = str(arglist).split(',')
+	attrs = [arg.strip().replace(':', ' ').split(' ', 1)[0] for arg in args]
+	return ', '.join([':{}'.format(name) for name in attrs if name])
+
 def write_instance_vars(arglist, snip):
 	args = str(arglist).split(',')
 	for arg in args:
@@ -34,7 +39,10 @@ $0
 endsnippet
 
 snippet defi "def initialize ..."
-def initialize($1)`!p write_instance_vars(t[1],snip)`$0
+attr_reader `!p snip.rv = ruby_vars_list(t[1])`
+private `!p snip.rv = ruby_vars_list(t[1])`
+
+def initialize($1)`!p write_instance_vars(t[1], snip)`$0
 end
 endsnippet
 
