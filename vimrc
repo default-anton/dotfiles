@@ -120,7 +120,7 @@ let g:terraform_align=1
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml']
 
 let g:deoplete#enable_camel_case = 1
-call deoplete#custom#set('emoji', 'filetypes', ['gitcommit', 'markdown', 'ruby', 'javascript', 'javascript.jsx', 'json'])
+call deoplete#custom#source('emoji', 'filetypes', ['gitcommit', 'markdown', 'ruby', 'javascript', 'javascript.jsx', 'json'])
 
 set t_Co=256
 set t_ut=
