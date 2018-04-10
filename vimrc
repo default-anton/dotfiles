@@ -53,6 +53,7 @@ Plugin 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plugin 'zchee/deoplete-go', { 'do': 'make'}
 Plugin 'fszymanski/deoplete-emoji'
 Plugin 'SirVer/ultisnips'
+Plugin 'airblade/vim-rooter'
 
 call vundle#end()
 filetype plugin indent on
@@ -90,6 +91,11 @@ syntax on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:rooter_patterns = [
+      \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
+      \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
+      \ ]
+
 let g:UltiSnipsExpandTrigger="<c-k>"
 let g:UltiSnipsJumpForwardTrigger="<c-b>"
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
