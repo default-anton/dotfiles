@@ -322,7 +322,7 @@ map <C-j> <C-W>j
 map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
-imap jj <Esc>
+imap kj <Esc>
 
 map <leader>k :setlocal spell! spelllang=en_us<cr>
 " Yank file path with line number

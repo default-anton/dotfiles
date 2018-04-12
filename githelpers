@@ -55,11 +55,11 @@ merged_branches() {
 }
 
 local_merged_branches() {
-  git branch --merged | remove_origin | remove_master
+  git branch --merged | remove_origin | remove_master | sort
 }
 
 remote_merged_branches() {
-  git branch -r --merged | remove_origin | remove_master
+  git branch -r --merged | remove_origin | remove_master | sort
 }
 
 remove_origin() {
