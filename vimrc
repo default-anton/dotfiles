@@ -54,6 +54,7 @@ Plugin 'zchee/deoplete-go', { 'do': 'make'}
 Plugin 'fszymanski/deoplete-emoji'
 Plugin 'SirVer/ultisnips'
 Plugin 'airblade/vim-rooter'
+Plugin 'jparise/vim-graphql'
 
 call vundle#end()
 filetype plugin indent on
