@@ -17,7 +17,7 @@
   dmbr  = "!bash -c '. ~/.dotfiles/githelpers && merged_branches | delete_branches'"
   dlbr  = "!bash -c '. ~/.dotfiles/githelpers && local_merged_branches | delete_branches'"
   drbr  = "!bash -c '. ~/.dotfiles/githelpers && remote_merged_branches | delete_branches'"
-  pr    = "!bash -c 'hub pull-request -a `git config --get github.user` $@' -"
+  pr    = "!bash -c 'git push origin HEAD && hub pull-request -a `git config --get github.user` $@' -"
 	ci    = commit --verbose
 	st    = status
   l     = "!bash -c '. ~/.dotfiles/githelpers && pretty_git_log $@' -"
