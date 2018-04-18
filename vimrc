@@ -55,6 +55,7 @@ Plugin 'fszymanski/deoplete-emoji'
 Plugin 'SirVer/ultisnips'
 Plugin 'airblade/vim-rooter'
 Plugin 'jparise/vim-graphql'
+Plugin 'schickling/vim-bufonly'
 
 call vundle#end()
 filetype plugin indent on
@@ -359,12 +360,14 @@ nnoremap <Right> :echoe "Use l"<CR>
 nnoremap <Up> :echoe "Use k"<CR>
 nnoremap <Down> :echoe "Use j"<CR>
 
+" Close all the buffers except the current buffer.
+map <leader>bo :BufOnly<CR>
 " Close the current buffer
 map <silent> <leader>bd :Bclose<CR>
 " Close all the buffers
-map <leader>ba :bufdo bd<cr>
-map <leader>l :bnext<cr>
-map <leader>h :bprevious<cr>
+map <leader>ba :bufdo bd<CR>
+map <leader>l :bnext<CR>
+map <leader>h :bprevious<CR>
 
 " Specify the behavior when switching between buffers
 try
