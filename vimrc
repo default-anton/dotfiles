@@ -279,6 +279,9 @@ autocmd BufReadPost *
       \ if line("'\"") > 0 && line("'\"") <= line("$") |
       \   exe "normal! g`\"" |
       \ endif
+
+" source .vimrc after cd project/
+autocmd User RooterChDir source .vimrc
 " Remember info about open buffers on close
 set viminfo^=%
 
