@@ -97,6 +97,9 @@ let g:rooter_patterns = [
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
       \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
       \ ]
+let g:rooter_use_lcd = 0
+let g:rooter_silent_chdir = 1
+let g:rooter_resolve_links = 1
 
 let g:UltiSnipsExpandTrigger="<c-k>"
 let g:UltiSnipsJumpForwardTrigger="<c-b>"
@@ -281,7 +284,7 @@ autocmd BufReadPost *
       \ endif
 
 " source .vimrc after cd project/
-autocmd User RooterChDir source .vimrc
+autocmd User RooterChDir silent! source .vimrc
 " Remember info about open buffers on close
 set viminfo^=%
 
