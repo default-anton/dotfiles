@@ -56,6 +56,7 @@ Plugin 'SirVer/ultisnips'
 Plugin 'airblade/vim-rooter'
 Plugin 'jparise/vim-graphql'
 Plugin 'schickling/vim-bufonly'
+Plugin 'amadeus/vim-mjml'
 
 call vundle#end()
 filetype plugin indent on
@@ -232,7 +233,7 @@ let g:go_highlight_methods = 1
 let g:go_highlight_function_calls = 1
 let g:go_highlight_build_constraints = 1
 let g:go_highlight_generate_tags = 1
-let g:go_updatetime = 300
+let g:go_updatetime = 100
 let g:go_jump_to_error = 0
 let g:go_metalinter_autosave = 1
 let g:go_metalinter_deadline = "5s"
@@ -252,7 +253,7 @@ autocmd FileType go nmap <leader>rtd :GoRemoveTags db<cr>
 autocmd FileType go nmap <leader>rt :GoRemoveTags<cr>
 autocmd FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
 autocmd FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
-autocmd FileType go nmap <Leader>d <Plug>(go-describe)
+autocmd FileType go nmap <Leader>d <Plug>(go-doc)
 autocmd FileType go nmap <Leader>i <Plug>(go-implements)
 autocmd FileType go nmap <Leader>q <Plug>(go-info)
 autocmd FileType go nmap <Leader>de :GoDecls<cr>
@@ -340,16 +341,6 @@ nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
 " will insert tab at beginning of line,
 " will use completion if not at beginning
 set wildmode=list:longest,list:full
-function! InsertTabWrapper()
-  let col = col('.') - 1
-  if !col || getline('.')[col - 1] !~ '\k'
-    return "\<tab>"
-  else
-    return "\<c-p>"
-  endif
-endfunction
-inoremap <Tab> <c-r>=InsertTabWrapper()<cr>
-inoremap <S-Tab> <c-n>
 
 " n always search forward and N backward
 nnoremap <expr> n  'Nn'[v:searchforward]
@@ -372,8 +363,8 @@ map <leader>bo :BufOnly<CR>
 map <silent> <leader>bd :Bclose<CR>
 " Close all the buffers
 map <leader>ba :bufdo bd<CR>
-map <leader>l :bnext<CR>
-map <leader>h :bprevious<CR>
+map <leader>. :bnext<CR>
+map <leader>m :bprevious<CR>
 
 " Specify the behavior when switching between buffers
 try
