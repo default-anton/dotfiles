@@ -31,6 +31,7 @@
 	dw    = diff --color-words
   all   = add --all
   up    = standup -d 7 -f
+  pu   = push origin HEAD
 
 [color]
 	ui   = true
