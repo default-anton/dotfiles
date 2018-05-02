@@ -30,8 +30,9 @@
   df    = diff
 	dw    = diff --color-words
   all   = add --all
-  up    = standup -d 7 -f
-  pu   = push origin HEAD
+  up    = standup -d 1 -f
+  poo   = push origin HEAD
+  rom    = !git fap && git rebase origin/master
 
 [color]
 	ui   = true
