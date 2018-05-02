@@ -79,3 +79,15 @@ delete_branches() {
     git branch -d "${br}" && git push origin --delete "${br}"
   done
 }
+
+function last_tag() {
+  git describe --abbrev=0 --tags
+}
+
+function github_repository() {
+  git remote -v | grep fetch | awk '{print $2}' | cut -d ":" -f2 | cut -d "." -f1
+}
+
+function list_of_prs() {
+  prs-merged-since --tag $(last_tag) --repo $(github_repository) --format markdown | sed 's/####/-/g' | sed '/^$/d'
+}
