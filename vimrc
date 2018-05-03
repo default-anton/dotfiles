@@ -387,12 +387,15 @@ if executable('ag')
   let g:ctrlp_use_caching = 0
 endif
 
+
+let g:ctrlp_match_window = 'bottom,order:btt,min:10,max:30,results:30'
 let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_max_files = 0
 let g:ctrlp_max_depth = 100
 let g:ctrlp_root_markers = ['Gemfile', '.git', 'node_modules']
 let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
+let g:ctrlp_show_hidden = 1
 let g:ctrlp_custom_ignore = {
       \ 'dir':  '\v[\/]\.(git|hg|svn)$',
       \ 'file': '\v\.(exe|so|dll)$',
