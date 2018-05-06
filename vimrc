@@ -49,9 +49,6 @@ Plugin 'xavierchow/vim-sequence-diagram'
 Plugin 'wannesm/wmgraphviz.vim'
 Plugin 'roxma/nvim-yarp'
 Plugin 'roxma/vim-hug-neovim-rpc'
-Plugin 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plugin 'zchee/deoplete-go', { 'do': 'make'}
-Plugin 'fszymanski/deoplete-emoji'
 Plugin 'SirVer/ultisnips'
 Plugin 'airblade/vim-rooter'
 Plugin 'jparise/vim-graphql'
@@ -130,9 +127,6 @@ let g:terraform_fmt_on_save = 1
 let g:terraform_align=1
 
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml']
-
-let g:deoplete#enable_camel_case = 1
-call deoplete#custom#source('emoji', 'filetypes', ['gitcommit', 'markdown', 'ruby', 'javascript', 'javascript.jsx', 'json'])
 
 set t_Co=256
 set t_ut=
@@ -221,9 +215,8 @@ au FileType python set indentkeys-=0#
 """"""""""""""""""""""""""""""
 " => Go section
 """"""""""""""""""""""""""""""
-" all lists will be of type quickfix
-let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
+" all lists will be of type quickfix
 let g:go_list_type = "quickfix"
 let g:go_test_timeout = '10s'
 let g:go_fmt_command = "goimports"
