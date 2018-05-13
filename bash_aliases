@@ -4,3 +4,4 @@ alias ts="timestamp"
 alias open='xdg-open'
 alias tf="terraform"
 alias copy="xclip -selection c"
+alias g="git"
