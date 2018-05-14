@@ -76,7 +76,8 @@ remove_master() {
 
 delete_branches() {
   while read br; do
-    git branch -d "${br}" && git push origin --delete "${br}"
+    git branch -d "${br}"
+    git push origin --delete "${br}"
   done
 }
 
