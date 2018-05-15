@@ -98,5 +98,5 @@ function release() {
   local current_version="$(last_tag)"
   release_version="$(semver bump ${version_number} ${current_version})"
   release_message=$(printf "Release ${release_version}\n\n$(git prs)")
-  hub release create --browse --message "${release_message}" "${release_version}"
+  hub release create --browse -m "${release_message}" "${release_version}"
 }
