@@ -6,7 +6,7 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'altercation/vim-colors-solarized'
-Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'junegunn/fzf', { 'do': './install --all' }
 Bundle 'vim-ruby/vim-ruby'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-bundler'
@@ -54,6 +54,10 @@ Plugin 'airblade/vim-rooter'
 Plugin 'jparise/vim-graphql'
 Plugin 'schickling/vim-bufonly'
 Plugin 'amadeus/vim-mjml'
+Plugin 'autozimu/LanguageClient-neovim', {
+      \ 'branch': 'next',
+      \ 'do': 'bash install.sh',
+      \ }
 
 call vundle#end()
 filetype plugin indent on
@@ -91,6 +95,18 @@ syntax on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:LanguageClient_serverCommands = {
+      \ 'go': ['go-langserver', '-gocodecompletion'],
+      \ }
+nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
+nnoremap <silent> gl :call LanguageClient#textDocument_documentSymbol()<CR>
+nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
+nnoremap <space><space> :FZF<CR>
+setlocal omnifunc=LanguageClient#complete
+
 let g:rooter_patterns = [
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
       \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
@@ -100,8 +116,8 @@ let g:rooter_silent_chdir = 1
 let g:rooter_resolve_links = 1
 
 let g:UltiSnipsExpandTrigger="<c-k>"
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+let g:UltiSnipsJumpForwardTrigger="<c-j>"
+let g:UltiSnipsJumpBackwardTrigger="<c-l>"
 let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
 
 let g:airline_powerline_fonts = 1
@@ -217,6 +233,8 @@ au FileType python set indentkeys-=0#
 """"""""""""""""""""""""""""""
 
 " all lists will be of type quickfix
+let g:go_def_mapping_enabled = 0
+let g:go_doc_keywordprg_enabled = 0
 let g:go_list_type = "quickfix"
 let g:go_test_timeout = '10s'
 let g:go_fmt_command = "goimports"
@@ -374,27 +392,25 @@ endtry
 cnoreabbrev Ack Ack!
 if executable('ag')
   let g:ackprg = 'ag --vimgrep'
-  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --ignore-case --nocolor --hidden --depth 100 -g ""'
-  " ag is fast enough that CtrlP doesn't need to cache
-  let g:ctrlp_use_caching = 0
 endif
 
-
-let g:ctrlp_match_window = 'bottom,order:btt,min:10,max:30,results:30'
-let g:ctrlp_cmd = 'CtrlPMixed'
-let g:ctrlp_max_files = 0
-let g:ctrlp_max_depth = 100
-let g:ctrlp_root_markers = ['Gemfile', '.git', 'node_modules']
-let g:ctrlp_working_path_mode = 'ra'
-let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
-let g:ctrlp_show_hidden = 1
-let g:ctrlp_custom_ignore = {
-      \ 'dir':  '\v[\/]\.(git|hg|svn)$',
-      \ 'file': '\v\.(exe|so|dll)$',
-      \ 'link': 'some_bad_symbolic_links',
-      \ }
-
+let $FZF_DEFAULT_COMMAND = 'ag --ignore-case --nocolor --hidden --depth 100 -g ""'
+let g:fzf_layout = { 'window': 'enew' }
+let g:fzf_history_dir = '~/.local/share/fzf-history'
+let g:fzf_colors =
+\ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'hl':      ['fg', 'Comment'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'Statement'],
+  \ 'info':    ['fg', 'PreProc'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Conditional'],
+  \ 'pointer': ['fg', 'Exception'],
+  \ 'marker':  ['fg', 'Keyword'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
