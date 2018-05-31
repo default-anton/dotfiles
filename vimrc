@@ -147,7 +147,6 @@ let g:terraform_fmt_on_save = 1
 let g:terraform_align=1
 
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml']
-au BufWritePost *.markdown,*.md silent! !grip --user-content --context=KeyweeLabs/post-malone --norefresh --quiet --export % > /dev/null 2>&1 && mv %:r.html /tmp/md-%:r.html && xdg-open /tmp/md-%:r.html > /dev/null 2>&1
 
 set t_Co=256
 set t_ut=
@@ -257,34 +256,34 @@ let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
 let g:go_metalinter_autosave_enabled = ['vet', 'golint']
 let g:go_gocode_unimported_packages = 1
 
-autocmd FileType go nmap <leader>gr <Plug>(go-run-split)
-autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
-autocmd FileType go nmap <leader>e <Plug>(go-rename)
-autocmd FileType go nmap <leader>rf <Plug>(go-test)
-autocmd FileType go nmap <leader>rs <Plug>(go-test-func)
-autocmd FileType go nmap <leader>atj :GoAddTags json<cr>
-autocmd FileType go nmap <leader>atd :GoAddTags db<cr>
-autocmd FileType go nmap <leader>rtj :GoRemoveTags json<cr>
-autocmd FileType go nmap <leader>rtd :GoRemoveTags db<cr>
-autocmd FileType go nmap <leader>rt :GoRemoveTags<cr>
-autocmd FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
-autocmd FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
-autocmd FileType go nmap <Leader>d <Plug>(go-doc)
-autocmd FileType go nmap <Leader>i <Plug>(go-implements)
-autocmd FileType go nmap <Leader>q <Plug>(go-info)
-autocmd FileType go nmap <Leader>de :GoDecls<cr>
-autocmd FileType go nmap <Leader>ded :GoDeclsDir<cr>
-autocmd FileType go nmap <Leader>fc <Plug>(go-callers)
-autocmd FileType go nmap <Leader>fb <Plug>(go-callstack)
-autocmd FileType go nmap <Leader>we :GoWhicherrs<cr>
-autocmd FileType go nmap <Leader>sk :GoKeyify<cr>
-autocmd FileType go nmap <Leader>sf :GoFillStruct<cr>
-autocmd FileType go vmap <leader>p :GoPlay<cr>
-autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
-autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
-autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
-autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
-autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+au FileType go nmap <leader>gr <Plug>(go-run-split)
+au FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
+au FileType go nmap <leader>e <Plug>(go-rename)
+au FileType go nmap <leader>rf <Plug>(go-test)
+au FileType go nmap <leader>rs <Plug>(go-test-func)
+au FileType go nmap <leader>atj :GoAddTags json<cr>
+au FileType go nmap <leader>atd :GoAddTags db<cr>
+au FileType go nmap <leader>rtj :GoRemoveTags json<cr>
+au FileType go nmap <leader>rtd :GoRemoveTags db<cr>
+au FileType go nmap <leader>rt :GoRemoveTags<cr>
+au FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
+au FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
+au FileType go nmap <Leader>d <Plug>(go-doc)
+au FileType go nmap <Leader>i <Plug>(go-implements)
+au FileType go nmap <Leader>q <Plug>(go-info)
+au FileType go nmap <Leader>de :GoDecls<cr>
+au FileType go nmap <Leader>ded :GoDeclsDir<cr>
+au FileType go nmap <Leader>fc <Plug>(go-callers)
+au FileType go nmap <Leader>fb <Plug>(go-callstack)
+au FileType go nmap <Leader>we :GoWhicherrs<cr>
+au FileType go nmap <Leader>sk :GoKeyify<cr>
+au FileType go nmap <Leader>sf :GoFillStruct<cr>
+au FileType go vmap <leader>p :GoPlay<cr>
+au Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+au Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+au Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+au Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
 
 
 
