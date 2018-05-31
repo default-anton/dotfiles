@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+REPOSITORY=$(git remote -v | grep fetch | awk '{print $2}' | cut -d ":" -f2 | cut -d "." -f1)
+FILE_PATH="${1}"
+exec grip --user-content --context="${REPOSITORY}" --wide --quiet --browser "${FILE_PATH}" > /dev/null 2>&1 &
