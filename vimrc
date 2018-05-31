@@ -93,8 +93,10 @@ syntax on
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => VIM user interface
+" => VIM UI
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:markdown_syntax_conceal = 0
+
 let g:LanguageClient_serverCommands = {
       \ 'go': ['go-langserver', '-gocodecompletion'],
       \ 'javascript': ['javascript-typescript-stdio'],
@@ -145,6 +147,7 @@ let g:terraform_fmt_on_save = 1
 let g:terraform_align=1
 
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml']
+au BufWritePost *.markdown,*.md silent! !grip --user-content --context=KeyweeLabs/post-malone --norefresh --quiet --export % > /dev/null 2>&1 && mv %:r.html /tmp/md-%:r.html && xdg-open /tmp/md-%:r.html > /dev/null 2>&1
 
 set t_Co=256
 set t_ut=
