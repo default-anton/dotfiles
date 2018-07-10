@@ -24,7 +24,7 @@ Plugin 'tpope/vim-dadbod'
 Plugin 'tpope/vim-rhubarb'
 Plugin 'raimondi/delimitmate'
 Plugin 'pbrisbin/vim-mkdir'
-Plugin 'thoughtbot/vim-rspec'
+Plugin 'janko-m/vim-test'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'vim-airline/vim-airline'
@@ -323,10 +323,12 @@ nmap <unique> <leader>ds <Plug>GenerateDiagram
 " Flow diagram
 nmap <silent> <leader>df :GraphvizCompile<cr>:silent :GraphvizShow<cr>
 
-map <Leader>rf :call RunCurrentSpecFile()<CR>
-map <Leader>rs :call RunNearestSpec()<CR>
-map <Leader>rl :call RunLastSpec()<CR>
-map <Leader>ra :call RunAllSpecs()<CR>
+let test#strategy = "vimterminal"
+let test#ruby#bundle_exec = 0
+map <Leader>rf :TestFile<CR>
+map <Leader>rs :TestNearest<CR>
+map <Leader>rl :TestLast<CR>
+map <Leader>ra :TestSuite<CR>
 
 map <Leader>n :NERDTreeToggle<CR>
 map <Leader>nf :NERDTreeFind<CR>
