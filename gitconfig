@@ -9,6 +9,7 @@
 	user = antonkuzmenko
 
 [alias]
+  s = stash
 	co      = checkout
 	br      = branch
   mbr     = "!bash -c '. ~/.dotfiles/githelpers && merged_branches'"
