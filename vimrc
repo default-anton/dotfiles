@@ -108,7 +108,7 @@ let g:LanguageClient_serverCommands = {
       \ 'javascript.jsx': ['javascript-typescript-stdio'],
       \ }
 
-au FileType go,javascript,javascript.jsx setlocal setlocal omnifunc=LanguageClient#complete
+au FileType go,javascript,javascript.jsx setlocal omnifunc=LanguageClient#complete
 au FileType go,javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
 au FileType go,javascript,javascript.jsx nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
 au FileType go,javascript,javascript.jsx nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
