@@ -22,6 +22,7 @@ Plugin 'tpope/vim-markdown'
 Plugin 'tpope/vim-abolish'
 Plugin 'tpope/vim-dadbod'
 Plugin 'tpope/vim-rhubarb'
+Plugin 'tpope/vim-cucumber'
 Plugin 'raimondi/delimitmate'
 Plugin 'pbrisbin/vim-mkdir'
 Plugin 'janko-m/vim-test'
@@ -58,6 +59,7 @@ Plugin 'autozimu/LanguageClient-neovim', {
       \ 'branch': 'next',
       \ 'do': 'bash install.sh',
       \ }
+Plugin 'AndrewRadev/sideways.vim'
 
 call vundle#end()
 filetype plugin indent on
@@ -95,6 +97,9 @@ syntax on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM UI
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nnoremap <C-j> :SidewaysLeft<CR>
+nnoremap <C-k> :SidewaysRight<CR>
+
 let g:markdown_syntax_conceal = 0
 
 let g:LanguageClient_serverCommands = {
@@ -102,14 +107,16 @@ let g:LanguageClient_serverCommands = {
       \ 'javascript': ['javascript-typescript-stdio'],
       \ 'javascript.jsx': ['javascript-typescript-stdio'],
       \ }
-nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
-nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
-nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
-nnoremap <silent> gl :call LanguageClient#textDocument_documentSymbol()<CR>
-nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
+
+au FileType go,javascript,javascript.jsx setlocal setlocal omnifunc=LanguageClient#complete
+au FileType go,javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+au FileType go,javascript,javascript.jsx nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+au FileType go,javascript,javascript.jsx nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+au FileType go,javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
+au FileType go,javascript,javascript.jsx nnoremap <silent> gl :call LanguageClient#textDocument_documentSymbol()<CR>
+au FileType go,javascript,javascript.jsx nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
+
 nnoremap <space><space> :FZF<CR>
-setlocal omnifunc=LanguageClient#complete
 
 let g:rooter_patterns = [
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
