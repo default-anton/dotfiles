@@ -261,7 +261,7 @@ let g:go_jump_to_error = 0
 let g:go_metalinter_autosave = 1
 let g:go_metalinter_deadline = "5s"
 let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
-let g:go_metalinter_autosave_enabled = ['vet', 'golint']
+let g:go_metalinter_autosave_enabled = ['vet']
 let g:go_gocode_unimported_packages = 1
 
 au FileType go nmap <leader>gr <Plug>(go-run-split)
