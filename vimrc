@@ -5,7 +5,7 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'altercation/vim-colors-solarized'
+Plugin 'chriskempson/base16-vim'
 Plugin 'junegunn/fzf', { 'do': './install --all' }
 Bundle 'vim-ruby/vim-ruby'
 Plugin 'tpope/vim-fugitive'
@@ -131,15 +131,6 @@ let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-l>"
 let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
 
-let g:airline_powerline_fonts = 1
-let g:airline_solarized_bg='dark'
-let g:airline_theme='solarized'
-let g:airline#extensions#ale#enabled = 1
-let g:airline#extensions#branch#enabled = 1
-let g:airline#extensions#tabline#enabled = 1
-let g:solarized_termcolors=256
-let g:indentLine_color_term = 239
-
 let g:jsx_ext_required = 0
 
 let g:ale_fixers = {
@@ -159,7 +150,19 @@ let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby
 set t_Co=256
 set t_ut=
 set background=dark
-colorscheme solarized
+set termguicolors
+colorscheme base16-default-dark
+
+let g:airline_powerline_fonts = 1
+let g:airline_theme='base16'
+let g:airline_base16_improved_contrast=1
+let base16colorspace=256
+let g:airline#extensions#ale#enabled = 1
+let g:airline#extensions#branch#enabled = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:indentLine_color_term = 239
+
+
 " No annoying sound on errors
 set noerrorbells
 set novisualbell
