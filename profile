@@ -12,6 +12,7 @@
 export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}:${HOME}/.dotfiles/bin"
 export PATH="${PATH}:/usr/local/go/bin"
 export PATH="${PATH}:${HOME}/Sources/go/bin"
+export PATH="${HOME}/.npm-global/bin:$PATH"
 export GOPATH="${HOME}/Sources/go"
 
 # if running bash
