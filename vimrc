@@ -48,8 +48,6 @@ Plugin 'hashivim/vim-terraform'
 Plugin 'w0rp/ale'
 Plugin 'xavierchow/vim-sequence-diagram'
 Plugin 'wannesm/wmgraphviz.vim'
-Plugin 'roxma/nvim-yarp'
-Plugin 'roxma/vim-hug-neovim-rpc'
 Plugin 'SirVer/ultisnips'
 Plugin 'airblade/vim-rooter'
 Plugin 'jparise/vim-graphql'
@@ -103,18 +101,18 @@ nnoremap <C-k> :SidewaysRight<CR>
 let g:markdown_syntax_conceal = 0
 
 let g:LanguageClient_serverCommands = {
-      \ 'go': ['go-langserver', '-gocodecompletion'],
+      \ 'go': ['go-langserver'],
       \ 'javascript': ['javascript-typescript-stdio'],
       \ 'javascript.jsx': ['javascript-typescript-stdio'],
       \ }
 
-au FileType go,javascript,javascript.jsx setlocal omnifunc=LanguageClient#complete
-au FileType go,javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+au FileType javascript,javascript.jsx setlocal omnifunc=LanguageClient#complete
+au FileType javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
 au FileType go,javascript,javascript.jsx nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
 au FileType go,javascript,javascript.jsx nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
-au FileType go,javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
 au FileType go,javascript,javascript.jsx nnoremap <silent> gl :call LanguageClient#textDocument_documentSymbol()<CR>
 au FileType go,javascript,javascript.jsx nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
+au FileType javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
 
 nnoremap <space><space> :FZF<CR>
 
@@ -266,6 +264,7 @@ let g:go_metalinter_deadline = "5s"
 let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
 let g:go_metalinter_autosave_enabled = ['vet']
 let g:go_gocode_unimported_packages = 1
+let g:go_decls_mode = 'fzf'
 
 au FileType go nmap <leader>gr <Plug>(go-run-split)
 au FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
@@ -279,7 +278,7 @@ au FileType go nmap <leader>rtd :GoRemoveTags db<cr>
 au FileType go nmap <leader>rt :GoRemoveTags<cr>
 au FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
 au FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
-au FileType go nmap <Leader>d <Plug>(go-doc)
+au FileType go nmap K <Plug>(go-doc)
 au FileType go nmap <Leader>i <Plug>(go-implements)
 au FileType go nmap <Leader>q <Plug>(go-info)
 au FileType go nmap <Leader>de :GoDecls<cr>
@@ -295,7 +294,6 @@ au Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
 au Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
 au Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
-
 
 
 let g:ruby_indent_block_style = 'do'
@@ -369,6 +367,7 @@ nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
 " will insert tab at beginning of line,
 " will use completion if not at beginning
 set wildmode=list:longest,list:full
+set completeopt-=preview
 
 " n always search forward and N backward
 nnoremap <expr> n  'Nn'[v:searchforward]
