@@ -279,6 +279,7 @@ au FileType go nmap <leader>rt :GoRemoveTags<cr>
 au FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
 au FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
 au FileType go nmap K <Plug>(go-doc)
+au FileType go nmap <Leader>d <Plug>(go-describe)
 au FileType go nmap <Leader>i <Plug>(go-implements)
 au FileType go nmap <Leader>q <Plug>(go-info)
 au FileType go nmap <Leader>de :GoDecls<cr>
