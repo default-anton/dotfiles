@@ -1,6 +1,10 @@
 snippet rc "React Class Component" b
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+
+const propTypes = {};
+
+const defaultProps = {};
 
 class ${1:`!v expand('%:t:r')`} extends Component {
 	static propTypes = {
@@ -13,13 +17,20 @@ class ${1:`!v expand('%:t:r')`} extends Component {
 	}
 }
 
+$1.propTypes = propTypes;
+$1.defaultProps = defaultProps;
+
 export default $1;
 endsnippet
 
 
 snippet rf "React Functional Component" b
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
+
+const propTypes = {};
+
+const defaultProps = {};
 
 const ${1:`!v expand('%:t:r')`} = (${2:{...props}}) => {
 	return (
@@ -27,9 +38,8 @@ const ${1:`!v expand('%:t:r')`} = (${2:{...props}}) => {
 	);
 }
 
-$1.propTypes = {};
-
-$1.defaultProps = {};
+$1.propTypes = propTypes;
+$1.defaultProps = defaultProps;
 
 export default $1;
 endsnippet
