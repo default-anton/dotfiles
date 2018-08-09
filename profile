@@ -36,3 +36,4 @@ fi
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
 command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
 command -v helm >/dev/null 2>&1 && source <(helm completion bash)
+command -v npm >/dev/null 2>&1 && source <(npm completion)
