@@ -107,6 +107,10 @@ let g:LanguageClient_serverCommands = {
       \ 'javascript.jsx': ['javascript-typescript-stdio'],
       \ }
 
+
+au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
+
+
 au FileType javascript,javascript.jsx setlocal omnifunc=LanguageClient#complete
 au FileType javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
 au FileType go,javascript,javascript.jsx nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
@@ -217,7 +221,6 @@ let g:html_indent_tags = 'li\|p'
 " Open new split panes to right and bottom, which feels more natural
 set splitbelow
 set splitright
-
 
 
 """"""""""""""""""""""""""""""
