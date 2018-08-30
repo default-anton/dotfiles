@@ -119,8 +119,6 @@ au FileType go,javascript,javascript.jsx nnoremap <silent> gl :call LanguageClie
 au FileType go,javascript,javascript.jsx nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
 au FileType javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
 
-nnoremap <space><space> :FZF<CR>
-
 let g:rooter_patterns = [
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
       \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
@@ -416,7 +414,7 @@ if executable('ag')
 endif
 
 let $FZF_DEFAULT_COMMAND = 'ag --ignore-case --nocolor --hidden --depth 100 -g ""'
-let g:fzf_layout = { 'window': 'enew' }
+let g:fzf_layout = { 'up': '70%' }
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
@@ -433,6 +431,9 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
+nnoremap <space><space> :FZF<CR>
+" Search buffer names
+nnoremap <leader><space> :call fzf#run({'source': map(range(1, bufnr('$')), 'bufname(v:val)'), 'sink': 'e', 'up': '70%'})<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Helper functions
