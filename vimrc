@@ -96,8 +96,10 @@ syntax on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM UI
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-nnoremap <C-j> :SidewaysLeft<CR>
-nnoremap <C-k> :SidewaysRight<CR>
+execute "set <M-j>=\ej"
+execute "set <M-k>=\ek"
+nnoremap <M-j> :SidewaysLeft<CR>
+nnoremap <M-k> :SidewaysRight<CR>
 
 let g:markdown_syntax_conceal = 0
 
