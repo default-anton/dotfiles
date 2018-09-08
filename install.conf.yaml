@@ -14,13 +14,13 @@
     ~/.vim/UltiSnips: UltiSnips
 
 - shell:
-  - command: sudo apt install python-pip && pip install --upgrade pip && git clone https://github.com/powerline/fonts.git --depth=1 && (cd fonts && ./install.sh) && rm -rf fonts
+  - command: sudo apt install -y python-pip && pip install --upgrade pip && git clone https://github.com/powerline/fonts.git --depth=1 && (cd fonts && ./install.sh) && rm -rf fonts
     description: Install powerline fonts
   - command: curl -L https://raw.githubusercontent.com/kamranahmedse/git-standup/master/installer.sh | sudo sh
     description: Install git-standup
   - command: git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     description: Install Vundle
-  - command: sudo apt install --reinstall bash-completion
+  - command: sudo apt install -y --reinstall bash-completion
     description: Fix bash completion
   - command: mkdir -p ~/bin && curl https://hub.github.com/standalone -Lo ~/bin/hub && chmod 755 ~/bin/hub
     description: Install hub
