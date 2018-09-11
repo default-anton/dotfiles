@@ -57,7 +57,6 @@ Plugin 'autozimu/LanguageClient-neovim', {
       \ 'branch': 'next',
       \ 'do': 'bash install.sh',
       \ }
-Plugin 'AndrewRadev/sideways.vim'
 Plugin 'leafgarland/typescript-vim'
 
 call vundle#end()
@@ -98,8 +97,6 @@ syntax on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 execute "set <M-j>=\ej"
 execute "set <M-k>=\ek"
-nnoremap <M-j> :SidewaysLeft<CR>
-nnoremap <M-k> :SidewaysRight<CR>
 
 let g:markdown_syntax_conceal = 0
 
