@@ -1,0 +1,6 @@
+\set QUIET 1
+\timing
+\pset null null
+\x auto
+\set VERBOSITY verbose
+\unset QUIET
