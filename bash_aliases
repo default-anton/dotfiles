@@ -35,6 +35,7 @@ alias tf=terraform
 alias copy="xclip -selection c"
 alias g=git
 alias webcam=v4l2-ctl
+alias cf="g st -s | ag -v -s D | cut -d' ' -f3"
 
 # aliases to load completion for
 aliases=(dc ts open tf g)
