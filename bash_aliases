@@ -28,6 +28,8 @@ eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
 }
 
 alias dc=docker-compose
+alias up="docker-compose up -d"
+alias down="docker-compose down"
 alias timestamp="date +'%Y%M%d%H%M%S'"
 alias ts=timestamp
 alias open=xdg-open
