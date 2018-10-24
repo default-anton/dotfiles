@@ -58,6 +58,7 @@ Plugin 'autozimu/LanguageClient-neovim', {
       \ 'do': 'bash install.sh',
       \ }
 Plugin 'leafgarland/typescript-vim'
+Plugin 'dart-lang/dart-vim-plugin'
 
 call vundle#end()
 filetype plugin indent on
@@ -119,8 +120,9 @@ au FileType go,javascript,javascript.jsx nnoremap <silent> gr :call LanguageClie
 au FileType javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
 
 let g:rooter_patterns = [
+      \ 'Gopkg.lock', 'pubspec.lock',
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
-      \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
+      \ 'Gemfile', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
       \ ]
 let g:rooter_use_lcd = 0
 let g:rooter_silent_chdir = 1
@@ -141,6 +143,7 @@ let g:ale_fix_on_save = 1
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_lint_on_enter = 0
 let g:ale_javascript_prettier_use_local_config = 1
+let g:ale_echo_cursor = 0
 
 let g:terraform_fmt_on_save = 1
 let g:terraform_align=1
