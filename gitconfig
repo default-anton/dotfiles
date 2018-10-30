@@ -47,3 +47,5 @@
 	ff = false
 [core]
 	editor = vim
+[init]
+	templatedir = ~/.dotfiles/git-templates/
