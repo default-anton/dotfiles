@@ -29,8 +29,11 @@ if [ -f "${HOME}/.local_bash_aliases" ]; then
   . "${HOME}/.local_bash_aliases"
 fi
 
-if [ -f "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh" ]; then
-  source "${HOME}/.local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh"
+if [ -f "/usr/share/powerline/bindings/bash/powerline.sh" ]; then
+  powerline-daemon -q
+  POWERLINE_BASH_CONTINUATION=1
+  POWERLINE_BASH_SELECT=1
+  source /usr/share/powerline/bindings/bash/powerline.sh
 fi
 
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
