@@ -233,6 +233,8 @@ let g:rubycomplete_classes_in_global = 1
 let g:rubycomplete_include_object = 1
 let g:rubycomplete_include_objectspace = 1
 
+autocmd BufNewFile *.rb call append(0, "# frozen_string_literal: true")
+autocmd BufNewFile *.rb call append(line('$'), "")
 
 " => Python section
 """"""""""""""""""""""""""""""
