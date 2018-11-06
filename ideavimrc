@@ -5,12 +5,21 @@ set smartcase
 set relativenumber
 set visualbell
 
+""" Refactoring
 nmap ,e :action RenameElement<CR>i
-" Diff with the same repository version
-nmap ,df :action Compare.SameVersion<CR>
 nmap ,rr :action ReformatCode<CR>
-nmap ,rr :action ReformatCode<CR>
+
+""" Editing
+nmap ,rf :action RunClass<CR>
+nmap ,c<space> :action CommentByLineComment<CR>
+vmap ,c<space> :action CommentByLineComment<CR>
+
+""" Navigation
 nmap ,. :action NextTab<CR>
 nmap ,m :action PreviousTab<CR>
 nmap ,bo :action CloseAllEditorsButActive<CR>
 nmap ,ba :action CloseAllEditors<CR>
+
+""" Git
+" Diff with the same repository version
+nmap ,df :action Compare.SameVersion<CR>
