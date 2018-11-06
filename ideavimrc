@@ -19,6 +19,7 @@ nmap ,. :action NextTab<CR>
 nmap ,m :action PreviousTab<CR>
 nmap ,bo :action CloseAllEditorsButActive<CR>
 nmap ,ba :action CloseAllEditors<CR>
+nmap ,t :action GotoTest<CR>
 
 """ Git
 " Diff with the same repository version
