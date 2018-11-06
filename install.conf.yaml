@@ -9,6 +9,7 @@
     ~/.gitconfig: gitconfig
     ~/.psqlrc: psqlrc
     ~/.vimrc: vimrc
+    ~/.ideavimrc: ideavimrc
     ~/.bash_aliases: bash_aliases
     ~/.profile: profile
     ~/.config/powerline/config.json: powerline/config.json
