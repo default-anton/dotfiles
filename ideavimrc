@@ -5,6 +5,9 @@ set smartcase
 set relativenumber
 set visualbell
 
+
+imap kj <Esc>
+
 """ Refactoring
 nmap ,e :action RenameElement<CR>i
 nmap ,rr :action ReformatCode<CR>
@@ -20,6 +23,8 @@ nmap ,m :action PreviousTab<CR>
 nmap ,bo :action CloseAllEditorsButActive<CR>
 nmap ,ba :action CloseAllEditors<CR>
 nmap ,t :action GotoTest<CR>
+nmap ,nf :action SelectInProjectView<CR>
+nmap ,, :action RestoreDefaultLayout<CR>
 
 """ Git
 " Diff with the same repository version
