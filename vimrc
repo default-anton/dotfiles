@@ -61,6 +61,7 @@ Plugin 'leafgarland/typescript-vim'
 Plugin 'dart-lang/dart-vim-plugin'
 Plugin 'kana/vim-textobj-user'
 Plugin 'nelstrom/vim-textobj-rubyblock'
+Plugin 'danchoi/ri.vim'
 
 call vundle#end()
 filetype plugin indent on
