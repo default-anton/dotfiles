@@ -38,7 +38,6 @@ Plugin 'yggdroot/indentline'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'AndrewRadev/splitjoin.vim'
 Plugin 'mileszs/ack.vim'
-Plugin 'rbgrouleff/bclose.vim'
 Plugin 'matchit.zip'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'junegunn/vim-easy-align'
@@ -53,15 +52,17 @@ Plugin 'airblade/vim-rooter'
 Plugin 'jparise/vim-graphql'
 Plugin 'schickling/vim-bufonly'
 Plugin 'amadeus/vim-mjml'
-Plugin 'autozimu/LanguageClient-neovim', {
-      \ 'branch': 'next',
-      \ 'do': 'bash install.sh',
-      \ }
+"Plugin 'autozimu/LanguageClient-neovim', {
+      "\ 'branch': 'next',
+      "\ 'do': 'bash install.sh',
+      "\ }
 Plugin 'leafgarland/typescript-vim'
 Plugin 'dart-lang/dart-vim-plugin'
 Plugin 'kana/vim-textobj-user'
 Plugin 'nelstrom/vim-textobj-rubyblock'
 Plugin 'danchoi/ri.vim'
+Plugin 'Shougo/denite.nvim'
+Plugin 'neoclide/coc.nvim', {'tag': '*'}
 
 call vundle#end()
 filetype plugin indent on
@@ -104,23 +105,23 @@ execute "set <M-k>=\ek"
 
 let g:markdown_syntax_conceal = 0
 
-let g:LanguageClient_serverCommands = {
-      \ 'go': ['go-langserver'],
-      \ 'javascript': ['javascript-typescript-stdio'],
-      \ 'javascript.jsx': ['javascript-typescript-stdio'],
-      \ }
+"let g:LanguageClient_serverCommands = {
+      "\ 'go': ['go-langserver'],
+      "\ 'javascript': ['javascript-typescript-stdio'],
+      "\ 'javascript.jsx': ['javascript-typescript-stdio'],
+      "\ }
 
 
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
 
 
-au FileType javascript,javascript.jsx setlocal omnifunc=LanguageClient#complete
-au FileType javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
-au FileType go,javascript,javascript.jsx nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-au FileType go,javascript,javascript.jsx nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
-au FileType go,javascript,javascript.jsx nnoremap <silent> gl :call LanguageClient#textDocument_documentSymbol()<CR>
-au FileType go,javascript,javascript.jsx nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
-au FileType javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
+"au FileType javascript,javascript.jsx setlocal omnifunc=LanguageClient#complete
+"au FileType javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+"au FileType go,javascript,javascript.jsx nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+"au FileType go,javascript,javascript.jsx nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+"au FileType go,javascript,javascript.jsx nnoremap <silent> gl :call LanguageClient#textDocument_documentSymbol()<CR>
+"au FileType go,javascript,javascript.jsx nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
+"au FileType javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
 
 let g:rooter_patterns = [
       \ 'Gopkg.lock', 'pubspec.lock',
@@ -166,6 +167,7 @@ let base16colorspace=256
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#branch#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#coc#enabled = 1
 let g:indentLine_color_term = 239
 
 
@@ -338,7 +340,7 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 
 let g:WMGraphviz_output = 'png'
 " Sequence diagram
-nmap <unique> <leader>ds <Plug>GenerateDiagram
+nmap <silent> <leader>ds <Plug>GenerateDiagram
 " Flow diagram
 nmap <silent> <leader>df :GraphvizCompile<cr>:silent :GraphvizShow<cr>
 
@@ -398,7 +400,7 @@ nnoremap <Down> :echoe "Use j"<CR>
 " Close all the buffers except the current buffer.
 map <leader>bo :BufOnly<CR>
 " Close the current buffer
-map <silent> <leader>bd :Bclose<CR>
+map <silent> <leader>bd :bd<CR>
 " Close all the buffers
 map <leader>ba :bufdo bd<CR>
 map <leader>. :bnext<CR>
@@ -411,7 +413,76 @@ try
 catch
 endtry
 
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use `[e` and `]e` for navigate diagnostics
+nmap <silent> [e <Plug>(coc-diagnostic-prev)
+nmap <silent> ]e <Plug>(coc-diagnostic-next)
+
+" Remap keys for gotos
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K for show documentation in preview window
+
+au FileType javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if &filetype == 'vim'
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" Remap for rename current word
+nmap <leader>rn <Plug>(coc-rename)
+
+" Remap for format selected region
+vmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+" Setup formatexpr specified filetype(s).
+augroup mygroup
+  autocmd!
+  autocmd FileType typescript,javascript,javascript.jsx,json,ruby,go setl formatexpr=CocAction('formatSelected')
+augroup end
+
+" Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
+vmap <leader>aa  <Plug>(coc-codeaction-selected)
+nmap <leader>aa  <Plug>(coc-codeaction-selected)
+
+" Remap for do codeAction of current line
+nmap <leader>ac  <Plug>(coc-codeaction)
+
+" Shortcuts for denite interface
+" Show extension list
+nnoremap <silent> <space>e  :<C-u>Denite coc-extension<cr>
+" Show symbols of current buffer
+nnoremap <silent> <space>o  :<C-u>Denite coc-symbols<cr>
+" Search symbols of current workspace
+nnoremap <silent> <space>t  :<C-u>Denite coc-workspace<cr>
+" Show diagnostics of current workspace
+nnoremap <silent> <space>a  :<C-u>Denite coc-diagnostic<cr>
+" Show available commands
+nnoremap <silent> <space>c  :<C-u>Denite coc-command<cr>
+" Show available services
+nnoremap <silent> <space>s  :<C-u>Denite coc-service<cr>
+" Show links of current buffer
+nnoremap <silent> <space>l  :<C-u>Denite coc-link<cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Search

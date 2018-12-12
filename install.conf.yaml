@@ -14,6 +14,7 @@
     ~/.profile: profile
     ~/.config/powerline/config.json: powerline/config.json
     ~/.vim/UltiSnips: UltiSnips
+    ~/.vim/coc-settings.json: coc-settings.json
 
 - shell:
   - command: sudo apt install -y python-pip && pip install --upgrade pip && git clone https://github.com/powerline/fonts.git --depth=1 && (cd fonts && ./install.sh) && rm -rf fonts
