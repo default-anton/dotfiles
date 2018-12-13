@@ -1,3 +1,4 @@
 {
-  "coc.source.emoji.filetypes": ["markdown", "ruby", "javascript"]
+  "coc.preferences.autoTrigger": "none",
+  "coc.source.emoji.filetypes": ["markdown", "javascript"]
 }
