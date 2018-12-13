@@ -413,8 +413,9 @@ try
 catch
 endtry
 
-" Use ctrl+k to trigger coc completion
-inoremap <silent><expr> <C-k> coc#refresh()
+" Use ctrl+j to trigger coc completion
+inoremap <silent><expr> <c-j> coc#refresh()
+
 
 " Use `[e` and `]e` for navigate diagnostics
 nmap <silent> [e <Plug>(coc-diagnostic-prev)
