@@ -442,16 +442,6 @@ endfunction
 " Remap for rename current word
 nmap <leader>rn <Plug>(coc-rename)
 
-" Remap for format selected region
-vmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-" Setup formatexpr specified filetype(s).
-augroup mygroup
-  autocmd!
-  autocmd FileType typescript,javascript,javascript.jsx,json,ruby,go setl formatexpr=CocAction('formatSelected')
-augroup end
-
 " Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
 vmap <leader>aa  <Plug>(coc-codeaction-selected)
 nmap <leader>aa  <Plug>(coc-codeaction-selected)
