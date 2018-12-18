@@ -62,7 +62,7 @@ Plugin 'kana/vim-textobj-user'
 Plugin 'nelstrom/vim-textobj-rubyblock'
 Plugin 'danchoi/ri.vim'
 Plugin 'Shougo/denite.nvim'
-Plugin 'neoclide/coc.nvim', {'tag': '*'}
+Plugin 'neoclide/coc.nvim', {'do': 'yarn install'}
 
 call vundle#end()
 filetype plugin indent on
