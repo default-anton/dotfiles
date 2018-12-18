@@ -1,4 +1,11 @@
 {
   "coc.preferences.autoTrigger": "none",
-  "coc.source.emoji.filetypes": ["markdown", "javascript"]
+  "coc.source.emoji.filetypes": ["markdown", "javascript"],
+  "languageserver": {
+    "bash": {
+      "command": "bash-language-server",
+      "filetypes": ["sh"],
+      "args": ["start"]
+    }
+  }
 }
