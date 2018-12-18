@@ -8,6 +8,8 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+source "${HOME}/.dotfiles/pomodoro/pomodoro.sh"
+
 # set PATH so it includes user's private bin directories
 export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}:${HOME}/.dotfiles/bin"
 export PATH="${PATH}:/usr/local/go/bin"
