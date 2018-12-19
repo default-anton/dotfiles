@@ -17,6 +17,7 @@
     ~/.vim/coc-settings.json: coc-settings.json
 
 - shell:
+  - command: wget git.io/trans -O ~/bin/trans && chmod +x ~/bin/trans
   - command: sudo apt install -y python-pip && pip install --upgrade pip && git clone https://github.com/powerline/fonts.git --depth=1 && (cd fonts && ./install.sh) && rm -rf fonts
     description: Install powerline fonts
   - command: curl -L https://raw.githubusercontent.com/kamranahmedse/git-standup/master/installer.sh | sudo sh
