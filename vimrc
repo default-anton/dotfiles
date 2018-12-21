@@ -153,6 +153,9 @@ let g:ale_lint_on_enter = 0
 let g:ale_javascript_prettier_use_local_config = 1
 let g:ale_echo_cursor = 0
 
+nmap <silent> [e <Plug>(ale_previous_wrap)
+nmap <silent> ]e <Plug>(ale_next_wrap)
+
 let g:terraform_fmt_on_save = 1
 let g:terraform_align=1
 
@@ -420,10 +423,6 @@ endtry
 " Use ctrl+j to trigger coc completion
 inoremap <silent><expr> <c-j> coc#refresh()
 
-
-" Use `[e` and `]e` for navigate diagnostics
-nmap <silent> [e <Plug>(coc-diagnostic-prev)
-nmap <silent> ]e <Plug>(coc-diagnostic-next)
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)

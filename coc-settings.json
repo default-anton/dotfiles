@@ -1,6 +1,7 @@
 {
   "coc.preferences.autoTrigger": "none",
   "coc.source.emoji.filetypes": ["markdown", "javascript"],
+  "coc.preferences.diagnostic.displayByAle": true,
   "languageserver": {
     "bash": {
       "command": "bash-language-server",
