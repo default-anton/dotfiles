@@ -52,10 +52,6 @@ Plugin 'airblade/vim-rooter'
 Plugin 'jparise/vim-graphql'
 Plugin 'schickling/vim-bufonly'
 Plugin 'amadeus/vim-mjml'
-"Plugin 'autozimu/LanguageClient-neovim', {
-      "\ 'branch': 'next',
-      "\ 'do': 'bash install.sh',
-      "\ }
 Plugin 'leafgarland/typescript-vim'
 Plugin 'dart-lang/dart-vim-plugin'
 Plugin 'kana/vim-textobj-user'
@@ -63,6 +59,7 @@ Plugin 'nelstrom/vim-textobj-rubyblock'
 Plugin 'danchoi/ri.vim'
 Plugin 'Shougo/denite.nvim'
 Plugin 'neoclide/coc.nvim', {'do': 'yarn install'}
+Plugin 'BurntSushi/erd'
 
 call vundle#end()
 filetype plugin indent on
@@ -105,23 +102,7 @@ execute "set <M-k>=\ek"
 
 let g:markdown_syntax_conceal = 0
 
-"let g:LanguageClient_serverCommands = {
-      "\ 'go': ['go-langserver'],
-      "\ 'javascript': ['javascript-typescript-stdio'],
-      "\ 'javascript.jsx': ['javascript-typescript-stdio'],
-      "\ }
-
-
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
-
-
-"au FileType javascript,javascript.jsx setlocal omnifunc=LanguageClient#complete
-"au FileType javascript,javascript.jsx nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
-"au FileType go,javascript,javascript.jsx nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-"au FileType go,javascript,javascript.jsx nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
-"au FileType go,javascript,javascript.jsx nnoremap <silent> gl :call LanguageClient#textDocument_documentSymbol()<CR>
-"au FileType go,javascript,javascript.jsx nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
-"au FileType javascript,javascript.jsx nnoremap <silent> gi :call LanguageClient#textDocument_implementation()<CR>
 
 let g:rooter_patterns = [
       \ 'Gopkg.lock', 'pubspec.lock',
@@ -159,7 +140,7 @@ nmap <silent> ]e <Plug>(ale_next_wrap)
 let g:terraform_fmt_on_save = 1
 let g:terraform_align=1
 
-let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml']
+let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml', 'go']
 
 set t_Co=256
 set t_ut=
