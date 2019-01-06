@@ -331,6 +331,8 @@ let g:WMGraphviz_output = 'png'
 nmap <silent> <leader>ds <Plug>GenerateDiagram
 " Flow diagram
 nmap <silent> <leader>df :GraphvizCompile<cr>:silent :GraphvizShow<cr>
+" Entity diagram
+nmap <silent> <leader>de :!erd -i design/initial_entities.er -f png -o /tmp/erd.png && xdg-open /tmp/erd.png<cr>
 
 let test#strategy = "vimterminal"
 let test#ruby#bundle_exec = 0
