@@ -415,7 +415,7 @@ nmap <silent> gr <Plug>(coc-references)
 
 " Use K for show documentation in preview window
 
-au FileType javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
+au FileType sh,go,python,javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if &filetype == 'vim'
