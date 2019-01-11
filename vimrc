@@ -60,6 +60,7 @@ Plugin 'danchoi/ri.vim'
 Plugin 'Shougo/denite.nvim'
 Plugin 'neoclide/coc.nvim', {'do': 'yarn install'}
 Plugin 'BurntSushi/erd'
+Plugin 'easymotion/vim-easymotion'
 
 call vundle#end()
 filetype plugin indent on
@@ -156,7 +157,6 @@ let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#branch#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#coc#enabled = 1
-let g:indentLine_color_term = 239
 
 
 " No annoying sound on errors
@@ -189,8 +189,6 @@ set smarttab
 set hlsearch
 highlight Search guibg=NONE guifg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
 highlight IncSearch guibg=NONE guifg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
-" Disable highlight when <leader><leader> is pressed
-map <silent> <leader><leader> :noh<cr>
 " Makes search act like search in modern browsers
 set incsearch
 " Don't redraw while executing macros (good performance config)
@@ -372,6 +370,15 @@ nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
 set wildmode=list:longest,list:full
 set completeopt-=preview
 
+" This setting makes EasyMotion work similarly to Vim's smartcase option for global searches.
+let g:EasyMotion_smartcase = 1
+
+augroup vimrc-incsearch-highlight
+  autocmd!
+  autocmd CmdlineEnter [/\?] :set hlsearch
+  autocmd CmdlineLeave [/\?] :set nohlsearch
+augroup END
+
 " n always search forward and N backward
 nnoremap <expr> n  'Nn'[v:searchforward]
 nnoremap <expr> N  'nN'[v:searchforward]
@@ -478,8 +485,6 @@ let g:fzf_colors =
   \ 'header':  ['fg', 'Comment'] }
 
 nnoremap <space><space> :FZF<CR>
-" Search buffer names
-nnoremap <leader><space> :call fzf#run({'source': map(range(1, bufnr('$')), 'bufname(v:val)'), 'sink': 'e', 'up': '70%'})<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Helper functions
