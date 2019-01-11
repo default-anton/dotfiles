@@ -60,6 +60,7 @@ Plugin 'danchoi/ri.vim'
 Plugin 'Shougo/denite.nvim'
 Plugin 'neoclide/coc.nvim', {'do': 'yarn install'}
 Plugin 'BurntSushi/erd'
+Plugin 'uarun/vim-protobuf'
 Plugin 'easymotion/vim-easymotion'
 
 call vundle#end()
@@ -127,6 +128,7 @@ let g:ale_fixers = {
 \}
 let g:ale_linters = {
 \ 'sh': ['language_server'],
+\ 'go': ['language_server'],
 \ }
 let g:ale_linters = {'sh': []}
 let g:ale_fix_on_save = 1
@@ -257,7 +259,7 @@ let g:go_highlight_build_constraints = 1
 let g:go_highlight_generate_tags = 1
 let g:go_updatetime = 100
 let g:go_jump_to_error = 0
-let g:go_metalinter_autosave = 1
+let g:go_metalinter_autosave = 0
 let g:go_metalinter_deadline = "5s"
 let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
 let g:go_metalinter_autosave_enabled = ['vet']
