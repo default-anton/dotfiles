@@ -362,7 +362,6 @@ map <C-h> <C-W>h
 map <C-l> <C-W>l
 imap kj <Esc>
 
-map <leader>k :setlocal spell! spelllang=en_us<cr>
 " Yank file path with line number
 nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
 
@@ -372,8 +371,14 @@ nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
 set wildmode=list:longest,list:full
 set completeopt-=preview
 
+" Disable default mappings
+let g:EasyMotion_do_mapping = 0
 " This setting makes EasyMotion work similarly to Vim's smartcase option for global searches.
 let g:EasyMotion_smartcase = 1
+
+" Jump to anywhere you want with minimal keystrokes, with just one key binding.
+" `s{char}{label}`
+nmap s <Plug>(easymotion-overwin-f2)
 
 augroup vimrc-incsearch-highlight
   autocmd!
