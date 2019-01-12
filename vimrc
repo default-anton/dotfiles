@@ -6,7 +6,8 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'chriskempson/base16-vim'
-Plugin 'junegunn/fzf', { 'do': './install --all' }
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
 Bundle 'vim-ruby/vim-ruby'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-bundler'
@@ -91,7 +92,7 @@ set si "Smart indent
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
 if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
-  "syntax enable
+"syntax enable
 endif
 syntax on
 
@@ -107,7 +108,7 @@ let g:markdown_syntax_conceal = 0
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
 
 let g:rooter_patterns = [
-      \ 'Gopkg.lock', 'pubspec.lock',
+    \ 'Gopkg.lock', 'pubspec.lock',
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
       \ 'Gemfile', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
       \ ]
@@ -268,7 +269,6 @@ let g:go_decls_mode = 'fzf'
 
 au FileType go nmap <leader>gr <Plug>(go-run-split)
 au FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
-au FileType go nmap <leader>e <Plug>(go-rename)
 au FileType go nmap <leader>rf <Plug>(go-test)
 au FileType go nmap <leader>rs <Plug>(go-test-func)
 au FileType go nmap <leader>atj :GoAddTags json<cr>
@@ -276,19 +276,15 @@ au FileType go nmap <leader>atd :GoAddTags db<cr>
 au FileType go nmap <leader>rtj :GoRemoveTags json<cr>
 au FileType go nmap <leader>rtd :GoRemoveTags db<cr>
 au FileType go nmap <leader>rt :GoRemoveTags<cr>
-au FileType go nmap <Leader>rc <Plug>(go-coverage-toggle)
-au FileType go nmap <Leader>rcb :GoCoverageBrowser<cr>
-au FileType go nmap K <Plug>(go-doc)
-au FileType go nmap <Leader>d <Plug>(go-describe)
-au FileType go nmap <Leader>i <Plug>(go-implements)
-au FileType go nmap <Leader>q <Plug>(go-info)
-au FileType go nmap <Leader>de :GoDecls<cr>
-au FileType go nmap <Leader>ded :GoDeclsDir<cr>
-au FileType go nmap <Leader>fc <Plug>(go-callers)
-au FileType go nmap <Leader>fb <Plug>(go-callstack)
-au FileType go nmap <Leader>we :GoWhicherrs<cr>
-au FileType go nmap <Leader>sk :GoKeyify<cr>
-au FileType go nmap <Leader>sf :GoFillStruct<cr>
+au FileType go nmap <leader>rc <Plug>(go-coverage-toggle)
+au FileType go nmap <leader>rcb :GoCoverageBrowser<cr>
+au FileType go nmap <leader>de :GoDecls<cr>
+au FileType go nmap <leader>ded :GoDeclsDir<cr>
+au FileType go nmap <leader>fc <Plug>(go-callers)
+au FileType go nmap <leader>fb <Plug>(go-callstack)
+au FileType go nmap <leader>we :GoWhicherrs<cr>
+au FileType go nmap <leader>sk :GoKeyify<cr>
+au FileType go nmap <leader>sf :GoFillStruct<cr>
 au FileType go vmap <leader>p :GoPlay<cr>
 au Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
 au Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
@@ -314,7 +310,7 @@ autocmd User RooterChDir silent! source .vimrc
 " Remember info about open buffers on close
 set viminfo^=%
 
-
+set tags=./tags;tags;./.tags;.tags
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Maps
@@ -420,16 +416,15 @@ endtry
 " Use ctrl+j to trigger coc completion
 inoremap <silent><expr> <c-j> coc#refresh()
 
-
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
+au FileType json,sh,go,python,javascript,javascript.jsx nmap <leader>q :call CocAction('showSignatureHelp')<cr>
 " Use K for show documentation in preview window
-
-au FileType sh,go,python,javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
+au FileType json,sh,go,python,javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if &filetype == 'vim'
@@ -492,6 +487,9 @@ let g:fzf_colors =
   \ 'header':  ['fg', 'Comment'] }
 
 nnoremap <space><space> :FZF<CR>
+nnoremap <space>b :Buffers<CR>
+nnoremap <space>g :Tags<CR>
+imap <c-x><c-f> <plug>(fzf-complete-file-ag)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Helper functions
