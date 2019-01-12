@@ -1,4 +1,8 @@
 {
+  "coc.preferences.minTriggerInputLength": 0,
+  "coc.preferences.hoverTarget": "echo",
+  "coc.source.tag.enable": true,
+  "coc.preferences.triggerSignatureHelp": true,
   "coc.preferences.autoTrigger": "none",
   "coc.source.emoji.filetypes": ["markdown", "javascript"],
   "coc.preferences.diagnostic.displayByAle": true,
@@ -9,12 +13,11 @@
       "args": ["start"]
     },
     "golang": {
-      "command": "go-langserver",
+      "command": "bingo",
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
       "filetypes": ["go"],
       "initializationOptions": {
-        "gocodeCompletionEnabled": true,
-        "diagnosticsEnabled": true,
-        "lintTool": "golint"
+        "formatStyle": "goimports"
       }
     }
   }
