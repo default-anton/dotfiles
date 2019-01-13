@@ -1,10 +1,10 @@
 {
-  "coc.preferences.minTriggerInputLength": 0,
+  "coc.preferences.minTriggerInputLength": 1,
   "coc.preferences.hoverTarget": "echo",
   "coc.source.tag.enable": true,
   "coc.preferences.triggerSignatureHelp": true,
-  "coc.preferences.autoTrigger": "none",
-  "coc.source.emoji.filetypes": ["markdown", "javascript"],
+  "coc.preferences.autoTrigger": "always",
+  "coc.source.emoji.filetypes": ["markdown", "gitcommit"],
   "coc.preferences.diagnostic.displayByAle": true,
   "languageserver": {
     "bash": {
@@ -18,6 +18,18 @@
       "filetypes": ["go"],
       "initializationOptions": {
         "formatStyle": "goimports"
+      }
+    },
+    "dart": {
+      "command": "dart_language_server",
+      "args": [],
+      "filetypes": ["dart"],
+      "initializationOptions": {},
+      "settings": {
+        "dart": {
+          "validation": {},
+          "completion": {}
+        }
       }
     }
   }
