@@ -142,7 +142,9 @@ nmap <silent> [e <Plug>(ale_previous_wrap)
 nmap <silent> ]e <Plug>(ale_next_wrap)
 
 let g:terraform_fmt_on_save = 1
-let g:terraform_align=1
+let g:terraform_align = 1
+
+let dart_format_on_save = 1
 
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml', 'go']
 
@@ -422,9 +424,9 @@ nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
-au FileType json,sh,go,python,javascript,javascript.jsx nmap <leader>q :call CocAction('showSignatureHelp')<cr>
+au FileType dart,json,sh,go,python,javascript,javascript.jsx nmap <leader>q :call CocAction('showSignatureHelp')<cr>
 " Use K for show documentation in preview window
-au FileType json,sh,go,python,javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
+au FileType dart,json,sh,go,python,javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if &filetype == 'vim'
