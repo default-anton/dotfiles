@@ -17,7 +17,7 @@ export PATH="${PATH}:${HOME}/Sources/go/bin"
 export PATH="${HOME}/.npm-global/bin:$PATH"
 export GOPATH="${HOME}/Sources/go"
 export FZF_DEFAULT_COMMAND='ag --smart-case --hidden --depth 100 --nocolor --ignore .git -l -g ""'
-export FZF_CTRL_T_COMMAND='${FZF_DEFAULT_COMMAND}'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 
 # if running bash
 if [ -n "${BASH_VERSION}" ]; then
