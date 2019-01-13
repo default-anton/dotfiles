@@ -1,5 +1,5 @@
 {
-  "coc.preferences.minTriggerInputLength": 1,
+  "coc.preferences.minTriggerInputLength": 2,
   "coc.preferences.hoverTarget": "echo",
   "coc.source.tag.enable": true,
   "coc.preferences.triggerSignatureHelp": true,
