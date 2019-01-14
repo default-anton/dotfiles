@@ -43,3 +43,4 @@ command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
 command -v helm >/dev/null 2>&1 && source <(helm completion bash)
 command -v npm >/dev/null 2>&1 && source <(npm completion)
 command -v flutter >/dev/null 2>&1 && source <(flutter bash-completion)
+command -v aws >/dev/null 2>&1 && complete -C 'aws_completer' aws
