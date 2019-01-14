@@ -1,4 +1,5 @@
 {
+  "coc.preferences.noselect": false,
   "coc.preferences.minTriggerInputLength": 2,
   "coc.preferences.hoverTarget": "echo",
   "coc.source.tag.enable": true,
@@ -6,6 +7,19 @@
   "coc.preferences.autoTrigger": "always",
   "coc.source.emoji.filetypes": ["markdown", "gitcommit"],
   "coc.preferences.diagnostic.displayByAle": true,
+  "coc.preferences.rootPatterns": [
+    ".vim",
+    ".git",
+    ".hg",
+    ".projections.json",
+    "pubspec.lock",
+    "Gopkg.lock",
+    "package.json",
+    "Gemfile",
+    "Rakefile",
+    "Makefile",
+    "requirements.txt"
+  ],
   "languageserver": {
     "bash": {
       "command": "bash-language-server",
@@ -23,6 +37,7 @@
     "dart": {
       "command": "dart_language_server",
       "args": [],
+      "rootPatterns": ["pubspec.lock"],
       "filetypes": ["dart"],
       "initializationOptions": {},
       "settings": {
@@ -31,6 +46,11 @@
           "completion": {}
         }
       }
+    },
+    "dockerfile": {
+      "command": "docker-langserver",
+      "filetypes": ["dockerfile"],
+      "args": ["--stdio"]
     }
   }
 }
