@@ -417,6 +417,8 @@ endtry
 
 " Use ctrl+j to trigger coc completion
 inoremap <silent><expr> <c-j> coc#refresh()
+" Close preview window when completion is done.
+autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
@@ -489,9 +491,8 @@ let g:fzf_colors =
   \ 'header':  ['fg', 'Comment'] }
 
 nnoremap <space><space> :FZF<CR>
-nnoremap <space>b :Buffers<CR>
-nnoremap <space>g :Tags<CR>
-imap <c-x><c-f> <plug>(fzf-complete-file-ag)
+nnoremap <space>k :Buffers<CR>
+au FileType go nnoremap <space>j :Tags<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Helper functions
