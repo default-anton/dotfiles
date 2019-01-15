@@ -344,6 +344,8 @@ map <Leader>ra :TestSuite<CR>
 map <Leader>n :NERDTreeToggle<CR>
 map <Leader>nf :NERDTreeFind<CR>
 
+let g:NERDSpaceDelims = 1
+
 let g:splitjoin_split_mapping = ''
 let g:splitjoin_join_mapping = ''
 let g:splitjoin_ruby_hanging_args = 0
