@@ -233,6 +233,7 @@ autocmd FileType ruby,eruby let g:rubycomplete_include_objectspace = 1
 
 autocmd BufNewFile *.rb call append(0, "# frozen_string_literal: true")
 autocmd BufNewFile *.rb call append(line('$'), "")
+autocmd BufWritePost *.rb,*.rake silent! :Dispatch! ripper-tags -R --exclude=vendor --tag-relative --tag-file .tags
 
 " => Python section
 """"""""""""""""""""""""""""""
