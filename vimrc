@@ -286,6 +286,7 @@ au FileType go nmap <leader>de :GoDecls<cr>
 au FileType go nmap <leader>ded :GoDeclsDir<cr>
 au FileType go nmap <leader>fc <Plug>(go-callers)
 au FileType go nmap <leader>fb <Plug>(go-callstack)
+au FileType go nmap <leader>i <Plug>(go-implements)
 au FileType go nmap <leader>we :GoWhicherrs<cr>
 au FileType go nmap <leader>sk :GoKeyify<cr>
 au FileType go nmap <leader>sf :GoFillStruct<cr>
@@ -295,6 +296,7 @@ au Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
 au Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
 au Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+autocmd BufWritePost *.go silent! :Dispatch! gotags -tag-relative -extra +q -f .tags -R .
 
 
 let g:ruby_indent_block_style = 'do'

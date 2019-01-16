@@ -1,0 +1,7 @@
+priority -50
+
+snippet errw "Error return with errors.Wrap" !b
+if err != nil {
+	return errors.Wrap(err, "${1:nil}")
+}${0}
+endsnippet
