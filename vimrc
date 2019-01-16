@@ -131,6 +131,12 @@ let g:ale_fixers = {
 let g:ale_linters = {
 \ 'sh': ['language_server'],
 \ 'go': ['language_server'],
+\ 'dockerfile': ['language_server'],
+\ 'dart': ['language_server'],
+\ 'javascript': ['language_server'],
+\ 'javascript.jsx': ['language_server'],
+\ 'json': ['language_server'],
+\ 'python': ['language_server'],
 \ }
 let g:ale_linters = {'sh': []}
 let g:ale_fix_on_save = 1
@@ -296,8 +302,6 @@ au Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
 au Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
 au Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 au BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
-autocmd BufWritePost *.go silent! :Dispatch! gotags -tag-relative -extra +q -f .tags -R .
-
 
 let g:ruby_indent_block_style = 'do'
 let ruby_spellcheck_strings = 1
