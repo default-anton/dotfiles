@@ -38,6 +38,8 @@ alias webcam=v4l2-ctl
 alias cf="g st -s | ag -v -s D | cut -d' ' -f3"
 alias en="trans :en"
 alias ru="trans :ru"
+alias ll='ls -AlF'
+alias l='ls -ACF'
 
 function resize {
   eval $(resize.py)
