@@ -281,11 +281,13 @@ au FileType go nmap <leader>gr <Plug>(go-run-split)
 au FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
 au FileType go nmap <leader>rf <Plug>(go-test)
 au FileType go nmap <leader>rs <Plug>(go-test-func)
-au FileType go nmap <leader>atj :GoAddTags json<cr>
-au FileType go nmap <leader>atd :GoAddTags db<cr>
-au FileType go nmap <leader>rtj :GoRemoveTags json<cr>
-au FileType go nmap <leader>rtd :GoRemoveTags db<cr>
-au FileType go nmap <leader>rt :GoRemoveTags<cr>
+au FileType go nmap <leader>taj :GoAddTags json<cr>
+au FileType go nmap <leader>tab :GoAddTags bson<cr>:GoAddTags bson,omitempty<cr>
+au FileType go nmap <leader>tad :GoAddTags db<cr>
+au FileType go nmap <leader>trj :GoRemoveTags json<cr>
+au FileType go nmap <leader>trb :GoRemoveTags bson<cr>
+au FileType go nmap <leader>trd :GoRemoveTags db<cr>
+au FileType go nmap <leader>tr :GoRemoveTags<cr>
 au FileType go nmap <leader>rc <Plug>(go-coverage-toggle)
 au FileType go nmap <leader>rcb :GoCoverageBrowser<cr>
 au FileType go nmap <leader>de :GoDecls<cr>
