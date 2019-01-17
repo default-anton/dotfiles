@@ -8,7 +8,14 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-source "${HOME}/.dotfiles/pomodoro/pomodoro.sh"
+
+function _update_ps1() {
+    PS1=$(powerline-shell $?)
+}
+
+if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
+  PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+fi
 
 # set PATH so it includes user's private bin directories
 export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}:${HOME}/.dotfiles/bin"
@@ -29,13 +36,6 @@ fi
 
 if [ -f "${HOME}/.local_bash_aliases" ]; then
   . "${HOME}/.local_bash_aliases"
-fi
-
-if [ -f "/usr/share/powerline/bindings/bash/powerline.sh" ]; then
-  powerline-daemon -q
-  POWERLINE_BASH_CONTINUATION=1
-  POWERLINE_BASH_SELECT=1
-  source /usr/share/powerline/bindings/bash/powerline.sh
 fi
 
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
