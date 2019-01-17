@@ -14,6 +14,6 @@
   "theme": "solarized_dark",
   "cwd": {
     "mode": "plain",
-    "max_depth": 2
+    "max_depth": 3
   }
 }
