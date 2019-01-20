@@ -47,5 +47,6 @@
 	ff = false
 [core]
 	editor = vim
+	excludesfile = ~/.dotfiles/gitignore
 [init]
 	templatedir = ~/.dotfiles/git-templates/
