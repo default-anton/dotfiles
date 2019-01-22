@@ -130,15 +130,8 @@ let g:ale_fixers = {
 \}
 let g:ale_linters = {
 \ 'sh': ['language_server'],
-\ 'go': ['language_server'],
-\ 'dockerfile': ['language_server'],
-\ 'dart': ['language_server'],
-\ 'javascript': ['language_server'],
-\ 'javascript.jsx': ['language_server'],
-\ 'json': ['language_server'],
-\ 'python': ['language_server'],
+\ 'go': ['govet', 'golint'],
 \ }
-let g:ale_linters = {'sh': []}
 let g:ale_fix_on_save = 1
 let g:ale_lint_on_text_changed = 0
 let g:ale_lint_on_enter = 0
@@ -268,12 +261,10 @@ let g:go_highlight_methods = 1
 let g:go_highlight_function_calls = 1
 let g:go_highlight_build_constraints = 1
 let g:go_highlight_generate_tags = 1
-let g:go_updatetime = 100
 let g:go_jump_to_error = 0
 let g:go_metalinter_autosave = 0
-let g:go_metalinter_deadline = "5s"
-let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
-let g:go_metalinter_autosave_enabled = ['vet']
+let g:go_metalinter_enabled = []
+let g:go_metalinter_autosave_enabled = []
 let g:go_gocode_unimported_packages = 1
 let g:go_decls_mode = 'fzf'
 
