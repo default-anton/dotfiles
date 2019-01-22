@@ -28,10 +28,12 @@
     },
     "golang": {
       "command": "bingo",
-      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/", "Gopkg.lock"],
       "filetypes": ["go"],
       "initializationOptions": {
-        "formatStyle": "goimports"
+        "formatStyle": "goimports",
+        "diagnosticsStyle": "onsave",
+        "enhanceSignatureHelp": true
       }
     },
     "dart": {
