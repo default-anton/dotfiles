@@ -63,7 +63,6 @@ Plugin 'Shougo/denite.nvim'
 Plugin 'neoclide/coc.nvim', {'do': 'yarn install'}
 Plugin 'BurntSushi/erd'
 Plugin 'uarun/vim-protobuf'
-Plugin 'easymotion/vim-easymotion'
 
 call vundle#end()
 filetype plugin indent on
@@ -493,6 +492,7 @@ let g:fzf_colors =
 
 nnoremap <space><space> :FZF<cr>
 nnoremap <space>d :GFiles?<cr>
+nnoremap <space>b :Buffers<cr>
 nnoremap <space>k :Tags<cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
