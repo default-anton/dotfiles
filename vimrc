@@ -32,7 +32,6 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-Plugin 'ecomba/vim-ruby-refactoring'
 Plugin 'fatih/vim-go'
 Plugin 'jeffkreeftmeijer/vim-numbertoggle'
 Plugin 'roman/golden-ratio'
@@ -110,7 +109,7 @@ au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
 let g:rooter_patterns = [
     \ 'Gopkg.lock', 'pubspec.lock',
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
-      \ 'Gemfile', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
+      \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
       \ ]
 let g:rooter_use_lcd = 0
 let g:rooter_silent_chdir = 1
@@ -154,9 +153,8 @@ set termguicolors
 colorscheme base16-default-dark
 
 let g:airline_powerline_fonts = 1
-let g:airline_theme='base16'
+let g:airline_theme='minimalist'
 let g:airline_base16_improved_contrast=1
-let base16colorspace=256
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#branch#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
@@ -300,12 +298,14 @@ let ruby_spellcheck_strings = 1
 
 autocmd FileType ruby compiler ruby
 autocmd FileType ruby let b:delimitMate_quotes = "\" ' ` |"
-autocmd BufEnter * EnableStripWhitespaceOnSave
 " Return to last edit position when opening files (You want this!)
 autocmd BufReadPost *
       \ if line("'\"") > 0 && line("'\"") <= line("$") |
       \   exe "normal! g`\"" |
       \ endif
+
+let g:better_whitespace_enabled=1
+let g:strip_whitespace_on_save = 1
 
 " source .vimrc after cd project/
 autocmd User RooterChDir silent! source .vimrc
@@ -332,7 +332,11 @@ nmap <silent> <leader>df :GraphvizCompile<cr>:silent :GraphvizShow<cr>
 " Entity diagram
 nmap <silent> <leader>de :!erd -i design/initial_entities.er -f png -o /tmp/erd.png && xdg-open /tmp/erd.png<cr>
 
-let test#strategy = "vimterminal"
+let test#strategy = {
+  \ 'nearest': 'dispatch',
+  \ 'file':    'dispatch_background',
+  \ 'suite':   'dispatch_background',
+\}
 let test#ruby#bundle_exec = 0
 map <Leader>rf :TestFile<CR>
 map <Leader>rs :TestNearest<CR>
