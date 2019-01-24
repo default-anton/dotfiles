@@ -3,7 +3,7 @@
       create: true
       relink: true
 
-- clean: ['~']
+- clean: ['~', '.config/powerline-shell', '~/.vim', '~/.config/Code/User']
 
 - link:
     ~/.gitconfig: gitconfig
@@ -15,6 +15,9 @@
     ~/.config/powerline-shell/config.json: powerline-shell/config.json
     ~/.vim/UltiSnips: UltiSnips
     ~/.vim/coc-settings.json: coc-settings.json
+    ~/.config/Code/User/keybindings.json: code/keybindings.json
+    ~/.config/Code/User/settings.json: code/settings.json
+    ~/.config/Code/User/snippets: code/snippets
 
 - shell:
   - command: wget git.io/trans -O ~/bin/trans && chmod +x ~/bin/trans
