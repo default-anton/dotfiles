@@ -61,6 +61,7 @@ Plugin 'danchoi/ri.vim'
 Plugin 'neoclide/coc.nvim', {'do': 'yarn install'}
 Plugin 'BurntSushi/erd'
 Plugin 'uarun/vim-protobuf'
+Plugin 'mustache/vim-mustache-handlebars'
 
 call vundle#end()
 filetype plugin indent on
@@ -138,6 +139,8 @@ let g:ale_echo_cursor = 1
 nmap <silent> [e <Plug>(ale_previous_wrap)
 nmap <silent> ]e <Plug>(ale_next_wrap)
 
+let g:mustache_abbreviations = 1
+
 let g:terraform_fmt_on_save = 1
 let g:terraform_align = 1
 
@@ -145,7 +148,7 @@ let dart_format_on_save = 1
 
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml', 'go']
 
-set t_Co=256
+set t_Co=16
 set t_ut=
 set background=dark
 set termguicolors
