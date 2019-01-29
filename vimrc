@@ -173,7 +173,11 @@ set foldcolumn=1
 " Set x lines to the cursor - when moving vertically using j/k
 set so=7
 set wildmenu
-set clipboard=unnamedplus
+if has("unix")
+  set clipboard=unnamedplus
+else
+  set clipboard=unnamed
+endif
 set wildignore=*.o,*~,*.pyc
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
