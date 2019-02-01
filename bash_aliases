@@ -1,4 +1,4 @@
-alias_completion(){
+function alias_completion {
   # keep global namespace clean
   local cmd completion
 
@@ -30,11 +30,8 @@ eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
 alias dc=docker-compose
 alias timestamp="date +'%Y%M%d%H%M%S'"
 alias ts=timestamp
-alias open=xdg-open
 alias tf=terraform
-alias copy="xclip -selection c"
 alias g=git
-alias webcam=v4l2-ctl
 alias cf="g st -s | ag -v -s D | cut -d' ' -f3"
 alias en="trans :en"
 alias ru="trans :ru"
@@ -45,12 +42,17 @@ function resize {
   eval $(resize.py)
 }
 
+if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  alias open=xdg-open
+  alias copy="xclip -selection c"
+  alias webcam=v4l2-ctl
 # aliases to load completion for
-aliases=(dc ts open tf g)
+  aliases=(dc ts open tf g)
 
-for a in "${aliases[@]}"; do
-  alias_completion "$a"
-done
+  for a in "${aliases[@]}"; do
+    alias_completion "$a"
+  done
 
 # clean up after ourselves
-unset a aliases
+  unset a aliases
+fi
