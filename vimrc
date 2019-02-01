@@ -73,11 +73,18 @@ let g:mapleader = ","
 set nobackup
 set nowritebackup
 set noswapfile
-set history=50
+if &history < 1000
+  set history=1000
+endif
+if &tabpagemax < 50
+  set tabpagemax=50
+endif
 set ruler         " show the cursor position all the time
 set showcmd       " display incomplete commands
+set display+=lastline
 set laststatus=2  " Always display the status line
 set exrc
+set nrformats-=octal
 set secure
 set autoread
 set autowrite
@@ -85,16 +92,20 @@ set tabstop=2
 set shiftwidth=2
 set shiftround
 set expandtab
-set ai "Auto indent
-set si "Smart indent
+set autoindent
+set smartindent
 set redrawtime=10000
+set sessionoptions-=options
 
-" Switch syntax highlighting on, when the terminal has colors
-" Also switch on highlighting the last used search pattern.
-if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
-"syntax enable
-endif
 syntax on
+
+if &listchars ==# 'eol:$'
+  set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
+endif
+
+if v:version > 703 || v:version == 703 && has("patch541")
+  set formatoptions+=j " Delete comment character when joining commented lines
+endif
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -174,6 +185,12 @@ set foldcolumn=1
 " Set x lines to the cursor - when moving vertically using j/k
 set so=7
 set wildmenu
+if !&scrolloff
+  set scrolloff=3
+endif
+if !&sidescrolloff
+  set sidescrolloff=5
+endif
 if has("macunix")
   set clipboard=unnamed
 else
@@ -187,7 +204,7 @@ set cmdheight=2
 set hidden
 set shortmess=atToOFc
 " Configure backspace so it acts as it should act
-set backspace=eol,start,indent
+set backspace=indent,eol,start
 set whichwrap+=<,>,h,l
 " Ignore case when searching
 set ignorecase
