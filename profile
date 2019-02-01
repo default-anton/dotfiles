@@ -1,13 +1,10 @@
-# ~/.profile: executed by the command interpreter for login shells.
-# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
-# exists.
-# see /usr/share/doc/bash/examples/startup-files for examples.
-# the files are located in the bash-doc package.
+[ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash
+[ -f ~/.bash_aliases ] && source ~/.bash_aliases
+[ -f ~/.local_bash_aliases ] && source ~/.local_bash_aliases
+[ -f ~/.bashrc ] && source ~/.bashrc
+[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 
-# the default umask is set in /etc/profile; for setting the umask
-# for ssh logins, install and configure the libpam-umask package.
-#umask 022
-
+command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
 
 function _update_ps1() {
     PS1=$(powerline-shell $?)
@@ -25,18 +22,10 @@ export PATH="${HOME}/.npm-global/bin:$PATH"
 export GOPATH="${HOME}/Sources/go"
 export FZF_DEFAULT_COMMAND='ag --smart-case --hidden --depth 100 --nocolor --ignore .git -l -g ""'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
-
-# if running bash
-if [ -n "${BASH_VERSION}" ]; then
-    # include .bashrc if it exists
-    if [ -f "${HOME}/.bashrc" ]; then
-      . "${HOME}/.bashrc"
-    fi
-fi
-
-if [ -f "${HOME}/.local_bash_aliases" ]; then
-  . "${HOME}/.local_bash_aliases"
-fi
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+# Load RVM into a shell session *as a function*
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
 command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
