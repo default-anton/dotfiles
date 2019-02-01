@@ -359,8 +359,8 @@ nmap <silent> <leader>de :!erd -i design/initial_entities.er -f png -o /tmp/erd.
 
 let test#strategy = {
   \ 'nearest': 'dispatch',
-  \ 'file':    'dispatch_background',
-  \ 'suite':   'dispatch_background',
+  \ 'file':    'dispatch',
+  \ 'suite':   'dispatch',
 \}
 let test#ruby#bundle_exec = 0
 map <Leader>rf :TestFile<CR>
