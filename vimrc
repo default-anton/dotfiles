@@ -184,7 +184,8 @@ set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
 set cmdheight=2
 " A buffer becomes hidden when it is abandoned
-set hid
+set hidden
+set shortmess=atToOFc
 " Configure backspace so it acts as it should act
 set backspace=eol,start,indent
 set whichwrap+=<,>,h,l
