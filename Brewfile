@@ -33,3 +33,5 @@ brew install pandoc
 brew install the_silver_searcher
 brew install ack
 brew install terraform
+brew install node@10
+brew link --force node@10
