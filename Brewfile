@@ -2,6 +2,7 @@
 
 brew install curl
 brew install git
+brew install git-standup
 brew install tig
 brew install hub
 brew install vim
@@ -23,3 +24,4 @@ brew install pandoc
 brew install the_silver_searcher
 brew install ack
 brew install terraform
+brew docker-completion
