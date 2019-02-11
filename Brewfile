@@ -35,3 +35,4 @@ brew install ack
 brew install terraform
 brew install node@10
 brew link --force node@10
+curl -o- -L https://yarnpkg.com/install.sh | bash
