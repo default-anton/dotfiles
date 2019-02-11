@@ -5,8 +5,24 @@ command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] &
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 [ -f ~/.local_bash_aliases ] && source ~/.local_bash_aliases
 
+case "$(uname -s)" in
+  Linux*)
+    for COMPLETION in $(brew --prefix)/etc/bash_completion.d/*
+    do
+      [[ -f $COMPLETION ]] && source "$COMPLETION"
+    done
+    if [[ -f $(brew --prefix)/etc/profile.d/bash_completion.sh ]];
+    then
+      source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
+    fi
+    ;;
+  Darwin*)
+    ;;
+  *)
+esac
+
 function _update_ps1() {
-    PS1=$(powerline-shell $?)
+  PS1=$(powerline-shell $?)
 }
 
 if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
