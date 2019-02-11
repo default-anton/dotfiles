@@ -26,6 +26,7 @@ brew install jq
 brew install ctags
 brew install colordiff
 brew install fzf
+$(brew --prefix)/opt/fzf/install
 brew install gawk
 brew install graphviz
 brew install pandoc
