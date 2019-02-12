@@ -1,0 +1,13 @@
+#!/bin/sh
+# Prevent push to remote protected branches
+
+protected="^refs/heads/master$|^refs/heads/develop$"
+while read local_ref local_sha remote_ref remote_sha
+do
+  if [[ "$remote_ref" =~ $protected ]]; then
+    echo "pre-push hook: Can not push to remote "${remote_ref}" branch."
+    exit 1
+  fi
+done
+
+exit 0
