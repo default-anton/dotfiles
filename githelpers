@@ -49,29 +49,15 @@ pretty_git_format() {
 }
 
 merged_branches() {
-  comm -12 \
-    <(local_merged_branches | remove_origin | remove_master) \
-    <(remote_merged_branches | remove_origin | remove_master)
+  comm -12 <(local_merged_branches) <(remote_merged_branches)
 }
 
 local_merged_branches() {
-  git branch --merged | remove_origin | remove_master | sort
+  git branch --merged | ag -v "^\*|  master|  develop" | sort
 }
 
 remote_merged_branches() {
-  git branch -r --merged | remove_origin | remove_master | sort
-}
-
-remove_origin() {
-  while read br; do
-    echo "${br}" | sed 's@origin/@@g'
-  done
-}
-
-remove_master() {
-  while read br; do
-    echo "${br}" | egrep -v master
-  done
+  git branch -r --merged | ag -v "^\*|  master|  develop" | sed "s@origin/@@" | sort
 }
 
 delete_branches() {
