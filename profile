@@ -16,7 +16,7 @@ command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] &
 [ -f ~/.local_bash_aliases ] && source ~/.local_bash_aliases
 
 case "$(uname -s)" in
-  Linux*)
+  Linux* | Darwin*)
     for COMPLETION in $(brew --prefix)/etc/bash_completion.d/*
     do
       [[ -f $COMPLETION ]] && source "$COMPLETION"
@@ -25,8 +25,6 @@ case "$(uname -s)" in
     then
       source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
     fi
-    ;;
-  Darwin*)
     ;;
   *)
 esac
