@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+brew install doctl
 brew install curl
 brew install git
 brew install git-standup
