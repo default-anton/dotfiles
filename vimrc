@@ -5,7 +5,8 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'chriskempson/base16-vim'
+" Plugin 'chriskempson/base16-vim'
+Plugin 'romainl/flattened'
 Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plugin 'junegunn/fzf.vim'
 Bundle 'vim-ruby/vim-ruby'
@@ -164,7 +165,8 @@ set t_Co=16
 set t_ut=
 set background=dark
 set termguicolors
-colorscheme base16-default-dark
+" colorscheme base16-default-dark
+colorscheme flattened_dark
 
 let g:airline_powerline_fonts = 1
 let g:airline_theme='minimalist'
