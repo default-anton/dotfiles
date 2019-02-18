@@ -1,0 +1,4 @@
+tmux new-session -d -s dev -n vim
+tmux new-window -n docker
+tmux select-window -t :0
+tmux a -t dev

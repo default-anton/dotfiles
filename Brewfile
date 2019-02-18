@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+brew install tmux
 brew install kubectl
 brew install doctl
 brew install curl
