@@ -50,3 +50,7 @@
 	excludesfile = ~/.dotfiles/gitignore
 [init]
 	templatedir = ~/.dotfiles/git-templates/
+[pull]
+	rebase = true
+[rebase]
+	autoStash = true
