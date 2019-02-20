@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+brew install rclone
 brew install tmux
 brew install kubectl
 brew install doctl
