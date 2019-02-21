@@ -4,12 +4,10 @@ brew install rclone
 brew install tmux
 brew install kubectl
 brew install doctl
-brew install curl
 brew install git
 brew install git-standup
 brew install tig
 brew install hub
-brew install vim
 brew install htop
 brew install tree
 brew install wget
@@ -25,7 +23,6 @@ brew install rake-completion
 brew install ruby-completion
 brew install gcc
 brew install imagemagick
-brew install bash
 brew install jq
 brew install ctags
 brew install colordiff
@@ -41,3 +38,13 @@ brew install kubernetes-helm
 brew install node@10
 brew link --force node@10
 curl -o- -L https://yarnpkg.com/install.sh | bash
+
+case "$(uname -s)" in
+  # Linux*)
+  Darwin*)
+    brew install curl
+    brew install vim
+    brew install bash
+    ;;
+  *)
+esac
