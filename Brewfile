@@ -27,7 +27,6 @@ brew install jq
 brew install ctags
 brew install colordiff
 brew install fzf
-$(brew --prefix)/opt/fzf/install
 brew install gawk
 brew install graphviz
 brew install pandoc
@@ -43,6 +42,7 @@ case "$(uname -s)" in
   Linux*)
     brew unlink bash
     brew unlink curl
+    ;;
   Darwin*)
     brew install curl
     brew install vim
@@ -50,3 +50,5 @@ case "$(uname -s)" in
     ;;
   *)
 esac
+
+$(brew --prefix)/opt/fzf/install
