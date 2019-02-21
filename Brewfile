@@ -40,7 +40,9 @@ brew link --force node@10
 curl -o- -L https://yarnpkg.com/install.sh | bash
 
 case "$(uname -s)" in
-  # Linux*)
+  Linux*)
+    brew unlink bash
+    brew unlink curl
   Darwin*)
     brew install curl
     brew install vim
