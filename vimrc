@@ -63,6 +63,7 @@ Plugin 'neoclide/coc.nvim', {'do': 'yarn install'}
 Plugin 'BurntSushi/erd'
 Plugin 'uarun/vim-protobuf'
 Plugin 'mustache/vim-mustache-handlebars'
+Plugin 'rhysd/vim-grammarous'
 
 call vundle#end()
 filetype plugin indent on
