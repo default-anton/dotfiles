@@ -51,4 +51,6 @@ case "$(uname -s)" in
   *)
 esac
 
+npm i -g vmd
+
 $(brew --prefix)/opt/fzf/install
