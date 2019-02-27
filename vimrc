@@ -490,7 +490,7 @@ if executable('ag')
   let g:ackprg = 'ag --vimgrep'
 endif
 
-let $FZF_DEFAULT_COMMAND = 'ag --ignore-case --nocolor --hidden --depth 100 -g ""'
+let $FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-case --exclude '.git'"
 let g:fzf_layout = { 'up': '70%' }
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_colors =
