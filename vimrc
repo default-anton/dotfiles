@@ -401,15 +401,6 @@ nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<CR>
 set wildmode=list:longest,list:full
 set completeopt-=preview
 
-" Disable default mappings
-let g:EasyMotion_do_mapping = 0
-" This setting makes EasyMotion work similarly to Vim's smartcase option for global searches.
-let g:EasyMotion_smartcase = 1
-
-" Jump to anywhere you want with minimal keystrokes, with just one key binding.
-" `s{char}{label}`
-nmap s <Plug>(easymotion-overwin-f2)
-
 augroup vimrc-incsearch-highlight
   autocmd!
   autocmd CmdlineEnter [/\?] :set hlsearch
