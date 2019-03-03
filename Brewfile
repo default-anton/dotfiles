@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+brew install dep
 brew install fd
 brew install rclone
 brew install tmux
