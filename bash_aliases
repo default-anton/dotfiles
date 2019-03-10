@@ -37,6 +37,7 @@ alias en="trans :en"
 alias ru="trans :ru"
 alias ll='ls -AlF'
 alias l='ls -ACF'
+alias sinkforbrowser='pactl load-module module-null-sink sink_name="loopback_of_bg_music" sink_properties=device.description="loopback_of_bg_music"'
 
 function resize {
   eval $(resize.py)
