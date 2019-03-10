@@ -5,7 +5,7 @@
   "coc.source.tag.enable": true,
   "coc.preferences.triggerSignatureHelp": true,
   "coc.preferences.autoTrigger": "always",
-  "coc.source.emoji.filetypes": ["markdown", "gitcommit"],
+  "coc.source.emoji.filetypes": ["markdown", "gitcommit", "yaml"],
   "coc.preferences.diagnostic.displayByAle": true,
   "list.maxHeight": 30,
   "coc.preferences.rootPatterns": [
