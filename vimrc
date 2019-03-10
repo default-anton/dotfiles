@@ -63,6 +63,7 @@ Plugin 'BurntSushi/erd'
 Plugin 'uarun/vim-protobuf'
 Plugin 'mustache/vim-mustache-handlebars'
 Plugin 'rhysd/vim-grammarous'
+Plugin 'cespare/vim-toml'
 
 call vundle#end()
 filetype plugin indent on
