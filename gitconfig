@@ -36,6 +36,7 @@
   up      = standup -d 1 -f
   poo     = push origin HEAD
   rom     = !git fap && git rebase origin/master
+  rod     = !git fap && git rebase origin/develop
 
 [color]
 	ui   = true
