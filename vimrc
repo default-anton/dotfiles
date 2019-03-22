@@ -99,6 +99,12 @@ set smartindent
 set redrawtime=10000
 set sessionoptions-=options
 
+" Using vim with Russian keyboard
+set keymap=russian-jcukenwin
+set iminsert=0
+set imsearch=0
+highlight lCursor guifg=NONE guibg=Cyan
+
 syntax on
 
 if &listchars ==# 'eol:$'
