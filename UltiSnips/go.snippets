@@ -1,7 +1,19 @@
-priority -50
+priority 10
 
 snippet errw "Error return with errors.Wrap" !b
 if err != nil {
 	return errors.Wrap(err, "${1:nil}")
+}${0}
+endsnippet
+
+snippet terr "Test with an error" !b
+if err != nil {
+	t.Fatal(err)
+}${0}
+endsnippet
+
+snippet te "Assert" !b
+if ${1:actual} != tt.expected {
+	t.Errorf("${2:FunctionName}() = got %s, have %s", tt.got, tt.have, ${1})
 }${0}
 endsnippet
