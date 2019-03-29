@@ -8,6 +8,7 @@ brew install exiftool
 brew install trash-cli
 brew install coreutils
 brew install nnn
+brew install ffmpeg
 brew install dep
 brew install fd
 brew install rclone
