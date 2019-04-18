@@ -72,5 +72,3 @@ export dot="$HOME/.dotfiles"
 export desk="$HOME/Desktop"
 export docs="$HOME/Documents"
 export down="$HOME/Downloads"
-
-set -o vi
