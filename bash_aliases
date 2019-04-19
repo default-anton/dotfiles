@@ -28,7 +28,7 @@ eval "$(sed "s/$cmd\$/$1/" <<<"$completion")"
 }
 
 alias dc=docker-compose
-alias timestamp="date +'%Y%M%d%H%M%S'"
+alias timestamp="date +'%Y%m%d%H%M%S'"
 alias ts=timestamp
 alias tf=terraform
 alias g=git
