@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# nnn dependencies
+brew install moreutils
+brew install fzy
+brew install atool
+brew install exiftool
+brew install trash-cli
+brew install coreutils
+brew install nnn
 brew install dep
 brew install fd
 brew install rclone
@@ -44,6 +52,9 @@ case "$(uname -s)" in
   Linux*)
     brew unlink bash
     brew unlink curl
+    sudo apt install curl
+    # nnn dependencies
+    sudo apt install patool vlock
     ;;
   Darwin*)
     brew install curl
