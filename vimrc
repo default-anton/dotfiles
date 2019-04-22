@@ -488,6 +488,10 @@ if executable('ag')
   let g:ackprg = 'ag --vimgrep'
 endif
 
+let g:ack_mappings = { "o": "<CR>zz" }
+let g:ackhighlight = 1
+let g:ack_autoclose = 1
+
 let $FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-case --exclude '.git'"
 let g:fzf_layout = { 'up': '70%' }
 let g:fzf_history_dir = '~/.local/share/fzf-history'
