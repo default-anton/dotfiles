@@ -41,5 +41,7 @@
         "statusBar.debuggingBackground": "#005f5f"
     },
     "files.autoSave": "off",
-    "go.useCodeSnippetsOnFunctionSuggestWithoutType": true
+    "go.useCodeSnippetsOnFunctionSuggestWithoutType": true,
+    "window.zoomLevel": 3,
+    "editor.minimap.enabled": false
 }
