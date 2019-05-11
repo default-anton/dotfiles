@@ -8,12 +8,12 @@ export GOPATH="${HOME}/Sources/go"
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
 
-[ -f ~/.bashrc ] && source ~/.bashrc
 command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 [ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 [ -f ~/.local_bash_aliases ] && source ~/.local_bash_aliases
+[ -f ~/.bashrc ] && source ~/.bashrc
 
 case "$(uname -s)" in
   Linux* | Darwin*)
