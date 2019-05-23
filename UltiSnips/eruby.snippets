@@ -1,0 +1,20 @@
+priority 10
+
+snippet = "<%= %>"
+<%= $0 %>
+endsnippet
+
+snippet % "<% %>"
+<% $0 %>
+endsnippet
+
+snippet if "<% if %><% end %>"
+<% if $1 %>
+	$0
+<% end %>
+endsnippet
+
+snippet else "<% else %>"
+<% else %>
+	$0
+endsnippet
