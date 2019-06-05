@@ -170,9 +170,8 @@ let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby
 
 set t_Co=16
 set t_ut=
-set background=dark
 set termguicolors
-colorscheme base16-material-darker
+colorscheme base16-one-light
 
 let g:airline_powerline_fonts = 1
 let g:airline_theme='minimalist'
@@ -222,8 +221,6 @@ set smartcase
 set smarttab
 " Highlight search results
 set hlsearch
-highlight Search guibg=NONE guifg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
-highlight IncSearch guibg=NONE guifg=NONE gui=underline ctermfg=NONE ctermbg=NONE cterm=underline
 " Makes search act like search in modern browsers
 set incsearch
 " Don't redraw while executing macros (good performance config)
