@@ -171,7 +171,8 @@ let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby
 set t_Co=16
 set t_ut=
 set termguicolors
-colorscheme base16-one-light
+set background=dark
+colorscheme base16-material-darker
 
 let g:airline_powerline_fonts = 1
 let g:airline_theme='minimalist'
