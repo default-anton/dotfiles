@@ -17,3 +17,9 @@ if ${1:actual} != tt.expected {
 	t.Errorf("${2:FunctionName}() = got %s, have %s", tt.got, tt.have, ${1})
 }${0}
 endsnippet
+
+snippet hf "http.HandlerFunc" !b
+func ${1:handler}(w http.ResponseWriter, r *http.Request) {
+	${0:fmt.Fprintf(w, "hello world")}
+}
+endsnippet
