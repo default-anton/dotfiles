@@ -300,9 +300,11 @@ au FileType go nmap <leader>gr <Plug>(go-run-split)
 au FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
 au FileType go nmap <leader>rf <Plug>(go-test)
 au FileType go nmap <leader>rs <Plug>(go-test-func)
+au FileType go nmap <leader>tax :GoAddTags xml<cr>
 au FileType go nmap <leader>taj :GoAddTags json<cr>
 au FileType go nmap <leader>tab :GoAddTags bson<cr>:GoAddTags bson,omitempty<cr>
 au FileType go nmap <leader>tad :GoAddTags db<cr>
+au FileType go nmap <leader>trx :GoRemoveTags xml<cr>
 au FileType go nmap <leader>trj :GoRemoveTags json<cr>
 au FileType go nmap <leader>trb :GoRemoveTags bson<cr>
 au FileType go nmap <leader>trd :GoRemoveTags db<cr>
