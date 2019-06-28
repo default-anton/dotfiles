@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+function set_razer_siren_x_sink() {
+  pactl set-card-profile 1 input:analog-stereo
+  pactl set-default-source alsa_input.usb-Razer_Inc_Razer_Seiren_X_UC1910L01200514-00.analog-stereo
+}
+
+function set_jabra_output() {
+  pactl set-card-profile 2 output:analog-stereo
+  pactl set-default-sink alsa_output.usb-GN_Netcom_A_S_Jabra_EVOLVE_20_MS_0000520EB21207-00.analog-stereo
+}
+
+function create_sink() {
+  pacmd list-modules | ag twitch_alerts > /dev/null 2>&1 || \
+    pactl load-module module-null-sink sink_name="twitch_alerts" sink_properties=device.description="twitch_alerts"
+}
+
+create_sink
+set_jabra_output
+set_razer_siren_x_sink
+
+export PULSE_SINK=twitch_alerts
+export PULSE_SOURCE=alsa_input.usb-Razer_Inc_Razer_Seiren_X_UC1910L01200514-00.analog-stereo
+nohup obs &
