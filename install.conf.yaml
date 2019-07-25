@@ -9,6 +9,7 @@
     ~/.gitconfig: gitconfig
     ~/.psqlrc: psqlrc
     ~/.vimrc: vimrc
+    ~/.gvimrc: gvimrc
     ~/.ideavimrc: ideavimrc
     ~/.bash_aliases: bash_aliases
     ~/.profile: profile
