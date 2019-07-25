@@ -8,6 +8,7 @@
   "coc.preferences.hoverTarget": "float",
   "coc.source.tag.enable": true,
   "coc.source.emoji.filetypes": ["markdown", "gitcommit", "yaml"],
+  "python.jediEnabled": false,
   "list.maxHeight": 30,
   "coc.preferences.rootPatterns": [
     ".vim",
