@@ -9,6 +9,10 @@
   "coc.source.tag.enable": true,
   "coc.source.emoji.filetypes": ["markdown", "gitcommit", "yaml"],
   "python.jediEnabled": false,
+  "python.linting.pylintEnabled": false,
+  "python.linting.enabled": true,
+  "python.pythonPath": "python3",
+  "python.formatting.provider": "yapf",
   "list.maxHeight": 30,
   "coc.preferences.rootPatterns": [
     ".vim",
