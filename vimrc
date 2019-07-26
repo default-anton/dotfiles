@@ -129,7 +129,7 @@ au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
 let g:rooter_patterns = [
     \ 'Gopkg.lock', 'pubspec.lock',
       \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
-      \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/'
+      \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/',
       \ ]
 let g:rooter_use_lcd = 0
 let g:rooter_silent_chdir = 1
@@ -304,11 +304,11 @@ au FileType go nmap <leader>rs <Plug>(go-test-func)
 au FileType go nmap <leader>tax :GoAddTags xml<cr>
 au FileType go nmap <leader>taj :GoAddTags json<cr>
 au FileType go nmap <leader>tab :GoAddTags bson<cr>:GoAddTags bson,omitempty<cr>
-au FileType go nmap <leader>tad :GoAddTags db<cr>
+au FileType go nmap <leader>tad :GoAddTags dynamo<cr>
 au FileType go nmap <leader>trx :GoRemoveTags xml<cr>
 au FileType go nmap <leader>trj :GoRemoveTags json<cr>
 au FileType go nmap <leader>trb :GoRemoveTags bson<cr>
-au FileType go nmap <leader>trd :GoRemoveTags db<cr>
+au FileType go nmap <leader>trd :GoRemoveTags dynamo<cr>
 au FileType go nmap <leader>tr :GoRemoveTags<cr>
 au FileType go nmap <leader>rc <Plug>(go-coverage-toggle)
 au FileType go nmap <leader>rcb :GoCoverageBrowser<cr>
