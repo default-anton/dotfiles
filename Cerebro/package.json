@@ -1,7 +1,6 @@
 {
   "name": "cerebro-plugins",
   "dependencies": {
-    "cerebro-basic-apps": "1.0.11",
     "cerebro-converter": "1.0.9",
     "cerebro-devdocs": "^0.0.1",
     "cerebro-emoj": "^0.2.4",
@@ -13,6 +12,7 @@
     "cerebro-linux-system": "^0.2.8",
     "cerebro-math": "1.0.0",
     "cerebro-open-web": "1.0.0",
-    "cerebro-timezones": "^0.0.5"
+    "cerebro-timezones": "^0.0.5",
+    "cerebro-basic-apps": "1.0.12"
   }
 }
