@@ -480,6 +480,7 @@ nmap <leader>aa  <Plug>(coc-codeaction-selected)
 " Remap for do codeAction of current line
 nmap <leader>ac  <Plug>(coc-codeaction)
 nmap <space>o :CocList outline<cr>
+nmap <space>l :CocList symbols<cr>
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
