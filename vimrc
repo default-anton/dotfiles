@@ -174,10 +174,10 @@ set t_Co=16
 set t_ut=
 set termguicolors
 set background=dark
-colorscheme base16-material-darker
+colorscheme base16-onedark
 
 let g:airline_powerline_fonts = 1
-let g:airline_theme='minimalist'
+let g:airline_theme='onedark'
 let g:airline_base16_improved_contrast=1
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#branch#enabled = 1

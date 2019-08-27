@@ -17,6 +17,7 @@
     ~/.config/powerline-shell/config.json: powerline-shell/config.json
     ~/.vim/UltiSnips: UltiSnips
     ~/.vim/coc-settings.json: coc-settings.json
+    ~/.config/tilix/schemes/one-dark.json: tilix/schemes/one-dark.json
     ~/.config/Code/User/keybindings.json: code/keybindings.json
     ~/.config/Code/User/settings.json: code/settings.json
     ~/.config/Code/User/snippets: code/snippets
