@@ -45,7 +45,7 @@ Plugin 'junegunn/vim-easy-align'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
 Plugin 'hashivim/vim-terraform'
-Plugin 'w0rp/ale'
+Plugin 'dense-analysis/ale'
 Plugin 'xavierchow/vim-sequence-diagram'
 Plugin 'wannesm/wmgraphviz.vim'
 Plugin 'SirVer/ultisnips'
@@ -127,10 +127,12 @@ let g:markdown_syntax_conceal = 0
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
 
 let g:rooter_patterns = [
-    \ 'Gopkg.lock', 'pubspec.lock',
-      \ 'package.json', 'Rakefile', 'Makefile', 'requirements.txt',
-      \ 'Gemfile', '.git', '.git/', '_darcs/', '.hg/', '.bzr/', '.svn/',
-      \ ]
+  \'pubspec.lock',
+  \'package.json',
+  \'Rakefile',
+  \'Gemfile',
+  \'Gopkg.toml',
+\]
 let g:rooter_use_lcd = 0
 let g:rooter_silent_chdir = 1
 let g:rooter_resolve_links = 1
@@ -143,14 +145,15 @@ let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
 let g:jsx_ext_required = 0
 
 let g:ale_fixers = {
-  \'javascript': ['prettier', 'eslint'],
+  \'javascript': ['eslint'],
   \'ruby': ['rubocop'],
   \'python': ['yapf'],
 \}
 let g:ale_linters = {
-\ 'sh': ['language_server'],
-\ 'go': ['govet', 'golint'],
-\ 'python': ['flake8'],
+  \'sh': ['language_server'],
+  \'go': ['govet', 'golint'],
+  \'python': ['flake8'],
+  \'javascript': ['eslint'],
 \ }
 let g:ale_fix_on_save = 1
 let g:ale_lint_on_text_changed = 0
@@ -247,6 +250,17 @@ let g:html_indent_tags = 'li\|p'
 " Open new split panes to right and bottom, which feels more natural
 set splitbelow
 set splitright
+
+""""""""""""""""""""""""""""""
+" => JavaScript section
+""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""""""
+
+augroup FiletypeGroup
+  autocmd!
+  au BufNewFile,BufRead *.jsx set filetype=javascript.jsx
+augroup END
 
 
 """"""""""""""""""""""""""""""
