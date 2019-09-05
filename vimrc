@@ -147,7 +147,7 @@ let g:jsx_ext_required = 0
 let g:ale_fixers = {
   \'javascript': ['eslint'],
   \'ruby': ['rubocop'],
-  \'python': ['yapf'],
+  \'python': ['yapf', 'isort'],
 \}
 let g:ale_linters = {
   \'sh': ['language_server'],
