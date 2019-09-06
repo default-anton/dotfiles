@@ -132,6 +132,8 @@ let g:rooter_patterns = [
   \'Rakefile',
   \'Gemfile',
   \'Gopkg.toml',
+  \'requirements/',
+  \'requirements.txt',
 \]
 let g:rooter_use_lcd = 0
 let g:rooter_silent_chdir = 1
