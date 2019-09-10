@@ -533,6 +533,7 @@ nnoremap <space><space> :FZF<cr>
 nnoremap <space>d :GFiles?<cr>
 nnoremap <space>b :Buffers<cr>
 nnoremap <space>k :Tags<cr>
+nnoremap <space>/ :BLines<cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Helper functions
