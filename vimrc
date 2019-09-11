@@ -474,6 +474,24 @@ nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
+let g:coc_global_extensions = [
+  \'coc-json',
+  \'coc-tsserver',
+  \'coc-html',
+  \'coc-css',
+  \'coc-solargraph',
+  \'coc-yaml',
+  \'coc-python',
+  \'coc-emmet',
+  \'coc-ultisnips',
+  \'coc-lists',
+  \'coc-svg',
+  \'coc-emoji',
+  \'coc-tag',
+  \'coc-omni',
+  \'coc-syntax',
+\]
+
 au FileType dart,json,sh,go,python,javascript,javascript.jsx nmap <leader>q :call CocAction('showSignatureHelp')<cr>
 " Use K for show documentation in preview window
 au FileType dart,json,sh,go,python,javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
