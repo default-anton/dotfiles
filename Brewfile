@@ -66,5 +66,21 @@ case "$(uname -s)" in
 esac
 
 npm i -g vmd
+npm i -g textlint \
+  textlint-rule-no-todo \
+  textlint-rule-no-start-duplicated-conjunction \
+  textlint-rule-terminology \
+  textlint-rule-spelling \
+  dictionary-en-us \
+  dictionary-ru \
+  dictionary-uk \
+  textlint-rule-abbr-within-parentheses \
+  textlint-rule-common-misspellings \
+  textlint-rule-ginger \
+  textlint-rule-spellchecker \
+  textlint-rule-apostrophe \
+  textlint-rule-diacritics \
+  textlint-rule-stop-words \
+  textlint-rule-en-capitalization
 
 $(brew --prefix)/opt/fzf/install

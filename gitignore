@@ -4,3 +4,4 @@
 .projections.json
 .vscode
 test/reports
+.textlintrc
