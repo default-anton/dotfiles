@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+unameOut=$(uname -r)
+case "${unameOut}" in
+  *Microsoft)
+    clip.exe "$@"
+    exit 0
+  ;;
+  *Linux*)
+    xclip -selection c "$@"
+    exit 0
+  ;;
+  *Darwin*)
+    pbcopy "$@"
+    exit 0
+  ;;
+  *)
+esac
+
+# if [ command -v clip.exe >/dev/null 2>&1 ]; then
+  # clip.exe "$@"
+# elsif []
+  # xclip -selection c "$@"
+# fi

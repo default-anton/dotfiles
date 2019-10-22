@@ -45,7 +45,6 @@ function resize {
 
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   alias open=xdg-open
-  alias copy="xclip -selection c"
   alias webcam=v4l2-ctl
 # aliases to load completion for
   aliases=(dc ts open tf g)
