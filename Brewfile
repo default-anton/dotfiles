@@ -54,7 +54,7 @@ brew install $brew_packages
 
 case "$(uname -s)" in
   Linux*)
-    sudo apt install curl
+    sudo apt install vim-gtk3 curl python3 python3-pip
     # nnn dependencies
     sudo apt install patool vlock
     ;;
@@ -63,6 +63,8 @@ case "$(uname -s)" in
     ;;
   *)
 esac
+
+pip3 install --user powerline-shell
 
 ## Install yarn
 curl -o- -L https://yarnpkg.com/install.sh | bash
