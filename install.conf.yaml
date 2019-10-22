@@ -24,6 +24,12 @@
     ~/.config/Cerebro/plugins/package.json: Cerebro/package.json
 
 - shell:
-  - command: git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-    description: Install Vundle
+  - command: git submodule update --init --recursive
+    description: Installing submodules
+    stdout: true
+    stderr: true
   - command: curl -s https://raw.githubusercontent.com/mrzool/bash-sensible/master/sensible.bash > ~/.dotfiles/bin/sensible.bash
+    quiet: true
+  - command: ./Brewfile
+    stdout: true
+    stderr: true
