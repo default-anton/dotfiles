@@ -523,8 +523,8 @@ nmap <leader>ac  <Plug>(coc-codeaction)
 " => Search
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 cnoreabbrev Ack Ack!
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
+if executable('rg')
+  let g:ackprg = 'rg --vimgrep'
 endif
 
 let g:ack_mappings = { "o": "<CR>zz" }
