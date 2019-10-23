@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-unameOut=$(uname -r)
+unameOut=$(uname -a)
 case "${unameOut}" in
-  *Microsoft)
+  *Microsoft*)
     clip.exe "$@"
     exit 0
   ;;
@@ -16,9 +16,3 @@ case "${unameOut}" in
   ;;
   *)
 esac
-
-# if [ command -v clip.exe >/dev/null 2>&1 ]; then
-  # clip.exe "$@"
-# elsif []
-  # xclip -selection c "$@"
-# fi
