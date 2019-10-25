@@ -402,6 +402,11 @@ map <Leader>n :NERDTreeToggle<CR>
 map <Leader>nf :NERDTreeFind<CR>
 
 let g:NERDSpaceDelims = 1
+let g:NERDTreeAutoDeleteBuffer = 1
+
+" Start NERDTree automatically when vim starts up if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 
 let g:splitjoin_split_mapping = ''
 let g:splitjoin_join_mapping = ''
