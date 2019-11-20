@@ -65,6 +65,8 @@ Plug 'uarun/vim-protobuf'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'rhysd/vim-grammarous'
 Plug 'cespare/vim-toml'
+Plug 'NLKNguyen/papercolor-theme'
+
 call plug#end()
 
 set nocompatible
@@ -177,16 +179,18 @@ let dart_format_on_save = 1
 
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'css', 'erb=ruby', 'javascript.jsx', 'javascript', 'js=javascript.jsx', 'json=javascript', 'ruby', 'xml', 'go', 'terraform', 'sh', 'yaml']
 
-set t_Co=16
+set t_Co=256
 set t_ut=
 set termguicolors
-set background=dark
-colorscheme base16-onedark
 
+set background=light
+colorscheme PaperColor
+
+let g:lightline = { 'colorscheme': 'PaperColor' }
 
 let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
 let g:airline_powerline_fonts = 1
-let g:airline_theme='onedark'
+let g:airline_theme='papercolor'
 let g:airline_base16_improved_contrast=1
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#branch#enabled = 1
