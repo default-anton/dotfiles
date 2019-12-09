@@ -27,7 +27,6 @@ case "$(uname -s)" in
       source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
     fi
     ;;
-  *)
 esac
 
 function _update_ps1() {
