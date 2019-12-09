@@ -35,13 +35,12 @@
       "ignoredRootPaths": ["~"]
     },
     "golang": {
-      "command": "bingo",
-      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/", "Gopkg.lock"],
+      "command": "gopls",
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
       "filetypes": ["go"],
       "initializationOptions": {
-        "formatStyle": "goimports",
-        "diagnosticsStyle": "onsave",
-        "enhanceSignatureHelp": true
+        "usePlaceholders": true,
+        "completeUnimported": true
       }
     },
     "dart": {
