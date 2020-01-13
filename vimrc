@@ -510,7 +510,7 @@ au FileType dart,json,sh,go,python,javascript,javascript.jsx nmap <leader>q :cal
 au FileType dart,json,sh,go,python,javascript,javascript.jsx nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
-  if &filetype == 'vim'
+  if (index(['vim','help'], &filetype) >= 0)
     execute 'h '.expand('<cword>')
   else
     call CocAction('doHover')
