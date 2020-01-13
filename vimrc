@@ -59,7 +59,7 @@ Plug 'dart-lang/dart-vim-plugin'
 Plug 'kana/vim-textobj-user'
 Plug 'nelstrom/vim-textobj-rubyblock'
 Plug 'danchoi/ri.vim'
-Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'BurntSushi/erd'
 Plug 'uarun/vim-protobuf'
 Plug 'mustache/vim-mustache-handlebars'
@@ -76,6 +76,8 @@ let g:is_posix = 1
 let mapleader = ","
 let g:mapleader = ","
 
+set updatetime=300
+set signcolumn=yes
 set nobackup
 set nowritebackup
 set noswapfile
