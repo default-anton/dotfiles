@@ -30,9 +30,9 @@
     stderr: true
   - command: curl -s https://raw.githubusercontent.com/mrzool/bash-sensible/master/sensible.bash > ~/.dotfiles/bin/sensible.bash
     quiet: true
-  # - command: ./Brewfile
-    # description: Installing dependencies
-    # stdout: true
-    # stderr: true
+  - command: ./Brewfile
+    description: Installing dependencies
+    stdout: true
+    stderr: true
   - command: 'grep starship ~/.bashrc && exit 0 || echo "eval \"\$(starship init bash)\"" >> ~/.bashrc'
     description: 'Installing starship'
