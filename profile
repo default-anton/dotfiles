@@ -29,14 +29,6 @@ case "$(uname -s)" in
     ;;
 esac
 
-function _update_ps1() {
-  PS1=$(powerline-shell $?)
-}
-
-if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
-  PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
-fi
-
 # Use ~~ as the trigger sequence instead of the default **
 export FZF_COMPLETION_TRIGGER='--'
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude ".git"'

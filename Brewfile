@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 brew_packages=$(cat <<EOF
+starship
 moreutils
 fzy
 atool
@@ -75,7 +76,7 @@ case "$(uname -s)" in
   *)
 esac
 
-pip3 install --user powerline-shell
+pip install -U pgcli
 
 npm i -g \
   vmd \

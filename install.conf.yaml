@@ -3,7 +3,7 @@
       create: true
       relink: true
 
-- clean: ['~', '.config/powerline-shell', '~/.vim', '~/.config/Code/User']
+- clean: ['~', '~/.vim', '~/.config/Code/User']
 
 - link:
     ~/.gitconfig: gitconfig
@@ -14,9 +14,9 @@
     ~/.bash_aliases: bash_aliases
     ~/.profile: profile
     ~/.tmux.conf: tmux.conf
-    ~/.config/powerline-shell/config.json: powerline-shell/config.json
     ~/.vim/UltiSnips: UltiSnips
     ~/.vim/coc-settings.json: coc-settings.json
+    ~/.config/pgcli/config: pgcli/config
     ~/.config/tilix/schemes/one-dark.json: tilix/schemes/one-dark.json
     ~/.config/Code/User/keybindings.json: code/keybindings.json
     ~/.config/Code/User/settings.json: code/settings.json
@@ -30,6 +30,9 @@
     stderr: true
   - command: curl -s https://raw.githubusercontent.com/mrzool/bash-sensible/master/sensible.bash > ~/.dotfiles/bin/sensible.bash
     quiet: true
-  - command: ./Brewfile
-    stdout: true
-    stderr: true
+  # - command: ./Brewfile
+    # description: Installing dependencies
+    # stdout: true
+    # stderr: true
+  - command: 'grep starship ~/.bashrc && exit 0 || echo "eval \"\$(starship init bash)\"" >> ~/.bashrc'
+    description: 'Installing starship'
