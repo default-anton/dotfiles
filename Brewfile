@@ -52,22 +52,30 @@ EOF
 
 brew install $brew_packages
 
+$(brew --prefix)/opt/fzf/install
+
 case "$(uname -s)" in
   Linux*)
-    sudo apt install vim-gtk3 curl python3 python3-pip
+    sudo apt install vim-gtk3 curl python3 python3-pip fonts-firacode
     # nnn dependencies
     sudo apt install patool vlock
     ;;
   Darwin*)
     brew install curl vim bash
+
+    mkdir ~/Downloads/FiraCode
+    (
+      cd ~/Downloads/FiraCode;
+      wget https://github.com/tonsky/FiraCode/releases/download/2/FiraCode_2.zip;
+      unzip FiraCode_2.zip;
+      cp ttf/*.ttf ~/Library/Fonts/
+    )
+    rm -rf ~/Downloads/FiraCode
     ;;
   *)
 esac
 
 pip3 install --user powerline-shell
-
-## Install yarn
-curl -o- -L https://yarnpkg.com/install.sh | bash
 
 npm i -g \
   vmd \
@@ -88,4 +96,5 @@ npm i -g \
   textlint-rule-stop-words \
   textlint-rule-en-capitalization
 
-$(brew --prefix)/opt/fzf/install
+## Install yarn
+curl -o- -L https://yarnpkg.com/install.sh | bash
