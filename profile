@@ -1,8 +1,8 @@
 # set PATH so it includes user's private bin directories
-export PATH="${HOME}/bin:${HOME}/.local/bin:${PATH}:${HOME}/.dotfiles/bin"
+export PATH="${HOME}/.dotfiles/bin:${HOME}/bin:${HOME}/.local/bin:${PATH}"
 export PATH="${PATH}:/usr/local/go/bin"
 export PATH="${PATH}:${HOME}/Sources/go/bin"
-export PATH="${HOME}/.npm-global/bin:$PATH"
+export PATH="${HOME}/.npm-global/bin:${PATH}"
 export GOPATH="${HOME}/Sources/go"
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
@@ -49,6 +49,10 @@ _fzf_compgen_dir() {
 
 # Load RVM into a shell session *as a function*
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+
+for script in ~/.dotfiles/scripts/*; do
+  source "${script}"
+done
 
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
 command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
