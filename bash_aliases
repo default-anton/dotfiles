@@ -1,3 +1,4 @@
+alias vim=nvim
 alias dc=docker-compose
 alias timestamp="date +'%Y%m%d%H%M%S'"
 alias ts=timestamp

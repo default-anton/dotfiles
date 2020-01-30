@@ -17,6 +17,7 @@
     ~/.vim/UltiSnips: UltiSnips
     ~/.vim/coc-settings.json: coc-settings.json
     ~/.config/pgcli/config: pgcli/config
+    ~/.config/nvim: nvim
     ~/.config/tilix/schemes/one-dark.json: tilix/schemes/one-dark.json
     ~/.config/Code/User/keybindings.json: code/keybindings.json
     ~/.config/Code/User/settings.json: code/settings.json

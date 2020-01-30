@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 brew_packages=$(cat <<EOF
+neovim
 starship
 moreutils
 fzy
