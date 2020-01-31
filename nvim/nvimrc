@@ -33,7 +33,6 @@ filetype plugin indent on
 
 let mapleader = ","
 
-set nocompatible
 set number
 set nobackup
 set nowritebackup
@@ -43,6 +42,7 @@ set autoindent
 set smartindent
 set scrolloff=3
 set sidescrolloff=5
+set termguicolors
 if has("macunix")
   set clipboard=unnamed
 else
@@ -57,6 +57,9 @@ set smartcase
 set lazyredraw
 set textwidth=120
 set encoding=utf8
+
+let g:python_host_prog = "/usr/bin/python"
+let g:python3_host_prog = "/usr/bin/python3"
 
 let g:better_whitespace_enabled=1
 let g:strip_whitespace_on_save = 1
