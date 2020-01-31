@@ -80,6 +80,8 @@ let g:coc_global_extensions = [
   \'coc-tag',
   \'coc-omni',
   \'coc-syntax',
+  \'coc-docker',
+  \'coc-sh',
 \]
 " \'coc-solargraph',
 " \'coc-gocode',

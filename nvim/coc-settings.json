@@ -1,0 +1,21 @@
+{
+  "list.maxHeight": 80,
+  "coc.preferences.formatOnSaveFiletypes": ["python", "json", "go", "javascript", "dockerfile", "sh"],
+  "python.pythonPath": "/usr/bin/python3",
+  "python.linting.flake8Enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.formatting.provider": "yapf",
+  "coc.preferences.rootPatterns": [
+    ".vim",
+    ".git",
+    ".projections.json",
+    "pubspec.lock",
+    "Gopkg.lock",
+    "package.json",
+    "Gemfile",
+    "Rakefile",
+    "Makefile",
+    "requirements.txt"
+  ],
+  "coc.source.emoji.filetypes": ["markdown", "gitcommit"]
+}
