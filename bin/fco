@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-branches=$(git branch -vv)
-branch=$(echo "$branches" | fzf +m)
-git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
+branches=$(git branch -avv | sed 's@remotes/@@')
+branch=$(echo "$branches" | fzf +m | awk '{print $1}' | sed "s/.* //")
+git checkout -b "$branch" || git checkout "$branch"
