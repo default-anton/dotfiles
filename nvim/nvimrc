@@ -206,11 +206,10 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
-nnoremap <silent> <space><Leader> :<C-u>FZF<CR>
-nnoremap <silent> <space>m        :<C-u>Rg<CR>
+nnoremap <silent> <space><Leader> :<C-u>CocList files<CR>
+nnoremap <silent> <space>m        :<C-u>CocList grep<CR>
 nnoremap <silent> <space>d        :<C-u>CocList gstatus<CR>
 nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
-nnoremap <silent> <space>k        :<C-u>Tags<CR>
 nnoremap <silent> <space>/        :<C-u>BLines<CR>
 
 
