@@ -108,7 +108,8 @@ nmap <silent> gr <Plug>(coc-references)
 nmap <silent> ]c <Plug>(coc-git-nextchunk)
 nmap <silent> [c <Plug>(coc-git-prevchunk)
 nmap <silent> hp <Plug>(coc-git-chunkinfo)
-nmap hr <Plug>(coc-git-chunkundo)
+nmap <silent> hr :<C-u>CocCommand git.chunkUndo<CR>
+nmap <silent> hs :<C-u>CocCommand git.chunkStage<CR>
 nmap <silent> hc <Plug>(coc-git-commit)
 
 nmap F2 <Plug>(coc-rename)
@@ -205,12 +206,12 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
-nnoremap <silent> <space><Leader> :<C-u>FZF<cr>
-nnoremap <silent> <space>m        :<C-u>Rg<cr>
-nnoremap <silent> <space>d        :<C-u>GFiles?<cr>
-nnoremap <silent> <space>.        :<C-u>CocList buffers<cr>
-nnoremap <silent> <space>k        :<C-u>Tags<cr>
-nnoremap <silent> <space>/        :<C-u>BLines<cr>
+nnoremap <silent> <space><Leader> :<C-u>FZF<CR>
+nnoremap <silent> <space>m        :<C-u>Rg<CR>
+nnoremap <silent> <space>d        :<C-u>CocList gstatus<CR>
+nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
+nnoremap <silent> <space>k        :<C-u>Tags<CR>
+nnoremap <silent> <space>/        :<C-u>BLines<CR>
 
 
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
