@@ -5,8 +5,8 @@
   "python.linting.flake8Enabled": true,
   "python.linting.pylintEnabled": false,
   "python.formatting.provider": "yapf",
-  "list.source.files.command": "rg",
-  "list.source.files.args": ["--hidden", "--files"],
+  "list.source.files.command": "fd",
+  "list.source.files.args": ["--type", "f", "--hidden", "--follow", "--ignore-case", "--exclude", "'.git'"],
   "list.source.grep.command": "rg",
   "coc.preferences.rootPatterns": [
     ".vim",
