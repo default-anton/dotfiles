@@ -6,6 +6,7 @@
 - clean: ['~', '~/.vim', '~/.config/Code/User']
 
 - link:
+    ~/.ripgreprc: ripgreprc
     ~/.gitconfig: gitconfig
     ~/.psqlrc: psqlrc
     ~/.vimrc: vimrc
