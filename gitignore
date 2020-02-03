@@ -5,3 +5,4 @@
 .vscode
 test/reports
 .textlintrc
+.vim/coc-settings.json
