@@ -12,7 +12,6 @@ Plug 'junegunn/fzf.vim'
 Plug 'preservim/nerdtree'
 Plug 'preservim/nerdcommenter'
 Plug 'Xuyuanp/nerdtree-git-plugin'
-Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
 Plug 'janko-m/vim-test'
 Plug 'SirVer/ultisnips'
@@ -58,6 +57,11 @@ set lazyredraw
 set textwidth=120
 set encoding=utf8
 
+" Specify the behavior when switching between buffers
+set switchbuf=useopen,usetab,vsplit
+set stal=2
+set statusline=%{get(g:,'coc_git_status','')}%{get(b:,'coc_git_status','')}
+
 let g:python_host_prog = "/usr/bin/python"
 let g:python3_host_prog = "/usr/bin/python3"
 
@@ -82,6 +86,7 @@ let g:coc_global_extensions = [
   \'coc-syntax',
   \'coc-docker',
   \'coc-sh',
+  \'coc-git',
 \]
 " \'coc-solargraph',
 " \'coc-gocode',
@@ -100,6 +105,11 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nmap <silent> ]c <Plug>(coc-git-nextchunk)
+nmap <silent> [c <Plug>(coc-git-prevchunk)
+nmap <silent> hp <Plug>(coc-git-chunkinfo)
+nmap hr <Plug>(coc-git-chunkundo)
+nmap <silent> hc <Plug>(coc-git-commit)
 
 nmap F2 <Plug>(coc-rename)
 
@@ -176,10 +186,6 @@ map <silent> <Leader>bd :bd<CR>
 map <Leader>ba :bufdo bd<CR>
 map <Leader>. :bnext<CR>
 map <Leader>m :bprevious<CR>
-
-" Specify the behavior when switching between buffers
-set switchbuf=useopen,usetab,vsplit
-set stal=2
 
 let $FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-case --exclude '.git'"
 let g:fzf_layout = { 'up': '70%' }

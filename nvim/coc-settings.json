@@ -17,5 +17,8 @@
     "Makefile",
     "requirements.txt"
   ],
-  "coc.source.emoji.filetypes": ["markdown", "gitcommit"]
+  "coc.source.emoji.filetypes": [
+    "markdown",
+    "gitcommit"
+  ]
 }
