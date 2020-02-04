@@ -60,15 +60,27 @@ set encoding=utf8
 " Specify the behavior when switching between buffers
 set switchbuf=useopen,usetab,vsplit
 set stal=2
-set statusline=%{get(g:,'coc_git_status','')}%{get(b:,'coc_git_status','')}
+
+set statusline=
+set statusline+=%#PmenuSel#
+set statusline+=%{get(g:,'coc_git_status','')}%{get(b:,'coc_git_status','')}
+set statusline+=%#LineNr#
+set statusline+=\ %f
+set statusline+=%m
+set statusline+=%=
+set statusline+=%#CursorColumn#
+set statusline+=\ %y
+set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
+set statusline+=\[%{&fileformat}\]
+set statusline+=\ %l:%c
 
 let g:python_host_prog = "/usr/bin/python"
 let g:python3_host_prog = "/usr/bin/python3"
 
-let g:better_whitespace_enabled=1
+let g:better_whitespace_enabled = 1
 let g:strip_whitespace_on_save = 1
 
-let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
+let g:UltiSnipsSnippetsDir = "~/.vim/UltiSnips"
 
 " coc.nvim specific
 let g:coc_global_extensions = [
@@ -210,7 +222,7 @@ nnoremap <silent> <space><Leader> :<C-u>CocList files<CR>
 nnoremap <silent> <space>m        :<C-u>CocList grep<CR>
 nnoremap <silent> <space>d        :<C-u>CocList gstatus<CR>
 nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
-nnoremap <silent> <space>/        :<C-u>BLines<CR>
+nnoremap <silent> <space>/        :<C-u>CocList lines<CR>
 
 
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
