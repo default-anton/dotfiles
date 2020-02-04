@@ -74,6 +74,8 @@ set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
 set statusline+=\[%{&fileformat}\]
 set statusline+=\ %l:%c
 
+let g:dispatch_tmux_height = "15"
+
 let g:python_host_prog = "/usr/bin/python"
 let g:python3_host_prog = "/usr/bin/python3"
 
@@ -117,12 +119,15 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+
+" Remap keys for git commands
 nmap <silent> ]c <Plug>(coc-git-nextchunk)
 nmap <silent> [c <Plug>(coc-git-prevchunk)
 nmap <silent> hp <Plug>(coc-git-chunkinfo)
+nmap <silent> hb <Plug>(coc-git-commit)
 nmap <silent> hr :<C-u>CocCommand git.chunkUndo<CR>
 nmap <silent> hs :<C-u>CocCommand git.chunkStage<CR>
-nmap <silent> hc <Plug>(coc-git-commit)
+nmap <silent> hc :<C-u>terminal tig status<CR>i<CR>
 
 nmap F2 <Plug>(coc-rename)
 
@@ -223,7 +228,6 @@ nnoremap <silent> <space>m        :<C-u>CocList grep<CR>
 nnoremap <silent> <space>d        :<C-u>CocList gstatus<CR>
 nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
 nnoremap <silent> <space>/        :<C-u>CocList lines<CR>
-
 
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
 
