@@ -6,6 +6,7 @@ export PATH="${HOME}/.npm-global/bin:${PATH}"
 export GOPATH="${HOME}/Sources/go"
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
+export EDITOR=nvim
 
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
