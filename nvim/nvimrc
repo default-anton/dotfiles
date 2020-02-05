@@ -15,6 +15,7 @@ Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'junegunn/vim-easy-align'
 Plug 'janko-m/vim-test'
 Plug 'SirVer/ultisnips'
+Plug 'airblade/vim-rooter'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
 Plug 'schickling/vim-bufonly'
 Plug 'tpope/vim-dispatch'
@@ -74,6 +75,22 @@ set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
 set statusline+=\[%{&fileformat}\]
 set statusline+=\ %l:%c
 
+let g:rooter_use_lcd = 1
+let g:rooter_resolve_links = 1
+let g:rooter_patterns =
+\ [ '.vim/',
+\ '.git/',
+\ '.projections.json',
+\ 'pubspec.lock',
+\ 'Gopkg.lock',
+\ 'package.json',
+\ 'Gemfile',
+\ 'Rakefile',
+\ 'Makefile',
+\ 'requirements/',
+\ 'venv/',
+\]
+
 let g:dispatch_tmux_height = "15"
 
 let g:python_host_prog = "/usr/bin/python"
@@ -113,6 +130,13 @@ set updatetime=300
 set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
+
+" Navigation
+nnoremap <silent> <space><Leader> :<C-u>CocList files<CR>
+nnoremap <silent> <space>m        :<C-u>CocList grep<CR>
+nnoremap <silent> <space>d        :<C-u>CocList gstatus<CR>
+nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
+nnoremap <silent> <space>/        :<C-u>CocList lines<CR>
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
@@ -222,12 +246,6 @@ let g:fzf_colors =
   \ 'marker':  ['fg', 'Keyword'],
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
-
-nnoremap <silent> <space><Leader> :<C-u>CocList files<CR>
-nnoremap <silent> <space>m        :<C-u>CocList grep<CR>
-nnoremap <silent> <space>d        :<C-u>CocList gstatus<CR>
-nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
-nnoremap <silent> <space>/        :<C-u>CocList lines<CR>
 
 au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
 
