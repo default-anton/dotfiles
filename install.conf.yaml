@@ -3,15 +3,13 @@
       create: true
       relink: true
 
-- clean: ['~', '~/.vim', '~/.config/Code/User']
+- clean: ['~', '~/.vim', '~/.config']
 
 - link:
     ~/.ripgreprc: ripgreprc
     ~/.gitconfig: gitconfig
     ~/.psqlrc: psqlrc
     ~/.vimrc: vimrc
-    ~/.gvimrc: gvimrc
-    ~/.ideavimrc: ideavimrc
     ~/.bash_aliases: bash_aliases
     ~/.profile: profile
     ~/.tmux.conf: tmux.conf
@@ -19,10 +17,9 @@
     ~/.vim/coc-settings.json: coc-settings.json
     ~/.config/pgcli/config: pgcli/config
     ~/.config/nvim: nvim
-    ~/.config/tilix/schemes/one-dark.json: tilix/schemes/one-dark.json
-    ~/.config/Code/User/keybindings.json: code/keybindings.json
-    ~/.config/Code/User/settings.json: code/settings.json
-    ~/.config/Code/User/snippets: code/snippets
+
+- create:
+  - ~/Sources
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
@@ -30,7 +27,6 @@
   - command: ./brew_install
     stderr: true
     description: Installing brew packages
-  - [$(brew --prefix)/opt/fzf/install, Installing fzf]
   - command: ./pkg_install
     stderr: true
     description: Installing system packages
@@ -41,3 +37,4 @@
     stderr: true
     description: Installing npm packages
   - 'grep starship ~/.bashrc && exit 0 || echo "eval \"\$(starship init bash)\"" >> ~/.bashrc'
+  - [$(brew --prefix)/opt/fzf/install, Installing fzf]
