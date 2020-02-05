@@ -26,7 +26,7 @@ Plug 'tpope/vim-eunuch'
 Plug 'pbrisbin/vim-mkdir'
 Plug 'vim-scripts/matchit.zip'
 Plug 'ntpeters/vim-better-whitespace'
-Plug 'NLKNguyen/papercolor-theme'
+Plug 'rakr/vim-one'
 call plug#end()
 
 filetype plugin indent on
@@ -50,7 +50,7 @@ else
 endif
 
 set background=light
-colorscheme PaperColor
+colorscheme one
 
 set ignorecase
 set smartcase
