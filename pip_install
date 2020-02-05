@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+pip3 install --user pandas ipython flake8 isort jedi

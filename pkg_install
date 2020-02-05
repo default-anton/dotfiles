@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+case "$(uname -s)" in
+  Linux*)
+    sudo apt install vim-gtk3 curl python3 python3-pip fonts-firacode
+    # nnn dependencies
+    sudo apt install patool vlock
+    ;;
+  Darwin*)
+    brew install curl vim bash
+
+    mkdir ~/Downloads/FiraCode
+    (
+      cd ~/Downloads/FiraCode;
+      wget https://github.com/tonsky/FiraCode/releases/download/2/FiraCode_2.zip;
+      unzip FiraCode_2.zip;
+      cp ttf/*.ttf ~/Library/Fonts/
+    )
+    rm -rf ~/Downloads/FiraCode
+    ;;
+  *)
+esac

@@ -26,15 +26,19 @@
     ~/.config/Cerebro/plugins/package.json: Cerebro/package.json
 
 - shell:
-  - command: git submodule update --init --recursive
-    description: Installing submodules
-    stdout: true
+  - [git submodule update --init --recursive, Installing submodules]
+  - ["curl -s https://raw.githubusercontent.com/mrzool/bash-sensible/master/sensible.bash > ~/.dotfiles/bin/sensible.bash", Installing sensible.bash]
+  - command: ./brew_install
     stderr: true
-  - command: curl -s https://raw.githubusercontent.com/mrzool/bash-sensible/master/sensible.bash > ~/.dotfiles/bin/sensible.bash
-    quiet: true
-  - command: ./Brewfile
-    description: Installing dependencies
-    stdout: true
+    description: Installing brew packages
+  - [$(brew --prefix)/opt/fzf/install, Installing fzf]
+  - command: ./pkg_install
     stderr: true
-  - command: 'grep starship ~/.bashrc && exit 0 || echo "eval \"\$(starship init bash)\"" >> ~/.bashrc'
-    description: 'Installing starship'
+    description: Installing system packages
+  - command: ./pip_install
+    stderr: true
+    description: Installing pip packages
+  - command: ./npm_install
+    stderr: true
+    description: Installing npm packages
+  - 'grep starship ~/.bashrc && exit 0 || echo "eval \"\$(starship init bash)\"" >> ~/.bashrc'
