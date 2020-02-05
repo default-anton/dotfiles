@@ -77,18 +77,12 @@ set statusline+=\ %l:%c
 
 let g:rooter_use_lcd = 1
 let g:rooter_resolve_links = 1
-let g:rooter_patterns =
-\ [ '.vim/',
-\ '.git/',
-\ '.projections.json',
-\ 'pubspec.lock',
-\ 'Gopkg.lock',
+let g:rooter_patterns = [
 \ 'package.json',
 \ 'Gemfile',
-\ 'Rakefile',
-\ 'Makefile',
-\ 'requirements/',
 \ 'venv/',
+\ '.git',
+\ '.git/',
 \]
 
 let g:dispatch_tmux_height = "15"
@@ -153,7 +147,7 @@ nmap <silent> hr :<C-u>CocCommand git.chunkUndo<CR>
 nmap <silent> hs :<C-u>CocCommand git.chunkStage<CR>
 nmap <silent> hc :<C-u>terminal tig status<CR>i<CR>
 
-nmap F2 <Plug>(coc-rename)
+nmap <F2> <Plug>(coc-rename)
 
 " Use tab for trigger completion with characters ahead and navigate.
 " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
