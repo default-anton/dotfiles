@@ -47,7 +47,7 @@
 [merge]
 	ff = false
 [core]
-	editor = vim
+	editor = nvim
 	excludesfile = ~/.dotfiles/gitignore
 [init]
 	templatedir = ~/.dotfiles/git-templates/
