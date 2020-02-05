@@ -26,6 +26,7 @@
     "Gemfile",
     "Rakefile",
     "Makefile",
-    "requirements.txt"
+    "requirements.txt",
+    "venv"
   ]
 }
