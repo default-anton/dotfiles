@@ -23,7 +23,6 @@
     ~/.config/Code/User/keybindings.json: code/keybindings.json
     ~/.config/Code/User/settings.json: code/settings.json
     ~/.config/Code/User/snippets: code/snippets
-    ~/.config/Cerebro/plugins/package.json: Cerebro/package.json
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
