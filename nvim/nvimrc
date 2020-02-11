@@ -227,6 +227,9 @@ map <Leader>ba :bufdo bd<CR>
 map <Leader>. :bnext<CR>
 map <Leader>m :bprevious<CR>
 
+command! InsertDate call setline('.', getline('.') . strftime('%b %d, %Y'))
+
+
 let $FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-case --exclude '.git'"
 let g:fzf_layout = { 'up': '70%' }
 let g:fzf_history_dir = '~/.local/share/fzf-history'
