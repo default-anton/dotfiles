@@ -40,8 +40,12 @@ set noswapfile
 set laststatus=2 " Always display the status line
 set autoindent
 set smartindent
+set expandtab
+set shiftwidth=2
+set softtabstop=2
 set scrolloff=3
 set sidescrolloff=5
+set backspace=indent,eol,start
 set termguicolors
 if has("macunix")
   set clipboard=unnamed
@@ -241,10 +245,15 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
-au BufNewFile,BufRead Dockerfile* set syntax=dockerfile
+augroup langs
+  autocmd!
+  autocmd BufNewFile,BufRead Dockerfile* set syntax=dockerfile
+  autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=79 fileformat=unix cinwords=if,elif,else,for,while,try,except,finally,def,class,with
+augroup end
 
 " Highlight symbol under cursor on CursorHold
 autocmd CursorHold * silent call CocActionAsync('highlight')
+
 
 augroup mygroup
   autocmd!
