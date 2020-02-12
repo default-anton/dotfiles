@@ -145,11 +145,11 @@ nmap <silent> gr <Plug>(coc-references)
 " Remap keys for git commands
 nmap <silent> ]c <Plug>(coc-git-nextchunk)
 nmap <silent> [c <Plug>(coc-git-prevchunk)
-nmap <silent> hp <Plug>(coc-git-chunkinfo)
-nmap <silent> hb <Plug>(coc-git-commit)
-nmap <silent> hr :<C-u>CocCommand git.chunkUndo<CR>
-nmap <silent> hs :<C-u>CocCommand git.chunkStage<CR>
-nmap <silent> hc :<C-u>terminal tig status<CR>i<CR>
+nmap <silent> <Leader>hp <Plug>(coc-git-chunkinfo)
+nmap <silent> <Leader>hb <Plug>(coc-git-commit)
+nmap <silent> <Leader>hr :<C-u>CocCommand git.chunkUndo<CR>
+nmap <silent> <Leader>hs :<C-u>CocCommand git.chunkStage<CR>
+nmap <silent> <Leader>hc :<C-u>terminal tig status<CR>i<CR>
 
 nmap <F2> <Plug>(coc-rename)
 
