@@ -15,7 +15,6 @@ command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] &
 [ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 [ -f ~/.local_bash_aliases ] && source ~/.local_bash_aliases
-[ -f ~/.bashrc ] && source ~/.bashrc
 
 case "$(uname -s)" in
   Linux* | Darwin*)
