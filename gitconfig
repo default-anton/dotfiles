@@ -6,7 +6,7 @@
 	default = current
 
 [github]
-	user = antonkuzmenko
+	user = antonlabs
 
 [alias]
   s = stash
