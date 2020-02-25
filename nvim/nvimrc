@@ -62,6 +62,7 @@ set ignorecase
 set smartcase
 set lazyredraw
 set textwidth=120
+set colorcolumn=120
 set encoding=utf8
 
 " Specify the behavior when switching between buffers
@@ -195,11 +196,7 @@ endfunction
 vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
 vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 
-let test#strategy = {
-  \ 'nearest': 'dispatch',
-  \ 'file':    'dispatch',
-  \ 'suite':   'dispatch',
-\}
+let test#strategy = "dispatch_background"
 nnoremap <Leader>rf :TestFile<CR>
 nnoremap <Leader>rs :TestNearest<CR>
 nnoremap <Leader>rl :TestLast<CR>
@@ -256,7 +253,7 @@ let g:fzf_colors =
 augroup langs
   autocmd!
   autocmd BufNewFile,BufRead Dockerfile* set syntax=dockerfile
-  autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=79 fileformat=unix cinwords=if,elif,else,for,while,try,except,finally,def,class,with
+  autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=120 fileformat=unix cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 augroup end
 
 " Highlight symbol under cursor on CursorHold
