@@ -1,3 +1,2 @@
 --glob=!git/*
 --smart-case
---follow
