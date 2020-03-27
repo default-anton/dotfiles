@@ -12,7 +12,10 @@ export EDITOR=nvim
 
 command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
-[ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash
+# If running interactively
+case $- in
+  *i*) [ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash ;;
+esac
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 [ -f ~/.local_bash_aliases ] && source ~/.local_bash_aliases
 
