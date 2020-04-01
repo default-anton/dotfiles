@@ -8,8 +8,7 @@ export GOPATH="${HOME}/Sources/go"
 export PATH="$PATH:$HOME/.rvm/bin"
 export EDITOR=nvim
 
-[ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-
+command -v brew >/dev/null 2>&1 && eval $($(brew --prefix)/bin/brew shellenv)
 command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 # If running interactively
@@ -65,10 +64,3 @@ command -v npm >/dev/null 2>&1 && source <(npm completion)
 command -v flutter >/dev/null 2>&1 && source <(flutter bash-completion)
 command -v doctl >/dev/null 2>&1 && source <(doctl completion bash)
 command -v aws >/dev/null 2>&1 && complete -C 'aws_completer' aws
-
-# This allows you to bookmark your favorite places across the file system
-# Define a variable containing a path and you will be able to cd into it regardless of the directory you're in
-export dot="$HOME/.dotfiles"
-export desk="$HOME/Desktop"
-export docs="$HOME/Documents"
-export down="$HOME/Downloads"
