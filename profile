@@ -3,6 +3,8 @@ export PATH="${HOME}/.dotfiles/bin:${HOME}/bin:${HOME}/.local/bin:${PATH}"
 export PATH="${PATH}:/usr/local/go/bin"
 export PATH="${PATH}:${HOME}/Sources/go/bin"
 export PATH="${HOME}/.npm-global/bin:${PATH}"
+export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+export PATH="/home/linuxbrew/.linuxbrew/sbin:$PATH"
 export GOPATH="${HOME}/Sources/go"
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
@@ -20,13 +22,15 @@ esac
 
 case "$(uname -s)" in
   Linux* | Darwin*)
-    for COMPLETION in $(brew --prefix)/etc/bash_completion.d/*
-    do
-      [[ -f $COMPLETION ]] && source "$COMPLETION"
-    done
-    if [[ -f $(brew --prefix)/etc/profile.d/bash_completion.sh ]];
-    then
-      source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
+    if command -v brew >/dev/null 2>&1; then
+      for COMPLETION in $(brew --prefix)/etc/bash_completion.d/*
+      do
+        [[ -f $COMPLETION ]] && source "$COMPLETION"
+      done
+      if [[ -f $(brew --prefix)/etc/profile.d/bash_completion.sh ]];
+      then
+        source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
+      fi
     fi
     ;;
 esac
