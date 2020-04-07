@@ -35,6 +35,8 @@ filetype plugin indent on
 
 let mapleader = ","
 
+set exrc
+set secure
 set number
 set nobackup
 set nowritebackup
