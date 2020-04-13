@@ -147,6 +147,9 @@ nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
+vmap <leader>f <Plug>(coc-format-selected)
+nmap <leader>f <Plug>(coc-format-selected)
+
 nmap <silent> ]e <Plug>(coc-diagnostic-next)
 nmap <silent> [e <Plug>(coc-diagnostic-prev)
 
