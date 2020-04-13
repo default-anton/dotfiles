@@ -1,6 +1,7 @@
 .tags
 .libtags
 .vimrc
+.nvimrc
 .projections.json
 .vscode
 test/reports
