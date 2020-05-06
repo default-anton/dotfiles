@@ -263,6 +263,7 @@ augroup langs
   autocmd!
   autocmd BufNewFile,BufRead Dockerfile* set syntax=dockerfile
   autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=120 fileformat=unix cinwords=if,elif,else,for,while,try,except,finally,def,class,with
+  autocmd FileType yaml setlocal tabstop=2 softtabstop=2 shiftwidth=2 textwidth=120 fileformat=unix
 augroup end
 
 " Highlight symbol under cursor on CursorHold
