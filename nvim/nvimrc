@@ -103,7 +103,7 @@ let g:python3_host_prog = "/usr/bin/python3"
 let g:better_whitespace_enabled = 1
 let g:strip_whitespace_on_save = 1
 
-let g:UltiSnipsSnippetsDir = "~/.vim/UltiSnips"
+let g:UltiSnipsSnippetDirectories = [$HOME.'/.dotfiles/UltiSnips']
 
 " coc.nvim specific
 let g:coc_global_extensions = [
@@ -114,7 +114,7 @@ let g:coc_global_extensions = [
   \'coc-yaml',
   \'coc-python',
   \'coc-emoji',
-  \'coc-ultisnips',
+  \'coc-snippets',
   \'coc-lists',
   \'coc-tag',
   \'coc-omni',
@@ -122,9 +122,8 @@ let g:coc_global_extensions = [
   \'coc-docker',
   \'coc-sh',
   \'coc-git',
+  \'coc-go',
 \]
-" \'coc-solargraph',
-" \'coc-gocode',
 
 " if hidden is not set, TextEdit might fail.
 set hidden
@@ -264,6 +263,7 @@ augroup langs
   autocmd BufNewFile,BufRead Dockerfile* set syntax=dockerfile
   autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=120 fileformat=unix cinwords=if,elif,else,for,while,try,except,finally,def,class,with
   autocmd FileType yaml setlocal tabstop=2 softtabstop=2 shiftwidth=2 textwidth=120 fileformat=unix
+  autocmd FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
 augroup end
 
 " Highlight symbol under cursor on CursorHold
