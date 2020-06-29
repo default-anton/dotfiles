@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -e
+
+reset_code="\e[0m"
+
+green() {
+  color="\e[32m"
+  echo -e "${color}${1}${reset_code}"
+}
+
+red() {
+  color="\e[31m"
+  echo -e "${color}${1}${reset_code}"
+}
+
+green "Updating linux packages..."
+sudo apt update && sudo apt upgrade && green "Finished updating Linux packages" || red "Failed to update Linux packages"
+
+green "Updating snap apps..."
+sudo snap refresh && green "Finished updating snap apps" || red "Failed to update snap apps"
+
+green "Updating brew packages..."
+brew upgrade && green "Finished updating brew packages" || red "Failed to update brew packages"
