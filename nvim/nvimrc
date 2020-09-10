@@ -30,6 +30,7 @@ Plug 'ntpeters/vim-better-whitespace'
 Plug 'rakr/vim-one' " Adaptation of one-light and one-dark colorschemes for Vim
 Plug 'scrooloose/vim-slumlord' " Inline previews for Plantuml sequence diagrams
 Plug 'aklt/plantuml-syntax'
+Plug 'roman/golden-ratio'
 call plug#end()
 
 filetype plugin indent on
