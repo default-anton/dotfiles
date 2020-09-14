@@ -7,7 +7,11 @@
   "diagnostic.displayByAle": true,
   "coc.preferences.hoverTarget": "preview",
   "coc.source.tag.enable": true,
-  "coc.source.emoji.filetypes": ["markdown", "gitcommit", "yaml"],
+  "coc.source.emoji.filetypes": [
+    "markdown",
+    "gitcommit",
+    "yaml"
+  ],
   "python.jediEnabled": true,
   "python.linting.pylintEnabled": false,
   "python.linting.enabled": true,
@@ -30,36 +34,15 @@
   "languageserver": {
     "bash": {
       "command": "bash-language-server",
-      "filetypes": ["sh"],
-      "args": ["start"],
-      "ignoredRootPaths": ["~"]
-    },
-    "golang": {
-      "command": "gopls",
-      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-      "filetypes": ["go"],
-      "initializationOptions": {
-        "usePlaceholders": true,
-        "completeUnimported": true
-      }
-    },
-    "dart": {
-      "command": "dart_language_server",
-      "args": [],
-      "rootPatterns": ["pubspec.lock"],
-      "filetypes": ["dart"],
-      "initializationOptions": {},
-      "settings": {
-        "dart": {
-          "validation": {},
-          "completion": {}
-        }
-      }
-    },
-    "dockerfile": {
-      "command": "docker-langserver",
-      "filetypes": ["dockerfile"],
-      "args": ["--stdio"]
+      "filetypes": [
+        "sh"
+      ],
+      "args": [
+        "start"
+      ],
+      "ignoredRootPaths": [
+        "~"
+      ]
     }
   }
 }
