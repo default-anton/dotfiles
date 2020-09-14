@@ -44,8 +44,6 @@ fzf
 gawk
 graphviz
 pandoc
-the_silver_searcher
-ack
 terraform
 kubernetes-helm
 node
