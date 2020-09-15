@@ -98,9 +98,6 @@ let g:rooter_patterns = [
 
 let g:dispatch_tmux_height = "15"
 
-let g:python_host_prog = "/usr/bin/python"
-let g:python3_host_prog = "/usr/bin/python3"
-
 let g:better_whitespace_enabled = 1
 let g:strip_whitespace_on_save = 1
 
