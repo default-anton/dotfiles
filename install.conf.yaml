@@ -11,7 +11,6 @@
     ~/.psqlrc: psqlrc
     ~/.vimrc: vimrc
     ~/.bash_aliases: bash_aliases
-    ~/.profile: profile
     ~/.tmux.conf: tmux.conf
     ~/.vim/UltiSnips: UltiSnips
     ~/.vim/coc-settings.json: coc-settings.json
