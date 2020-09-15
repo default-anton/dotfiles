@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-unameOut=$(uname -a)
-case "${unameOut}" in
-  *Microsoft*)
+uname_out=$(uname -a)
+case "${uname_out}" in
+  *microsoft*)
     clip.exe "$@"
     exit 0
   ;;
