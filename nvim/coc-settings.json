@@ -43,7 +43,8 @@
     "go",
     "javascript",
     "dockerfile",
-    "sh"
+    "sh",
+    "html"
   ],
   "coc.preferences.rootPatterns": [
     ".vim",
