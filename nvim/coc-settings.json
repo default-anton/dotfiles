@@ -42,6 +42,7 @@
     "json",
     "go",
     "javascript",
+    "typescript",
     "dockerfile",
     "sh",
     "html"
