@@ -1,5 +1,12 @@
 {
-  "list.maxHeight": 80,
+  "eslint.autoFixOnSave": true,
+  "eslint.filetypes": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "prettier.disableSuccessMessage": true,
   "list.source.files.command": "fd",
   "list.source.files.args": [
     "--type",
@@ -11,25 +18,11 @@
     "'.git'"
   ],
   "list.source.grep.command": "rg",
-  "list.source.grep.defaultOptions": [
-    "--interactive",
-    "--auto-preview"
-  ],
-  "list.source.gstatus.defaultOptions": [
-    "--ignore-case",
-    "--normal"
-  ],
-  "list.source.buffers.defaultOptions": [
-    "--ignore-case"
-  ],
-  "list.source.lines.defaultOptions": [
-    "--interactive",
-    "--ignore-case"
-  ],
-  "coc.source.emoji.filetypes": [
-    "markdown",
-    "gitcommit"
-  ],
+  "list.source.grep.defaultOptions": ["--interactive", "--auto-preview"],
+  "list.source.gstatus.defaultOptions": ["--ignore-case", "--normal"],
+  "list.source.buffers.defaultOptions": ["--ignore-case"],
+  "list.source.lines.defaultOptions": ["--interactive", "--ignore-case"],
+  "coc.source.emoji.filetypes": ["markdown", "gitcommit"],
   "go.goplsOptions": {
     "completeUnimported": true,
     "usePlaceholders": true
@@ -42,7 +35,9 @@
     "json",
     "go",
     "javascript",
+    "javascriptreact",
     "typescript",
+    "typescriptreact",
     "dockerfile",
     "sh",
     "html"

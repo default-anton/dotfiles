@@ -31,6 +31,11 @@ Plug 'rakr/vim-one' " Adaptation of one-light and one-dark colorschemes for Vim
 Plug 'scrooloose/vim-slumlord' " Inline previews for Plantuml sequence diagrams
 Plug 'aklt/plantuml-syntax'
 Plug 'roman/golden-ratio'
+Plug 'pangloss/vim-javascript'
+Plug 'leafgarland/typescript-vim'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'moll/vim-node'
+Plug 'styled-components/vim-styled-components'
 call plug#end()
 
 filetype plugin indent on
@@ -126,6 +131,8 @@ let g:coc_global_extensions = [
   \'coc-actions',
   \'coc-emmet',
   \'coc-html',
+  \'coc-eslint',
+  \'coc-prettier',
 \]
 
 " if hidden is not set, TextEdit might fail.
@@ -165,6 +172,7 @@ nmap <silent> <Leader>hr :<C-u>CocCommand git.chunkUndo<CR>
 nmap <silent> <Leader>hs :<C-u>CocCommand git.chunkStage<CR>
 
 nmap <F2> <Plug>(coc-rename)
+nmap <leader>do <Plug>(coc-codeaction)
 
 " Use tab for trigger completion with characters ahead and navigate.
 " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
