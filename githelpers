@@ -53,11 +53,11 @@ merged_branches() {
 }
 
 local_merged_branches() {
-  git branch --merged | ag -v "^\*|  master|  develop" | awk '{ print $1 }' | sort
+  git branch --merged | awk '{ print $1 }' | grep -v 'master\|develop\|*' | sort
 }
 
 remote_merged_branches() {
-  git branch -r --merged | ag -v "^\*|  master|  develop" | sed "s@origin/@@" | awk '{ print $1 }' | sort
+  git branch -r --merged | grep -v "master\|develop" | sed "s@origin/@@" | awk '{ print $1 }' | sort
 }
 
 delete_branches() {
