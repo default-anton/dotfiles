@@ -35,7 +35,6 @@ Plug 'pangloss/vim-javascript'
 Plug 'leafgarland/typescript-vim'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'moll/vim-node'
-Plug 'styled-components/vim-styled-components'
 call plug#end()
 
 filetype plugin indent on
@@ -278,6 +277,8 @@ augroup langs
   autocmd FileType go nmap gta :CocCommand go.tags.add
   autocmd FileType go nmap gtx :CocCommand go.tags.clear<CR>
   autocmd FileType go nmap gtg :CocCommand go.test.generate.exported<CR>
+  autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
+  autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
 augroup end
 
 " Highlight symbol under cursor on CursorHold
