@@ -231,8 +231,6 @@ let g:NERDTreeWinSize=60
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-nmap <leader>ds <Plug>GenerateDiagram
-
 imap kj <Esc>
 
 " Yank file path with line number
