@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-cd() {
-  builtin cd "$@" || return
-  [ "$OLDPWD" = "$PWD" ] && return
-
-  activate
-}

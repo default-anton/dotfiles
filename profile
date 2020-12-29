@@ -53,10 +53,6 @@ _fzf_compgen_dir() {
 # Load RVM into a shell session *as a function*
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
-for script in ~/.dotfiles/scripts/*; do
-  source "${script}"
-done
-
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
 command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
 command -v helm >/dev/null 2>&1 && source <(helm completion bash)
