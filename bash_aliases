@@ -11,6 +11,7 @@ alias ll='ls -AlF'
 alias l='ls -ACF'
 alias sinkforbrowser='pactl load-module module-null-sink sink_name="loopback_of_bg_music" sink_properties=device.description="loopback_of_bg_music"'
 alias activate='[ -d ./venv ] && source ./venv/bin/activate'
+alias plantuml="java -jar ${HOME}/.vim/plugged/vim-slumlord/plantuml.jar"
 
 case "$OSTYPE" in
   "linux"*)
