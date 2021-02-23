@@ -27,9 +27,11 @@
     "completeUnimported": true,
     "usePlaceholders": true
   },
-  "python.linting.flake8Enabled": true,
-  "python.linting.pylintEnabled": false,
+  "pyright.organizeimports.provider": "isort",
   "python.formatting.provider": "yapf",
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.mypyEnabled": true,
   "coc.preferences.formatOnSaveFiletypes": [
     "python",
     "json",

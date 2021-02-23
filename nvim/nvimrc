@@ -28,8 +28,10 @@ Plug 'pbrisbin/vim-mkdir'
 Plug 'vim-scripts/matchit.zip'
 Plug 'ntpeters/vim-better-whitespace'
 Plug 'rakr/vim-one' " Adaptation of one-light and one-dark colorschemes for Vim
-Plug 'scrooloose/vim-slumlord' " Inline previews for Plantuml sequence diagrams
+Plug 'tyru/open-browser.vim'
 Plug 'aklt/plantuml-syntax'
+" Plug 'scrooloose/vim-slumlord' " Inline previews for Plantuml sequence diagrams
+Plug 'weirongxu/plantuml-previewer.vim' " In-browser preview for Plantuml
 Plug 'roman/golden-ratio'
 Plug 'pangloss/vim-javascript'
 Plug 'leafgarland/typescript-vim'
@@ -114,7 +116,7 @@ let g:coc_global_extensions = [
   \'coc-html',
   \'coc-css',
   \'coc-yaml',
-  \'coc-python',
+  \'coc-pyright',
   \'coc-emoji',
   \'coc-snippets',
   \'coc-lists',
