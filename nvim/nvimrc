@@ -131,7 +131,6 @@ let g:coc_global_extensions = [
   \'coc-sh',
   \'coc-actions',
   \'coc-emmet',
-  \'coc-html',
   \'coc-eslint',
   \'coc-prettier',
 \]
