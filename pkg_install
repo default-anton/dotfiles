@@ -2,7 +2,7 @@
 
 case "$(uname -s)" in
   Linux*)
-    sudo apt install vim-gtk3 curl python3 python3-pip fonts-firacode
+    sudo apt install curl python3 python3-pip fonts-firacode
     # nnn dependencies
     sudo apt install patool vlock
     ;;

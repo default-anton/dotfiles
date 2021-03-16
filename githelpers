@@ -66,23 +66,3 @@ delete_branches() {
     git push origin --delete "${br}"
   done
 }
-
-function last_tag() {
-  git describe --abbrev=0 --tags
-}
-
-function github_repository() {
-  git remote -v | grep fetch | awk '{print $2}' | cut -d ":" -f2 | cut -d "." -f1
-}
-
-function list_of_prs() {
-  prs-merged-since --tag $(last_tag) --repo $(github_repository) --format markdown | sed 's/####/-/g' | sed '/^$/d'
-}
-
-function release() {
-  local version_number="${1}"
-  local current_version="$(last_tag)"
-  release_version="$(semver bump ${version_number} ${current_version})"
-  release_message=$(printf "Release ${release_version}\n\n$(git prs)")
-  hub release create --browse -m "${release_message}" "${release_version}"
-}

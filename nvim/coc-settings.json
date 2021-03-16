@@ -1,11 +1,5 @@
 {
   "eslint.autoFixOnSave": true,
-  "eslint.filetypes": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
   "prettier.disableSuccessMessage": true,
   "list.source.files.command": "fd",
   "list.source.files.args": [

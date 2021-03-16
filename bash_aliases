@@ -13,9 +13,13 @@ alias sinkforbrowser='pactl load-module module-null-sink sink_name="loopback_of_
 alias activate='[ -d ./venv ] && source ./venv/bin/activate'
 alias plantuml="java -jar ${HOME}/.vim/plugged/vim-slumlord/plantuml.jar"
 
-case "$OSTYPE" in
-  "linux"*)
-    alias open=xdg-open
-    alias webcam=v4l2-ctl
+uname_out=$(uname -a)
+case "${uname_out}" in
+  *microsoft*)
+    alias open="wslview"
   ;;
+  *Linux*)
+    alias open=xdg-open
+  ;;
+  *)
 esac
