@@ -22,12 +22,14 @@
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
-  - command: ./brew_install
-    stderr: true
-    description: Installing brew packages
   - command: ./pkg_install
     stderr: true
     description: Installing system packages
+  - command: ./brew_install
+    stderr: true
+    description: Installing brew packages
+  - [$(brew --prefix)/opt/fzf/install, Installing fzf]
+  - [nvm install node, Install the latest node]
   - command: ./pip_install
     stderr: true
     description: Installing pip packages
@@ -35,4 +37,3 @@
     stderr: true
     description: Installing npm packages
   - 'grep starship ~/.bashrc && exit 0 || echo "eval \"\$(starship init bash)\"" >> ~/.bashrc'
-  - [$(brew --prefix)/opt/fzf/install, Installing fzf]

@@ -19,7 +19,6 @@ tig
 htop
 tree
 wget
-lsh-completioninks
 bash-completion@2
 bundler-completion
 docker-completion
@@ -36,8 +35,9 @@ colordiff
 gawk
 graphviz
 pandoc
-node@14
 pgcli
+nvm
+fzf
 EOF
 )
 
