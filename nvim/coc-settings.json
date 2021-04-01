@@ -22,7 +22,7 @@
     "usePlaceholders": true
   },
   "pyright.organizeimports.provider": "isort",
-  "python.formatting.provider": "yapf",
+  "python.formatting.provider": "black",
   "python.linting.enabled": true,
   "python.linting.flake8Enabled": true,
   "python.linting.mypyEnabled": true,
