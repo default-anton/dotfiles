@@ -2,4 +2,4 @@
 
 branches=$(git branch -a | sed 's@remotes/origin/@@' | grep -vE '\*|origin' | sort -u)
 branch=$(echo "$branches" | fzf +m | awk '{print $1}' | sed "s/.* //")
-git checkout -b "$branch" || git checkout "$branch"
+git checkout "$branch" || git checkout -b "$branch"
