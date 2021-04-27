@@ -272,6 +272,11 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
+
+" Terraform
+let g:terraform_align=1
+let g:terraform_fmt_on_save=1
+
 augroup langs
   autocmd!
   autocmd BufNewFile,BufRead Dockerfile* set syntax=dockerfile
