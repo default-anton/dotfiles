@@ -12,11 +12,7 @@
         s     = stash
         co    = checkout
         br    = branch
-        mbr   = "!bash -c '. ~/.dotfiles/githelpers && merged_branches'"
-        lbr   = "!bash -c '. ~/.dotfiles/githelpers && local_merged_branches'"
         rbr   = "!bash -c '. ~/.dotfiles/githelpers && remote_merged_branches'"
-        dmbr  = "!bash -c '. ~/.dotfiles/githelpers && merged_branches | delete_branches'"
-        dlbr  = "!bash -c '. ~/.dotfiles/githelpers && local_merged_branches | delete_branches'"
         drbr  = "!bash -c '. ~/.dotfiles/githelpers && remote_merged_branches | delete_branches'"
         ci    = commit --verbose
         st    = status
@@ -52,3 +48,5 @@
 	rebase = true
 [rebase]
 	autoStash = true
+[fetch]
+	prune = true

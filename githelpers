@@ -48,14 +48,6 @@ pretty_git_format() {
   fi
 }
 
-merged_branches() {
-  comm -12 <(local_merged_branches) <(remote_merged_branches)
-}
-
-local_merged_branches() {
-  git branch --merged | awk '{ print $1 }' | grep -v 'master\|develop\|*' | sort
-}
-
 remote_merged_branches() {
   git branch -r --merged | grep -v "master\|develop" | sed "s@origin/@@" | awk '{ print $1 }' | sort
 }
