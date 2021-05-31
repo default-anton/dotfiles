@@ -12,8 +12,7 @@
         s     = stash
         co    = checkout
         br    = branch
-        rbr   = "!bash -c '. ~/.dotfiles/githelpers && remote_merged_branches'"
-        drbr  = "!bash -c '. ~/.dotfiles/githelpers && remote_merged_branches | delete_branches'"
+        dmbr  = !git br --merged | egrep -v '(^\\*|^master$|^develop$|^main$)' | xargs git br -d
         ci    = commit --verbose
         st    = status
         l     = "!bash -c '. ~/.dotfiles/githelpers && pretty_git_log $@' -"

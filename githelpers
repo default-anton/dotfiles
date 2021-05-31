@@ -47,14 +47,3 @@ pretty_git_format() {
     less --quit-if-one-screen --no-init --RAW-CONTROL-CHARS --chop-long-lines
   fi
 }
-
-remote_merged_branches() {
-  git branch -r --merged | grep -v "master\|develop" | sed "s@origin/@@" | awk '{ print $1 }' | sort
-}
-
-delete_branches() {
-  while read br; do
-    git branch -d "${br}"
-    git push origin --delete "${br}"
-  done
-}
