@@ -36,7 +36,8 @@
     "typescriptreact",
     "dockerfile",
     "sh",
-    "html"
+    "html",
+    "sql"
   ],
   "coc.preferences.rootPatterns": [
     ".vim",

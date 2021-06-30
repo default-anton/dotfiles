@@ -112,6 +112,7 @@ let g:UltiSnipsSnippetDirectories = [$HOME.'/.dotfiles/UltiSnips']
 
 " coc.nvim specific
 let g:coc_global_extensions = [
+  \'coc-sql',
   \'coc-json',
   \'coc-tsserver',
   \'coc-html',
