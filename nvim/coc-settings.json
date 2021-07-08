@@ -37,7 +37,8 @@
     "dockerfile",
     "sh",
     "html",
-    "sql"
+    "sql",
+    "css"
   ],
   "coc.preferences.rootPatterns": [
     ".vim",
