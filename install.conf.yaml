@@ -15,6 +15,7 @@
     ~/.vim/UltiSnips: UltiSnips
     ~/.vim/coc-settings.json: coc-settings.json
     ~/.config/pgcli/config: pgcli/config
+    ~/.config/alacritty/alacritty.yml: alacritty.yml
     ~/.config/nvim: nvim
 
 - create:
