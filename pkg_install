@@ -6,7 +6,7 @@ case "$(uname -a)" in
     unzip -p /tmp/win32yank.zip win32yank.exe > /tmp/win32yank.exe
     chmod +x /tmp/win32yank.exe
     mv /tmp/win32yank.exe ~/.local/bin/
-    ;;&
+    ;;
   Linux*)
     sudo apt install curl python3 python3-pip fonts-firacode
     # nnn dependencies
