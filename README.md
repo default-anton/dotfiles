@@ -2,7 +2,7 @@
 
 ## Installation
 
-`git clone git@github.com:antonkuzmenko/dotfiles.git "${HOME}/.dotfiles" && cd "${HOME}/.dotfiles" && ./install`
+`git clone git@github.com:NoNonsenseDev/dotfiles.git "${HOME}/.dotfiles" && cd "${HOME}/.dotfiles" && ./install`
 
 ## Docs
 
