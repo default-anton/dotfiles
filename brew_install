@@ -39,6 +39,7 @@ pgcli
 nvm
 fzf
 watch
+llvm
 EOF
 )
 
