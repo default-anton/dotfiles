@@ -5,15 +5,13 @@
   "list.source.files.args": [
     "--type",
     "f",
-    "--hidden",
     "--follow",
     "--ignore-case",
-    "--exclude",
-    "'.git'"
+    "--no-ignore-vcs"
   ],
   "list.source.grep.command": "rg",
   "list.source.grep.defaultOptions": ["--interactive", "--auto-preview"],
-  "list.source.gstatus.defaultOptions": ["--ignore-case", "--normal"],
+  "list.source.gstatus.defaultOptions": ["--ignore-case"],
   "list.source.buffers.defaultOptions": ["--ignore-case"],
   "list.source.lines.defaultOptions": ["--interactive", "--ignore-case"],
   "coc.source.emoji.filetypes": ["markdown", "gitcommit"],
