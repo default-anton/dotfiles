@@ -328,6 +328,7 @@ augroup langs
   autocmd FileType go nmap gta :CocCommand go.tags.add
   autocmd FileType go nmap gtx :CocCommand go.tags.clear<CR>
   autocmd FileType go nmap gtg :CocCommand go.test.generate.exported<CR>
+  autocmd FileType scss setl iskeyword+=@-@
 augroup end
 
 " Highlight symbol under cursor on CursorHold

@@ -9,11 +9,9 @@
     ~/.ripgreprc: ripgreprc
     ~/.gitconfig: gitconfig
     ~/.psqlrc: psqlrc
-    ~/.vimrc: vimrc
     ~/.bash_aliases: bash_aliases
     ~/.tmux.conf: tmux.conf
     ~/.vim/UltiSnips: UltiSnips
-    ~/.vim/coc-settings.json: coc-settings.json
     ~/.config/pgcli/config: pgcli/config
     ~/.config/alacritty/alacritty.yml: alacritty.yml
     ~/.config/nvim: nvim
