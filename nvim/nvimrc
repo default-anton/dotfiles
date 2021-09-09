@@ -7,7 +7,7 @@ endif
 call plug#begin('~/.vim/plugged')
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'preservim/nerdtree'
 Plug 'preservim/nerdcommenter'
@@ -126,8 +126,6 @@ let g:coc_global_extensions = [
   \'coc-git',
   \'coc-go',
   \'coc-docker',
-  \'coc-sh',
-  \'coc-actions',
   \'coc-emmet',
   \'coc-eslint',
   \'coc-prettier',
@@ -144,11 +142,11 @@ set shortmess+=c
 set signcolumn=yes
 
 " Navigation
-nnoremap <silent> <space><Leader> :<C-u>CocList files<CR>
-nnoremap <silent> <space>m        :<C-u>CocList grep<CR>
-nnoremap <silent> <space>d        :<C-u>CocList gstatus<CR>
+nnoremap <silent> <space><Leader> :<C-u>Files<CR>
+nnoremap <silent> <space>m        :<C-u>Rg<CR>
+nnoremap <silent> <space>d        :<C-u>GFiles?<CR>
 nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
-nnoremap <silent> <space>/        :<C-u>CocList lines<CR>
+nnoremap <silent> <space>/        :<C-u>BLines<CR>
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
