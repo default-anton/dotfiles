@@ -15,6 +15,7 @@
     ~/.config/pgcli/config: pgcli/config
     ~/.config/alacritty/alacritty.yml: alacritty.yml
     ~/.config/nvim: nvim
+    ~/.config/lazygit/config.yml: lazygit.yml
 
 - create:
   - ~/Sources

@@ -40,6 +40,7 @@ nvm
 fzf
 watch
 llvm
+jesseduffield/lazygit/lazygit
 EOF
 )
 
