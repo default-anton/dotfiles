@@ -260,8 +260,12 @@ map <Leader>m :bprevious<CR>
 command! InsertDate call setline('.', getline('.') . strftime('%b %d, %Y'))
 
 
-let $FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --ignore-case --exclude '.git'"
-let g:fzf_layout = { 'up': '70%' }
+let $FZF_DEFAULT_COMMAND = "fd --type f --follow --ignore-case"
+if exists('$TMUX')
+  let g:fzf_layout = { 'tmux': '-p80%,70%' }
+else
+  let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.7 } }
+endif
 let g:fzf_history_dir = '~/.local/share/fzf-history'
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
