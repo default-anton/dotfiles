@@ -1,4 +1,3 @@
-alias vim=nvim
 alias dc=docker-compose
 alias timestamp="date +'%Y%m%d%H%M%S'"
 alias ts=timestamp
@@ -11,6 +10,14 @@ alias l='ls -ACF'
 alias activate='[ -d ./venv ] && source ./venv/bin/activate'
 alias plantuml="java -jar ${HOME}/.vim/plugged/vim-slumlord/plantuml.jar"
 alias gg="lazygit -ucd ~/.config/lazygit"
+
+vim() {
+  if [ "$#" -gt 0 ]; then
+    nvim $@
+  else
+    nvim -c Files
+  fi
+}
 
 uname_out=$(uname -a)
 case "${uname_out}" in
