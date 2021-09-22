@@ -33,6 +33,7 @@ Plug 'peitalin/vim-jsx-typescript'
 Plug 'leafgarland/typescript-vim'
 Plug 'moll/vim-node'
 Plug 'hashivim/vim-terraform'
+Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python' }
 call plug#end()
 
 filetype plugin indent on
@@ -331,6 +332,9 @@ let g:mkdp_preview_options = {
 let g:terraform_align=1
 let g:terraform_fmt_on_save=1
 
+
+let g:pydocstring_formatter = 'google'
+
 augroup langs
   autocmd!
   autocmd BufNewFile,BufRead Dockerfile* set syntax=dockerfile
@@ -342,6 +346,8 @@ augroup langs
   autocmd FileType go nmap gtx :CocCommand go.tags.clear<CR>
   autocmd FileType go nmap gtg :CocCommand go.test.generate.exported<CR>
   autocmd FileType scss setl iskeyword+=@-@
+  " Setup formatexpr specified filetype(s).
+  autocmd FileType javascript,typescript,json,go,python,html,css,dockerfile,scss setl formatexpr=CocAction('formatSelected')
 augroup end
 
 " Highlight symbol under cursor on CursorHold

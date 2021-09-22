@@ -23,7 +23,6 @@
     "dockerfile",
     "sh",
     "html",
-    "sql",
     "css"
   ],
   "coc.preferences.rootPatterns": [
