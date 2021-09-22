@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 branches=$(git branch -a | sed 's@remotes/origin/@@' | grep -vE '\*|origin' | sort -u)
-branch=$(echo "$branches" | fzf +m | awk '{print $1}' | sed "s/.* //")
+branch=$(echo "$branches" | fzf-tmux -p 80% | awk '{print $1}' | sed "s/.* //")
 git checkout "$branch" || git checkout -b "$branch"
