@@ -10,6 +10,7 @@ alias l='ls -ACF'
 alias activate='[ -d ./venv ] && source ./venv/bin/activate'
 alias plantuml="java -jar ${HOME}/.vim/plugged/vim-slumlord/plantuml.jar"
 alias gg="lazygit -ucd ~/.config/lazygit"
+alias gvim="nvim -c GFiles?"
 
 vim() {
   if [ "$#" -gt 0 ]; then
