@@ -298,7 +298,6 @@ let g:mkdp_refresh_slow = 1
 
 " specify browser to open preview page
 " default: ''
-let g:mkdp_browser = 'safari'
 
 " options for markdown render
 " mkit: markdown-it options for render
