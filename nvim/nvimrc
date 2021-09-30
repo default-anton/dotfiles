@@ -259,9 +259,6 @@ map <Leader>ba :bufdo bd<CR>
 map <Leader>. :bnext<CR>
 map <Leader>m :bprevious<CR>
 
-command! InsertDate call setline('.', getline('.') . strftime('%b %d, %Y'))
-
-
 let $FZF_DEFAULT_COMMAND = "fd --type f --follow --ignore-case"
 if exists('$TMUX')
   let g:fzf_layout = { 'tmux': '-p80%,70%' }
