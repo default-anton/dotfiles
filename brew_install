@@ -41,6 +41,7 @@ fzf
 watch
 llvm
 jesseduffield/lazygit/lazygit
+podman
 EOF
 )
 
