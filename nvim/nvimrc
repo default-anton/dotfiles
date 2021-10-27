@@ -33,7 +33,6 @@ Plug 'peitalin/vim-jsx-typescript'
 Plug 'leafgarland/typescript-vim'
 Plug 'moll/vim-node'
 Plug 'hashivim/vim-terraform'
-Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python' }
 call plug#end()
 
 filetype plugin indent on
@@ -115,6 +114,7 @@ let g:coc_global_extensions = [
   \'coc-css',
   \'coc-yaml',
   \'coc-pyright',
+  \'coc-pydocstring',
   \'coc-emoji',
   \'coc-snippets',
   \'coc-lists',
