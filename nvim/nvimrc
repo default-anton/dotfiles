@@ -173,7 +173,8 @@ xmap <leader>gb :<C-U>let @a=line("'<")<CR>:let @b=line("'>")<CR>:let @c=expand(
 
 nmap <F2> <Plug>(coc-rename)
 " Remap keys for applying codeAction to the current buffer.
-nmap <leader>da <Plug>(coc-codeaction)
+nmap <leader>da <Plug>(coc-codeaction-line)
+xmap <silent> da <Plug>(coc-codeaction-selected)
 " Apply AutoFix to problem on the current line.
 nmap <leader>do <Plug>(coc-fix-current)
 
