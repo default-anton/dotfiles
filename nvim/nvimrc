@@ -112,6 +112,7 @@ let g:coc_global_extensions = [
   \'coc-tsserver',
   \'coc-html',
   \'coc-css',
+  \'coc-tailwindcss',
   \'coc-yaml',
   \'coc-pyright',
   \'coc-pydocstring',
@@ -130,6 +131,7 @@ let g:coc_global_extensions = [
   \'coc-eslint',
   \'coc-prettier',
   \'coc-clangd',
+  \'coc-vimlsp',
 \]
 
 " if hidden is not set, TextEdit might fail.
