@@ -155,6 +155,9 @@ nnoremap <silent> <space>d        :<C-u>GFiles?<CR>
 nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
 nnoremap <silent> <space>/        :<C-u>BLines<CR>
 
+" Fix gx on Mac to open links, images etc with `open`
+nmap <silent> gx :!open <cfile><cr>
+
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
