@@ -347,8 +347,6 @@ let g:terraform_align=1
 let g:terraform_fmt_on_save=1
 
 
-let g:pydocstring_formatter = 'google'
-
 augroup langs
   autocmd!
   autocmd BufNewFile,BufRead Dockerfile* set syntax=dockerfile
