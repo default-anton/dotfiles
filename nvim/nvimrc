@@ -259,7 +259,9 @@ nmap ga <Plug>(EasyAlign)
 
 imap kj <Esc>
 
-" Yank file path with line number
+" Yank current file path relative to the project root
+nnoremap <Leader>yf :let @+=expand("%")<CR>
+" Yank current file path with line number relative to the project root
 nnoremap <Leader>yl :let @+=expand("%") . ':' . line(".")<CR>
 
 " n always search forward and N backward
