@@ -43,6 +43,7 @@
 	excludesfile = ~/.dotfiles/gitignore
 [init]
 	templatedir = ~/.dotfiles/git-templates/
+	defaultBranch = main
 [pull]
 	rebase = true
 [rebase]
