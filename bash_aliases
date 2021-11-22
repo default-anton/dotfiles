@@ -14,7 +14,7 @@ alias gvim="nvim -c GFiles?"
 
 vim() {
   if [ "$#" -gt 0 ]; then
-    nvim $@
+    nvim "$@"
   else
     nvim -c Files
   fi
