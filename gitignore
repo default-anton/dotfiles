@@ -8,3 +8,4 @@ test/reports
 .textlintrc
 .vim/
 .DS_Store
+.python-version
