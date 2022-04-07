@@ -178,9 +178,6 @@ nmap <silent> <Leader>hb <Plug>(coc-git-commit)
 nmap <silent> <Leader>hr :<C-u>CocCommand git.chunkUndo<CR>
 nmap <silent> <Leader>hs :<C-u>CocCommand git.chunkStage<CR>
 
-" Git blame visual selection
-xmap <leader>gb :<C-U>let @a=line("'<")<CR>:let @b=line("'>")<CR>:let @c=expand("%")<CR>:let @d=getcwd()<CR>:!tmux popup -d <C-R>d git blame -L <C-R>a,<C-R>b <C-R>c<CR><CR>
-
 nmap <F2> <Plug>(coc-rename)
 " Remap keys for applying codeAction to the current buffer.
 nmap <leader>da <Plug>(coc-codeaction-line)
