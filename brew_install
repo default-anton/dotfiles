@@ -43,6 +43,7 @@ llvm
 jesseduffield/lazygit/lazygit
 podman
 yt-dlp/taps/yt-dlp
+pyenv
 EOF
 )
 
