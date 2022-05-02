@@ -10,16 +10,8 @@ alias l='ls -ACF'
 alias activate='[ -d ./venv ] && source ./venv/bin/activate'
 alias plantuml="java -jar ${HOME}/.vim/plugged/vim-slumlord/plantuml.jar"
 alias gg="lazygit -ucd ~/.config/lazygit"
-alias gvim="nvim -c GFiles?"
+alias vim=nvim
 alias p3="ipython3"
-
-vim() {
-  if [ "$#" -gt 0 ]; then
-    nvim "$@"
-  else
-    nvim -c Files
-  fi
-}
 
 uname_out=$(uname -a)
 case "${uname_out}" in
