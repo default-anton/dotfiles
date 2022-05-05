@@ -3,7 +3,7 @@
 # Prevent commit to local protected branches
 
 branch=`git symbolic-ref HEAD`
-protected="^refs/heads/master$|^refs/heads/develop$"
+protected="^refs/heads/master$|^refs/heads/main$|^refs/heads/develop$"
 if [[ "$branch" =~ $protected ]]; then
   echo "pre-commit hook: Cannot commit to the local ${branch} branch."
   exit 1

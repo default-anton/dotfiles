@@ -1,7 +1,7 @@
 #!/bin/sh
 # Prevent push to remote protected branches
 
-protected="^refs/heads/master$|^refs/heads/develop$"
+protected="^refs/heads/master$|^refs/heads/main$|^refs/heads/develop$"
 while read local_ref local_sha remote_ref remote_sha
 do
   if [[ "$remote_ref" =~ $protected ]]; then

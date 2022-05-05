@@ -33,6 +33,7 @@ Plug 'peitalin/vim-jsx-typescript'
 Plug 'leafgarland/typescript-vim'
 Plug 'moll/vim-node'
 Plug 'hashivim/vim-terraform'
+Plug 'tpope/vim-markdown'
 call plug#end()
 
 filetype plugin indent on
@@ -87,6 +88,8 @@ set statusline+=\ %y
 set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
 set statusline+=\[%{&fileformat}\]
 set statusline+=\ %l:%c
+
+let g:markdown_fenced_languages = ['python', 'bash=sh', 'html', 'css', 'json', 'javascript', 'js=javascript', 'yaml']
 
 let g:rooter_cd_cmd="lcd"
 let g:rooter_resolve_links = 1
