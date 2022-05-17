@@ -1,17 +1,28 @@
 {
-  "eslint.autoFixOnSave": true,
-  "prettier.disableSuccessMessage": true,
-  "list.source.buffers.defaultOptions": ["--ignore-case"],
-  "coc.source.emoji.filetypes": ["markdown", "gitcommit"],
+  "list.source.buffers.defaultOptions": [
+    "--ignore-case"
+  ],
+  "coc.source.emoji.filetypes": [
+    "markdown",
+    "gitcommit"
+  ],
   "go.goplsOptions": {
     "completeUnimported": true,
     "usePlaceholders": true
   },
+  "coc.source.omni.filetypes": [
+    "sh",
+    "bash",
+    "html",
+    "css",
+    "dockerfile"
+  ],
   "pyright.organizeimports.provider": "isort",
   "python.formatting.provider": "black",
   "python.linting.enabled": true,
   "python.linting.flake8Enabled": true,
   "python.linting.mypyEnabled": true,
+  "pydocstring.formatter": "google",
   "coc.preferences.formatOnSaveFiletypes": [
     "python",
     "json",
@@ -20,10 +31,7 @@
     "javascriptreact",
     "typescript",
     "typescriptreact",
-    "dockerfile",
-    "sh",
-    "html",
-    "css"
+    "dockerfile"
   ],
   "coc.preferences.rootPatterns": [
     ".vim",
@@ -40,6 +48,5 @@
     "Pipfile",
     "Pipfile.lock"
   ],
-  "git.enableGutters": true,
-  "pydocstring.formatter": "google"
+  "git.enableGutters": true
 }
