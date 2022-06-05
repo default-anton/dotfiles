@@ -5,6 +5,10 @@
 
 - clean: ['~', '~/.vim', '~/.config']
 
+- create:
+  - ~/code
+  - ~/.config/bat
+
 - link:
   ~/.ripgreprc: ripgreprc
   ~/.gitconfig: gitconfig
@@ -16,9 +20,7 @@
   ~/.config/alacritty/alacritty.yml: alacritty.yml
   ~/.config/nvim: nvim
   ~/.config/lazygit/config.yml: lazygit.yml
-
-- create:
-  - ~/code
+  ~/.config/bat/config: bat/config
 
 - shell:
   - [git submodule update --init --recursive, Install submodules]
