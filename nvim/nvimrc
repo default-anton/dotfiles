@@ -34,6 +34,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'moll/vim-node'
 Plug 'hashivim/vim-terraform'
 Plug 'tpope/vim-markdown'
+Plug 'tpope/vim-rails'
 call plug#end()
 
 filetype plugin indent on
@@ -125,6 +126,7 @@ let g:coc_global_extensions = [
   \'coc-go',
   \'coc-vimlsp',
   \'coc-omni',
+  \'coc-solargraph',
 \]
 
 " if hidden is not set, TextEdit might fail.
@@ -182,6 +184,8 @@ nmap <leader>da <Plug>(coc-codeaction-line)
 xmap <silent> da <Plug>(coc-codeaction-selected)
 " Apply AutoFix to problem on the current line.
 nmap <leader>do <Plug>(coc-fix-current)
+" Run the Code Lens action on the current line.
+nmap <leader>dl  <Plug>(coc-codelens-action)
 
 " Map function and class text objects
 " NOTE: Requires 'textDocument.documentSymbol' support from the language server.

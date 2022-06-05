@@ -48,5 +48,8 @@
     "Pipfile",
     "Pipfile.lock"
   ],
-  "git.enableGutters": true
+  "git.enableGutters": true,
+  "codeLens.enable": true,
+  "solargraph.formatting": true,
+  "solargraph.useBundler": true
 }
