@@ -1,6 +1,7 @@
-[submodule "dotbot"]
-	path = dotbot
-	url = https://github.com/anishathalye/dotbot
 [submodule "pomodoro"]
 	path = pomodoro
 	url = https://github.com/rukshn/pomodoro
+[submodule "dotbot"]
+	path = dotbot
+	url = https://github.com/anishathalye/dotbot
+	ignore = dirty
