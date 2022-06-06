@@ -1,14 +1,83 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-set -e
+from typing import Final
+from pathlib import Path
+from subprocess import Popen
 
-CONFIG="install.conf.yaml"
-DOTBOT_DIR="dotbot"
 
-DOTBOT_BIN="bin/dotbot"
-BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SYM_LINKS: Final[list[tuple[str, str]]] = [
+    ("~/.ripgreprc", "ripgreprc"),
+    ("~/.gitconfig", "gitconfig"),
+    ("~/.psqlrc", "psqlrc"),
+    ("~/.bash_aliases", "bash_aliases"),
+    ("~/.tmux.conf", "tmux.conf"),
+    ("~/.config/pgcli/config", "pgcli/config"),
+    ("~/.config/alacritty/alacritty.yml", "alacritty.yml"),
+    ("~/.config/nvim", "nvim"),
+    ("~/.config/lazygit/config.yml", "lazygit.yml"),
+    ("~/.config/bat/config", "bat/config"),
+]
 
-cd "${BASEDIR}"
-git submodule update --init --recursive "${DOTBOT_DIR}"
+DIRECTORIES: Final[list[str]] = [
+    "~/code",
+]
 
-"${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" -c "${CONFIG}" "${@}"
+DOTFILES: Path = Path("~/.dotfiles").expanduser()
+
+SHELL_CMDS: Final[list[str]] = [
+    "brew bundle",
+    ". /opt/homebrew/opt/nvm/nvm.sh && nvm install node",
+    "./pip_install",
+    "./install_fonts",
+    "$(brew --prefix)/opt/fzf/install",
+]
+
+BASHRC_LINES: Final[list[str]] = [
+    'eval "$(starship init bash)"',
+    'source "${HOME}/.dotfiles/bashrc"',
+    "source ~/.fzf.bash",
+    "[ -f ~/.fzf.bash ] && source ~/.fzf.bash",
+    "[ -f ~/.bash_aliases ] && source ~/.bash_aliases",
+]
+
+PROFILE_LINES: Final[list[str]] = [
+    'source "$HOME/.bashrc"',
+    'source "$HOME/.dotfiles/profile"',
+]
+
+
+def main():
+    for cmd in SHELL_CMDS:
+        process = Popen(
+            cmd, cwd=DOTFILES, shell=True, executable="/opt/homebrew/bin/bash"
+        )
+        process.wait(timeout=60)
+
+    for (src, dst) in SYM_LINKS:
+        src, dst = Path(src).expanduser(), DOTFILES.joinpath(dst)
+        src.parent.mkdir(parents=True, exist_ok=True)
+        print(f"ln -s {src} {dst}")
+        src.unlink(missing_ok=True)
+        src.symlink_to(dst, target_is_directory=dst.is_dir())
+
+    for directory in DIRECTORIES:
+        print(f"mkdir -p {directory}")
+        Path(directory).expanduser().mkdir(parents=True, exist_ok=True)
+
+    bashrc = Path("~/.bashrc").expanduser()
+    bashrc_content = bashrc.read_text()
+    with bashrc.open(mode="a") as f:
+        for bashrc_line in BASHRC_LINES:
+            if bashrc_line not in bashrc_content:
+                f.write(bashrc_line)
+
+    profile = Path("~/.profile").expanduser()
+    profile_content = profile.read_text()
+    with bashrc.open(mode="a") as f:
+        for profile_line in PROFILE_LINES:
+            if profile_line not in profile_content:
+                f.write(profile_line)
+
+
+if __name__ == "__main__":
+    main()
