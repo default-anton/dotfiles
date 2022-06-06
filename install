@@ -34,15 +34,15 @@ SHELL_CMDS: Final[list[str]] = [
 
 BASHRC_LINES: Final[list[str]] = [
     'eval "$(starship init bash)"',
-    'source "${HOME}/.dotfiles/bashrc"',
-    "source ~/.fzf.bash",
+    'source ~/.dotfiles/bashrc',
     "[ -f ~/.fzf.bash ] && source ~/.fzf.bash",
     "[ -f ~/.bash_aliases ] && source ~/.bash_aliases",
 ]
 
-PROFILE_LINES: Final[list[str]] = [
-    'source "$HOME/.bashrc"',
-    'source "$HOME/.dotfiles/profile"',
+BASH_PROFILE_LINES: Final[list[str]] = [
+    'source ~/.bashrc',
+    'source ~/.dotfiles/profile',
+    'eval "$(pyenv init --path)"',
 ]
 
 
@@ -74,7 +74,7 @@ def main():
     profile = Path("~/.profile").expanduser()
     profile_content = profile.read_text()
     with bashrc.open(mode="a") as f:
-        for profile_line in PROFILE_LINES:
+        for profile_line in BASH_PROFILE_LINES:
             if profile_line not in profile_content:
                 f.write(profile_line)
 

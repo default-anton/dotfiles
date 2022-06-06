@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
 export PATH="${HOME}/.dotfiles/bin:${HOME}/bin:${HOME}/.local/bin:${PATH}"
+export GOPATH="${HOME}/code/.go"
+export GOBIN="${GOPATH}/bin"
+export PATH="${PATH}:${GOBIN}"
 export PATH="${PATH}:/usr/local/go/bin"
-export PATH="${PATH}:${HOME}/Sources/go/bin"
-export PATH="${HOME}/.npm-global/bin:${PATH}"
-export GOPATH="${HOME}/Sources/go"
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
 export EDITOR=nvim
 
 command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
