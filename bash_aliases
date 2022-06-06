@@ -12,6 +12,7 @@ alias plantuml="java -jar ${HOME}/.vim/plugged/vim-slumlord/plantuml.jar"
 alias gg="lazygit -ucd ~/.config/lazygit"
 alias vim=nvim
 alias p3="ipython3"
+alias cat=bat
 
 uname_out=$(uname -a)
 case "${uname_out}" in
