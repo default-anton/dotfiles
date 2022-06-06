@@ -3,6 +3,7 @@
 from typing import Final
 from pathlib import Path
 from subprocess import Popen
+import os
 
 
 SYM_LINKS: Final[list[tuple[str, str]]] = [
@@ -49,7 +50,7 @@ BASH_PROFILE_LINES: Final[list[str]] = [
 def main():
     for cmd in SHELL_CMDS:
         process = Popen(
-            cmd, cwd=DOTFILES, shell=True, executable="/opt/homebrew/bin/bash"
+            cmd, cwd=DOTFILES, shell=True, executable=os.getenv('SHELL')
         )
         process.wait(timeout=60)
 
