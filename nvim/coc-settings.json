@@ -1,4 +1,7 @@
 {
+  "toml.schema.associations": {
+    ".*/starship.toml": "https://starship.rs/config-schema.json"
+  },
   "list.source.buffers.defaultOptions": [
     "--ignore-case"
   ],
