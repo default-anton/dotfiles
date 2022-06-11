@@ -17,6 +17,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.config/nvim", "nvim"),
     ("~/.config/lazygit/config.yml", "lazygit.yml"),
     ("~/.config/bat/config", "bat/config"),
+    ("~/.config/starship.toml", "starship.toml"),
 ]
 
 DIRECTORIES: Final[list[str]] = [
@@ -35,23 +36,21 @@ SHELL_CMDS: Final[list[str]] = [
 
 BASHRC_LINES: Final[list[str]] = [
     'eval "$(starship init bash)"',
-    'source ~/.dotfiles/bashrc',
+    "source ~/.dotfiles/bashrc",
     "[ -f ~/.fzf.bash ] && source ~/.fzf.bash",
     "[ -f ~/.bash_aliases ] && source ~/.bash_aliases",
 ]
 
 BASH_PROFILE_LINES: Final[list[str]] = [
-    'source ~/.bashrc',
-    'source ~/.dotfiles/profile',
+    "source ~/.bashrc",
+    "source ~/.dotfiles/profile",
     'eval "$(pyenv init --path)"',
 ]
 
 
 def main():
     for cmd in SHELL_CMDS:
-        process = Popen(
-            cmd, cwd=DOTFILES, shell=True, executable=os.getenv('SHELL')
-        )
+        process = Popen(cmd, cwd=DOTFILES, shell=True, executable=os.getenv("SHELL"))
         process.wait(timeout=60)
 
     for (src, dst) in SYM_LINKS:
