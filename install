@@ -50,7 +50,12 @@ BASH_PROFILE_LINES: Final[list[str]] = [
 
 def main():
     for cmd in SHELL_CMDS:
-        process = Popen(cmd, cwd=DOTFILES, shell=True, executable=os.getenv("SHELL"))
+        process = Popen(
+            cmd,
+            cwd=DOTFILES,
+            shell=True,
+            executable=os.getenv("SHELL"),
+        )
         process.wait(timeout=60)
 
     for (src, dst) in SYM_LINKS:
@@ -71,7 +76,7 @@ def main():
             if bashrc_line not in bashrc_content:
                 f.write(bashrc_line)
 
-    profile = Path("~/.profile").expanduser()
+    profile = Path("~/.bash_profile").expanduser()
     profile_content = profile.read_text()
     with bashrc.open(mode="a") as f:
         for profile_line in BASH_PROFILE_LINES:
