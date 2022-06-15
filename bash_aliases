@@ -13,6 +13,7 @@ alias gg="lazygit -ucd ~/.config/lazygit"
 alias vim=nvim
 alias p3="ipython3"
 alias cat=bat
+alias c="code ."
 
 uname_out=$(uname -a)
 case "${uname_out}" in
