@@ -9,6 +9,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
+Plug 'antoinemadec/coc-fzf'
 Plug 'preservim/nerdtree'
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
@@ -150,11 +151,13 @@ command! -bang -nargs=* Rg
   \   fzf#vim#with_preview(), <bang>0)
 
 " Navigation
-nnoremap <silent> <space><Leader> :<C-u>Files<CR>
-nnoremap <silent> <space>m        :<C-u>Rg<CR>
-nnoremap <silent> <space>d        :<C-u>GFiles?<CR>
-nnoremap <silent> <space>.        :<C-u>CocList buffers<CR>
-nnoremap <silent> <space>/        :<C-u>BLines<CR>
+nnoremap <silent><nowait> <space><Leader> :<C-u>Files<CR>
+nnoremap <silent><nowait> <space>m        :<C-u>Rg<CR>
+nnoremap <silent><nowait> <space>d        :<C-u>GFiles?<CR>
+nnoremap <silent><nowait> <space>.        :<C-u>Buffers<CR>
+nnoremap <silent><nowait> <space>/        :<C-u>BLines<CR>
+nnoremap <silent><nowait> <space>c        :<C-u>CocFzfList commands<CR>
+nnoremap <silent><nowait> <space>o        :<C-u>CocFzfList outline<CR>
 
 " Fix gx on Mac to open links, images etc with `open`
 nmap <silent> gx :!open <cfile><cr>
