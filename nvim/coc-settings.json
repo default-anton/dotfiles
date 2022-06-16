@@ -5,6 +5,7 @@
   "list.source.buffers.defaultOptions": [
     "--ignore-case"
   ],
+  "list.height": 30,
   "coc.source.emoji.filetypes": [
     "markdown",
     "gitcommit"
