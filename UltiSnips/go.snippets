@@ -23,3 +23,9 @@ func ${1:handler}(w http.ResponseWriter, r *http.Request) {
 	${0:fmt.Fprintf(w, "hello world")}
 }
 endsnippet
+
+snippet errp "panic(err)" !b
+if err != nil {
+	panic(err)
+}${0}
+endsnippet
