@@ -342,7 +342,7 @@ let g:mkdp_preview_options = {
     \ 'disable_sync_scroll': 0,
     \ 'sync_scroll_type': 'middle',
     \ 'hide_yaml_meta': 1,
-    \ 'sequence_diagrams': {},
+    \ 'sequence_diagrams': {'theme': 'simple'},
     \ 'flowchart_diagrams': {},
     \ 'content_editable': v:false,
     \ 'disable_filename': 0
