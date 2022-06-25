@@ -45,6 +45,7 @@ BASH_PROFILE_LINES: Final[list[str]] = [
     "source ~/.bashrc",
     "source ~/.dotfiles/profile",
     'eval "$(pyenv init --path)"',
+    'eval "$(gh completion -s bash)"',
 ]
 
 
