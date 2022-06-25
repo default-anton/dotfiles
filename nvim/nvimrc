@@ -43,6 +43,7 @@ filetype plugin indent on
 
 let mapleader = ","
 
+set splitbelow
 set exrc
 set secure
 set number
