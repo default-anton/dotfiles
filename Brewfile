@@ -1,6 +1,3 @@
-tap "jesseduffield/lazygit"
-tap "yt-dlp/taps"
-
 brew "curl"
 brew "bash"
 brew "neovim"
@@ -45,7 +42,8 @@ brew "llvm"
 brew "podman"
 brew "pyenv"
 brew "bat"
-brew "lazygit"
-brew "yt-dlp"
+brew "jesseduffield/lazygit/lazygit"
+brew "yt-dlp/taps/yt-dlp"
+brew "gh"
 
 cask "lulu"
