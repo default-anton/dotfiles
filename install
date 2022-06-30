@@ -16,6 +16,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.config/alacritty/alacritty.yml", "alacritty.yml"),
     ("~/.config/nvim", "nvim"),
     ("~/.config/lazygit/config.yml", "lazygit.yml"),
+    ("~/Library/Application Support/jesseduffield/lazygit/config.yml", "lazygit.yml"),
     ("~/.config/bat/config", "bat/config"),
     ("~/.config/starship.toml", "starship.toml"),
 ]

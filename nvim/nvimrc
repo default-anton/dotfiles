@@ -38,6 +38,7 @@ Plug 'tpope/vim-markdown'
 Plug 'tpope/vim-rails'
 Plug 'tpope/vim-bundler'
 Plug 'editorconfig/editorconfig-vim'
+Plug 'kdheepak/lazygit.nvim'
 call plug#end()
 
 filetype plugin indent on
@@ -162,6 +163,9 @@ nnoremap <silent><nowait> <space>/        :<C-u>BLines<CR>
 nnoremap <silent><nowait> <space>c        :<C-u>CocFzfList commands<CR>
 nnoremap <silent><nowait> <space>o        :<C-u>CocFzfList outline<CR>
 
+nnoremap <silent>         <leader>gg      :LazyGit<CR>
+nnoremap <silent>         <leader>gf      :LazyGitFilterCurrentFile<CR>
+
 " Fix gx on Mac to open links, images etc with `open`
 nmap <silent> gx :!open <cfile><cr>
 
@@ -181,7 +185,6 @@ nmap <silent> [e <Plug>(coc-diagnostic-prev)
 nmap <silent> ]c <Plug>(coc-git-nextchunk)
 nmap <silent> [c <Plug>(coc-git-prevchunk)
 nmap <silent> <Leader>hp <Plug>(coc-git-chunkinfo)
-nmap <silent> <Leader>hb <Plug>(coc-git-commit)
 nmap <silent> <Leader>hr :<C-u>CocCommand git.chunkUndo<CR>
 nmap <silent> <Leader>hs :<C-u>CocCommand git.chunkStage<CR>
 
