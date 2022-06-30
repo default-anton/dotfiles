@@ -36,6 +36,7 @@ Plug 'moll/vim-node'
 Plug 'hashivim/vim-terraform'
 Plug 'tpope/vim-markdown'
 Plug 'tpope/vim-rails'
+Plug 'tpope/vim-bundler'
 Plug 'editorconfig/editorconfig-vim'
 call plug#end()
 
