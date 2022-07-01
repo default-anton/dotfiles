@@ -60,3 +60,8 @@ command -v npm >/dev/null 2>&1 && source <(npm completion)
 command -v flutter >/dev/null 2>&1 && source <(flutter bash-completion)
 command -v doctl >/dev/null 2>&1 && source <(doctl completion bash)
 command -v aws >/dev/null 2>&1 && complete -C 'aws_completer' aws
+if [ -n "$PYTHONPATH" ]; then
+    export PYTHONPATH='/opt/homebrew/Cellar/pdm/1.15.4/libexec/lib/python3.10/site-packages/pdm/pep582':$PYTHONPATH
+else
+    export PYTHONPATH='/opt/homebrew/Cellar/pdm/1.15.4/libexec/lib/python3.10/site-packages/pdm/pep582'
+fi

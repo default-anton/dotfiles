@@ -9,3 +9,5 @@ test/reports
 .vim/
 .DS_Store
 .python-version
+.pdm.toml
+__pypackages__/
