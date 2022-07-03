@@ -46,5 +46,6 @@ brew "jesseduffield/lazygit/lazygit"
 brew "yt-dlp/taps/yt-dlp"
 brew "gh"
 brew "pdm"
+brew "protobuf"
 
 cask "lulu"
