@@ -1804,7 +1804,7 @@
         }
       },
       "goreleaser/tap/goreleaser": {
-        "version": "1.9.2",
+        "version": "1.10.1",
         "bottle": false
       }
     },
@@ -1822,7 +1822,7 @@
       "monterey": {
         "HOMEBREW_VERSION": "3.5.3",
         "HOMEBREW_PREFIX": "/opt/homebrew",
-        "Homebrew/homebrew-core": "6b633976bb80d9f9625c50a3b8158b2fca2c8155",
+        "Homebrew/homebrew-core": "adf8c57f743b551e5658118c3cb6c8a0d1ea114d",
         "CLT": "13.4.0.0.1.1651278267",
         "Xcode": "13.4",
         "macOS": "12.4"
