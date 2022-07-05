@@ -1802,6 +1802,10 @@
             }
           }
         }
+      },
+      "goreleaser/tap/goreleaser": {
+        "version": "1.9.2",
+        "bottle": false
       }
     },
     "cask": {
