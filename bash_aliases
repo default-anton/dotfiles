@@ -15,6 +15,7 @@ alias v=nvim
 alias p3="ipython3"
 alias cat=bat
 alias c="code ."
+alias shcheck=shellcheck
 
 uname_out=$(uname -a)
 case "${uname_out}" in
