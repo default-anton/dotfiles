@@ -1,3 +1,6 @@
+tap "neovim/neovim"
+tap "goreleaser/tap"
+
 brew "curl"
 brew "bash"
 brew "neovim"
@@ -48,5 +51,8 @@ brew "goreleaser/tap/goreleaser"
 brew "gh"
 brew "pdm"
 brew "protobuf"
+brew "shellcheck"
+brew "shfmt"
+brew "tldr"
 
 cask "lulu"
