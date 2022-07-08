@@ -2,17 +2,17 @@
 
 uname_out=$(uname -a)
 case "${uname_out}" in
-  *microsoft*)
-    clip.exe "$@"
-    exit 0
-  ;;
-  *Linux*)
-    xclip -selection c "$@"
-    exit 0
-  ;;
-  *Darwin*)
-    pbcopy "$@"
-    exit 0
-  ;;
-  *)
+*microsoft*)
+	clip.exe "$@"
+	exit 0
+	;;
+*Linux*)
+	xclip -selection c "$@"
+	exit 0
+	;;
+*Darwin*)
+	pbcopy "$@"
+	exit 0
+	;;
+*) ;;
 esac

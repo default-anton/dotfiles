@@ -3,12 +3,12 @@
 service=$1
 
 if [ "$#" -eq 0 ]; then
-  echo "Usage: run <service> [<command>]"
+	echo "Usage: run <service> [<command>]"
 fi
 
 if [ -z "$2" ]; then
-  docker-compose run --rm "$service" /bin/bash
+	docker-compose run --rm "$service" /bin/bash
 else
-  shift
-  docker-compose run --rm "$service" "$@"
+	shift
+	docker-compose run --rm "$service" "$@"
 fi

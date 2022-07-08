@@ -4,11 +4,10 @@
 # Version: 0.2.2
 
 # Unique Bash version check
-if ((BASH_VERSINFO[0] < 4))
-then
-  echo "sensible.bash: Looks like you're running an older version of Bash."
-  echo "sensible.bash: You need at least bash-4.0 or some options will not work correctly."
-  echo "sensible.bash: Keep your software up-to-date!"
+if ((BASH_VERSINFO[0] < 4)); then
+	echo "sensible.bash: Looks like you're running an older version of Bash."
+	echo "sensible.bash: You need at least bash-4.0 or some options will not work correctly."
+	echo "sensible.bash: Keep your software up-to-date!"
 fi
 
 ## GENERAL OPTIONS ##
@@ -28,10 +27,10 @@ PROMPT_DIRTRIM=2
 bind Space:magic-space
 
 # Turn on recursive globbing (enables ** to recurse all directories)
-shopt -s globstar 2> /dev/null
+shopt -s globstar 2>/dev/null
 
 # Case-insensitive globbing (used in pathname expansion)
-shopt -s nocaseglob;
+shopt -s nocaseglob
 
 ## SMARTER TAB-COMPLETION (Readline bindings) ##
 
@@ -80,11 +79,11 @@ bind '"\e[D": backward-char'
 ## BETTER DIRECTORY NAVIGATION ##
 
 # Prepend cd to directory names automatically
-shopt -s autocd 2> /dev/null
+shopt -s autocd 2>/dev/null
 # Correct spelling errors during tab-completion
-shopt -s dirspell 2> /dev/null
+shopt -s dirspell 2>/dev/null
 # Correct spelling errors in arguments supplied to cd
-shopt -s cdspell 2> /dev/null
+shopt -s cdspell 2>/dev/null
 
 # This defines where cd looks for targets
 # Add the directories you want to have fast access to, separated by colon
