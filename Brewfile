@@ -54,5 +54,6 @@ brew "protobuf"
 brew "shellcheck"
 brew "shfmt"
 brew "tldr"
+brew "viddy"
 
 cask "lulu"
