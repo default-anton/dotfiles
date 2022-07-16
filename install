@@ -28,7 +28,7 @@ DIRECTORIES: Final[list[str]] = [
 DOTFILES: Path = Path("~/.dotfiles").expanduser()
 
 SHELL_CMDS: Final[list[str]] = [
-    "brew bundle --no-upgrade --no-lock",
+    "brew bundle --no-lock",
     ". /opt/homebrew/opt/nvm/nvm.sh && nvm install node",
     "./pip_install",
     "./install_fonts",
