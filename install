@@ -31,7 +31,6 @@ SHELL_CMDS: Final[list[str]] = [
     "brew bundle --no-lock",
     ". /opt/homebrew/opt/nvm/nvm.sh && nvm install node",
     "./pip_install",
-    "./install_fonts",
     "$(brew --prefix)/opt/fzf/install",
 ]
 
