@@ -28,6 +28,7 @@ Plug 'lewis6991/gitsigns.nvim'
 Plug 'akinsho/bufferline.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'lukas-reineke/indent-blankline.nvim'
+Plug 'lewis6991/impatient.nvim'
 
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
@@ -59,6 +60,7 @@ call plug#end()
 
 set completeopt=menu,menuone,noselect
 
+lua require("impatient")
 lua require("user")
 
 filetype plugin indent on
