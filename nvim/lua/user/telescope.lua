@@ -5,7 +5,7 @@ telescope.setup {
   defaults = {
     prompt_prefix = " ",
     selection_caret = " ",
-    path_display = { "smart" },
+    path_display = { "truncate" },
 
     mappings = {
       i = {
@@ -44,6 +44,7 @@ telescope.setup {
     find_files = {
       previewer = false,
       find_command = { "fd", "--type", "f", "--strip-cwd-prefix" },
+      debounce = 50,
       layout_config = {
         height = 0.8,
       },
@@ -56,12 +57,14 @@ telescope.setup {
     },
     live_grep = {
       theme = "ivy",
+      debounce = 50,
       layout_config = {
         height = 0.5,
       }
     },
     grep_string = {
       theme = "ivy",
+      debounce = 50,
       layout_config = {
         height = 0.5,
       }
