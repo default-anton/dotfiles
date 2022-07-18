@@ -138,15 +138,20 @@ nnoremap <leader>b <cmd>lua require('telescope.builtin').git_branches()<cr>
 nnoremap <silent> <leader>gg <cmd>LazyGit<cr>
 nnoremap <silent> <leader>gf <cmd>LazyGitFilterCurrentFile<cr>
 
+nnoremap <silent><C-Up> <cmd>resize -2<cr>
+nnoremap <silent><C-Down> <cmd>resize +2<cr>
+nnoremap <silent><C-Left> <cmd>vertical resize -2<cr>
+nnoremap <silent><C-Right> <cmd>vertical resize +2<cr>
+
 nnoremap ]c <cmd>lua require('gitsigns').next_hunk()<cr>
 nnoremap [c <cmd>lua require('gitsigns').prev_hunk()<cr>
-nnoremap ht <cmd>lua require('gitsigns').toggle_signs()<cr>
-nnoremap hp <cmd>lua require('gitsigns').preview_hunk()<cr>
-nnoremap hb <cmd>lua require('gitsigns').blame_line()<cr>
-nnoremap hr <cmd>lua require('gitsigns').reset_hunk()<cr>
-nnoremap hs <cmd>lua require('gitsigns').stage_hunk()<cr>
-nnoremap hu <cmd>lua require('gitsigns').undo_stage_hunk()<cr>
-nnoremap hR <cmd>lua require('gitsigns').reset_buffer()<cr>
+nnoremap <leader>ht <cmd>lua require('gitsigns').toggle_signs()<cr>
+nnoremap <leader>hp <cmd>lua require('gitsigns').preview_hunk()<cr>
+nnoremap <leader>hb <cmd>lua require('gitsigns').blame_line()<cr>
+nnoremap <leader>hr <cmd>lua require('gitsigns').reset_hunk()<cr>
+nnoremap <leader>hs <cmd>lua require('gitsigns').stage_hunk()<cr>
+nnoremap <leader>hu <cmd>lua require('gitsigns').undo_stage_hunk()<cr>
+nnoremap <leader>hR <cmd>lua require('gitsigns').reset_buffer()<cr>
 
 
 " Navigation
