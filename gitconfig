@@ -1,12 +1,12 @@
 [user]
 	name  = Anton Kuzmenko
-	email = 1917237+NoNonsenseDev@users.noreply.github.com
+	email = 1917237+default-anton@users.noreply.github.com
 
 [push]
 	default = current
 
 [github]
-	user = NoNonsenseDev
+	user = default-anton
 
 [alias]
         s     = stash
