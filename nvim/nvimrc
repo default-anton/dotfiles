@@ -27,6 +27,7 @@ Plug 'kyazdani42/nvim-tree.lua'
 Plug 'lewis6991/gitsigns.nvim'
 Plug 'akinsho/bufferline.nvim'
 Plug 'nvim-lualine/lualine.nvim'
+Plug 'lukas-reineke/indent-blankline.nvim'
 
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
