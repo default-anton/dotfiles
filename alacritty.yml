@@ -446,7 +446,7 @@ colors:
 #   - (Linux/BSD) user login shell
 #   - (Windows) powershell
 shell:
-  program: /opt/homebrew/bin/bash
+  program: "${HOMEBREW_PREFIX}/bin/bash"
   args:
     - -l
     - -c

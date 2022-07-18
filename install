@@ -2,8 +2,9 @@
 
 from typing import Final
 from pathlib import Path
-from subprocess import Popen
+from subprocess import Popen, check_output
 import os
+from io import StringIO
 
 
 SYM_LINKS: Final[list[tuple[str, str]]] = [
@@ -13,12 +14,15 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.bash_aliases", "bash_aliases"),
     ("~/.tmux.conf", "tmux.conf"),
     ("~/.config/pgcli/config", "pgcli/config"),
-    ("~/.config/alacritty/alacritty.yml", "alacritty.yml"),
     ("~/.config/nvim", "nvim"),
     ("~/.config/lazygit/config.yml", "lazygit.yml"),
     ("~/Library/Application Support/jesseduffield/lazygit/config.yml", "lazygit.yml"),
     ("~/.config/bat/config", "bat/config"),
     ("~/.config/starship.toml", "starship.toml"),
+]
+
+TEMPLATES: Final[list[tuple[str, str]]] = [
+    ("~/.config/alacritty/alacritty.yml", "alacritty.yml"),
 ]
 
 DIRECTORIES: Final[list[str]] = [
@@ -29,7 +33,7 @@ DOTFILES: Path = Path("~/.dotfiles").expanduser()
 
 SHELL_CMDS: Final[list[str]] = [
     "brew bundle --no-lock",
-    ". /opt/homebrew/opt/nvm/nvm.sh && nvm install node",
+    ". $(brew --prefix)/opt/nvm/nvm.sh && nvm install node",
     "./pip_install",
     "$(brew --prefix)/opt/fzf/install",
 ]
@@ -50,6 +54,8 @@ BASH_PROFILE_LINES: Final[list[str]] = [
 
 
 def main():
+    os.environ["HOMEBREW_PREFIX"] = check_output(["brew", "--prefix"]).strip().decode()
+
     for cmd in SHELL_CMDS:
         process = Popen(
             cmd,
@@ -66,6 +72,18 @@ def main():
         src.unlink(missing_ok=True)
         src.symlink_to(dst, target_is_directory=dst.is_dir())
 
+    for (dst, template) in TEMPLATES:
+        dst, template = Path(dst).expanduser(), DOTFILES.joinpath(template)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.unlink(missing_ok=True)
+        process = Popen(
+            f'envsubst < "{template}" > "{dst}"',
+            cwd=DOTFILES,
+            shell=True,
+            executable=os.getenv("SHELL"),
+        )
+        process.wait(timeout=60)
+
     for directory in DIRECTORIES:
         print(f"mkdir -p {directory}")
         Path(directory).expanduser().mkdir(parents=True, exist_ok=True)
@@ -79,7 +97,7 @@ def main():
 
     profile = Path("~/.bash_profile").expanduser()
     profile_content = profile.read_text()
-    with bashrc.open(mode="a") as f:
+    with profile.open(mode="a") as f:
         for profile_line in BASH_PROFILE_LINES:
             if profile_line not in profile_content:
                 f.write(profile_line)
