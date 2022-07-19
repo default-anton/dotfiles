@@ -33,7 +33,6 @@ Plug 'lewis6991/impatient.nvim'
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
 Plug 'janko-m/vim-test'
-Plug 'airblade/vim-rooter'
 Plug 'schickling/vim-bufonly'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-projectionist'
@@ -105,16 +104,6 @@ set switchbuf=useopen,usetab,vsplit
 set stal=2
 
 let g:markdown_fenced_languages = ['python', 'bash=sh', 'html', 'css', 'json', 'javascript', 'js=javascript', 'yaml', 'dockerfile']
-
-let g:rooter_cd_cmd="lcd"
-let g:rooter_resolve_links = 1
-let g:rooter_patterns = [
-\ 'package.json',
-\ 'Gemfile',
-\ 'venv/',
-\ '.git',
-\ '.git/',
-\]
 
 let g:better_whitespace_enabled = 1
 let g:strip_whitespace_on_save = 1
