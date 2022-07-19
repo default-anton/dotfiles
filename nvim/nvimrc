@@ -148,8 +148,11 @@ nnoremap <leader>hR <cmd>lua require('gitsigns').reset_buffer()<cr>
 
 " Navigation
 nnoremap <space><leader> <cmd>lua require('telescope.builtin').find_files()<cr>
+nnoremap <space><space><leader> <cmd>lua require('telescope.builtin').find_files({cwd='%:h'})<cr>
 nnoremap <space>m <cmd>lua require('telescope.builtin').live_grep()<cr>
+nnoremap <space><space>m <cmd>lua require('telescope.builtin').live_grep({cwd='%:h'})<cr>
 nnoremap <space>w <cmd>lua require('telescope.builtin').grep_string()<cr>
+nnoremap <space><space>w <cmd>lua require('telescope.builtin').grep_string({cwd='%:h'})<cr>
 nnoremap <space>. <cmd>lua require('telescope.builtin').buffers()<cr>
 nnoremap <space>/ <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
 nnoremap <space>o <cmd>lua require('telescope.builtin').lsp_document_symbols()<cr>
