@@ -58,5 +58,21 @@ lspconfig.terraformls.setup { on_attach = on_attach, capabilities = capabilities
 lspconfig.vimls.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.solargraph.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.sqlls.setup { on_attach = on_attach, capabilities = capabilities }
-lspconfig.sumneko_lua.setup { on_attach = on_attach, capabilities = capabilities }
+lspconfig.sumneko_lua.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" },
+      },
+      workspace = {
+        library = {
+          [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+          [vim.fn.stdpath("config") .. "/lua"] = true,
+        },
+      },
+    },
+  },
+}
 lspconfig.tsserver.setup { on_attach = on_attach, capabilities = capabilities }
