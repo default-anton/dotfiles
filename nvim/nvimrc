@@ -157,7 +157,6 @@ nnoremap <space><space>w <cmd>lua require('telescope.builtin').grep_string({cwd=
 nnoremap <space>. <cmd>lua require('telescope.builtin').buffers()<cr>
 nnoremap <space>/ <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
 nnoremap <space>o <cmd>lua require('telescope.builtin').lsp_document_symbols()<cr>
-nnoremap <space>h <cmd>lua require('telescope.builtin').help_tags()<cr>
 nnoremap gr <cmd>lua require('telescope.builtin').lsp_references()<cr>
 nnoremap gd <cmd>lua require('telescope.builtin').lsp_definitions()<cr>
 nnoremap gi <cmd>lua require('telescope.builtin').lsp_implementations()<cr>
