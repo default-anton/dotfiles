@@ -29,6 +29,7 @@ Plug 'akinsho/bufferline.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'lewis6991/impatient.nvim'
+Plug 'notjedi/nvim-rooter.lua'
 
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'

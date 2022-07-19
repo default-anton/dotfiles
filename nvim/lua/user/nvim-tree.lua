@@ -2,9 +2,10 @@ local nvim_tree = require "nvim-tree"
 local tree_cb = require("nvim-tree.config").nvim_tree_callback
 
 nvim_tree.setup({
+  sync_root_with_cwd = true,
   update_focused_file = {
     enable = true,
-    update_cwd = true,
+    update_root = true,
   },
   renderer = {
     root_folder_modifier = ":t",
