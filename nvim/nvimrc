@@ -18,8 +18,6 @@ Plug 'b0o/schemastore.nvim'
 Plug 'SirVer/ultisnips'
 Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim'
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/nvim-treesitter-context'
 Plug 'kyazdani42/nvim-web-devicons'
@@ -33,6 +31,7 @@ Plug 'notjedi/nvim-rooter.lua'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'kdheepak/lazygit.nvim'
+Plug 'ibhagwan/fzf-lua', { 'branch': 'main' }
 
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
@@ -127,8 +126,8 @@ else
 endif
 
 " Git
-nnoremap <space>d <cmd>lua require('telescope.builtin').git_status()<cr>
-nnoremap <leader>b <cmd>lua require('telescope.builtin').git_branches()<cr>
+nnoremap <space>d <cmd>lua require('fzf-lua').git_status()<cr>
+nnoremap <leader>b <cmd>lua require('fzf-lua').git_branches()<cr>
 nnoremap <silent> <leader>gg <cmd>LazyGit<cr>
 nnoremap <silent> <leader>gf <cmd>LazyGitFilterCurrentFile<cr>
 
@@ -149,19 +148,23 @@ nnoremap <leader>hR <cmd>lua require('gitsigns').reset_buffer()<cr>
 
 
 " Navigation
-nnoremap <space><leader> <cmd>lua require('telescope.builtin').find_files()<cr>
-nnoremap <space><space><leader> <cmd>lua require('telescope.builtin').find_files({cwd='%:h'})<cr>
-nnoremap <space>m <cmd>lua require('telescope.builtin').live_grep()<cr>
-nnoremap <space><space>m <cmd>lua require('telescope.builtin').live_grep({cwd='%:h'})<cr>
-nnoremap <space>w <cmd>lua require('telescope.builtin').grep_string()<cr>
-nnoremap <space><space>w <cmd>lua require('telescope.builtin').grep_string({cwd='%:h'})<cr>
-nnoremap <space>. <cmd>lua require('telescope.builtin').buffers()<cr>
-nnoremap <space>/ <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
-nnoremap <space>o <cmd>lua require('telescope.builtin').lsp_document_symbols()<cr>
-nnoremap gr <cmd>lua require('telescope.builtin').lsp_references()<cr>
-nnoremap gd <cmd>lua require('telescope.builtin').lsp_definitions()<cr>
-nnoremap gi <cmd>lua require('telescope.builtin').lsp_implementations()<cr>
-nnoremap gt <cmd>lua require('telescope.builtin').lsp_type_definitions()<cr>
+nnoremap <space><leader> <cmd>lua require('fzf-lua').files()<cr>
+nnoremap <space><space><leader> <cmd>lua require('fzf-lua').files({ cwd='%:h' })<cr>
+nnoremap <space>m <cmd>lua require('fzf-lua').live_grep_native()<cr>
+nnoremap <space><space>m <cmd>lua require('fzf-lua').live_grep_native({ cwd='%:h' })<cr>
+vnoremap <space>m <cmd>lua require('fzf-lua').grep_visual()<cr>
+vnoremap <space><space>m <cmd>lua require('fzf-lua').grep_visual({ cwd='%:h' })<cr>
+nnoremap <space>w <cmd>lua require('fzf-lua').grep_cword()<cr>
+nnoremap <space><space>w <cmd>lua require('fzf-lua').grep_cword({ cwd='%:h' })<cr>
+nnoremap <space>. <cmd>lua require('fzf-lua').buffers({ winopts = { width = 0.6, height = 0.33 } })<cr>
+nnoremap <space>/ <cmd>lua require('fzf-lua').blines()<cr>
+nnoremap <space>o <cmd>lua require('fzf-lua').lsp_document_symbols({ winopts = { width = 0.6 } })<cr>
+nnoremap gr <cmd>lua require('fzf-lua').lsp_references({ winopts = { height=0.6 } })<cr>
+nnoremap gd <cmd>lua require('fzf-lua').lsp_definitions({ jump_to_single_result = true, winopts = { height=0.6 } })<cr>
+nnoremap gD <cmd>lua require('fzf-lua').lsp_declarations({ jump_to_single_result = true, winopts = { height=0.6 } })<cr>
+nnoremap gi <cmd>lua require('fzf-lua').lsp_implementations({ winopts = { height=0.6 } })<cr>
+nnoremap gt <cmd>lua require('fzf-lua').lsp_typedefs({ winopts = { height=0.6 }})<cr>
+nnoremap <leader>da <cmd>lua require('fzf-lua').lsp_code_actions({ winopts = { height=0.6 }})<cr>
 
 " Fix gx on Mac to open links, images etc with `open`
 nmap <silent> gx :!open <cfile><cr>

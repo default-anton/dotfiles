@@ -14,11 +14,9 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, bufopts)
   vim.keymap.set('n', '[e', vim.diagnostic.goto_prev, bufopts)
   vim.keymap.set('n', ']e', vim.diagnostic.goto_next, bufopts)
-  vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
   vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
   vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, bufopts)
   vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, bufopts)
-  vim.keymap.set('n', '<leader>da', vim.lsp.buf.code_action, bufopts)
   vim.keymap.set('n', '<leader>f', vim.lsp.buf.formatting, bufopts)
 end
 
