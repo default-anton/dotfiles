@@ -41,6 +41,8 @@ lspconfig.gopls.setup {
   settings = {
     gopls = {
       experimentalPostfixCompletions = true,
+      completeUnimported = true,
+      usePlaceholders = true,
       analyses = {
         unusedparams = true,
         shadow = true,

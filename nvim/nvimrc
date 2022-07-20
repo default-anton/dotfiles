@@ -30,6 +30,9 @@ Plug 'nvim-lualine/lualine.nvim'
 Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'lewis6991/impatient.nvim'
 Plug 'notjedi/nvim-rooter.lua'
+Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'kdheepak/lazygit.nvim'
 
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
@@ -45,7 +48,6 @@ Plug 'pbrisbin/vim-mkdir'
 Plug 'vim-scripts/matchit.zip'
 Plug 'ntpeters/vim-better-whitespace'
 Plug 'rakr/vim-one' " Adaptation of one-light and one-dark colorschemes for Vim
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'pangloss/vim-javascript'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'leafgarland/typescript-vim'
@@ -54,7 +56,6 @@ Plug 'hashivim/vim-terraform'
 Plug 'tpope/vim-rails'
 Plug 'tpope/vim-bundler'
 Plug 'editorconfig/editorconfig-vim'
-Plug 'kdheepak/lazygit.nvim'
 Plug 'github/copilot.vim'
 call plug#end()
 

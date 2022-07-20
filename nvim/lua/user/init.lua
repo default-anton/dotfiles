@@ -1,4 +1,5 @@
 require("user.nvim-lsp")
+require("user.null-ls")
 require("user.cmp")
 require("user.nvim-tree")
 require("user.treesitter")
