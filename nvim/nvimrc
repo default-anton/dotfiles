@@ -83,6 +83,7 @@ set shiftwidth=2
 set softtabstop=2
 set scrolloff=3
 set sidescrolloff=5
+set scroll=8
 set backspace=indent,eol,start
 set termguicolors
 if has("macunix")
