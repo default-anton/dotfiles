@@ -20,6 +20,7 @@ Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/nvim-treesitter-context'
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'kyazdani42/nvim-tree.lua'
 Plug 'lewis6991/gitsigns.nvim'
@@ -171,17 +172,6 @@ nmap <silent> gx :!open <cfile><cr>
 
 " vmap <leader>f <Plug>(coc-format-selected)
 " nmap <leader>f <Plug>(coc-format-selected)
-
-" Map function and class text objects
-" NOTE: Requires 'textDocument.documentSymbol' support from the language server.
-" xmap if <Plug>(coc-funcobj-i)
-" omap if <Plug>(coc-funcobj-i)
-" xmap af <Plug>(coc-funcobj-a)
-" omap af <Plug>(coc-funcobj-a)
-" xmap ic <Plug>(coc-classobj-i)
-" omap ic <Plug>(coc-classobj-i)
-" xmap ac <Plug>(coc-classobj-a)
-" omap ac <Plug>(coc-classobj-a)
 
 " Visual mode pressing * or # searches for the current selection
 vnoremap <silent> * :<C-u>call GetVisualSelection()<cr>/<C-R>=@/<cr><cr>
