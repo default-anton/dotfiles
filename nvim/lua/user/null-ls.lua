@@ -13,7 +13,9 @@ null_ls.setup({
     formatting.black.with({ extra_args = { "--fast" } }),
     formatting.stylua,
     formatting.rubocop,
+    formatting.shfmt,
     diagnostics.flake8,
     diagnostics.rubocop,
+    diagnostics.shellcheck,
   },
 })
