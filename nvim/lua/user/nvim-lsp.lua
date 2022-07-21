@@ -18,6 +18,10 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, bufopts)
   vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, bufopts)
   vim.keymap.set('n', '<leader>f', vim.lsp.buf.formatting, bufopts)
+  vim.diagnostic.config({
+    virtual_text = false,
+    severity_sort = true,
+  })
 end
 
 lspconfig.jsonls.setup {
