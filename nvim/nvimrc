@@ -155,6 +155,7 @@ nnoremap <leader>hR <cmd>lua require('gitsigns').reset_buffer()<cr>
 nnoremap <C-d> 8jzz<cr>
 nnoremap <C-u> 8kzz<cr>
 
+nnoremap <space>c <cmd>lua require('fzf-lua').resume()<cr>
 nnoremap <space><leader> <cmd>lua require('fzf-lua').files()<cr>
 nnoremap <space><space><leader> <cmd>lua require('fzf-lua').files({ cwd='%:h' })<cr>
 nnoremap <space>m <cmd>lua require('fzf-lua').live_grep_native()<cr>
