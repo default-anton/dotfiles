@@ -14,6 +14,20 @@ require('nvim-treesitter.configs').setup {
   },
   textobjects = {
     enable = true,
+
+    move = {
+      enable = true,
+      set_jumps = true,
+
+      goto_next_start = {
+        ["]f"] = "@function.outer",
+        ["]]"] = "@class.outer",
+      },
+      goto_previous_start = {
+        ["[f"] = "@function.outer",
+        ["[["] = "@class.outer",
+      },
+    },
     select = {
       enable = true,
 
