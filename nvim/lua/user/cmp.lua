@@ -1,37 +1,8 @@
 local cmp = require('cmp')
+local lspkind = require('lspkind')
 local cmp_ultisnips_mappings = require('cmp_nvim_ultisnips.mappings')
 
 require('cmp_nvim_ultisnips').setup {}
-
---   פּ ﯟ   some other good icons
-local kind_icons = {
-  Text = "",
-  Method = "m",
-  Function = "",
-  Constructor = "",
-  Field = "",
-  Variable = "",
-  Class = "",
-  Interface = "",
-  Module = "",
-  Property = "",
-  Unit = "",
-  Value = "",
-  Enum = "",
-  Keyword = "",
-  Snippet = "",
-  Color = "",
-  File = "",
-  Reference = "",
-  Folder = "",
-  EnumMember = "",
-  Constant = "",
-  Struct = "",
-  Event = "",
-  Operator = "",
-  TypeParameter = "",
-}
--- find more here: https://www.nerdfonts.com/cheat-sheet
 
 cmp.setup({
   snippet = {
@@ -79,20 +50,17 @@ cmp.setup({
   },
   formatting = {
     fields = { "kind", "abbr", "menu" },
-    format = function(entry, vim_item)
-      -- Kind icons
-      vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
-      --vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind)
-      vim_item.menu = ({
+    format = lspkind.cmp_format({
+      mode = "symbol",
+      menu = {
         nvim_lsp_signature_help = "[sig]",
         nvim_lsp = "[lsp]",
         nvim_lua = "[lsp]",
         ultisnips = "[snip]",
         buffer = "[buf]",
         path = "[path]",
-      })[entry.source.name]
-      return vim_item
-    end,
+      },
+    })
   },
   confirm_opts = {
     behavior = cmp.ConfirmBehavior.Replace,
