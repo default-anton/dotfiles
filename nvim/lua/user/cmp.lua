@@ -71,7 +71,7 @@ cmp.setup({
     { name = 'nvim_lsp' },
     { name = 'nvim_lua' },
     { name = 'ultisnips' }, -- For ultisnips users.
-    { name = 'buffer' },
+    { name = 'buffer', keyword_length = 4 },
     { name = "path" },
     -- { name = 'vsnip' }, -- For vsnip users.
     -- { name = 'luasnip' }, -- For luasnip users.
@@ -84,11 +84,12 @@ cmp.setup({
       vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
       --vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind)
       vim_item.menu = ({
-        nvim_lsp_signature_help = "[Signature]",
-        nvim_lsp = "[LSP]",
-        ultisnips = "[Snippet]",
-        buffer = "[Buffer]",
-        path = "[Path]",
+        nvim_lsp_signature_help = "[sig]",
+        nvim_lsp = "[lsp]",
+        nvim_lua = "[lsp]",
+        ultisnips = "[snip]",
+        buffer = "[buf]",
+        path = "[path]",
       })[entry.source.name]
       return vim_item
     end,
