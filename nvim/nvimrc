@@ -131,7 +131,7 @@ endif
 
 " Git
 nnoremap <space>d <cmd>lua require('fzf-lua').git_status()<cr>
-nnoremap <leader>b <cmd>lua require('fzf-lua').git_branches()<cr>
+nnoremap <leader>b <cmd>lua require('fzf-lua').git_branches({ winopts = { height=0.6 }})<cr>
 nnoremap <silent> <leader>gg <cmd>LazyGit<cr>
 nnoremap <silent> <leader>gf <cmd>LazyGitFilterCurrentFile<cr>
 
@@ -156,15 +156,15 @@ nnoremap <C-d> 8jzz<cr>
 nnoremap <C-u> 8kzz<cr>
 
 nnoremap <space>c <cmd>lua require('fzf-lua').resume()<cr>
-nnoremap <space><leader> <cmd>lua require('fzf-lua').files()<cr>
-nnoremap <space><space><leader> <cmd>lua require('fzf-lua').files({ cwd='%:h' })<cr>
+nnoremap <space><leader> <cmd>lua require('fzf-lua').files({ winopts = { row = 0.5, height = 0.5 }})<cr>
+nnoremap <space><space><leader> <cmd>lua require('fzf-lua').files({ cwd='%:h', winopts = { row = 0.5, height = 0.5 } })<cr>
 nnoremap <space>m <cmd>lua require('fzf-lua').live_grep_native()<cr>
 nnoremap <space><space>m <cmd>lua require('fzf-lua').live_grep_native({ cwd='%:h' })<cr>
 vnoremap <space>m <cmd>lua require('fzf-lua').grep_visual()<cr>
 vnoremap <space><space>m <cmd>lua require('fzf-lua').grep_visual({ cwd='%:h' })<cr>
 nnoremap <space>w <cmd>lua require('fzf-lua').grep_cword()<cr>
 nnoremap <space><space>w <cmd>lua require('fzf-lua').grep_cword({ cwd='%:h' })<cr>
-nnoremap <space>. <cmd>lua require('fzf-lua').buffers({ winopts = { width = 0.6, height = 0.33 } })<cr>
+nnoremap <space>. <cmd>lua require('fzf-lua').buffers({ winopts = { row = 0.5, width = 0.6, height = 0.33 } })<cr>
 nnoremap <space>/ <cmd>lua require('fzf-lua').blines()<cr>
 nnoremap <space>o <cmd>lua require('fzf-lua').lsp_document_symbols({ winopts = { width = 0.6 } })<cr>
 nnoremap gr <cmd>lua require('fzf-lua').lsp_references({ winopts = { height=0.6 } })<cr>
