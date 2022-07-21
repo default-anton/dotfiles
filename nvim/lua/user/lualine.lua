@@ -1,19 +1,19 @@
 local branch = {
-	"branch",
-	icons_enabled = true,
-	icon = "",
+  "branch",
+  icons_enabled = true,
+  icon = "",
 }
 
 local mode = {
-	"mode",
-	fmt = function(str)
-		return "-- " .. str .. " --"
-	end,
+  "mode",
+  fmt = function(str)
+    return "-- " .. str .. " --"
+  end,
 }
 
 local location = {
-	"location",
-	padding = 0,
+  "location",
+  padding = 0,
 }
 
 require('lualine').setup {
