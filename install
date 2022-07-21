@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-from typing import Final
+import os
 from pathlib import Path
 from subprocess import Popen, check_output
-import os
-from io import StringIO
-
+from typing import Final
 
 SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
