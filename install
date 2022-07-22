@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 from pathlib import Path
 from subprocess import Popen, check_output
@@ -52,16 +53,22 @@ BASH_PROFILE_LINES: Final[list[str]] = [
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--brew", action=argparse.BooleanOptionalAction)
+    parser.set_defaults(brew=True)
+    args = parser.parse_args()
+
     os.environ["HOMEBREW_PREFIX"] = check_output(["brew", "--prefix"]).strip().decode()
 
-    for cmd in SHELL_CMDS:
-        process = Popen(
-            cmd,
-            cwd=DOTFILES,
-            shell=True,
-            executable=os.getenv("SHELL"),
-        )
-        process.wait(timeout=60)
+    if args.brew:
+        for cmd in SHELL_CMDS:
+            process = Popen(
+                cmd,
+                cwd=DOTFILES,
+                shell=True,
+                executable=os.getenv("SHELL"),
+            )
+            process.wait(timeout=60)
 
     for (src, dst) in SYM_LINKS:
         src, dst = Path(src).expanduser(), DOTFILES.joinpath(dst)
