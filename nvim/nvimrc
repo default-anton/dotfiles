@@ -73,7 +73,7 @@ let mapleader = ","
 set splitbelow
 set exrc
 set secure
-set number
+set relativenumber
 set nobackup
 set nowritebackup
 set noswapfile
