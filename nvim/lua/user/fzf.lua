@@ -4,6 +4,7 @@ require 'fzf-lua'.setup {
       vertical = 'up:40%',
       horizontal = 'right:50%',
       layout = 'vertical',
+      default = 'bat_native',
     },
   },
   files = {

@@ -8,16 +8,16 @@ gui:
   language: 'auto' # one of 'auto' | 'en' | 'zh' | 'pl' | 'nl' | 'ja' | 'ko'
   timeFormat: '02 Jan 06 15:04 MST' # https://pkg.go.dev/time#Time.Format
   theme:
-    lightTheme: true # For terminals with a light background
+    lightTheme: false # For terminals with a light background
     activeBorderColor:
-      - black
+      - green
       - bold
     inactiveBorderColor:
-      - black
+      - white
     optionsTextColor:
       - blue
     selectedLineBgColor:
-      - default # set to `default` to have no background colour
+      - blue # set to `default` to have no background colour
     selectedRangeBgColor:
       - blue
     cherryPickedCommitBgColor:
@@ -28,7 +28,7 @@ gui:
       - red
   commitLength:
     show: true
-  mouseEvents: true
+  mouseEvents: false
   skipUnstageLineWarning: false
   skipStashWarning: false
   showFileTree: true # for rendering changes files in a tree format
@@ -36,7 +36,7 @@ gui:
   showRandomTip: true
   showBottomLine: true # for hiding the bottom information line (unless it has important information to tell you)
   showCommandLog: true
-  showIcons: false
+  showIcons: true
   commandLogSize: 8
   splitDiff: 'auto' # one of 'auto' | 'always'
 git:
