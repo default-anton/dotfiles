@@ -1,9 +1,9 @@
-require('nvim-lsp-installer').setup {
-  automatic_installation = true
+require("nvim-lsp-installer").setup {
+  automatic_installation = true,
 }
 
-local lspconfig = require('lspconfig')
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local lspconfig = require "lspconfig"
+local capabilities = require("cmp_nvim_lsp").update_capabilities(vim.lsp.protocol.make_client_capabilities())
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 -- Use an on_attach function to only map the following keys
@@ -11,17 +11,28 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 local on_attach = function(client, bufnr)
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   local bufopts = { noremap = true, silent = true, buffer = bufnr }
-  vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, bufopts)
-  vim.keymap.set('n', '[e', vim.diagnostic.goto_prev, bufopts)
-  vim.keymap.set('n', ']e', vim.diagnostic.goto_next, bufopts)
-  vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-  vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, bufopts)
-  vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, bufopts)
-  vim.keymap.set('n', '<leader>f', vim.lsp.buf.formatting, bufopts)
-  vim.diagnostic.config({
+  vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, bufopts)
+  vim.keymap.set("n", "[e", vim.diagnostic.goto_prev, bufopts)
+  vim.keymap.set("n", "]e", vim.diagnostic.goto_next, bufopts)
+  vim.keymap.set("n", "K", vim.lsp.buf.hover, bufopts)
+  vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, bufopts)
+  vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, bufopts)
+
+  if client.supports_method "textDocument/formatting" then
+    vim.keymap.set("n", "<leader>f", function()
+      vim.lsp.buf.format {
+        filter = function(c)
+          return c.name == "null-ls"
+        end,
+        bufnr = bufnr,
+      }
+    end, bufopts)
+  end
+
+  vim.diagnostic.config {
     virtual_text = false,
     severity_sort = true,
-  })
+  }
 end
 
 lspconfig.jsonls.setup {
@@ -29,7 +40,7 @@ lspconfig.jsonls.setup {
   capabilities = capabilities,
   settings = {
     json = {
-      schemas = require('schemastore').json.schemas(),
+      schemas = require("schemastore").json.schemas(),
       validate = { enable = true },
     },
   },
@@ -54,7 +65,7 @@ lspconfig.gopls.setup {
   },
   init_options = {
     usePlaceholders = true,
-  }
+  },
 }
 lspconfig.pyright.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.html.setup { on_attach = on_attach, capabilities = capabilities }
@@ -72,8 +83,8 @@ lspconfig.sumneko_lua.setup {
       },
       workspace = {
         library = {
-          [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-          [vim.fn.stdpath("config") .. "/lua"] = true,
+          [vim.fn.expand "$VIMRUNTIME/lua"] = true,
+          [vim.fn.stdpath "config" .. "/lua"] = true,
         },
       },
     },

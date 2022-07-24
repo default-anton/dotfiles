@@ -63,6 +63,7 @@ brew 'tldr'
 brew 'viddy'
 brew 'koekeishiya/formulae/yabai'
 brew 'koekeishiya/formulae/skhd'
+brew 'stylua'
 
 cask 'lulu'
 cask 'alacritty', args: { force: true }

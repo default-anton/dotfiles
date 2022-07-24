@@ -1,7 +1,7 @@
 local nvim_tree = require "nvim-tree"
 local tree_cb = require("nvim-tree.config").nvim_tree_callback
 
-nvim_tree.setup({
+nvim_tree.setup {
   sync_root_with_cwd = true,
   update_focused_file = {
     enable = true,
@@ -57,4 +57,4 @@ nvim_tree.setup({
       },
     },
   },
-})
+}

@@ -1,10 +1,10 @@
-local cmp = require('cmp')
-local lspkind = require('lspkind')
-local cmp_ultisnips_mappings = require('cmp_nvim_ultisnips.mappings')
+local cmp = require "cmp"
+local lspkind = require "lspkind"
+local cmp_ultisnips_mappings = require "cmp_nvim_ultisnips.mappings"
 
-require('cmp_nvim_ultisnips').setup {}
+require("cmp_nvim_ultisnips").setup {}
 
-cmp.setup({
+cmp.setup {
   snippet = {
     -- REQUIRED - you must specify a snippet engine
     expand = function(args)
@@ -14,35 +14,35 @@ cmp.setup({
       vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
     end,
   },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-d>'] = cmp.mapping.scroll_docs(4),
+  mapping = cmp.mapping.preset.insert {
+    ["<C-u>"] = cmp.mapping.scroll_docs(-4),
+    ["<C-d>"] = cmp.mapping.scroll_docs(4),
     ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
     ["<C-e>"] = cmp.mapping {
       i = cmp.mapping.abort(),
       c = cmp.mapping.close(),
     },
-    ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-    ['<CR>'] = cmp.mapping.confirm { select = true },
-    ['<Tab>'] = cmp.mapping(
-      function(fallback)
-        cmp_ultisnips_mappings.expand_or_jump_forwards(fallback)
-      end,
-      { 'i', 's', --[[ "c" (to enable the mapping in command mode) ]] }
-    ),
-    ['<S-Tab>'] = cmp.mapping(
-      function(fallback)
-        cmp_ultisnips_mappings.jump_backwards(fallback)
-      end,
-      { 'i', 's', --[[ "c" (to enable the mapping in command mode) ]] }
-    ),
-  }),
+    ["<C-y>"] = cmp.mapping.confirm { select = true },
+    ["<CR>"] = cmp.mapping.confirm { select = true },
+    ["<Tab>"] = cmp.mapping(function(fallback)
+      cmp_ultisnips_mappings.expand_or_jump_forwards(fallback)
+    end, {
+      "i",
+      "s", --[[ "c" (to enable the mapping in command mode) ]]
+    }),
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      cmp_ultisnips_mappings.jump_backwards(fallback)
+    end, {
+      "i",
+      "s", --[[ "c" (to enable the mapping in command mode) ]]
+    }),
+  },
   sources = {
-    { name = 'nvim_lsp_signature_help' },
-    { name = 'nvim_lsp' },
-    { name = 'nvim_lua' },
-    { name = 'ultisnips' }, -- For ultisnips users.
-    { name = 'buffer', keyword_length = 4 },
+    { name = "nvim_lsp_signature_help" },
+    { name = "nvim_lsp" },
+    { name = "nvim_lua" },
+    { name = "ultisnips" }, -- For ultisnips users.
+    { name = "buffer", keyword_length = 4 },
     { name = "path" },
     -- { name = 'vsnip' }, -- For vsnip users.
     -- { name = 'luasnip' }, -- For luasnip users.
@@ -50,7 +50,7 @@ cmp.setup({
   },
   formatting = {
     fields = { "kind", "abbr", "menu" },
-    format = lspkind.cmp_format({
+    format = lspkind.cmp_format {
       mode = "symbol",
       menu = {
         nvim_lsp_signature_help = "[sig]",
@@ -60,7 +60,7 @@ cmp.setup({
         buffer = "[buf]",
         path = "[path]",
       },
-    })
+    },
   },
   confirm_opts = {
     behavior = cmp.ConfirmBehavior.Replace,
@@ -76,22 +76,22 @@ cmp.setup({
 
     ghost_text = true,
   },
-})
+}
 
 -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline('/', {
+cmp.setup.cmdline("/", {
   mapping = cmp.mapping.preset.cmdline(),
   sources = {
-    { name = 'buffer' }
-  }
+    { name = "buffer" },
+  },
 })
 
 -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline(':', {
+cmp.setup.cmdline(":", {
   mapping = cmp.mapping.preset.cmdline(),
   sources = cmp.config.sources({
-    { name = 'path' }
+    { name = "path" },
   }, {
-    { name = 'cmdline' }
-  })
+    { name = "cmdline" },
+  }),
 })

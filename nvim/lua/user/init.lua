@@ -1,11 +1,11 @@
-require("user.nvim-lsp")
-require("user.null-ls")
-require("user.cmp")
-require("user.nvim-tree")
-require("user.treesitter")
-require("user.gitsigns")
-require("user.bufferline")
-require("user.lualine")
-require("user.indent-blankline")
-require("user.rooter")
-require("user.fzf")
+require "user.null-ls"
+require "user.nvim-lsp"
+require "user.cmp"
+require "user.nvim-tree"
+require "user.treesitter"
+require "user.gitsigns"
+require "user.bufferline"
+require "user.lualine"
+require "user.indent-blankline"
+require "user.rooter"
+require "user.fzf"

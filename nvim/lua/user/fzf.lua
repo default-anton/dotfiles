@@ -1,10 +1,10 @@
-require 'fzf-lua'.setup {
+require("fzf-lua").setup {
   winopts = {
     preview = {
-      vertical = 'up:40%',
-      horizontal = 'right:50%',
-      layout = 'vertical',
-      default = 'bat_native',
+      vertical = "up:40%",
+      horizontal = "right:50%",
+      layout = "vertical",
+      default = "bat_native",
     },
   },
   files = {

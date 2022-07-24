@@ -160,4 +160,3 @@ require("bufferline").setup {
     },
   },
 }
-
