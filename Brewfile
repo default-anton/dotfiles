@@ -65,6 +65,6 @@ brew 'koekeishiya/formulae/yabai'
 brew 'koekeishiya/formulae/skhd'
 
 cask 'lulu'
-cask 'alacritty'
+cask 'alacritty', args: { force: true }
 cask 'blackhole-16ch'
 cask 'font-fira-code-nerd-font'
