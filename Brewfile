@@ -9,7 +9,7 @@ tap 'koekeishiya/formulae'
 
 brew 'curl'
 brew 'bash'
-brew 'neovim'
+brew 'neovim', args: ['HEAD']
 brew 'starship'
 brew 'moreutils'
 brew 'fzy'
