@@ -18,6 +18,8 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/Library/Application Support/jesseduffield/lazygit/config.yml", "lazygit.yml"),
     ("~/.config/bat/config", "bat/config"),
     ("~/.config/starship.toml", "starship.toml"),
+    ("~/.config/yabai", "config/yabai"),
+    ("~/.config/skhd", "config/skhd"),
 ]
 
 TEMPLATES: Final[list[tuple[str, str]]] = [
