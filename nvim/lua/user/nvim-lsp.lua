@@ -17,17 +17,14 @@ local on_attach = function(client, bufnr)
   vim.keymap.set("n", "K", vim.lsp.buf.hover, bufopts)
   vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, bufopts)
   vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, bufopts)
-
-  if client.supports_method "textDocument/formatting" then
-    vim.keymap.set("n", "<leader>f", function()
-      vim.lsp.buf.format {
-        filter = function(c)
-          return c.name == "null-ls"
-        end,
-        bufnr = bufnr,
-      }
-    end, bufopts)
-  end
+  vim.keymap.set("n", "<leader>f", function()
+    vim.lsp.buf.format {
+      filter = function(c)
+        return c.name == "null-ls"
+      end,
+      bufnr = bufnr,
+    }
+  end, bufopts)
 
   vim.diagnostic.config {
     virtual_text = false,
