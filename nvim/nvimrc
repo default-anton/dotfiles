@@ -108,6 +108,9 @@ set encoding=utf8
 set switchbuf=useopen,usetab,vsplit
 set stal=2
 
+let g:copilot_no_tab_map = v:true
+imap <expr> <Plug>(vimrc:dummy-copilot-tab) copilot#Accept("\<Tab>")
+
 let g:markdown_fenced_languages = ['python', 'bash=sh', 'html', 'css', 'json', 'javascript', 'js=javascript', 'yaml', 'dockerfile']
 
 let g:better_whitespace_enabled = 1
