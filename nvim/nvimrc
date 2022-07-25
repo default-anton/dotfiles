@@ -76,10 +76,10 @@ nnoremap <leader>b <cmd>lua require('fzf-lua').git_branches({ winopts = { height
 nnoremap <silent> <leader>gg <cmd>LazyGit<cr>
 nnoremap <silent> <leader>gf <cmd>LazyGitFilterCurrentFile<cr>
 
-nnoremap <silent><C-Up> <cmd>resize -2<cr>
-nnoremap <silent><C-Down> <cmd>resize +2<cr>
-nnoremap <silent><C-Left> <cmd>vertical resize -2<cr>
-nnoremap <silent><C-Right> <cmd>vertical resize +2<cr>
+nnoremap <silent><C-Up> <cmd>resize -6<cr>
+nnoremap <silent><C-Down> <cmd>resize +6<cr>
+nnoremap <silent><C-Left> <cmd>vertical resize -6<cr>
+nnoremap <silent><C-Right> <cmd>vertical resize +6<cr>
 
 " Navigation
 nnoremap <C-d> 8jzz<cr>
