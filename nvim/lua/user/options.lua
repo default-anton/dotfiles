@@ -27,6 +27,8 @@ opt.scrolloff = 3
 opt.sidescrolloff = 5
 opt.scroll = 8
 opt.updatetime = 50
+opt.cursorline = true
+opt.cursorlineopt = { "number" }
 
 -- Don't pass messages to |ins-completion-menu|.
 opt.shortmess:append "c"
