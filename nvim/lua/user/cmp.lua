@@ -2,6 +2,8 @@ local cmp = require "cmp"
 local lspkind = require "lspkind"
 local cmp_ultisnips_mappings = require "cmp_nvim_ultisnips.mappings"
 
+vim.g.UltiSnipsSnippetDirectories = { os.getenv "HOME" .. "/.dotfiles/UltiSnips" }
+
 require("cmp_nvim_ultisnips").setup {}
 
 cmp.setup {
@@ -17,7 +19,7 @@ cmp.setup {
   mapping = cmp.mapping.preset.insert {
     ["<C-u>"] = cmp.mapping.scroll_docs(-4),
     ["<C-d>"] = cmp.mapping.scroll_docs(4),
-    ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i" }),
+    ["<C-Space>"] = cmp.mapping.complete(),
     ["<C-c>"] = cmp.mapping {
       i = cmp.mapping.abort(),
       c = cmp.mapping.close(),
@@ -44,7 +46,9 @@ cmp.setup {
       else
         vim.api.nvim_feedkeys(resolved_key, "n", true)
       end
-    end),
+    end, {
+      "i",
+    }),
   },
   sources = cmp.config.sources({
     { name = "nvim_lsp_signature_help" },
@@ -53,7 +57,7 @@ cmp.setup {
     { name = "nvim_lua" },
   }, {
     { name = "ultisnips" }, -- For ultisnips users.
-    { name = "buffer", keyword_length = 4 },
+    { name = "buffer", keyword_length = 3 },
     { name = "path" },
     -- { name = 'vsnip' }, -- For vsnip users.
     -- { name = 'luasnip' }, -- For luasnip users.

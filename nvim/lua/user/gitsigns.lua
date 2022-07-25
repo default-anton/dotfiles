@@ -1,4 +1,48 @@
-require("gitsigns").setup {
+local gs = require "gitsigns"
+
+local default_opts = { noremap = true, silent = true }
+
+gs.setup {
+  on_attach = function(bufnr)
+    local function map(mode, l, r, opts)
+      opts = vim.tbl_extend("force", default_opts, opts or {})
+      opts.buffer = bufnr
+      vim.keymap.set(mode, l, r, opts)
+    end
+
+    -- Navigation
+    map("n", "]c", function()
+      if vim.wo.diff then
+        return "]c"
+      end
+      vim.schedule(function()
+        gs.next_hunk()
+      end)
+      return "<Ignore>"
+    end, { expr = true })
+
+    map("n", "[c", function()
+      if vim.wo.diff then
+        return "[c"
+      end
+      vim.schedule(function()
+        gs.prev_hunk()
+      end)
+      return "<Ignore>"
+    end, { expr = true })
+
+    -- Actions
+    map("n", "<leader>ht", gs.toggle_signs)
+    map({ "n", "v" }, "<leader>hs", gs.stage_hunk)
+    map({ "n", "v" }, "<leader>hr", gs.reset_hunk)
+    map("n", "<leader>hS", gs.stage_buffer)
+    map("n", "<leader>hR", gs.reset_buffer)
+    map("n", "<leader>hu", gs.undo_stage_hunk)
+    map("n", "<leader>hp", gs.preview_hunk)
+    map("n", "<leader>hb", function()
+      gs.blame_line { full = true }
+    end)
+  end,
   signs = {
     add = { hl = "GitSignsAdd", text = "▎", numhl = "GitSignsAddNr", linehl = "GitSignsAddLn" },
     change = { hl = "GitSignsChange", text = "▎", numhl = "GitSignsChangeNr", linehl = "GitSignsChangeLn" },

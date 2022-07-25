@@ -49,7 +49,7 @@ Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-abolish'
 Plug 'pbrisbin/vim-mkdir'
 Plug 'vim-scripts/matchit.zip'
-Plug 'ntpeters/vim-better-whitespace'
+"Plug 'ntpeters/vim-better-whitespace'
 Plug 'pangloss/vim-javascript'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'leafgarland/typescript-vim'
@@ -61,71 +61,14 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'github/copilot.vim'
 call plug#end()
 
-set completeopt=menu,menuone,noselect
-
 lua require("impatient")
 lua require("user")
-
-filetype plugin indent on
-
-let mapleader = ","
-
-set splitbelow
-set exrc
-set secure
-set relativenumber
-set nobackup
-set nowritebackup
-set noswapfile
-set laststatus=2 " Always display the status line
-set autoindent
-set smartindent
-set expandtab
-set shiftwidth=2
-set softtabstop=2
-set scrolloff=3
-set sidescrolloff=5
-set scroll=8
-set backspace=indent,eol,start
-set termguicolors
-if has("macunix")
-  set clipboard=unnamed
-else
-  set clipboard=unnamedplus
-endif
-
-let g:tokyonight_lualine_bold = 1
-colorscheme tokyonight
-
-set ignorecase
-set smartcase
-set lazyredraw
-set textwidth=120
-set colorcolumn=120
-set encoding=utf8
-
-" Specify the behavior when switching between buffers
-set switchbuf=useopen,usetab,vsplit
-set stal=2
 
 let g:copilot_no_tab_map = v:true
 imap <expr> <Plug>(vimrc:dummy-copilot-tab) copilot#Accept("\<Tab>")
 
-let g:markdown_fenced_languages = ['python', 'bash=sh', 'html', 'css', 'json', 'javascript', 'js=javascript', 'yaml', 'dockerfile']
-
-let g:better_whitespace_enabled = 1
-let g:strip_whitespace_on_save = 1
-
-let g:UltiSnipsSnippetDirectories = [$HOME.'/.dotfiles/UltiSnips']
-
-" if hidden is not set, TextEdit might fail.
-set hidden
-" You will have bad experience for diagnostic messages when it's default 4000.
-set updatetime=300
-" don't give |ins-completion-menu| messages.
-set shortmess+=c
-" always show signcolumns
-set signcolumn=yes:1
+"let g:better_whitespace_enabled = 1
+"let g:strip_whitespace_on_save = 1
 
 " Git
 nnoremap <space>d <cmd>lua require('fzf-lua').git_status()<cr>
@@ -137,17 +80,6 @@ nnoremap <silent><C-Up> <cmd>resize -2<cr>
 nnoremap <silent><C-Down> <cmd>resize +2<cr>
 nnoremap <silent><C-Left> <cmd>vertical resize -2<cr>
 nnoremap <silent><C-Right> <cmd>vertical resize +2<cr>
-
-nnoremap ]c <cmd>lua require('gitsigns').next_hunk()<cr>
-nnoremap [c <cmd>lua require('gitsigns').prev_hunk()<cr>
-nnoremap <leader>ht <cmd>lua require('gitsigns').toggle_signs()<cr>
-nnoremap <leader>hp <cmd>lua require('gitsigns').preview_hunk()<cr>
-nnoremap <leader>hb <cmd>lua require('gitsigns').blame_line()<cr>
-nnoremap <leader>hr <cmd>lua require('gitsigns').reset_hunk()<cr>
-nnoremap <leader>hs <cmd>lua require('gitsigns').stage_hunk()<cr>
-nnoremap <leader>hu <cmd>lua require('gitsigns').undo_stage_hunk()<cr>
-nnoremap <leader>hR <cmd>lua require('gitsigns').reset_buffer()<cr>
-
 
 " Navigation
 nnoremap <C-d> 8jzz<cr>
@@ -215,53 +147,6 @@ map <silent> <leader>bd :bd<cr>
 map <leader>ba :bufdo bd<cr>
 map <leader>. :bnext<cr>
 map <leader>m :bprevious<cr>
-
-" set to 1, the nvim will auto close current preview window when change
-" from markdown buffer to another buffer
-" default: 1
-let g:mkdp_auto_close = 0
-
-" set to 1, the vim will refresh markdown when save the buffer or
-" leave from insert mode, default 0 is auto refresh markdown as you edit or
-" move the cursor
-" default: 0
-let g:mkdp_refresh_slow = 1
-
-" specify browser to open preview page
-" default: ''
-
-" options for markdown render
-" mkit: markdown-it options for render
-" katex: katex options for math
-" uml: markdown-it-plantuml options
-" maid: mermaid options
-" disable_sync_scroll: if disable sync scroll, default 0
-" sync_scroll_type: 'middle', 'top' or 'relative', default value is 'middle'
-"   middle: mean the cursor position alway show at the middle of the preview page
-"   top: mean the vim top viewport alway show at the top of the preview page
-"   relative: mean the cursor position alway show at the relative positon of the preview page
-" hide_yaml_meta: if hide yaml metadata, default is 1
-" sequence_diagrams: js-sequence-diagrams options
-" content_editable: if enable content editable for preview page, default: v:false
-" disable_filename: if disable filename header for preview page, default: 0
-let g:mkdp_preview_options = {
-    \ 'mkit': {},
-    \ 'katex': {},
-    \ 'uml': {},
-    \ 'maid': {},
-    \ 'disable_sync_scroll': 0,
-    \ 'sync_scroll_type': 'middle',
-    \ 'hide_yaml_meta': 1,
-    \ 'sequence_diagrams': {'theme': 'simple'},
-    \ 'flowchart_diagrams': {},
-    \ 'content_editable': v:false,
-    \ 'disable_filename': 0
-    \ }
-
-" Terraform
-let g:terraform_align=1
-let g:terraform_fmt_on_save=1
-
 
 augroup langs
   autocmd!
