@@ -1,3 +1,9 @@
+customCommands:
+  - key: 'r'
+    command: 'git rom'
+    context: 'files'
+    description: 'rebase origin main'
+    loadingText: 'pulling'
 gui:
   # stuff relating to the UI
   scrollHeight: 2 # how many lines you scroll by
@@ -42,7 +48,7 @@ gui:
 git:
   paging:
     colorArg: always
-    useConfig: false
+    pager: delta --dark --paging=never
   commit:
     signOff: false
   merging:
@@ -70,9 +76,9 @@ git:
   parseEmoji: false
   diffContextSize: 3 # how many lines of context are shown around a change in diffs
 os:
-  editCommand: '' # see 'Configuring File Editing' section
-  editCommandTemplate: ''
-  openCommand: ''
+  editCommand: 'nvim' # see 'Configuring File Editing' section
+  editCommandTemplate: '{{editor}} +{{line}} -- {{filename}}'
+  openCommand: 'open {{filename}}'
 refresher:
   refreshInterval: 10 # File/submodule refresh interval in seconds. Auto-refresh can be disabled via option 'git.autoRefresh'.
   fetchInterval: 60 # Re-fetch interval in seconds. Auto-fetch can be disabled via option 'git.autoFetch'.

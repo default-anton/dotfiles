@@ -3,49 +3,63 @@
 	email = 1917237+default-anton@users.noreply.github.com
 
 [push]
-	default = current
+    default = current
 
 [github]
-	user = default-anton
+    user = default-anton
 
 [alias]
-        s     = stash
-        co    = checkout
-        br    = branch
-        dmbr  = !git br --merged | egrep -v '(^\\*|^master$|^develop$|^main$)' | xargs git br -d
-        ci    = commit --verbose
-        st    = status
-        l     = "!bash -c '. ~/.dotfiles/githelpers && pretty_git_log $@' -"
-        r     = !GIT_NO_PAGER=1 git l -30
-        la    = !git l --all
-        fap   = fetch --all -p
-        amend = commit --amend
-        dc    = diff --cached
-        dcw   = diff --cached --color-words
-        df    = diff
-        dw    = diff --color-words
-        all   = add --all
-        up    = standup -d 1 -f
-        poo   = push origin HEAD
-        rom   = !git fap && git rebase origin/$([ -f .git/refs/heads/main ] && echo main || echo master)
+    s     = stash
+    co    = checkout
+    br    = branch
+    dmbr  = !git br --merged | egrep -v '(^\\*|^master$|^develop$|^main$)' | xargs git br -d
+    ci    = commit --verbose
+    st    = status
+    l     = "!bash -c '. ~/.dotfiles/githelpers && pretty_git_log $@' -"
+    r     = !GIT_NO_PAGER=1 git l -30
+    la    = !git l --all
+    fap   = fetch --all -p
+    amend = commit --amend
+    dc    = diff --cached
+    df    = diff
+    all   = add --all
+    up    = standup -d 1 -f
+    poo   = push origin HEAD
+    rom   = !git fap && git rebase origin/$([ -f .git/refs/heads/main ] && echo main || echo master)
 
 [color]
-	ui   = true
-	diff = auto
+    ui   = true
+    diff = auto
 
 [diff]
-	mnemonicprefix = true
+    colorMoved = default
+
 [merge]
-	ff = false
+    ff = false
+    conflictstyle = diff3
+
 [core]
-	editor = nvim
-	excludesfile = ~/.dotfiles/gitignore
+    editor = nvim
+    pager = delta
+    excludesfile = ~/.dotfiles/gitignore
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    line-numbers = true
+    side-by-side = false
+    syntax-theme = base16-256
+
 [init]
-	templatedir = ~/.dotfiles/git-templates/
-	defaultBranch = main
+    templatedir = ~/.dotfiles/git-templates/
+    defaultBranch = main
+
 [pull]
-	rebase = true
+    rebase = true
+
 [rebase]
-	autoStash = true
+    autoStash = true
+
 [fetch]
-	prune = true
+    prune = true
