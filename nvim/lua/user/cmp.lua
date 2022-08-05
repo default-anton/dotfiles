@@ -35,7 +35,7 @@ cmp.setup {
       "i",
       "s", --[[ "c" (to enable the mapping in command mode) ]]
     }),
-    ["<C-o>"] = cmp.mapping(function(fallback)
+    ["<C-l>"] = cmp.mapping(function(fallback)
       local fallback_key = vim.api.nvim_replace_termcodes("<Tab>", true, true, true)
       local resolved_key = vim.fn["copilot#Accept"](fallback)
       if fallback_key == resolved_key then
