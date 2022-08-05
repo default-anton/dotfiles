@@ -1,13 +1,20 @@
-local brew_svc_group = vim.api.nvim_create_augroup("BrewServices", { clear = true })
+local restart_things = vim.api.nvim_create_augroup("RestartThings", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
   pattern = "skhdrc",
   command = ":Dispatch! brew services restart skhd",
-  group = brew_svc_group,
+  group = restart_things,
 })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
   pattern = "yabairc",
   command = ":Dispatch! brew services restart yabai",
-  group = brew_svc_group,
+  group = restart_things,
 })
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "nvimrc, .nvimrc",
+  command = ":so %",
+  group = restart_things,
+})
+
