@@ -49,7 +49,6 @@ Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-abolish'
 Plug 'pbrisbin/vim-mkdir'
 Plug 'vim-scripts/matchit.zip'
-"Plug 'ntpeters/vim-better-whitespace'
 Plug 'pangloss/vim-javascript'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'leafgarland/typescript-vim'
@@ -67,8 +66,6 @@ lua require("user")
 let g:copilot_no_tab_map = v:true
 imap <expr> <Plug>(vimrc:dummy-copilot-tab) copilot#Accept("\<Tab>")
 
-"let g:better_whitespace_enabled = 1
-"let g:strip_whitespace_on_save = 1
 
 " Git
 nnoremap <space>d <cmd>lua require('fzf-lua').git_status()<cr>
