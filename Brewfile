@@ -66,6 +66,7 @@ brew 'koekeishiya/formulae/yabai'
 brew 'koekeishiya/formulae/skhd'
 brew 'stylua'
 brew 'git-delta'
+brew 'go'
 
 cask 'lulu'
 cask 'alacritty'
