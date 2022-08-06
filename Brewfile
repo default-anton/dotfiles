@@ -68,6 +68,11 @@ brew 'stylua'
 brew 'git-delta'
 
 cask 'lulu'
-cask 'alacritty', args: { force: true }
+cask 'alacritty'
 cask 'blackhole-16ch'
 cask 'font-fira-code-nerd-font'
+cask 'slack'
+cask 'telegram'
+cask 'vlc'
+cask 'visual-studio-code'
+cask 'google-chrome'
