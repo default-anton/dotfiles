@@ -4,9 +4,10 @@ import argparse
 import os
 from pathlib import Path
 from subprocess import Popen, check_output
-from typing import Final
+from typing import Final, Tuple, List
+from platform import python_version
 
-SYM_LINKS: Final[list[tuple[str, str]]] = [
+SYM_LINKS: Final[List[Tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
     ("~/.gitconfig", "gitconfig"),
     ("~/.psqlrc", "psqlrc"),
@@ -22,31 +23,31 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.config/skhd", "config/skhd"),
 ]
 
-TEMPLATES: Final[list[tuple[str, str]]] = [
+TEMPLATES: Final[List[Tuple[str, str]]] = [
     ("~/.config/alacritty/alacritty.yml", "alacritty.yml"),
 ]
 
-DIRECTORIES: Final[list[str]] = [
+DIRECTORIES: Final[List[str]] = [
     "~/code",
 ]
 
 DOTFILES: Path = Path("~/.dotfiles").expanduser()
 
-SHELL_CMDS: Final[list[str]] = [
+SHELL_CMDS: Final[List[str]] = [
     "brew bundle --no-lock",
     ". $(brew --prefix)/opt/nvm/nvm.sh && nvm install node",
     "./pip_install",
     "$(brew --prefix)/opt/fzf/install",
 ]
 
-BASHRC_LINES: Final[list[str]] = [
+BASHRC_LINES: Final[List[str]] = [
     'eval "$(starship init bash)"',
     "source ~/.dotfiles/bashrc",
     "[ -f ~/.fzf.bash ] && source ~/.fzf.bash",
     "[ -f ~/.bash_aliases ] && source ~/.bash_aliases",
 ]
 
-BASH_PROFILE_LINES: Final[list[str]] = [
+BASH_PROFILE_LINES: Final[List[str]] = [
     "source ~/.bashrc",
     "source ~/.dotfiles/profile",
     'eval "$(pyenv init --path)"',
@@ -55,9 +56,17 @@ BASH_PROFILE_LINES: Final[list[str]] = [
 
 
 def main():
+    major, minor, patch = map(int, python_version().split('.'))
+    assert major == 3, 'python 3 expected'
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--brew", action=argparse.BooleanOptionalAction)
-    parser.set_defaults(brew=True)
+
+    if minor >= 9:
+        parser.add_argument("--brew", action=argparse.BooleanOptionalAction)
+        parser.set_defaults(brew=True)
+    else:
+        parser.add_argument("--no-brew", dest='brew', action='store_false')
+
     args = parser.parse_args()
 
     os.environ["HOMEBREW_PREFIX"] = check_output(["brew", "--prefix"]).strip().decode()
@@ -70,7 +79,7 @@ def main():
                 shell=True,
                 executable=os.getenv("SHELL"),
             )
-            process.wait(timeout=60)
+            process.wait(timeout=3600)
 
     for (src, dst) in SYM_LINKS:
         src, dst = Path(src).expanduser(), DOTFILES.joinpath(dst)
@@ -89,7 +98,7 @@ def main():
             shell=True,
             executable=os.getenv("SHELL"),
         )
-        process.wait(timeout=60)
+        process.wait(timeout=3600)
 
     for directory in DIRECTORIES:
         print(f"mkdir -p {directory}")
