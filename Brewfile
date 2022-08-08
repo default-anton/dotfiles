@@ -71,6 +71,7 @@ brew 'rbenv'
 brew 'ruby-build'
 brew 'nss'
 brew 'mkcert'
+brew 'awscli'
 
 cask 'lulu'
 cask 'alacritty'
