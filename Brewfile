@@ -67,6 +67,8 @@ brew 'koekeishiya/formulae/skhd'
 brew 'stylua'
 brew 'git-delta'
 brew 'go'
+brew 'rbenv'
+brew 'ruby-build'
 
 cask 'lulu'
 cask 'alacritty'

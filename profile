@@ -5,7 +5,6 @@ export GOPATH="${HOME}/code/.go"
 export GOBIN="${GOPATH}/bin"
 export PATH="${PATH}:${GOBIN}"
 export PATH="${PATH}:/usr/local/go/bin"
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export EDITOR=nvim
 
 command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
@@ -49,9 +48,6 @@ _fzf_compgen_path() {
 _fzf_compgen_dir() {
   fd --type d --hidden --follow --exclude ".git" . "$1"
 }
-
-# Load RVM into a shell session *as a function*
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
 command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
