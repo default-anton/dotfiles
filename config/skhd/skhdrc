@@ -83,6 +83,8 @@ ctrl + cmd - n : open -a 'Notion'
 ctrl + cmd - h : open -a 'Hey'
 ctrl + cmd - m : open -a 'Messages'
 ctrl + cmd - s : open -a 'Slack'
+ctrl + cmd - z : open -a 'zoom.us'
+ctrl + cmd - g : open -a 'GarageBand'
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
 
