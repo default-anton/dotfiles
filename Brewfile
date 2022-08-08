@@ -69,6 +69,8 @@ brew 'git-delta'
 brew 'go'
 brew 'rbenv'
 brew 'ruby-build'
+brew 'nss'
+brew 'mkcert'
 
 cask 'lulu'
 cask 'alacritty'
