@@ -72,6 +72,7 @@ brew 'ruby-build'
 brew 'nss'
 brew 'mkcert'
 brew 'awscli'
+brew 'libpq'
 
 cask 'lulu'
 cask 'alacritty'
