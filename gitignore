@@ -11,3 +11,5 @@ test/reports
 .python-version
 .pdm.toml
 __pypackages__/
+/.solargraph.yml
+/solargraph.rb
