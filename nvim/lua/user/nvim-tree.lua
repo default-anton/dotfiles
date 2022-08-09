@@ -1,9 +1,11 @@
 local nvim_tree = require "nvim-tree"
 local tree_cb = require("nvim-tree.config").nvim_tree_callback
 
-local float_height = 30
+local win_height = vim.api.nvim_win_get_height(0)
+local win_width = vim.api.nvim_win_get_width(0)
+local float_height = math.floor(math.min(70, win_height * 0.7))
+local float_width = math.floor(math.min(90, win_width * 0.7))
 local float_row = math.floor((vim.api.nvim_win_get_height(0) - float_height) / 2)
-local float_width = 70
 local float_col = math.floor((vim.api.nvim_win_get_width(0) - float_width) / 2)
 
 nvim_tree.setup {
@@ -52,8 +54,8 @@ nvim_tree.setup {
     },
   },
   view = {
-    width = 70,
-    height = 30,
+    width = float_width,
+    height = float_height,
     side = "left",
     relativenumber = true,
     mappings = {
