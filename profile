@@ -34,6 +34,7 @@ export FZF_COMPLETION_TRIGGER='--'
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude ".git"'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
 export FZF_TMUX_OPTS="-p 80%,50%"
+export FZF_ALT_C_COMMAND="fd '' -t d --hidden -d 1 ~/ ~/code . -x echo {/}"
 export RIPGREP_CONFIG_PATH="${HOME}/.ripgreprc"
 
 # Use fd (https://github.com/sharkdp/fd) instead of the default find
