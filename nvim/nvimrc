@@ -113,7 +113,14 @@ vnoremap <silent> # :<C-u>call GetVisualSelection()<cr>?<C-R>=@/<cr><cr>
 
 let g:dispatch_tmux_height = "15"
 
-let test#strategy = "dispatch"
+let test#strategy = "dispatch_background"
+
+function! TmuxTransform(cmd) abort
+  return 'tmux send -t 1 '.shellescape(a:cmd).' Enter'
+endfunction
+
+let g:test#custom_transformations = {'tmux': function('TmuxTransform')}
+
 nnoremap <leader>rf <cmd>TestFile<cr>
 nnoremap <leader>rs <cmd>TestNearest<cr>
 nnoremap <leader>rl <cmd>TestLast<cr>
