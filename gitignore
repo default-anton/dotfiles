@@ -13,3 +13,4 @@ test/reports
 __pypackages__/
 /.solargraph.yml
 /solargraph.rb
+docker-compose.override.yml
