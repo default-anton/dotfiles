@@ -39,7 +39,7 @@ Plug 'folke/tokyonight.nvim', { 'branch': 'main'  }
 
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
-Plug 'janko-m/vim-test'
+Plug 'vim-test/vim-test'
 Plug 'schickling/vim-bufonly'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-projectionist'
