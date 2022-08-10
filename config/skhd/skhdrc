@@ -85,6 +85,7 @@ ctrl + cmd - m : open -a 'Messages'
 ctrl + cmd - s : open -a 'Slack'
 ctrl + cmd - z : open -a 'zoom.us'
 ctrl + cmd - g : open -a 'GarageBand'
+ctrl + cmd - p : open -a '1password'
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
 
