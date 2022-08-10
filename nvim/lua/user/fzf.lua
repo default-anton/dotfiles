@@ -1,4 +1,6 @@
-require("fzf-lua").setup {
+local fzf_lua = require("fzf-lua")
+
+fzf_lua.setup {
   winopts = {
     preview = {
       vertical = "up:40%",
@@ -22,3 +24,18 @@ require("fzf-lua").setup {
     git_icons = false,
   },
 }
+
+local fzf_dirs = function(opts)
+  opts = opts or {}
+  opts.prompt = "Directories> "
+  opts.winopts = { width = 0.6, row = 0.6, height = 0.6 }
+  opts.actions = {
+    ['default'] = function(selected)
+      vim.cmd("e " .. selected[1])
+    end
+  }
+  fzf_lua.fzf_exec("fd '' -t d -d 1 --hidden ~ ~/code .", opts)
+end
+
+-- or to a keybind, both below are (sort of) equal
+vim.keymap.set('n', '<space>cd', fzf_dirs)
