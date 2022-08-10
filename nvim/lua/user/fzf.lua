@@ -38,4 +38,4 @@ local fzf_dirs = function(opts)
 end
 
 -- or to a keybind, both below are (sort of) equal
-vim.keymap.set('n', '<space>cd', fzf_dirs)
+vim.keymap.set('n', '<leader>cd', fzf_dirs)
