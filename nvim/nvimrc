@@ -140,8 +140,8 @@ nnoremap <leader>yf :let @+=expand("%")<cr>
 nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<cr>
 
 " n always search forward and N backward
-nnoremap <expr> n (v:searchforward ? 'nzz' : 'Nzz')
-nnoremap <expr> N (v:searchforward ? 'Nzz' : 'nzz')
+nnoremap <expr> n (v:searchforward ? 'nzzzv' : 'Nzzzv')
+nnoremap <expr> N (v:searchforward ? 'Nzzzv' : 'nzzzv')
 
 " Close all the buffers except the current buffer.
 map <leader>bo :BufOnly<cr>
