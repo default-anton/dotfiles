@@ -19,7 +19,7 @@ local on_attach = function(client, bufnr)
   vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, bufopts)
   vim.keymap.set("n", "<leader>f", function()
     vim.lsp.buf.format {
-      timeout_ms = 2000,
+      timeout_ms = 4000,
       filter = function(c)
         return c.name == "null-ls"
       end,
