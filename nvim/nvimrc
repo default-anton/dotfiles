@@ -37,6 +37,7 @@ Plug 'kdheepak/lazygit.nvim'
 Plug 'ibhagwan/fzf-lua', { 'branch': 'main' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main'  }
 
+Plug 'AndrewRadev/splitjoin.vim'
 Plug 'preservim/nerdcommenter'
 Plug 'junegunn/vim-easy-align'
 Plug 'vim-test/vim-test'
