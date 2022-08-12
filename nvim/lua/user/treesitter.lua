@@ -49,6 +49,10 @@ require("nvim-treesitter.configs").setup {
     enable = true,
     disable = { "python", "css" },
   },
+  matchup = {
+    enable = true,              -- mandatory, false will disable the whole extension
+    disable = {},  -- optional, list of language that will be disabled
+  },
 }
 
 require("treesitter-context").setup {
