@@ -80,8 +80,8 @@ nnoremap <silent><C-Left> <cmd>vertical resize -6<cr>
 nnoremap <silent><C-Right> <cmd>vertical resize +6<cr>
 
 " Navigation
-nnoremap <C-d> 8jzz<cr>
-nnoremap <C-u> 8kzz<cr>
+nnoremap <C-d> 8jzzzv<cr>
+nnoremap <C-u> 8kzzzv<cr>
 
 nnoremap <space>c <cmd>lua require('fzf-lua').resume()<cr>
 nnoremap <space><leader> <cmd>lua require('fzf-lua').files({ winopts = { row = 0.5, height = 0.5 }})<cr>
