@@ -148,7 +148,7 @@ nnoremap <expr> N (v:searchforward ? 'Nzzzv' : 'nzzzv')
 " Close all the buffers except the current buffer.
 map <leader>bo :BufOnly<cr>
 " Close the current buffer
-map <silent> <leader>bd :bd<cr>
+map <silent> <leader>bd :bd!<cr>
 " Close all the buffers
 map <leader>ba :bufdo bd<cr>
 map <leader>. :bnext<cr>
