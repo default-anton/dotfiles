@@ -1,4 +1,4 @@
-local fzf_lua = require("fzf-lua")
+local fzf_lua = require "fzf-lua"
 
 fzf_lua.setup {
   winopts = {
@@ -30,12 +30,12 @@ local fzf_dirs = function(opts)
   opts.prompt = "Directories> "
   opts.winopts = { width = 0.6, row = 0.6, height = 0.6 }
   opts.actions = {
-    ['default'] = function(selected)
-      vim.cmd("e " .. selected[1])
-    end
+    ["default"] = function(selected)
+      vim.cmd("cd " .. selected[1] .. " | e " .. selected[1])
+    end,
   }
   fzf_lua.fzf_exec("fd '' -t d -d 1 --hidden ~ ~/code .", opts)
 end
 
 -- or to a keybind, both below are (sort of) equal
-vim.keymap.set('n', '<leader>cd', fzf_dirs)
+vim.keymap.set("n", "<leader>cd", fzf_dirs)
