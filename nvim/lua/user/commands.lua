@@ -6,4 +6,3 @@ vim.api.nvim_create_user_command("Pr", function()
     args = { "pr", "view", "-w" },
   }):start()
 end, {})
-
