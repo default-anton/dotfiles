@@ -71,7 +71,6 @@ imap <expr> <Plug>(vimrc:dummy-copilot-tab) copilot#Accept("\<Tab>")
 " Git
 nnoremap <space>d <cmd>lua require('fzf-lua').git_status()<cr>
 nnoremap <space>b <cmd>lua require('fzf-lua').git_branches({ winopts = { height=0.6 }})<cr>
-nnoremap <space>pr <cmd>Dispatch! gh pr view -w<cr>
 nnoremap <silent> <leader>gg <cmd>LazyGit<cr>
 nnoremap <silent> <leader>gf <cmd>LazyGitFilterCurrentFile<cr>
 
