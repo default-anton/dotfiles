@@ -32,7 +32,6 @@ Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'lewis6991/impatient.nvim'
 Plug 'notjedi/nvim-rooter.lua'
 Plug 'jose-elias-alvarez/null-ls.nvim'
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'kdheepak/lazygit.nvim'
 Plug 'ibhagwan/fzf-lua', { 'branch': 'main' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main'  }
