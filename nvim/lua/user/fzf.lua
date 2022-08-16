@@ -56,7 +56,7 @@ end
 vim.keymap.set("n", "<space>m", fzf_lua.live_grep_native)
 vim.keymap.set("n", "<space><space>m", function()
   select_cwd(function(selected)
-    fzf_lua.live_grep_native { cwd = selected[1] }
+    fzf_lua.grep { search = "", cwd = selected[1] }
   end)
 end)
 vim.keymap.set("v", "<space>m", fzf_lua.grep_visual)
