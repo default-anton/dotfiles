@@ -1,16 +1,28 @@
 require("gitlinker").setup {
-  mappings = "<leader>yr",
+  mappings = nil,
 }
 
 vim.api.nvim_set_keymap(
   "n",
-  "gb",
-  '<cmd>lua require"gitlinker".get_buf_range_url("n", {action_callback = require"gitlinker.actions".open_in_browser})<cr>',
+  "<leader>yr",
+  '<cmd>lua require"gitlinker".get_buf_range_url("n")<cr>',
   { silent = true }
 )
 vim.api.nvim_set_keymap(
   "v",
-  "gb",
-  '<cmd>lua require"gitlinker".get_buf_range_url("v", {action_callback = require"gitlinker.actions".open_in_browser})<cr>',
+  "<leader>yr",
+  '<cmd>lua require"gitlinker".get_buf_range_url("v")<cr>',
+  {}
+)
+vim.api.nvim_set_keymap(
+  "n",
+  "<leader>gr",
+  '<cmd>lua require"gitlinker".get_buf_range_url("n", {action_callback = require"gitlinker.actions".open_in_browser})<cr><cr>',
+  { silent = true }
+)
+vim.api.nvim_set_keymap(
+  "v",
+  "<leader>gr",
+  '<cmd>lua require"gitlinker".get_buf_range_url("v", {action_callback = require"gitlinker.actions".open_in_browser})<cr><cr>',
   {}
 )
