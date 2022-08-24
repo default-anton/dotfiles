@@ -73,6 +73,7 @@ brew 'nss'
 brew 'mkcert'
 brew 'awscli'
 brew 'libpq'
+brew 'direnv'
 
 cask 'lulu'
 cask 'alacritty'
