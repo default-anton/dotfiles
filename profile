@@ -7,6 +7,9 @@ export PATH="${PATH}:${GOBIN}"
 export PATH="${PATH}:/usr/local/go/bin"
 export EDITOR=nvim
 
+command -v pdm >/dev/null 2>&1 && source <(pdm --pep582)
+command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
+command -v rbenv >/dev/null 2>&1 && eval "$(rbenv init - bash)"
 command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 # If running interactively
@@ -57,5 +60,4 @@ command -v npm >/dev/null 2>&1 && source <(npm completion)
 command -v flutter >/dev/null 2>&1 && source <(flutter bash-completion)
 command -v doctl >/dev/null 2>&1 && source <(doctl completion bash)
 command -v aws >/dev/null 2>&1 && complete -C 'aws_completer' aws
-command -v pdm >/dev/null 2>&1 && source <(pdm --pep582)
-
+command -v gh >/dev/null 2>&1 && eval "$(gh completion -s bash)"

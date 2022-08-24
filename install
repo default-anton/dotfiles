@@ -41,17 +41,12 @@ SHELL_CMDS: Final[List[str]] = [
 ]
 
 BASHRC_LINES: Final[List[str]] = [
-    'eval "$(starship init bash)"',
     "source ~/.dotfiles/bashrc",
-    "[ -f ~/.fzf.bash ] && source ~/.fzf.bash",
-    "[ -f ~/.bash_aliases ] && source ~/.bash_aliases",
 ]
 
 BASH_PROFILE_LINES: Final[List[str]] = [
     "source ~/.bashrc",
     "source ~/.dotfiles/profile",
-    'eval "$(pyenv init --path)"',
-    'eval "$(gh completion -s bash)"',
 ]
 
 
