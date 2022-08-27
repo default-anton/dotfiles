@@ -26,9 +26,12 @@ null_ls.setup {
     formatting.rubocop.with {
       command = utils.has_file "bin/rubocop" and "bin/rubocop" or "rubocop",
     },
+    formatting.gofmt,
+    formatting.goimports,
     formatting.shfmt,
     diagnostics.flake8,
     diagnostics.shellcheck,
+    diagnostics.golangci_lint,
     diagnostics.rubocop.with {
       command = utils.has_file "bin/rubocop" and "bin/rubocop" or "rubocop",
       generator_opts = vim.tbl_extend("force", diagnostics.rubocop._opts, {
