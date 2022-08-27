@@ -74,6 +74,7 @@ brew 'mkcert'
 brew 'awscli'
 brew 'libpq'
 brew 'direnv'
+brew 'golangci-lint'
 
 cask 'lulu'
 cask 'alacritty'
