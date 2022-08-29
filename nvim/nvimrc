@@ -59,7 +59,6 @@ Plug 'hashivim/vim-terraform'
 Plug 'tpope/vim-rails'
 Plug 'tpope/vim-bundler'
 Plug 'editorconfig/editorconfig-vim'
-Plug 'github/copilot.vim'
 call plug#end()
 
 lua require("impatient")
