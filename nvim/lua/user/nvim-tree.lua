@@ -63,6 +63,8 @@ nvim_tree.setup {
         { key = { "l", "<CR>", "o" }, cb = tree_cb "edit" },
         { key = "h", cb = tree_cb "close_node" },
         { key = "v", cb = tree_cb "vsplit" },
+        { key = "<space>m", cb = ":lua require('user.nvim-tree').grep()<CR>" },
+        { key = "<space>,", cb = ":lua require('user.nvim-tree').find_files()<CR>" },
       },
     },
     float = {
@@ -81,3 +83,35 @@ nvim_tree.setup {
     ignore = false,
   },
 }
+
+local M = {}
+
+function M.grep()
+  return M.launch_fzf("grep", { search = "" })
+end
+
+function M.find_files()
+  return M.launch_fzf("files", { winopts = { row = 0.5, height = 0.5 } })
+end
+
+function M.launch_fzf(func_name, opts)
+  local nvim_tree_status_ok, _ = pcall(require, "nvim-tree")
+  if not nvim_tree_status_ok then
+    return
+  end
+  local lib_status_ok, lib = pcall(require, "nvim-tree.lib")
+  if not lib_status_ok then
+    return
+  end
+
+  local node = lib.get_node_at_cursor()
+  local is_folder = node.fs_stat and node.fs_stat.type == "directory" or false
+  opts.cwd = is_folder and node.absolute_path or vim.fn.fnamemodify(node.absolute_path, ":h")
+  if node.name == ".." and TreeExplorer ~= nil then
+    opts.cwd = TreeExplorer.cwd
+  end
+
+  return require("fzf-lua")[func_name](opts)
+end
+
+return M
