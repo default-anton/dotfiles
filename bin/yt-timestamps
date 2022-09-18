@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -e
+
+file="${1}"
+
+cat <<-SQL | sqlite3 | awk -F'|' '{ print $1, $2 }' > sections.txt
+.mode csv
+.import "${file}" edit_index
+.mode list
+SELECT "Record In", Notes FROM edit_index;
+SQL
+
+sections=$(cat <<-PYTHON | python3 -
+for line in open('sections.txt'):
+  ts = line[:line.index(' ')]
+  text = line[line.index(' ')+1:]
+  print(ts[:ts.rindex(':')], text, end='')
+PYTHON
+)
+
+echo "${sections}" | pbcopy
+
+rm -f sections.txt
