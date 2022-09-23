@@ -32,7 +32,9 @@ local global_cd = function(opts)
   opts.winopts = { width = 0.6, row = 0.6, height = 0.6 }
   opts.actions = {
     ["default"] = function(selected)
-      vim.cmd("cd " .. selected[1] .. " | e " .. selected[1])
+      vim.schedule(function()
+        vim.cmd("e " .. selected[1])
+      end)
     end,
   }
   fzf_lua.fzf_exec("fd '' -t d -d 1 --hidden ~ ~/code .", opts)
