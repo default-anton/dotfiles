@@ -43,20 +43,10 @@ nvim_tree.setup {
       },
     },
   },
-  diagnostics = {
-    enable = false,
-    show_on_dirs = true,
-    icons = {
-      hint = "",
-      info = "",
-      warning = "",
-      error = "",
-    },
-  },
   view = {
+    adaptive_size = true,
+    centralize_selection = true,
     width = float_width,
-    height = float_height,
-    side = "left",
     relativenumber = true,
     mappings = {
       list = {
@@ -70,8 +60,6 @@ nvim_tree.setup {
     float = {
       enable = true,
       open_win_config = {
-        relative = "editor",
-        border = "rounded",
         width = float_width,
         height = float_height,
         row = float_row,
