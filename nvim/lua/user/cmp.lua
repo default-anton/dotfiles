@@ -52,7 +52,6 @@ cmp.setup {
   }, {
     { name = "nvim_lsp" },
     { name = "nvim_lua" },
-  }, {
     { name = "ultisnips" }, -- For ultisnips users.
     { name = "buffer", keyword_length = 3 },
     { name = "path" },
