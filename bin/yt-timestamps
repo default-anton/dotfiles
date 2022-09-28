@@ -21,4 +21,8 @@ PYTHON
 
 echo "${sections}" | pbcopy
 
+echo "Sections:"
+echo "${sections}"
+echo -e "\nSections have been copied to your clipboard!"
+
 rm -f sections.txt
