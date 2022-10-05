@@ -53,7 +53,7 @@ nvim_tree.setup {
         { key = { "l", "<CR>", "o" }, cb = tree_cb "edit" },
         { key = "h", cb = tree_cb "close_node" },
         { key = "v", cb = tree_cb "vsplit" },
-        { key = "<space>m", cb = ":lua require('user.nvim-tree').grep()<CR>" },
+        { key = "<space>m", cb = ":lua require('user.nvim-tree').live_grep_native()<CR>" },
         { key = "<space>,", cb = ":lua require('user.nvim-tree').find_files()<CR>" },
       },
     },
@@ -74,8 +74,8 @@ nvim_tree.setup {
 
 local M = {}
 
-function M.grep()
-  return M.launch_fzf("grep", { search = "" })
+function M.live_grep_native()
+  return M.launch_fzf("live_grep_native", {})
 end
 
 function M.find_files()
