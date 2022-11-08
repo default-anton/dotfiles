@@ -1,8 +1,6 @@
 require("nvim-treesitter.configs").setup {
   -- A list of parser names, or "all"
-  ensure_installed = "all",
-  -- List of parsers to ignore installing (for "all")
-  ignore_install = { "phpdoc" },
+  ensure_installed = { "html", "ruby", "lua", "bash", "python", "comment", "dockerfile", "gitattributes", "gitignore", "go", "gomod", "graphql", "hcl", "javascript", "jsdoc", "json", "make", "markdown", "proto", "scss", "sql", "toml", "tsx", "typescript", "vim", "yaml" },
   highlight = {
     enable = true,
   },
