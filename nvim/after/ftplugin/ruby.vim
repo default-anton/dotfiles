@@ -1,0 +1,2 @@
+setlocal iskeyword+=?
+setlocal iskeyword+=!
