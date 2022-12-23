@@ -8,7 +8,7 @@ import pandas as pd
 
 if len(sys.argv) != 3:
     raise ValueError(
-        "Missing path to theh transactions file: format_rbc_txns path/to/file.csv YYYY-MM"
+        "Missing path to RBC transactions: format_rbc_txns path/to/file.csv YYYY-MM"
     )
 
 file = sys.argv[1]
@@ -40,7 +40,7 @@ date_range = (df["Transaction Date"] >= first_day_of_month) & (
 chequing = df[(df["Account Type"] == "Chequing") & date_range]
 # without wise transfers
 chequing = chequing[~chequing["Description 1"].str.contains("AUTODEPOSIT")]
-# without transfers berween my accounts
+# without transfers between my accounts
 chequing = chequing[~chequing["Description 1"].str.contains("WWW TRF DDA")]
 
 credit = df[(df["Account Type"] == "MasterCard") & date_range]
