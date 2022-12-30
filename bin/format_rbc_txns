@@ -42,8 +42,10 @@ chequing = df[(df["Account Type"] == "Chequing") & date_range]
 chequing = chequing[~chequing["Description 1"].str.contains("AUTODEPOSIT")]
 # without transfers between my accounts
 chequing = chequing[~chequing["Description 1"].str.contains("WWW TRF DDA")]
+chequing = chequing[~(chequing["Description 1"].str.contains("Transfer") & chequing["Description 2"].str.contains("WWW TRANSFER"))]
 
 credit = df[(df["Account Type"] == "MasterCard") & date_range]
+credit = credit[~credit["Description 1"].str.contains("PAYMENT - THANK YOU")]
 
 txns = pd.concat([chequing, credit])
 txns["Description"] = txns["Description 1"]
