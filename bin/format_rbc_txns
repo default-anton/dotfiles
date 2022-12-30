@@ -53,6 +53,7 @@ desc = (txns["Description 1"] + " " + txns["Description 2"]).dropna()
 txns.loc[desc.index, 'Description'] = desc
 txns["CAD$"] = -txns["CAD$"]
 txns["Source"] = "Anton"
+txns = txns.sort_values(by=['Transaction Date', 'CAD$'])
 txns.to_csv(
     "txns.csv",
     index=False,
