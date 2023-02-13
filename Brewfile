@@ -77,6 +77,7 @@ brew 'direnv'
 brew 'golangci-lint'
 brew 'duf'
 brew 'bandwhich'
+brew 'lua-language-server'
 
 cask 'lulu'
 cask 'alacritty'

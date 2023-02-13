@@ -73,7 +73,7 @@ lspconfig.terraformls.setup { on_attach = on_attach, capabilities = capabilities
 lspconfig.vimls.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.solargraph.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.sqlls.setup { on_attach = on_attach, capabilities = capabilities }
-lspconfig.sumneko_lua.setup {
+lspconfig.lua_ls.setup {
   on_attach = on_attach,
   capabilities = capabilities,
   settings = {
