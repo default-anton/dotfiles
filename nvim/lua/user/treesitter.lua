@@ -7,9 +7,6 @@ require("nvim-treesitter.configs").setup {
   autopairs = {
     enable = true,
   },
-  incremental_selection = {
-    enable = true,
-  },
   textobjects = {
     enable = true,
 
