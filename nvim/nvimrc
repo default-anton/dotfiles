@@ -38,6 +38,7 @@ Plug 'folke/tokyonight.nvim', { 'branch': 'main'  }
 Plug 'andymass/vim-matchup'
 Plug 'ruifm/gitlinker.nvim'
 Plug 'j-hui/fidget.nvim'
+Plug 'github/copilot.vim'
 
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'preservim/nerdcommenter'
@@ -65,7 +66,6 @@ lua require("impatient")
 lua require("user")
 
 let g:copilot_no_tab_map = v:true
-imap <expr> <Plug>(vimrc:dummy-copilot-tab) copilot#Accept("\<Tab>")
 
 
 " Git
