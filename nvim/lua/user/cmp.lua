@@ -35,17 +35,6 @@ cmp.setup {
       "i",
       "s", --[[ "c" (to enable the mapping in command mode) ]]
     }),
-    ["<C-l>"] = cmp.mapping(function(fallback)
-      local fallback_key = vim.api.nvim_replace_termcodes("<Tab>", true, true, true)
-      local resolved_key = vim.fn["copilot#Accept"](fallback)
-      if fallback_key == resolved_key then
-        cmp.confirm { select = true }
-      else
-        vim.api.nvim_feedkeys(resolved_key, "n", true)
-      end
-    end, {
-      "i",
-    }),
   },
   sources = cmp.config.sources({
     { name = "nvim_lsp_signature_help" },
