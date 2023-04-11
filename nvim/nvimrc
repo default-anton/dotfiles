@@ -65,9 +65,6 @@ call plug#end()
 lua require("impatient")
 lua require("user")
 
-imap <silent><script><expr> <C-L> copilot#Accept("\<CR>")
-let g:copilot_no_tab_map = v:true
-
 " Git
 nnoremap <space>d <cmd>lua require('fzf-lua').git_status()<cr>
 nnoremap <space>b <cmd>lua require('fzf-lua').git_branches({ winopts = { height=0.6 }})<cr>
