@@ -29,6 +29,7 @@ null_ls.setup {
     formatting.gofmt,
     formatting.goimports,
     formatting.shfmt,
+    diagnostics.eslint,
     diagnostics.flake8,
     diagnostics.shellcheck,
     diagnostics.golangci_lint,
