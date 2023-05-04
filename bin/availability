@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+import datetime
+import subprocess
+
+from dateutil.parser import parse
+
+
+def get_schedule():
+    result = subprocess.run(["schedule"], stdout=subprocess.PIPE)
+    output = result.stdout.decode("utf-8")
+    return output
+
+
+def parse_schedule(schedule_output):
+    lines = schedule_output.strip().split("\n")
+    busy_slots = []
+
+    for line in lines:
+        date_str, time_range = line.split(" at ")
+        start_time, end_time = time_range.split(" - ")
+        start_time = parse(f"{date_str} {start_time}")
+        end_time = parse(f"{date_str} {end_time}")
+        busy_slots.append((start_time, end_time))
+
+    return busy_slots
+
+
+def find_free_slots(busy_slots):
+    one_day = datetime.timedelta(days=1)
+    free_slots = []
+
+    work_start_hour = 9
+    work_end_hour = 17
+
+    start_date = datetime.datetime.now().date()
+    end_date = start_date + 7 * one_day
+
+    current_date = start_date
+    while current_date <= end_date:
+        if current_date.weekday() < 5:  # Check if it's a weekday
+            work_start = datetime.datetime(
+                current_date.year,
+                current_date.month,
+                current_date.day,
+                work_start_hour,
+                0,
+            )
+            work_end = datetime.datetime(
+                current_date.year,
+                current_date.month,
+                current_date.day,
+                work_end_hour,
+                0,
+            )
+
+            free_start = work_start
+            for start, end in busy_slots:
+                if start.date() == current_date:
+                    if start > free_start:
+                        free_slots.append((free_start, start))
+                    free_start = end
+
+            if free_start < work_end:
+                free_slots.append((free_start, work_end))
+
+        current_date += one_day
+
+    return free_slots
+
+
+def main():
+    schedule_output = get_schedule()
+    busy_slots = parse_schedule(schedule_output)
+    free_slots = find_free_slots(busy_slots)
+
+    for start, end in free_slots:
+        print(
+            f"{start.strftime('%Y-%m-%d %I:%M %p')} - {end.strftime('%Y-%m-%d %I:%M %p')}"
+        )
+
+
+if __name__ == "__main__":
+    main()
