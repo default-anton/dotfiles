@@ -76,7 +76,7 @@
 # A REFERENCE ONLY, WHEN MAKING YOUR OWN CONFIGURATION..          #
 # ############################################################### #
 
-ctrl + cmd - c : open -a 'Google Chrome'
+ctrl + cmd - c : open -a 'Microsoft Edge'
 ctrl + cmd - a : open -a 'Alacritty'
 ctrl + cmd - t : open -a 'Telegram'
 ctrl + cmd - n : open -a 'Notion'
