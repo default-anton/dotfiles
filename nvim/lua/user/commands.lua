@@ -1,4 +1,4 @@
-vim.api.nvim_create_user_command("pr", function()
+vim.api.nvim_create_user_command("Pr", function()
   local Job = require "plenary.job"
 
   Job:new({
