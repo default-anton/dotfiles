@@ -37,7 +37,7 @@ Plug 'ibhagwan/fzf-lua', { 'branch': 'main' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main'  }
 Plug 'andymass/vim-matchup'
 Plug 'ruifm/gitlinker.nvim'
-Plug 'j-hui/fidget.nvim'
+Plug 'j-hui/fidget.nvim', { 'tag': 'legacy' }
 Plug 'github/copilot.vim'
 
 Plug 'AndrewRadev/splitjoin.vim'
