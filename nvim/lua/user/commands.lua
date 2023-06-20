@@ -60,7 +60,7 @@ for _, language in ipairs(languages) do
     end
   end, { range = true, nargs = "+" })
 
-  vim.api.nvim_create_user_command(language.cmd .. "edit", function(opts)
+  vim.api.nvim_create_user_command(language.cmd .. "e", function(opts)
     --luarocks install lua-openai
     local openai = require "openai"
     local client = openai.new(os.getenv "OPENAI_API_KEY")
