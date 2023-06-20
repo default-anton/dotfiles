@@ -102,7 +102,7 @@ for _, language in ipairs(languages) do
     if status == 200 then
       if res.choices[1].message.function_call == nil then
         vim.print "\nNo function call found. Response:\n"
-        vim.pretty_print(res)
+        vim.print(vim.inspect(res))
         return
       end
 
@@ -112,13 +112,13 @@ for _, language in ipairs(languages) do
 
       if ok then
         vim.print "\nCode:\n"
-        vim.pretty_print(arguments.code)
+        vim.print(vim.inspect(arguments.code))
       else
         vim.print "\nError decoding arguments. Function call:\n"
-        vim.pretty_print(function_call)
+        vim.print(vim.inspect(function_call))
       end
     else
-      vim.pretty_print("\nError: " .. vim.inspect(res))
+      vim.print("\nError: " .. vim.inspect(res))
     end
   end, { range = true, nargs = "+" })
 end
