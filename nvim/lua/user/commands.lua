@@ -16,13 +16,14 @@ As an expert Full Stack Developer with over a decade of experience, demonstratin
 ]]
 
 local languages = {
-  { lang = "R", code = "ruby", technologies = "Ruby on Rails and RSpec" },
-  { lang = "L", code = "lua", technologies = "Neovim and Lua" },
-  { lang = "T", code = "tsx", technologies = "React and TypeScript" },
+  { cmd = "Ruby", code = "ruby", technologies = "Ruby on Rails and RSpec" },
+  { cmd = "Lua", code = "lua", technologies = "Neovim and Lua" },
+  { cmd = "React", code = "tsx", technologies = "React, CSS and TypeScript" },
+  { cmd = "Electron", code = "tsx", technologies = "Electron, React, TypeScript, Ant Design, SCSS modules, and fluent-ffmpeg" },
 }
 
 for _, language in ipairs(languages) do
-  vim.api.nvim_create_user_command(language.lang, function(opts)
+  vim.api.nvim_create_user_command(language.cmd, function(opts)
     --luarocks install lua-openai
     local openai = require "openai"
     local client = openai.new(os.getenv "OPENAI_API_KEY")
@@ -59,7 +60,7 @@ for _, language in ipairs(languages) do
     end
   end, { range = true, nargs = "+" })
 
-  vim.api.nvim_create_user_command(language.lang .. "edit", function(opts)
+  vim.api.nvim_create_user_command(language.cmd .. "edit", function(opts)
     --luarocks install lua-openai
     local openai = require "openai"
     local client = openai.new(os.getenv "OPENAI_API_KEY")
