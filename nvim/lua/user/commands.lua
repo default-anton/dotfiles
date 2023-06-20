@@ -54,6 +54,7 @@ for _, language in ipairs(languages) do
         return
       end
 
+      vim.fn.setreg('+', res.choices[1].message.content)
       vim.print(res.choices[1].message.content)
     else
       vim.print("\nError: " .. vim.inspect(res))
@@ -111,8 +112,8 @@ for _, language in ipairs(languages) do
       local ok, arguments = pcall(vim.json.decode, function_call.arguments)
 
       if ok then
-        vim.print "\nCode:\n"
-        vim.print(vim.inspect(arguments.code))
+        vim.fn.setreg('+', arguments.code)
+        vim.print(arguments.code)
       else
         vim.print "\nError decoding arguments. Function call:\n"
         vim.print(vim.inspect(function_call))
