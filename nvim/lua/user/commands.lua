@@ -58,7 +58,6 @@ for _, language in ipairs(languages) do
         return
       end
 
-      vim.fn.setreg('+', res.choices[1].message.content)
       vim.print(res.choices[1].message.content)
     else
       vim.print("\nError: " .. vim.inspect(res))
