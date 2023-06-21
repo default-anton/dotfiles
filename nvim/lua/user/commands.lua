@@ -19,7 +19,11 @@ local languages = {
   { cmd = "Ruby", code = "ruby", technologies = "Ruby on Rails and RSpec" },
   { cmd = "Lua", code = "lua", technologies = "Neovim and Lua" },
   { cmd = "React", code = "tsx", technologies = "React, CSS and TypeScript" },
-  { cmd = "Electron", code = "tsx", technologies = "Electron, React, TypeScript, Ant Design, CSS, SCSS, and fluent-ffmpeg" },
+  {
+    cmd = "Electron",
+    code = "tsx",
+    technologies = "Electron, React, TypeScript, Ant Design, CSS, SCSS, and fluent-ffmpeg",
+  },
 }
 
 for _, language in ipairs(languages) do
