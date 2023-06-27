@@ -26,103 +26,107 @@ local languages = {
   },
 }
 
+local MODELS = { "gpt-3.5-turbo-0613", "gpt-4-0613" }
+
 for _, language in ipairs(languages) do
-  vim.api.nvim_create_user_command(language.cmd, function(opts)
-    --luarocks install lua-openai
-    local openai = require "openai"
-    local client = openai.new(os.getenv "OPENAI_API_KEY")
+  for _, model in ipairs(MODELS) do
+    vim.api.nvim_create_user_command(language.cmd .. ((model == MODELS[1]) and "" or "4"), function(opts)
+      --luarocks install lua-openai
+      local openai = require "openai"
+      local client = openai.new(os.getenv "OPENAI_API_KEY")
 
-    local prompt = opts.args
+      local prompt = opts.args
 
-    if opts.range == 2 then
-      local lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
-      local context = table.concat(lines, "\n")
+      if opts.range == 2 then
+        local lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
+        local context = table.concat(lines, "\n")
 
-      prompt = "Context: ```" .. language.code .. "\n" .. context .. "\n```\n\n" .. prompt
-    end
-
-    local status, res = client:chat({
-      {
-        role = "system",
-        content = string.format(ask_system_prompt, language.technologies),
-      },
-      { role = "user", content = prompt },
-    }, {
-      model = "gpt-3.5-turbo-0613",
-      temperature = 0.5,
-    })
-
-    if status == 200 then
-      if res.choices[1].message.content == nil then
-        vim.print("\nNo content found. Response:\n" .. vim.inspect(res))
-        return
+        prompt = "Context: ```" .. language.code .. "\n" .. context .. "\n```\n\n" .. prompt
       end
 
-      vim.print(res.choices[1].message.content)
-    else
-      vim.print("\nError: " .. vim.inspect(res))
-    end
-  end, { range = true, nargs = "+" })
-
-  vim.api.nvim_create_user_command(language.cmd .. "e", function(opts)
-    --luarocks install lua-openai
-    local openai = require "openai"
-    local client = openai.new(os.getenv "OPENAI_API_KEY")
-
-    local prompt = opts.args
-
-    if opts.range == 2 then
-      local lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
-      local context = table.concat(lines, "\n")
-
-      prompt = "Context: ```" .. language.code .. "\n" .. context .. "\n```\n\n" .. prompt
-    end
-
-    local status, res = client:chat({
-      {
-        role = "system",
-        content = string.format(code_system_prompt, language.technologies),
-      },
-      { role = "user", content = prompt },
-    }, {
-      model = "gpt-3.5-turbo-0613",
-      temperature = 0.5,
-      functions = {
+      local status, res = client:chat({
         {
-          name = "return_code_to_user",
-          description = "Return the code to the user",
-          parameters = {
-            type = "object",
-            properties = {
-              code = { type = "string", description = "The code to return" },
-            },
-          },
-          required = { "code" },
+          role = "system",
+          content = string.format(ask_system_prompt, language.technologies),
         },
-      },
-      function_call = { name = "return_code_to_user" },
-    })
+        { role = "user", content = prompt },
+      }, {
+        model = model,
+        temperature = 0.5,
+      })
 
-    if status == 200 then
-      if res.choices[1].message.function_call == nil then
-        vim.print "\nNo function call found. Response:\n"
-        vim.print(vim.inspect(res))
-        return
-      end
+      if status == 200 then
+        if res.choices[1].message.content == nil then
+          vim.print("\nNo content found. Response:\n" .. vim.inspect(res))
+          return
+        end
 
-      local function_call = res.choices[1].message.function_call
-
-      local ok, arguments = pcall(vim.json.decode, function_call.arguments)
-
-      if ok then
-        vim.fn.setreg('+', arguments.code)
-        vim.print(arguments.code)
+        vim.print(res.choices[1].message.content)
       else
-        vim.print "\nError decoding arguments. Function call:\n"
-        vim.print(vim.inspect(function_call))
+        vim.print("\nError: " .. vim.inspect(res))
       end
-    else
-      vim.print("\nError: " .. vim.inspect(res))
-    end
-  end, { range = true, nargs = "+" })
+    end, { range = true, nargs = "+" })
+
+    vim.api.nvim_create_user_command(language.cmd .. ((model == MODELS[1]) and "" or "4") .. "e", function(opts)
+      --luarocks install lua-openai
+      local openai = require "openai"
+      local client = openai.new(os.getenv "OPENAI_API_KEY")
+
+      local prompt = opts.args
+
+      if opts.range == 2 then
+        local lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
+        local context = table.concat(lines, "\n")
+
+        prompt = "Context: ```" .. language.code .. "\n" .. context .. "\n```\n\n" .. prompt
+      end
+
+      local status, res = client:chat({
+        {
+          role = "system",
+          content = string.format(code_system_prompt, language.technologies),
+        },
+        { role = "user", content = prompt },
+      }, {
+        model = model,
+        temperature = 0.5,
+        functions = {
+          {
+            name = "return_code_to_user",
+            description = "Return the code to the user",
+            parameters = {
+              type = "object",
+              properties = {
+                code = { type = "string", description = "The code to return" },
+              },
+            },
+            required = { "code" },
+          },
+        },
+        function_call = { name = "return_code_to_user" },
+      })
+
+      if status == 200 then
+        if res.choices[1].message.function_call == nil then
+          vim.print "\nNo function call found. Response:\n"
+          vim.print(vim.inspect(res))
+          return
+        end
+
+        local function_call = res.choices[1].message.function_call
+
+        local ok, arguments = pcall(vim.json.decode, function_call.arguments)
+
+        if ok then
+          vim.fn.setreg("+", arguments.code)
+          vim.print(arguments.code)
+        else
+          vim.print "\nError decoding arguments. Function call:\n"
+          vim.print(vim.inspect(function_call))
+        end
+      else
+        vim.print("\nError: " .. vim.inspect(res))
+      end
+    end, { range = true, nargs = "+" })
+  end
 end
