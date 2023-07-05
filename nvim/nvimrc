@@ -43,7 +43,7 @@ let g:dispatch_tmux_height = "15"
 let test#strategy = "dispatch_background"
 
 function! TmuxTransform(cmd) abort
-  return 'tmux send -t 1 '.shellescape(a:cmd).' Enter'
+  return 'tmux send -t bottom-left '.shellescape(a:cmd).' Enter'
 endfunction
 
 let g:test#custom_transformations = {'tmux': function('TmuxTransform')}
