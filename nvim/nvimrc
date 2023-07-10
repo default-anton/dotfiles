@@ -3,8 +3,6 @@ lua require("impatient")
 lua require("user")
 
 " Git
-nnoremap <space>d <cmd>lua require('fzf-lua').git_status()<cr>
-nnoremap <space>b <cmd>lua require('fzf-lua').git_branches({ winopts = { height=0.6 }})<cr>
 nnoremap <silent> <leader>gg <cmd>LazyGit<cr>
 nnoremap <silent> <leader>gf <cmd>LazyGitFilterCurrentFile<cr>
 
@@ -16,17 +14,6 @@ nnoremap <silent><C-Right> <cmd>vertical resize +6<cr>
 " Navigation
 nnoremap <C-d> 8jzzzv<cr>
 nnoremap <C-u> 8kzzzv<cr>
-
-nnoremap <space>c <cmd>lua require('fzf-lua').resume()<cr>
-nnoremap <space>. <cmd>lua require('fzf-lua').buffers({ winopts = { row = 0.5, width = 0.6, height = 0.33 } })<cr>
-nnoremap <space>/ <cmd>lua require('fzf-lua').blines()<cr>
-nnoremap <space>o <cmd>lua require('fzf-lua').lsp_document_symbols({ winopts = { width = 0.6 } })<cr>
-nnoremap gr <cmd>lua require('fzf-lua').lsp_references({ winopts = { height=0.6 } })<cr>
-nnoremap gd <cmd>lua require('fzf-lua').lsp_definitions({ jump_to_single_result = true, winopts = { height=0.6 } })<cr>
-nnoremap gD <cmd>lua require('fzf-lua').lsp_declarations({ jump_to_single_result = true, winopts = { height=0.6 } })<cr>
-nnoremap gi <cmd>lua require('fzf-lua').lsp_implementations({ winopts = { height=0.6 } })<cr>
-nnoremap gt <cmd>lua require('fzf-lua').lsp_typedefs({ winopts = { height=0.6 }})<cr>
-nnoremap <leader>da <cmd>lua require('fzf-lua').lsp_code_actions({ winopts = { height=0.6 }})<cr>
 
 " Fix gx on Mac to open links, images etc with `open`
 nmap <silent> gx :!open <cfile><cr>
@@ -53,8 +40,8 @@ nnoremap <leader>rs <cmd>TestNearest<cr>
 nnoremap <leader>rl <cmd>TestLast<cr>
 nnoremap <leader>ra <cmd>TestSuite<cr>
 
-nnoremap <leader>nn <cmd>NvimTreeToggle<cr>
-nnoremap <leader>nf <cmd>NvimTreeFindFile<cr>
+"nnoremap <leader>nn <cmd>NvimTreeToggle<cr>
+"nnoremap <leader>nf <cmd>NvimTreeFindFile<cr>
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)

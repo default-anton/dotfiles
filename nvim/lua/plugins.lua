@@ -16,6 +16,7 @@ local packer_bootstrap = ensure_packer()
 return require("packer").startup(function(use)
   use "wbthomason/packer.nvim"
 
+  use "nvim-lua/plenary.nvim"
   use "neovim/nvim-lspconfig"
   use "williamboman/nvim-lsp-installer"
   use "hrsh7th/nvim-cmp"
@@ -29,12 +30,11 @@ return require("packer").startup(function(use)
   use "b0o/schemastore.nvim"
   use "SirVer/ultisnips"
   use "quangnguyen30192/cmp-nvim-ultisnips"
-  use "nvim-lua/plenary.nvim"
   use { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" }
   use "nvim-treesitter/nvim-treesitter-context"
   use "nvim-treesitter/nvim-treesitter-textobjects"
   use "nvim-tree/nvim-web-devicons"
-  use "nvim-tree/nvim-tree.lua"
+  --use "nvim-tree/nvim-tree.lua"
   use "lewis6991/gitsigns.nvim"
   use "akinsho/bufferline.nvim"
   use "nvim-lualine/lualine.nvim"
@@ -43,12 +43,21 @@ return require("packer").startup(function(use)
   use "notjedi/nvim-rooter.lua"
   use "jose-elias-alvarez/null-ls.nvim"
   use "kdheepak/lazygit.nvim"
-  use { "ibhagwan/fzf-lua", branch = "main" }
   use { "folke/tokyonight.nvim", branch = "main" }
   use "andymass/vim-matchup"
   use "ruifm/gitlinker.nvim"
   use { "j-hui/fidget.nvim", tag = "legacy" }
   use "github/copilot.vim"
+  use {
+    "nvim-telescope/telescope.nvim",
+    tag = "0.1.2",
+    requires = { { "nvim-lua/plenary.nvim" } },
+  }
+  use { "nvim-telescope/telescope-fzf-native.nvim", run = "make" }
+  use {
+    "nvim-telescope/telescope-file-browser.nvim",
+    requires = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+  }
 
   use "AndrewRadev/splitjoin.vim"
   use "preservim/nerdcommenter"
