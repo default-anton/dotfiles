@@ -1,5 +1,8 @@
 local builtin = require "telescope.builtin"
-local file_browser = require("telescope").extensions.file_browser.file_browser
+local extensions = require("telescope").extensions
+local file_browser = extensions.file_browser.file_browser
+local actions = require "telescope.actions"
+local action_state = require "telescope.actions.state"
 
 vim.keymap.set("n", "<space><leader>", builtin.find_files, {})
 vim.keymap.set("n", "<space>m", builtin.live_grep, {})
@@ -18,6 +21,22 @@ vim.keymap.set("n", "<space>nf", function()
   file_browser { path = vim.fn.expand "%:p:h", select_buffer = true }
 end, {})
 
+local function live_grep_in_dir(prompt_bufnr)
+  local entry_path = action_state.get_selected_entry().Path
+  local path = entry_path:is_dir() and entry_path:absolute() or entry_path:parent():absolute()
+
+  actions.close(prompt_bufnr)
+  builtin.live_grep { search_dirs = { path } }
+end
+
+local function find_files_in_dir(prompt_bufnr)
+  local entry_path = action_state.get_selected_entry().Path
+  local path = entry_path:is_dir() and entry_path:absolute() or entry_path:parent():absolute()
+
+  actions.close(prompt_bufnr)
+  builtin.find_files { search_dirs = { path } }
+end
+
 require("telescope").setup {
   extensions = {
     fzf = {
@@ -30,6 +49,12 @@ require("telescope").setup {
       hijack_netrw = true,
       git_status = false,
       prompt_path = true,
+      mappings = {
+        ["n"] = {
+          ["<space>m"] = live_grep_in_dir,
+          ["<space><leader>"] = find_files_in_dir,
+        },
+      },
     },
   },
 }
