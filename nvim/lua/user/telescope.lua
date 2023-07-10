@@ -13,7 +13,10 @@ vim.keymap.set("n", "gr", builtin.lsp_references, {})
 vim.keymap.set("n", "gd", builtin.lsp_definitions, {})
 vim.keymap.set("n", "gi", builtin.lsp_implementations, {})
 vim.keymap.set("n", "gt", builtin.lsp_type_definitions, {})
-vim.keymap.set("n", "<space>n", file_browser, {})
+vim.keymap.set("n", "<space>nn", file_browser, {})
+vim.keymap.set("n", "<space>nf", function()
+  file_browser { path = vim.fn.expand "%:p:h", select_buffer = true }
+end, {})
 
 require("telescope").setup {
   extensions = {
@@ -25,7 +28,8 @@ require("telescope").setup {
     file_browser = {
       -- disables netrw and use telescope-file-browser in its place
       hijack_netrw = true,
-      hidden = { file_browser = true, folder_browser = false },
+      git_status = false,
+      prompt_path = true,
     },
   },
 }
