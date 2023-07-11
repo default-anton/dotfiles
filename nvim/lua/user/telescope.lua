@@ -38,6 +38,12 @@ local function find_files_in_dir(prompt_bufnr)
 end
 
 require("telescope").setup {
+  defaults = {
+    layout_config = {
+      horizontal = { width = 0.9 },
+      vertical = { width = 0.9 },
+    },
+  },
   extensions = {
     fzf = {
       fuzzy = true, -- false will only do exact matching
