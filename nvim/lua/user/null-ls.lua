@@ -19,7 +19,11 @@ end
 null_ls.setup {
   debug = false,
   sources = {
-    formatting.prettier,
+    formatting.prettier.with {
+      command = "pnpm",
+      extra_args = { "exec", "prettier" },
+      prepend_extra_args = true,
+    },
     formatting.isort,
     formatting.black.with { extra_args = { "--fast" } },
     formatting.stylua,
@@ -29,7 +33,11 @@ null_ls.setup {
     formatting.gofmt,
     formatting.goimports,
     formatting.shfmt,
-    diagnostics.eslint,
+    diagnostics.eslint.with {
+      command = "pnpm",
+      extra_args = { "exec", "eslint" },
+      prepend_extra_args = true,
+    },
     diagnostics.flake8,
     diagnostics.shellcheck,
     diagnostics.golangci_lint,
