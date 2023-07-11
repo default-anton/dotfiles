@@ -34,7 +34,6 @@ return require("packer").startup(function(use)
   use "nvim-treesitter/nvim-treesitter-context"
   use "nvim-treesitter/nvim-treesitter-textobjects"
   use "nvim-tree/nvim-web-devicons"
-  --use "nvim-tree/nvim-tree.lua"
   use "lewis6991/gitsigns.nvim"
   use "akinsho/bufferline.nvim"
   use "nvim-lualine/lualine.nvim"
