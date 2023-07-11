@@ -26,7 +26,7 @@ local languages = {
   },
 }
 
-local MODELS = { "gpt-3.5-turbo-0613", "gpt-4-0613" }
+local MODELS = { "gpt-3.5-turbo", "gpt-4" }
 
 for _, language in ipairs(languages) do
   for _, model in ipairs(MODELS) do
