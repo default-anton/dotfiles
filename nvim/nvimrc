@@ -40,9 +40,6 @@ nnoremap <leader>rs <cmd>TestNearest<cr>
 nnoremap <leader>rl <cmd>TestLast<cr>
 nnoremap <leader>ra <cmd>TestSuite<cr>
 
-"nnoremap <leader>nn <cmd>NvimTreeToggle<cr>
-"nnoremap <leader>nf <cmd>NvimTreeFindFile<cr>
-
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
