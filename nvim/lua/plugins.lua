@@ -57,6 +57,7 @@ return require("packer").startup(function(use)
     "nvim-telescope/telescope-file-browser.nvim",
     requires = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
   }
+  use '~/code/gpt-sidekick'
 
   use "AndrewRadev/splitjoin.vim"
   use "preservim/nerdcommenter"
