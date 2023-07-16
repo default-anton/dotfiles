@@ -35,7 +35,6 @@ return require("packer").startup(function(use)
   use "nvim-treesitter/nvim-treesitter-textobjects"
   use "nvim-tree/nvim-web-devicons"
   use "lewis6991/gitsigns.nvim"
-  use "akinsho/bufferline.nvim"
   use "nvim-lualine/lualine.nvim"
   use "lukas-reineke/indent-blankline.nvim"
   use "lewis6991/impatient.nvim"
