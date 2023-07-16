@@ -37,7 +37,6 @@ return require("packer").startup(function(use)
   use "lewis6991/gitsigns.nvim"
   use "nvim-lualine/lualine.nvim"
   use "lukas-reineke/indent-blankline.nvim"
-  use "lewis6991/impatient.nvim"
   use "notjedi/nvim-rooter.lua"
   use "jose-elias-alvarez/null-ls.nvim"
   use "kdheepak/lazygit.nvim"
