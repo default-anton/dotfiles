@@ -79,6 +79,8 @@ brew 'duf'
 brew 'bandwhich'
 brew 'lua-language-server'
 brew 'gdu'
+brew 'ocaml'
+brew 'opam'
 
 cask 'lulu'
 cask 'alacritty'
