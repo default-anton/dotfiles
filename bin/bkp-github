@@ -1,0 +1,12 @@
+#/usr/bin/env bash
+
+REPOS="$(gh repo list --source --json name | jq -r '.[].name')"
+for repo in $REPOS; do
+  if [ ! -d "$repo" ]; then
+    echo "Cloning $repo"
+    gh repo clone "$repo"
+  fi
+
+  echo "Fetching $repo"
+  git -C "$repo" fetch --all --prune
+done
