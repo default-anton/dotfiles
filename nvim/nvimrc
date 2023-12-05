@@ -71,9 +71,6 @@ augroup langs
   "autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=120 fileformat=unix cinwords=if,elif,else,for,while,try,except,finally,def,class,with
   "autocmd FileType yaml setlocal tabstop=2 softtabstop=2 shiftwidth=2 textwidth=120 fileformat=unix
   "autocmd FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
-  set rtp+=~/.opam/default/share/ocp-indent/vim
-  let g:opamshare = substitute(system('opam var share'),'\n$','','''')
-  execute "set rtp+=" . g:opamshare . "/merlin/vim"
 augroup end
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
