@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+BASE_DIR="${HOME}/code"
+RCLONE_REMOTE="b2.envrcs.crypt"
+GITHUB_USER="$(git config --global --get github.user)"
+
+IFS=$'\n'
+for f in $(fd -u -tf -d2 -j4 --base-directory "${BASE_DIR}" .envrc); do
+  REPO_OWNER="$(git -C "$(dirname "${BASE_DIR}/${f}")" remote get-url origin | cut -d':' -f2 | cut -d'/' -f1)"
+
+  if [[ "${REPO_OWNER}" == "${GITHUB_USER}" ]]; then
+    rclone copy "${BASE_DIR}/${f}" "${RCLONE_REMOTE}:${f}"
+  fi
+done
