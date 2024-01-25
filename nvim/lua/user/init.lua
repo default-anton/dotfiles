@@ -1,6 +1,5 @@
 require "user.options"
 require "user.colors"
-require "user.null-ls"
 require "user.nvim-lsp"
 require "user.cmp"
 require "user.treesitter"

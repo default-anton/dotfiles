@@ -1,7 +1,22 @@
-require("nvim-lsp-installer").setup {
-  automatic_installation = true,
+require("mason").setup()
+require("mason-lspconfig").setup {
+  ensure_installed = {
+    "jsonls",
+    "cssls",
+    "bashls",
+    "dockerls",
+    "gopls",
+    "pyright",
+    "html",
+    "terraformls",
+    "vimls",
+    "ruby_ls",
+    "sqlls",
+    "lua_ls",
+    "tsserver",
+    "tailwindcss",
+  },
 }
-
 require("fidget").setup {}
 
 local lspconfig = require "lspconfig"
@@ -10,7 +25,7 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
-local on_attach = function(client, bufnr)
+local on_attach = function(_, bufnr)
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   local bufopts = { noremap = true, silent = true, buffer = bufnr }
   vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, bufopts)
@@ -22,9 +37,6 @@ local on_attach = function(client, bufnr)
   vim.keymap.set("n", "<leader>f", function()
     vim.lsp.buf.format {
       timeout_ms = 4000,
-      filter = function(c)
-        return c.name == "null-ls"
-      end,
       bufnr = bufnr,
     }
   end, bufopts)
@@ -71,7 +83,7 @@ lspconfig.pyright.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.html.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.terraformls.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.vimls.setup { on_attach = on_attach, capabilities = capabilities }
-lspconfig.solargraph.setup { on_attach = on_attach, capabilities = capabilities }
+lspconfig.ruby_ls.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.sqlls.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.lua_ls.setup {
   on_attach = on_attach,
