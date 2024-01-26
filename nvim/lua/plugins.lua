@@ -45,7 +45,6 @@ require("lazy").setup({
   { "folke/tokyonight.nvim",           branch = "main" },
   "andymass/vim-matchup",
   "ruifm/gitlinker.nvim",
-  "j-hui/fidget.nvim",
   "github/copilot.vim",
   {
     "nvim-telescope/telescope.nvim",
