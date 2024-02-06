@@ -1,4 +1,5 @@
 require "user.options"
+require "user.plugins"
 require "user.colors"
 require "user.nvim-lsp"
 require "user.cmp"

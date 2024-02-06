@@ -1,5 +1,4 @@
 lua vim.loader.enable()
-lua require("plugins")
 lua require("user")
 
 " Git
