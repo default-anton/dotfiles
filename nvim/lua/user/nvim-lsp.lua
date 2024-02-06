@@ -10,7 +10,7 @@ require("mason-lspconfig").setup {
     "html",
     "terraformls",
     "vimls",
-    "ruby_ls",
+    "solargraph",
     "sqlls",
     "lua_ls",
     "tsserver",
@@ -82,7 +82,7 @@ lspconfig.pyright.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.html.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.terraformls.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.vimls.setup { on_attach = on_attach, capabilities = capabilities }
-lspconfig.ruby_ls.setup { on_attach = on_attach, capabilities = capabilities }
+lspconfig.solargraph.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.sqlls.setup { on_attach = on_attach, capabilities = capabilities }
 lspconfig.lua_ls.setup {
   on_attach = on_attach,
