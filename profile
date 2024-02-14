@@ -8,8 +8,6 @@ export PATH="${PATH}:/usr/local/go/bin"
 export EDITOR=nvim
 
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
-command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
-[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 # If running interactively
 case $- in
   *i*) [ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash ;;
@@ -36,8 +34,3 @@ _fzf_compgen_path() {
 _fzf_compgen_dir() {
   fd --type d --hidden --follow --exclude ".git" . "$1"
 }
-
-command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
-command -v npm >/dev/null 2>&1 && source <(npm completion)
-command -v aws >/dev/null 2>&1 && complete -C 'aws_completer' aws
-command -v gh >/dev/null 2>&1 && eval "$(gh completion -s bash)"
