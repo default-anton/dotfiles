@@ -7,9 +7,7 @@ export PATH="${PATH}:${GOBIN}"
 export PATH="${PATH}:/usr/local/go/bin"
 export EDITOR=nvim
 
-command -v pdm >/dev/null 2>&1 && source <(pdm --pep582)
 command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init --path)"
-command -v rbenv >/dev/null 2>&1 && eval "$(rbenv init - bash)"
 command -v brew >/dev/null 2>&1 && [ -f $(brew --prefix)/etc/bash_completion ] && . $(brew --prefix)/etc/bash_completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 # If running interactively
@@ -17,20 +15,8 @@ case $- in
   *i*) [ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash ;;
 esac
 
-case "$(uname -s)" in
-  Linux* | Darwin*)
-    if command -v brew >/dev/null 2>&1; then
-      for COMPLETION in $(brew --prefix)/etc/bash_completion.d/*
-      do
-        [[ -f $COMPLETION ]] && source "$COMPLETION"
-      done
-      if [[ -f $(brew --prefix)/etc/profile.d/bash_completion.sh ]];
-      then
-        source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
-      fi
-    fi
-    ;;
-esac
+bash_completion="$(brew --prefix)/etc/profile.d/bash_completion.sh"
+[ -f "${bash_completion}" ] && source "${bash_completion}"
 
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude ".git"'
 export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
@@ -52,10 +38,6 @@ _fzf_compgen_dir() {
 }
 
 command -v kubectl >/dev/null 2>&1 && source <(kubectl completion bash)
-command -v minikube >/dev/null 2>&1 && source <(minikube completion bash)
-command -v helm >/dev/null 2>&1 && source <(helm completion bash)
 command -v npm >/dev/null 2>&1 && source <(npm completion)
-command -v flutter >/dev/null 2>&1 && source <(flutter bash-completion)
-command -v doctl >/dev/null 2>&1 && source <(doctl completion bash)
 command -v aws >/dev/null 2>&1 && complete -C 'aws_completer' aws
 command -v gh >/dev/null 2>&1 && eval "$(gh completion -s bash)"
