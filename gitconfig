@@ -15,6 +15,7 @@
     dmbr  = !git br --merged | egrep -v '(^\\*|^master$|^develop$|^main$)' | xargs git br -d
     ci    = commit --verbose
     st    = status
+    b     = blame -w -C -C -C
     l     = "!bash -c '. ~/.dotfiles/githelpers && pretty_git_log $@' -"
     r     = !GIT_NO_PAGER=1 git l -30
     la    = !git l --all
