@@ -24,7 +24,6 @@
     dc    = diff --cached
     df    = diff
     all   = add --all
-    up    = standup -d 1 -f
     poo   = push origin HEAD
     rom   = !git fap && git rebase origin/$([ -f .git/refs/heads/main ] && echo main || echo master)
 
