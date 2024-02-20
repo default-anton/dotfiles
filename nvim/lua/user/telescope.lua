@@ -43,6 +43,9 @@ require("telescope").setup {
       horizontal = { width = 0.9 },
       vertical = { width = 0.9 },
     },
+    preview = {
+      filesize_limit = 0.1, -- MB
+    },
   },
   extensions = {
     fzf = {
