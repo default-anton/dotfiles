@@ -78,7 +78,6 @@
 
 ctrl + cmd - a : open -a 'Alacritty'
 ctrl + cmd - c : open -a 'Google Chrome'
-ctrl + cmd - d : open -a 'DaVinci Resolve'
 ctrl + cmd - f : open -a 'Finder'
 ctrl + cmd - g : open -a 'GarageBand'
 ctrl + cmd - h : open -a 'Hey'
