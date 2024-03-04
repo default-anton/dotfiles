@@ -9,7 +9,16 @@ vim.keymap.set("n", "<space><leader>", builtin.find_files, {})
 vim.keymap.set("n", "<space>m", builtin.live_grep, {})
 vim.keymap.set("n", "<space>w", builtin.grep_string, {})
 vim.keymap.set("n", "<space>.", builtin.buffers, {})
-vim.keymap.set("n", "<space>/", builtin.current_buffer_fuzzy_find, {})
+vim.keymap.set("n", "<space>/", function()
+  builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+    previewer = false,
+    layout_config = {
+      height = function(_, _, max_lines)
+        return math.min(max_lines, 30)
+      end,
+    },
+  })
+end, {})
 vim.keymap.set("n", "<space>c", builtin.resume, {})
 vim.keymap.set("n", "<space>o", builtin.lsp_document_symbols, {})
 vim.keymap.set("n", "<space>d", builtin.git_status, {})
