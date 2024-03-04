@@ -43,6 +43,7 @@ require("lazy").setup({
   "notjedi/nvim-rooter.lua",
   "kdheepak/lazygit.nvim",
   { "folke/tokyonight.nvim",           branch = "main" },
+  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
   "andymass/vim-matchup",
   "ruifm/gitlinker.nvim",
   "github/copilot.vim",
