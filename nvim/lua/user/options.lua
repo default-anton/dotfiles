@@ -35,6 +35,7 @@ opt.showmode = false
 opt.undofile = true
 opt.splitright = true
 opt.splitbelow = true
+opt.inccommand = 'split'
 
 -- Don't pass messages to |ins-completion-menu|.
 opt.shortmess:append "c"
