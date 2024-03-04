@@ -4,6 +4,7 @@ local file_browser = extensions.file_browser.file_browser
 local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
 
+vim.keymap.set("n", "<space>h", builtin.help_tags, {})
 vim.keymap.set("n", "<space><leader>", builtin.find_files, {})
 vim.keymap.set("n", "<space>m", builtin.live_grep, {})
 vim.keymap.set("n", "<space>w", builtin.grep_string, {})
