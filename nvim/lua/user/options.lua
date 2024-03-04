@@ -31,6 +31,7 @@ opt.updatetime = 50
 opt.cursorline = true
 opt.cursorlineopt = { "number" }
 opt.mouse = ""
+opt.showmode = false
 
 -- Don't pass messages to |ins-completion-menu|.
 opt.shortmess:append "c"
