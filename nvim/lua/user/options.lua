@@ -32,6 +32,7 @@ opt.cursorline = true
 opt.cursorlineopt = { "number" }
 opt.mouse = ""
 opt.showmode = false
+opt.undofile = true
 
 -- Don't pass messages to |ins-completion-menu|.
 opt.shortmess:append "c"
