@@ -56,6 +56,7 @@ require("lazy").setup({
     "nvim-telescope/telescope-file-browser.nvim",
     dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
   },
+  "nvim-telescope/telescope-ui-select.nvim",
   { dir = '~/code/gpt-sidekick' },
   "AndrewRadev/splitjoin.vim",
   "preservim/nerdcommenter",
