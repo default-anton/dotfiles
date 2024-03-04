@@ -51,6 +51,9 @@ require("telescope").setup {
     preview = {
       filesize_limit = 0.1, -- MB
     },
+    file_previewer = function(_)
+      return false
+    end,
   },
   extensions = {
     fzf = {
@@ -75,6 +78,7 @@ require("telescope").setup {
     },
   },
 }
+
 require("telescope").load_extension "fzf"
 require("telescope").load_extension "file_browser"
 require('telescope').load_extension "ui-select"
