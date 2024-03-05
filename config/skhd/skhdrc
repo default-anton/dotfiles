@@ -86,7 +86,6 @@ ctrl + cmd - n : open -a 'Notion'
 ctrl + cmd - p : open -a '1password'
 ctrl + cmd - s : open -a 'Slack'
 ctrl + cmd - t : open -a 'Telegram'
-ctrl + cmd - z : open -a 'zoom.us'
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
 
