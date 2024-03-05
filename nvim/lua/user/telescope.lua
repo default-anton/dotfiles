@@ -1,6 +1,8 @@
 local builtin = require "telescope.builtin"
 local extensions = require("telescope").extensions
 local file_browser = extensions.file_browser.file_browser
+local fb_actions = extensions.file_browser.actions
+
 local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
 
@@ -57,16 +59,22 @@ require("telescope").setup {
   },
   extensions = {
     fzf = {
-      fuzzy = true, -- false will only do exact matching
+      fuzzy = true,                   -- false will only do exact matching
       override_generic_sorter = true, -- override the generic sorter
-      override_file_sorter = true, -- override the file sorter
+      override_file_sorter = true,    -- override the file sorter
     },
     file_browser = {
       -- disables netrw and use telescope-file-browser in its place
       hijack_netrw = true,
-      git_status = false,
       prompt_path = true,
+      hidden = { file_browser = true, folder_browser = true },
+      hide_parent_dir = true,
       mappings = {
+        ["i"] = {
+          ["<C-r>"] = fb_actions.rename,
+          ["<C-y>"] = fb_actions.copy,
+          ["<C-d>"] = fb_actions.remove,
+        },
         ["n"] = {
           ["<space>m"] = live_grep_in_dir,
           ["<space><leader>"] = find_files_in_dir,
