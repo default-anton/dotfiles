@@ -2,11 +2,11 @@
 
 REPOS="$(gh repo list --source --json name | jq -r '.[].name')"
 for repo in $REPOS; do
-  if [ ! -d "$repo" ]; then
+  if [ ! -d ~/code/"$repo" ]; then
     echo "Cloning $repo"
-    gh repo clone "$repo"
+    gh repo clone "$repo" ~/code/"$repo"
   fi
 
-  echo "Fetching $repo"
-  git -C "$repo" fetch --all --prune
+  echo "Fetching ~/code/$repo"
+  git -C ~/code/"$repo" fetch --all --prune
 done
