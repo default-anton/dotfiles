@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+CSV_FILE=~/Downloads/FXUSDCAD.csv
+start_date=$(date +'%Y-01-01')
+end_date=$(date +'%Y-%m-%d')
+
+rm -f $CSV_FILE
+curl "https://www.bankofcanada.ca/valet/observations/FXUSDCAD/csv?start_date=${start_date}&end_date=${end_date}" -o $CSV_FILE 2>/dev/null
+HEADER_LINE_NUMBER=$(grep -n '"date","FXUSDCAD"' $CSV_FILE | awk -F: '{print $1}')
+
+tail -n +$((HEADER_LINE_NUMBER+1)) $CSV_FILE > $CSV_FILE.tmp
+mv $CSV_FILE.tmp $CSV_FILE
+open $CSV_FILE
