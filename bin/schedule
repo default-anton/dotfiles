@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-icalBuddy -nc -ea -iep "datetime" -df "%Y-%m-%d" -tf "%I:%M %p" -po "datetime" -npn eventsFrom:"$(date +%Y-%m-%d)" to:"$(date -v+7d +%Y-%m-%d)" | cut -d ' ' -f 2- | sed "s/today/$(date +%Y-%m-%d)/g" | sed "s/tomorrow/$(date -v +1d +%Y-%m-%d)/g"
