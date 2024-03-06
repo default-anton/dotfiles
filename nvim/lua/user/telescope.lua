@@ -68,6 +68,7 @@ require("telescope").setup {
       hijack_netrw = true,
       prompt_path = true,
       hidden = { file_browser = true, folder_browser = true },
+      no_ignore = true,
       hide_parent_dir = true,
       mappings = {
         ["i"] = {
