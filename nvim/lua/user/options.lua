@@ -1,44 +1,43 @@
 vim.g.mapleader = ","
 vim.g.maplocalleader = ","
 
-local opt = vim.opt
-
-opt.completeopt = { "menu", "menuone", "noselect" }
-opt.number = true
-opt.relativenumber = true
-opt.splitbelow = true
-opt.exrc = true
-opt.secure = true
-opt.backup = false
-opt.swapfile = false
-opt.smartindent = true
-opt.expandtab = true
-opt.termguicolors = true
-opt.ignorecase = true
-opt.smartcase = true
-opt.hlsearch = false
-opt.clipboard = "unnamed"
-opt.signcolumn = "yes"
-opt.colorcolumn = "+1"
-opt.textwidth = 120
-opt.tabstop = 2
-opt.shiftwidth = 2
-opt.softtabstop = 2
-opt.scrolloff = 3
-opt.sidescrolloff = 5
-opt.scroll = 8
-opt.updatetime = 50
-opt.cursorline = true
-opt.cursorlineopt = { "number" }
-opt.mouse = ""
-opt.showmode = false
-opt.undofile = true
-opt.splitright = true
-opt.splitbelow = true
-opt.inccommand = 'split'
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.splitbelow = true
+vim.opt.exrc = true
+vim.opt.secure = true
+vim.opt.backup = false
+vim.opt.swapfile = false
+vim.opt.smartindent = true
+vim.opt.expandtab = true
+vim.opt.termguicolors = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.hlsearch = false
+vim.opt.clipboard = "unnamed"
+vim.opt.signcolumn = "yes"
+vim.opt.colorcolumn = "+1"
+vim.opt.textwidth = 120
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.softtabstop = 2
+vim.opt.scrolloff = 3
+vim.opt.sidescrolloff = 5
+vim.opt.scroll = 8
+vim.opt.updatetime = 50
+vim.opt.cursorline = true
+vim.opt.cursorlineopt = { "number" }
+vim.opt.mouse = ""
+vim.opt.showmode = false
+vim.opt.undofile = true
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.inccommand = 'split'
+vim.opt.grepprg = "rg --vimgrep --no-heading --smart-case"
 
 -- Don't pass messages to |ins-completion-menu|.
-opt.shortmess:append "c"
+vim.opt.shortmess:append "c"
 
 vim.g.markdown_fenced_languages = {
   "python",
