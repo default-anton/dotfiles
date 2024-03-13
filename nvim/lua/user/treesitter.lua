@@ -55,7 +55,6 @@ require("nvim-treesitter.configs").setup {
   },
   indent = {
     enable = true,
-    disable = { "python", "css" },
   },
   matchup = {
     enable = true, -- mandatory, false will disable the whole extension
