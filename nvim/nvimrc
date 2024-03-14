@@ -16,8 +16,8 @@ nnoremap <C-h> <C-W>h
 nnoremap <C-l> <C-W>l
 
 " Navigation
-nnoremap <C-d> 8jzzzv<cr>
-nnoremap <C-u> 8kzzzv<cr>
+nnoremap <C-d> 8jzzzv
+nnoremap <C-u> 8kzzzv
 
 " Fix gx on Mac to open links, images etc with `open`
 nmap <silent> gx :!open <cfile><cr>
