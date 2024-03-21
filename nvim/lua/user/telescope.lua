@@ -85,9 +85,18 @@ require("telescope").setup {
     ['ui-select'] = {
       require('telescope.themes').get_dropdown(),
     },
+    ast_grep = {
+      command = {
+        "sg",
+        "--json=stream",
+      },
+      grep_open_files = false,
+      lang = nil,
+    }
   },
 }
 
 require("telescope").load_extension "fzf"
 require("telescope").load_extension "file_browser"
 require('telescope').load_extension "ui-select"
+require('telescope').load_extension "ast_grep"

@@ -59,6 +59,7 @@ require("lazy").setup({
   },
   "nvim-telescope/telescope-ui-select.nvim",
   { dir = '~/code/gpt-sidekick' },
+  "Marskey/telescope-sg",
   "AndrewRadev/splitjoin.vim",
   "preservim/nerdcommenter",
   "junegunn/vim-easy-align",

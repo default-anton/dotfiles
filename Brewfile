@@ -78,6 +78,7 @@ brew 'duf'
 brew 'bandwhich'
 brew 'lua-language-server'
 brew 'gdu'
+brew 'ast-grep'
 
 cask 'lulu'
 cask 'alacritty'
