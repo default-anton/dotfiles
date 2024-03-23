@@ -79,7 +79,6 @@ local servers = {
   html = {},
   terraformls = {},
   vimls = {},
-  solargraph = {},
   sqlls = {},
   lua_ls = {
     settings = {
