@@ -47,6 +47,7 @@
     diffFilter = delta --color-only
 
 [delta]
+    navigate = true
     line-numbers = true
     side-by-side = false
     syntax-theme = base16-256
@@ -63,6 +64,10 @@
 
 [fetch]
     prune = true
+
+[maintenance]
+	repo = /Users/akuzmenko/code/aha-app
+	repo = /Users/akuzmenko/code/aha-dev-cli
 
 [rerere]
 	enabled = true
