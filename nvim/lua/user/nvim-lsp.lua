@@ -107,7 +107,7 @@ require("mason").setup()
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
---capabilities.textDocument.completion.completionItem.snippetSupport = true
+capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 require('mason-lspconfig').setup {
   ensure_installed = vim.tbl_keys(servers),
