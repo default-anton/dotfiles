@@ -64,7 +64,7 @@ qgui:
 git:
     paging:
         colorArg: always
-        pager: ""
+        pager: delta --dark --paging=never
         useConfig: false
         externalDiffCommand: ""
     commit:
