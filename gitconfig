@@ -26,6 +26,7 @@
     all   = add --all
     poo   = push origin HEAD
     rom   = !git fap && git rebase origin/$([ -f .git/refs/heads/main ] && echo main || echo master)
+    changed = !git status --porcelain | grep '^ *[AM]' | cut -d ' ' -f 3-
 
 [color]
     ui   = true
