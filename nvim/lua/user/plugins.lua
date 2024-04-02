@@ -61,6 +61,7 @@ require("lazy").setup({
   { dir = '~/code/gpt-sidekick' },
   "Marskey/telescope-sg",
   { "akinsho/flutter-tools.nvim", config = true },
+  "mfussenegger/nvim-dap",
   "AndrewRadev/splitjoin.vim",
   "preservim/nerdcommenter",
   "junegunn/vim-easy-align",
