@@ -6,12 +6,12 @@ local fb_actions = extensions.file_browser.actions
 local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
 
-vim.keymap.set("n", "<space>h", builtin.help_tags, {})
-vim.keymap.set("n", "<space><leader>", builtin.find_files, {})
-vim.keymap.set("n", "<space>m", builtin.live_grep, {})
-vim.keymap.set("n", "<space>w", builtin.grep_string, {})
-vim.keymap.set("n", "<space>.", builtin.buffers, {})
-vim.keymap.set("n", "<space>/", function()
+vim.keymap.set("n", "<leader>h", builtin.help_tags, {})
+vim.keymap.set("n", "<leader>,", builtin.find_files, {})
+vim.keymap.set("n", "<leader>m", builtin.live_grep, {})
+vim.keymap.set("n", "<leader>w", builtin.grep_string, {})
+vim.keymap.set("n", "<leader>.", builtin.buffers, {})
+vim.keymap.set("n", "<leader>/", function()
   builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
     previewer = false,
     layout_config = {
@@ -21,10 +21,10 @@ vim.keymap.set("n", "<space>/", function()
     },
   })
 end, {})
-vim.keymap.set("n", "<space>c", builtin.resume, {})
-vim.keymap.set("n", "<space>d", builtin.git_status, {})
-vim.keymap.set("n", "<space>nn", file_browser, {})
-vim.keymap.set("n", "<space>nf", function()
+vim.keymap.set("n", "<leader>c", builtin.resume, {})
+vim.keymap.set("n", "<leader>d", builtin.git_status, {})
+vim.keymap.set("n", "<leader>nn", file_browser, {})
+vim.keymap.set("n", "<leader>nf", function()
   file_browser { path = vim.fn.expand "%:p:h", select_buffer = true }
 end, {})
 
@@ -77,8 +77,8 @@ require("telescope").setup {
           ["<C-d>"] = fb_actions.remove,
         },
         ["n"] = {
-          ["<space>m"] = live_grep_in_dir,
-          ["<space><leader>"] = find_files_in_dir,
+          ["<leader>m"] = live_grep_in_dir,
+          ["<leader>,"] = find_files_in_dir,
         },
       },
     },

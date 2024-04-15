@@ -22,9 +22,6 @@ nnoremap <C-u> 8kzzzv
 " Fix gx on Mac to open links, images etc with `open`
 nmap <silent> gx :!open <cfile><cr>
 
-" vmap <leader>f <Plug>(coc-format-selected)
-" nmap <leader>f <Plug>(coc-format-selected)
-
 " Visual mode pressing * or # searches for the current selection
 vnoremap <silent> * :<C-u>call GetVisualSelection()<cr>/<C-R>=@/<cr><cr>
 vnoremap <silent> # :<C-u>call GetVisualSelection()<cr>?<C-R>=@/<cr><cr>
@@ -64,8 +61,8 @@ map <leader>bo :BufOnly<cr>
 map <silent> <leader>bd :bd!<cr>
 " Close all the buffers
 map <leader>ba :bufdo bd<cr>
-map <leader>. :bnext<cr>
-map <leader>m :bprevious<cr>
+map ,. :bnext<cr>
+map ,m :bprevious<cr>
 
 augroup langs
   autocmd!

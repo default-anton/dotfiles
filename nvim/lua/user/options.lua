@@ -1,5 +1,5 @@
-vim.g.mapleader = ","
-vim.g.maplocalleader = ","
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 vim.opt.number = true
