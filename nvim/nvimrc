@@ -37,7 +37,7 @@ endfunction
 let g:test#custom_transformations = {'tmux': function('TmuxTransform')}
 
 nnoremap <leader>rf <cmd>TestFile<cr>
-nnoremap <leader>rs <cmd>TestNearest<cr>
+nnoremap <leader>rr <cmd>TestNearest<cr>
 nnoremap <leader>rl <cmd>TestLast<cr>
 nnoremap <leader>ra <cmd>TestSuite<cr>
 
