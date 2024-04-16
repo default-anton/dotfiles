@@ -28,7 +28,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     map('gs', vim.lsp.buf.signature_help)
     map('<leader>o', builtin.lsp_document_symbols)
     map('<leader>rn', vim.lsp.buf.rename)
-    map('<leader>a', vim.lsp.buf.code_action)
+    --map('<leader>a', vim.lsp.buf.code_action)
     map('<leader>f', function()
       vim.lsp.buf.format {
         timeout_ms = 4000,
