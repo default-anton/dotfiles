@@ -21,7 +21,7 @@ vim.keymap.set("n", "<leader>/", function()
     },
   })
 end, {})
-vim.keymap.set("n", "<leader>c", builtin.resume, {})
+vim.keymap.set("n", "<leader>co", builtin.resume, {})
 vim.keymap.set("n", "<leader>d", builtin.git_status, {})
 vim.keymap.set("n", "<leader>nn", file_browser, {})
 vim.keymap.set("n", "<leader>nf", function()
