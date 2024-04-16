@@ -1,24 +1,6 @@
 lua vim.loader.enable()
 lua require("user")
 
-" Git
-nnoremap <silent> <leader>gg <cmd>LazyGit<cr>
-nnoremap <silent> <leader>gf <cmd>LazyGitFilterCurrentFile<cr>
-
-nnoremap <silent><C-S-Up> <cmd>resize -6<cr>
-nnoremap <silent><C-S-Down> <cmd>resize +6<cr>
-nnoremap <silent><C-S-Left> <cmd>vertical resize -6<cr>
-nnoremap <silent><C-S-Right> <cmd>vertical resize +6<cr>
-
-nnoremap <C-k> <C-W>k
-nnoremap <C-j> <C-W>j
-nnoremap <C-h> <C-W>h
-nnoremap <C-l> <C-W>l
-
-" Navigation
-nnoremap <C-d> 8jzzzv
-nnoremap <C-u> 8kzzzv
-
 " Fix gx on Mac to open links, images etc with `open`
 nmap <silent> gx :!open <cfile><cr>
 
@@ -36,20 +18,15 @@ endfunction
 
 let g:test#custom_transformations = {'tmux': function('TmuxTransform')}
 
-nnoremap <leader>rf <cmd>TestFile<cr>
-nnoremap <leader>rr <cmd>TestNearest<cr>
-nnoremap <leader>rl <cmd>TestLast<cr>
-nnoremap <leader>ra <cmd>TestSuite<cr>
-
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
 imap kj <Esc>
 
 " Yank current file path relative to the project root
-nnoremap <leader>yf :let @+=expand("%")<cr>
+nnoremap <leader>cf :let @+=expand("%")<cr>
 " Yank current file path with line number relative to the project root
-nnoremap <leader>yl :let @+=expand("%") . ':' . line(".")<cr>
+nnoremap <leader>cl :let @+=expand("%") . ':' . line(".")<cr>
 
 " n always search forward and N backward
 nnoremap <expr> n (v:searchforward ? 'nzzzv' : 'Nzzzv')
