@@ -39,3 +39,7 @@ vim.api.nvim_set_keymap('n', '<C-u>', '8kzzzv', { noremap = true, silent = true 
 -- Yank to clipboard
 vim.api.nvim_set_keymap('n', '<leader>y', '"+y', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '<leader>y', '"+y', { noremap = true, silent = true })
+
+-- Paste from clipboard
+vim.api.nvim_set_keymap('n', '<leader>p', '"+p', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>p', '"+p', { noremap = true, silent = true })
