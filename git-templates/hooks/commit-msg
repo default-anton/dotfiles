@@ -1,19 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
-# Add git branch if relevant
 parse_git_branch() {
   git rev-parse --abbrev-ref HEAD
 }
 
-# Extact tracker abbreviation and ticket number (e.g. DS-123)
 parse_ticket() {
   parse_git_branch | grep --only-matching --regexp '[A-Z]\+-[0-9]\+'
 }
 
-MESSAGE="$(cat $1)"
+MESSAGE="$(cat "$1")"
 TICKET="$(parse_ticket)"
 
-if [ -n "$TICKET" ]
-then
-  echo "[$TICKET] $MESSAGE" > $1
+# Check if the ticket number is already at the start of the commit message
+if [[ -n "$TICKET" && ! "$MESSAGE" =~ ^\[$TICKET\] ]]; then
+  # Prepend the ticket number to the commit message if it's not already there
+  echo "[$TICKET] $MESSAGE" > "$1"
 fi
