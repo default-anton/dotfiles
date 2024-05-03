@@ -4,5 +4,6 @@ QUESTION="$*"
 
 IFS=$'!?.\n\t ' ollama run llama3 "$QUESTION" | while IFS=$'!?.\n\t ' read -r sentence;
 do
-  say -r200 "$sentence"
+  echo "$sentence"
+  say -r220 "$sentence"
 done
