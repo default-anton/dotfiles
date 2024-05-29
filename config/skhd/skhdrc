@@ -79,7 +79,7 @@
 ctrl + cmd - a : open -a 'Alacritty'
 ctrl + cmd - c : open -a 'Google Chrome'
 ctrl + cmd - f : open -a 'Finder'
-ctrl + cmd - g : open -a 'GarageBand'
+ctrl + cmd - l : shortcuts run 'Log idea'
 ctrl + cmd - h : open -a 'Hey'
 ctrl + cmd - m : open -a 'Messages'
 ctrl + cmd - n : open -a 'Notion'
