@@ -60,7 +60,18 @@ require("lazy").setup({
   "nvim-telescope/telescope-ui-select.nvim",
   { dir = '~/code/gpt-sidekick' },
   "Marskey/telescope-sg",
-  { "akinsho/flutter-tools.nvim", config = true },
+  {
+    "akinsho/flutter-tools.nvim",
+    config = function()
+      require('flutter-tools').setup {
+        lsp = {
+          settings = {
+            lineLength = 140,
+          },
+        },
+      }
+    end,
+  },
   "mfussenegger/nvim-dap",
   "AndrewRadev/splitjoin.vim",
   "preservim/nerdcommenter",
