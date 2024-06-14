@@ -18,12 +18,10 @@ end, {})
 vim.keymap.set("n", "<leader>co", builtin.resume, {})
 vim.keymap.set("n", "<leader>d", builtin.git_status, {})
 vim.keymap.set("n", "<leader>n,", function()
-  local telescope = require "telescope.builtin"
-  telescope.find_files { search_dirs = { vim.fn.expand "%:h" } }
+  builtin.find_files { search_dirs = { vim.fn.expand "%:h" } }
 end, {})
 vim.keymap.set("n", "<leader>nm", function()
-  local telescope = require "telescope.builtin"
-  telescope.live_grep { search_dirs = { vim.fn.expand "%:h" } }
+  builtin.live_grep { search_dirs = { vim.fn.expand "%:h" } }
 end, {})
 
 require("telescope").setup {
