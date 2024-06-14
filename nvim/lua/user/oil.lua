@@ -34,3 +34,5 @@ oil.setup({
     ["<leader>,"] = find_files_in_dir,
   },
 })
+
+vim.keymap.set("n", "<leader>nn", "<CMD>Oil<CR>", {})
