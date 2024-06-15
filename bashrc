@@ -5,3 +5,4 @@
 
 command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook bash)"
+command -v pyenv >/dev/null 2>&1 && export PATH="$PATH:$(pyenv prefix)/bin"
