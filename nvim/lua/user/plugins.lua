@@ -42,7 +42,7 @@ require("lazy").setup({
   "lukas-reineke/indent-blankline.nvim",
   "notjedi/nvim-rooter.lua",
   "kdheepak/lazygit.nvim",
-  { "folke/tokyonight.nvim",           branch = "main" },
+  { "folke/tokyonight.nvim", lazy = false, },
   { 'folke/todo-comments.nvim',        event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
   "andymass/vim-matchup",
   "ruifm/gitlinker.nvim",
