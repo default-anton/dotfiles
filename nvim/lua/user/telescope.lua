@@ -26,10 +26,6 @@ end, {})
 
 require("telescope").setup {
   defaults = {
-    layout_config = {
-      horizontal = { width = 0.9 },
-      vertical = { width = 0.9 },
-    },
     preview = {
       filesize_limit = 0.1, -- MB
     },
@@ -43,9 +39,10 @@ require("telescope").setup {
   },
   extensions = {
     fzf = {
-      fuzzy = true,                   -- false will only do exact matching
-      override_generic_sorter = true, -- override the generic sorter
-      override_file_sorter = true,    -- override the file sorter
+      fuzzy = true,
+      override_generic_sorter = true,
+      override_file_sorter = true,
+      case_mode = "smart_case",
     },
     ['ui-select'] = {
       require('telescope.themes').get_dropdown(),
