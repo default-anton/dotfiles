@@ -39,18 +39,6 @@ vim.opt.grepprg = "rg --vimgrep --no-heading --smart-case"
 -- Don't pass messages to |ins-completion-menu|.
 vim.opt.shortmess:append "c"
 
-vim.g.markdown_fenced_languages = {
-  "python",
-  "bash=sh",
-  "html",
-  "css",
-  "json",
-  "javascript",
-  "js=javascript",
-  "yaml",
-  "dockerfile",
-}
-
 -- disable netrw at the very start of your init.lua (strongly advised)
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
