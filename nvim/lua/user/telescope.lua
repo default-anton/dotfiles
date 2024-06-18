@@ -26,16 +26,14 @@ end, {})
 
 require("telescope").setup {
   defaults = {
+    layout_strategy = 'vertical',
+    layout_config = { height = 0.95 },
     preview = {
       filesize_limit = 0.1, -- MB
     },
     file_previewer = function(_)
       return false
     end,
-  },
-  pickers = {
-    live_grep = false,
-    find_files = false,
   },
   extensions = {
     fzf = {
