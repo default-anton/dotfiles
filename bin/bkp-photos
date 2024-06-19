@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-osxphotos export /Volumes/anton/apple/photos --update --export-by-date --download-missing --retry 3 --exiftool --keyword-template "{label}"
+osxphotos export /Volumes/anton/apple/photos --update --export-by-date --download-missing --retry 3 --sidecar json --keyword-template "{label}"
