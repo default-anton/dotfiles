@@ -17,3 +17,4 @@ docker-compose.override.yml
 x_custom_*.env
 .envrc
 /chrome/
+venv/
