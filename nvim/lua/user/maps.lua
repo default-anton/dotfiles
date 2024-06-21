@@ -7,10 +7,6 @@ vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz', { noremap = true, silent
 -- LLM integration
 vim.api.nvim_set_keymap('n', '<leader>aa', '<cmd>Ask<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '<leader>aa', ':\'<,\'>Ask<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>ao', '<cmd>Ask gpt-4o<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>ao', ':\'<,\'>Ask gpt-4o<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>ac', '<cmd>Ask claude-3-opus-20240229<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>ac', ':\'<,\'>Ask claude-3-opus-20240229<CR>', { noremap = true, silent = true })
 
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>', { noremap = true, silent = true })
