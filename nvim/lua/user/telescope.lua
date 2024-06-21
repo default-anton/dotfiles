@@ -31,9 +31,6 @@ require("telescope").setup {
     preview = {
       filesize_limit = 0.1, -- MB
     },
-    file_previewer = function(_)
-      return false
-    end,
   },
   extensions = {
     fzf = {
