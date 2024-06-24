@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-QUESTION="$*"
-
-IFS=$'!?.\n\t ' ollama run llama3 "$QUESTION" | while IFS=$'!?.\n\t ' read -r sentence;
-do
-  echo "$sentence"
-  say -r220 "$sentence"
-done
