@@ -5,8 +5,8 @@ vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz', { noremap = true, silent = true })
 
 -- LLM integration
-vim.api.nvim_set_keymap('n', '<leader>aa', '<cmd>Ask<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>aa', ':\'<,\'>Ask<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>aa', '<cmd>Ask split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>aa', ':\'<,\'>Ask split<CR>', { noremap = true, silent = true })
 
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>', { noremap = true, silent = true })
