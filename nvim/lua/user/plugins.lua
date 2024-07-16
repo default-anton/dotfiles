@@ -60,13 +60,13 @@ require("lazy").setup({
     dependencies = { "nvim-tree/nvim-web-devicons" },
   },
   "nvim-telescope/telescope-ui-select.nvim",
-  {
-    "git@github.com:aha-app/llm-sidekick.nvim.git",
-    dependencies = { "nvim-lua/plenary.nvim" },
-  },
   --{
-    --dir = "~/code/llm-sidekick.nvim",
+    --"git@github.com:aha-app/llm-sidekick.nvim.git",
+    --dependencies = { "nvim-lua/plenary.nvim" },
   --},
+  {
+    dir = "~/code/llm-sidekick.nvim",
+  },
   "Marskey/telescope-sg",
   {
     "akinsho/flutter-tools.nvim",
