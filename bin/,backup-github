@@ -1,6 +1,6 @@
 #/usr/bin/env bash
 
-REPOS="$(gh repo list --source --json name | jq -r '.[].name')"
+REPOS="$(gh repo list --limit 100 --source --json name | jq -r '.[].name')"
 for repo in $REPOS; do
   if [ ! -d ~/code/"$repo" ]; then
     echo "Cloning $repo"
