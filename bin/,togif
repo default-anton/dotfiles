@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+if ! command -v ffmpeg &> /dev/null; then
+    echo "FFmpeg is not installed. Please install it and try again."
+    exit 1
+fi
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <input_video> [output_gif]"
+    exit 1
+fi
+
+input_video="$1"
+output_gif="${2:-${input_video%.*}.gif}"
+
+if [ ! -f "$input_video" ]; then
+    echo "Input file does not exist: $input_video"
+    exit 1
+fi
+
+ffmpeg -i "$input_video" \
+    -vf "fps=10,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+    -loop 0 \
+    "$output_gif"
+
+if [ $? -eq 0 ]; then
+    echo "Conversion successful. Output saved as: $output_gif"
+else
+    echo "Conversion failed."
+    exit 1
+fi
