@@ -8,7 +8,7 @@ local function yank_files_in_current_dir()
   local current_dir = vim.fn.expand('%:p:h')
   local bash_cmd = {"fd", "", "-tf", current_dir, "-X", "tail", "+1"}
   local result = table.concat(vim.fn.systemlist(bash_cmd), "\n")
-  vim.fn.setreg('"', "Here is what I'm working on:\n```" .. result .. "```", 'l')
+  vim.fn.setreg('"', "Here is what I'm working on:\n```\n" .. result .. "\n```", 'l')
 end
 
 -- LLM integration
