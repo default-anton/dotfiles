@@ -79,6 +79,7 @@ brew 'bandwhich'
 brew 'lua-language-server'
 brew 'gdu'
 brew 'ast-grep'
+brew 'pngpaste'
 
 cask 'lulu'
 cask 'alacritty'
