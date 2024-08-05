@@ -1,5 +1,7 @@
 #/usr/bin/env bash
 
+BACKUP_DIR=/Volumes/anton/code/
+
 REPOS="$(gh repo list --limit 100 --source --json name | jq -r '.[].name')"
 for repo in $REPOS; do
   if [ ! -d ~/code/"$repo" ]; then
@@ -9,4 +11,6 @@ for repo in $REPOS; do
 
   echo "Fetching ~/code/$repo"
   git -C ~/code/"$repo" fetch --all --prune
+
+  rsync -az --delete ~/code/"$repo"/ "${BACKUP_DIR}${repo}/"
 done
