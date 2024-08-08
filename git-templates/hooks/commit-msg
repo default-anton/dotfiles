@@ -5,7 +5,7 @@ parse_git_branch() {
 }
 
 parse_ticket() {
-  parse_git_branch | grep --only-matching --regexp '[A-Z]\+-[0-9]\+'
+  parse_git_branch | grep --only-matching --regexp '[A-Z]\+-[0-9]\+\(-[0-9]\+\)*'
 }
 
 MESSAGE="$(cat "$1")"
