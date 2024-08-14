@@ -90,8 +90,6 @@ require("lazy").setup({
   "tpope/vim-projectionist",
   "tpope/vim-surround",
   "tpope/vim-repeat",
-  "tpope/vim-eunuch",
-  "tpope/vim-abolish",
   "pbrisbin/vim-mkdir",
   "pangloss/vim-javascript",
   "peitalin/vim-jsx-typescript",
