@@ -14,7 +14,10 @@ end
 -- LLM integration
 vim.keymap.set('n', '<leader>yd', yank_files_in_current_dir, { noremap = true, silent = true, desc = "Yank files in current directory" })
 vim.api.nvim_set_keymap('n', '<leader>aa', '<cmd>Ask split<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>aa', ':\'<,\'>Ask split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>aa', '<cmd>\'<,\'>Ask split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>af', '<cmd>Ask file split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>ee', '<cmd>\'<,\'>Edit<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>ef', 'ggVG<cmd>\'<,\'>Edit<CR>', { noremap = true, silent = true })
 
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>', { noremap = true, silent = true })
