@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if ! pgrep -f "whisper-medium.en.llamafile --server" >/dev/null; then
+  nohup whisper-medium.en.llamafile --server >/dev/null 2>&1 &
+  disown
+fi
+
+sox -q -d -b 16 -c 1 /tmp/recording.wav rate 16k &&
+  curl 127.0.0.1:8080/inference \
+    -H "Content-Type: multipart/form-data" \
+    -F file="@/tmp/recording.wav" \
+    -F temperature="0.0" \
+    -F temperature_inc="0.2" \
+    -F response_format="text" &&
+  rm /tmp/recording.wav
