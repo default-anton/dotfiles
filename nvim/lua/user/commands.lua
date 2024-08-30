@@ -36,3 +36,11 @@ vim.api.nvim_create_user_command("Replace", function()
     with
   ))
 end, { nargs = 0 })
+
+vim.api.nvim_create_user_command("Ctest", function()
+  local current_file = vim.fn.expand("%")
+  local spec_file = current_file:gsub("^app", "spec"):gsub("%.rb$", "_spec.rb")
+  local spec_dir = vim.fn.fnamemodify(spec_file, ":h")
+  vim.fn.mkdir(spec_dir, "p")
+  vim.cmd("edit " .. spec_file)
+end, { desc = "Create a spec file for the current file" })
