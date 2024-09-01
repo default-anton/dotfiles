@@ -62,3 +62,5 @@ vim.api.nvim_set_keymap('v', '<leader>p', '"+p', { noremap = true, silent = true
 
 vim.keymap.set('i', '<C-o>', stt.run_whisper_transcription,
   { noremap = true, silent = true, desc = "Run Whisper transcription" })
+
+vim.api.nvim_set_keymap('n', 'sm', '<cmd>set opfunc=v:lua.convert_snake_to_mixed_opfunc<CR>g@', {})
