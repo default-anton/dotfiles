@@ -1,17 +1,16 @@
-local M = {}
-
-local function snake_to_mixed(text)
-  local parts = vim.split(text, '_')
+local function to_mixed_case(text)
+  -- Split the text by non-alphanumeric characters
+  local parts = vim.split(text, '[^%w]+')
   for i, part in ipairs(parts) do
     if #part > 0 then
-      parts[i] = part:sub(1, 1):upper() .. part:sub(2)
+      -- Lowercase the entire part, then uppercase the first letter
+      parts[i] = part:lower():sub(1, 1):upper() .. part:sub(2)
     end
   end
   return table.concat(parts, '')
 end
 
-_G.convert_snake_to_mixed_opfunc = function(motion_type)
-  vim.print("Function called with motion_type: " .. motion_type)
+_G.convert_to_mixed_case_opfunc = function(motion_type)
   local start_pos, end_pos
 
   if motion_type == 'char' then
@@ -31,18 +30,16 @@ _G.convert_snake_to_mixed_opfunc = function(motion_type)
       local start_char = math.max(start_col, 1)
       local end_char = math.min(end_col, #line_text)
       local text_to_convert = line_text:sub(start_char, end_char)
-      local converted_text = snake_to_mixed(text_to_convert)
+      local converted_text = to_mixed_case(text_to_convert)
       vim.api.nvim_buf_set_text(0, line - 1, start_char - 1, line - 1, end_char, { converted_text })
     end
     return
   else
-    print("Unsupported motion type: " .. motion_type)
+    vim.api.nvim_err_writeln("Unsupported motion type: " .. motion_type)
     return
   end
 
   local text = vim.api.nvim_buf_get_text(0, start_pos[2] - 1, start_pos[3] - 1, end_pos[2] - 1, end_pos[3], {})[1]
-  local converted_text = snake_to_mixed(text)
+  local converted_text = to_mixed_case(text)
   vim.api.nvim_buf_set_text(0, start_pos[2] - 1, start_pos[3] - 1, end_pos[2] - 1, end_pos[3], { converted_text })
 end
-
-return M
