@@ -22,6 +22,8 @@ vim.api.nvim_set_keymap('v', '<leader>aa', ':Ask split<CR>', { noremap = true, s
 vim.api.nvim_set_keymap('v', '<leader>av', ':Ask vsplit<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>aff', ':Ask file split<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>afv', ':Ask file vsplit<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>', { noremap = true, silent = true })
 
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>', { noremap = true, silent = true })
