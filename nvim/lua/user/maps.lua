@@ -16,14 +16,11 @@ end
 -- LLM integration
 vim.keymap.set('n', '<leader>yd', yank_files_in_current_dir,
   { noremap = true, silent = true, desc = "Yank files in current directory" })
-vim.api.nvim_set_keymap('n', '<leader>aa', ':Ask<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>as', ':Ask split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>aa', ':Ask split<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>av', ':Ask vsplit<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>aa', ':Ask<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>as', ':Ask split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>aa', ':Ask split<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '<leader>av', ':Ask vsplit<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>aff', ':Ask file<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>afs', ':Ask file split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>aff', ':Ask file split<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>afv', ':Ask file vsplit<CR>', { noremap = true, silent = true })
 
 -- Run tests
