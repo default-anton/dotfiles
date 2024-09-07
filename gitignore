@@ -3,6 +3,7 @@
 .vimrc
 .nvimrc
 .projections.json
+.llmsidekick.lua
 .vscode
 test/reports
 .textlintrc
