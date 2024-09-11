@@ -25,8 +25,9 @@
     df    = diff
     all   = add --all
     poo   = push origin HEAD
-    rom   = !git fap && git rebase origin/$([ -f .git/refs/heads/main ] && echo main || echo master)
+    rom   = !git fap && git rebase origin/$(git_default_branch)
     changed = !git status --porcelain | grep '^ *[AM]' | cut -d ' ' -f 3-
+    review = !git df $(git merge-base $(git_default_branch) HEAD)..HEAD
 
 [color]
     ui   = true
