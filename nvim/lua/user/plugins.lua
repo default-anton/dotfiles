@@ -59,6 +59,10 @@ require("lazy").setup({
     -- Optional dependencies
     dependencies = { "nvim-tree/nvim-web-devicons" },
   },
+  {
+    'stevearc/dressing.nvim',
+    opts = {},
+  },
   "nvim-telescope/telescope-ui-select.nvim",
   --{
     --"git@github.com:aha-app/llm-sidekick.nvim.git",
