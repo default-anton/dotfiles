@@ -108,7 +108,7 @@ local servers = {
       },
     }
   },
-  tsserver = {},
+  ts_ls = {},
   tailwindcss = {},
 }
 
