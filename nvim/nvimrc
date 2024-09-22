@@ -11,6 +11,8 @@ vnoremap <silent> # :<C-u>call GetVisualSelection()<cr>?<C-R>=@/<cr><cr>
 let g:dispatch_tmux_height = "15"
 
 let test#strategy = "dispatch_background"
+let test#lua#busted#executable = "ntest"
+let test#transformation = 'tmux'
 
 function! TmuxTransform(cmd) abort
   return 'tmux send -t bottom-left '.shellescape(a:cmd).' Enter'
