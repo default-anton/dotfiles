@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+show_help() {
+  echo "Usage: $(basename "$0") [OPTIONS] <file or directory>"
+  echo
+  echo "Run Plenary tests for Neovim plugins"
+  echo
+  echo "Options:"
+  echo "  -h, --help         Show this help message and exit"
+  echo "  -i, --init FILE    Specify a custom init.vim file (default: ./scripts/minimal_init.vim)"
+  echo
+  echo "Arguments:"
+  echo "  <file or directory>  The file or directory to run tests on"
+}
+
+# Default init file
+init_file="./scripts/minimal_init.vim"
+
+# Parse command-line options
+while getopts ":hi:-:" opt; do
+  case $opt in
+  h)
+    show_help
+    exit 0
+    ;;
+  i)
+    init_file="$OPTARG"
+    ;;
+  -)
+    case "${OPTARG}" in
+    help)
+      show_help
+      exit 0
+      ;;
+    init)
+      if [ -n "${!OPTIND}" ] && [ "${!OPTIND:0:1}" != "-" ]; then
+        init_file="${!OPTIND}"
+        OPTIND=$((OPTIND + 1))
+      else
+        echo "Error: --init requires an argument" >&2
+        exit 1
+      fi
+      ;;
+    *)
+      echo "Invalid option: --${OPTARG}" >&2
+      exit 1
+      ;;
+    esac
+    ;;
+  \?)
+    echo "Invalid option: -$OPTARG" >&2
+    exit 1
+    ;;
+  :)
+    echo "Option -$OPTARG requires an argument." >&2
+    exit 1
+    ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+# Check if an argument is provided
+if [ $# -eq 0 ]; then
+  echo "Error: No file or directory specified." >&2
+  exit 1
+fi
+
+file="$1"
+
+nvim --headless --noplugin -u "$init_file" -c "PlenaryBustedDirectory ${file} { minimal_init = '${init_file}' }"
