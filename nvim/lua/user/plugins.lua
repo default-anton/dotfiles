@@ -42,7 +42,7 @@ require("lazy").setup({
   "lukas-reineke/indent-blankline.nvim",
   "notjedi/nvim-rooter.lua",
   "kdheepak/lazygit.nvim",
-  { "folke/tokyonight.nvim", lazy = false, },
+  { "folke/tokyonight.nvim",           lazy = false, },
   { 'folke/todo-comments.nvim',        event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
   "andymass/vim-matchup",
   "ruifm/gitlinker.nvim",
@@ -65,12 +65,11 @@ require("lazy").setup({
   },
   "nvim-telescope/telescope-ui-select.nvim",
   --{
-    --"git@github.com:aha-app/llm-sidekick.nvim.git",
-    --dependencies = { "nvim-lua/plenary.nvim" },
+  --"git@github.com:aha-app/llm-sidekick.nvim.git",
+  --dependencies = { "nvim-lua/plenary.nvim" },
   --},
-  {
-    dir = "~/code/llm-sidekick.nvim",
-  },
+  { dir = "~/code/llm-sidekick.nvim" },
+  { dir = '~/code/rough-cut.nvim' },
   "Marskey/telescope-sg",
   {
     "akinsho/flutter-tools.nvim",
