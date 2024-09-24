@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+dry_run=false
+
+log() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+}
+
+remove_extension() {
+  echo "${1%.*}"
+}
+
+usage() {
+  echo "Usage: $0 [-n] <search_path>"
+  echo "  -n  Dry run (don't actually delete files)"
+  echo "  <search_path>  Path pattern to search for duplicates"
+  exit 1
+}
+
+while getopts ":n" opt; do
+  case ${opt} in
+  n)
+    dry_run=true
+    ;;
+  \?)
+    usage
+    ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+if [ $# -eq 0 ]; then
+  usage
+fi
+
+search_path="$1"
+
+if $dry_run; then
+  log "Starting duplicate file search (DRY RUN MODE)"
+else
+  log "Starting duplicate file search"
+fi
+
+mapfile -t duplicates < <(fd '\(\d+\)' -tf "$search_path")
+
+for duplicate in "${duplicates[@]}"; do
+  # Extract the original filename (without the (n) suffix)
+  original=$(echo "$duplicate" | sed -E 's/\([0-9]+\)(\.[^.]+)?$/\1/')
+
+  # Check if the original file exists
+  if [[ -f "$original" ]]; then
+    # Compare the files
+    if cmp -s "$duplicate" "$original"; then
+      log "Duplicate found: $duplicate"
+      log "Original: $original"
+
+      if $dry_run; then
+        log "DRY RUN: Would remove duplicate: $duplicate"
+      else
+        # Remove the duplicate
+        rm "$duplicate"
+        log "Removed duplicate: $duplicate"
+      fi
+    else
+      log "Files are different: $duplicate and $original"
+    fi
+  else
+    log "Original file not found for: $duplicate"
+  fi
+done
+
+if $dry_run; then
+  log "Duplicate removal process completed (DRY RUN MODE)"
+else
+  log "Duplicate removal process completed"
+fi
