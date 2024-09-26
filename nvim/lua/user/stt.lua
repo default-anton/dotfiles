@@ -1,56 +1,19 @@
 local Job = require('plenary.job')
 
-local function check_whisper_server()
-  vim.fn.system("pgrep -f 'whisper-medium.en.llamafile --server'")
-  return vim.v.shell_error == 0
-end
-
-local WHISPER_PROMPT = [[
-# Software Engineering Transcription
-## Common programming languages and frameworks
-Java, Python, JavaScript, C++, Ruby, PHP, Swift, Kotlin, Go, Rust, TypeScript
-React, Angular, Vue.js, Node.js, Django, Flask, Spring Boot, .NET Core, TensorFlow
-
-## Coding concepts and terminology
-Algorithm, API, Git, Docker, Kubernetes, CI/CD, Agile, Scrum, DevOps, Machine Learning
-Object-Oriented Programming, Functional Programming, Data Structures, Design Patterns
-
-## Code syntax examples
-if (condition) { ... } else { ... }
-for (int i = 0; i < n; i++) { ... }
-def function_name(parameter1, parameter2):
-    return result
-
-## Command line instructions
-$ npm install package-name
-$ git commit -m "Commit message"
-$ docker build -t my-image .
-
-// End of prompt
-$$$
-]]
-
-local function start_whisper_server()
-  local escaped_prompt = vim.fn.shellescape(WHISPER_PROMPT)
-  local command = string.format(
-    "nohup whisper-medium.en.llamafile --server --port 8432 --prompt %s >/dev/null 2>&1 &",
-    escaped_prompt
-  )
-  vim.fn.jobstart(command, {
-    detach = true
-  })
-end
+local FILE_PATH = "/tmp/recording.mp3"
 
 local function send_inference_request(callback)
   Job:new({
     command = "curl",
     args = {
-      "127.0.0.1:8432/inference",
+      "https://api.groq.com/openai/v1/audio/transcriptions",
+      "-H", "Authorization: bearer " .. (os.getenv("GROQ_API_KEY") or ""),
       "-H", "Content-Type: multipart/form-data",
-      "-F", "file=@/tmp/recording.wav",
+      "-F", "file=@" .. FILE_PATH,
+      "-F", "model=distil-whisper-large-v3-en",
       "-F", "temperature=0.0",
-      "-F", "temperature_inc=0.2",
-      "-F", "response_format=text"
+      "-F", "response_format=text",
+      "-F", "language=en"
     },
     on_exit = function(j, return_val)
       if return_val == 0 then
@@ -65,7 +28,7 @@ local function send_inference_request(callback)
   }):start()
 end
 
-local function record_audio()
+local function run_whisper_transcription()
   local buf = vim.api.nvim_create_buf(false, true)
   local width = math.floor(vim.o.columns * 0.4)
   local height = math.floor(vim.o.lines * 0.3)
@@ -80,7 +43,7 @@ local function record_audio()
     border = 'rounded'
   })
 
-  vim.fn.termopen("sox -q -d -b 16 -c 1 /tmp/recording.wav rate 16k", {
+  vim.fn.termopen("sox -q -d -c 1 -t mp3 -C 128.2 " .. FILE_PATH .. " rate 16k", {
     on_exit = function(_, exit_code)
       vim.api.nvim_win_close(win, true)
       if exit_code == 0 then
@@ -102,14 +65,6 @@ local function record_audio()
   })
 
   vim.cmd('startinsert')
-end
-
-local function run_whisper_transcription()
-  if not check_whisper_server() then
-    start_whisper_server()
-  end
-
-  record_audio()
 end
 
 return {
