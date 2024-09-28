@@ -50,10 +50,9 @@ local add_to_llm_context = {
       if entry.type == "directory" then
         path = cwd .. entry.parsed_name
       else
-        vim.cmd('Add ' .. cwd)
+        vim.cmd('Add ' .. cwd .. entry.parsed_name)
         return
       end
-      
       local function add_files_recursively(dir)
         local handle = vim.loop.fs_scandir(dir)
         if not handle then return end
