@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
-osxphotos export --ramdb --added-in-last "3 months" --export-by-date --download-missing --retry 3 --duplicate --sidecar json /Volumes/anton/apple/photos
+set -euo pipefail
+
+uv --directory ~/.dotfiles run osxphotos export --ramdb --added-in-last "3 months" --export-by-date --download-missing --retry 3 --duplicate --sidecar json /Volumes/anton/apple/photos
 
 ,delete-duplicates /Volumes/anton/apple/photos/
