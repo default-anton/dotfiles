@@ -79,6 +79,7 @@ brew 'lua-language-server'
 brew 'gdu'
 brew 'ast-grep'
 brew 'pngpaste'
+brew 'uv'
 
 cask 'lulu'
 cask 'alacritty'

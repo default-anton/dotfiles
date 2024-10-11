@@ -86,7 +86,7 @@ ctrl + cmd - n : open -a 'Notes'
 ctrl + cmd - p : open -a '1password'
 ctrl + cmd - s : open -a 'Slack'
 ctrl + cmd - t : open -a 'Telegram'
-ctrl + cmd - space : open -a 'Alacritty' && PATH="$PATH:/Users/akuzmenko/.cargo/bin" SHELL=/opt/homebrew/bin/bash tmux new-window -c '/Users/akuzmenko' 'nvim +Ask'
+ctrl + cmd - space : open -a 'Alacritty' && tmux new-window -c '/Users/akuzmenko' 'nvim +Ask'
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
 
