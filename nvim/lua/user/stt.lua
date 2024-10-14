@@ -10,7 +10,7 @@ local function send_inference_request(callback)
       "-H", "Authorization: bearer " .. (os.getenv("GROQ_API_KEY") or ""),
       "-H", "Content-Type: multipart/form-data",
       "-F", "file=@" .. FILE_PATH,
-      "-F", "model=distil-whisper-large-v3-en",
+      "-F", "model=whisper-large-v3-turbo",
       "-F", "temperature=0.0",
       "-F", "response_format=text",
       "-F", "language=en"
