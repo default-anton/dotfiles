@@ -79,7 +79,7 @@
 ctrl + cmd - a : open -a 'Alacritty'
 ctrl + cmd - c : open -a 'Google Chrome'
 ctrl + cmd - f : open -a 'Finder'
-ctrl + cmd - l : shortcuts run 'Log idea'
+ctrl + cmd - g : shortcuts run 'Groq' -o /tmp/groq_output.txt && cat /tmp/groq_output.txt | pbcopy
 ctrl + cmd - h : open -a 'Hey'
 ctrl + cmd - m : open -a 'Messages'
 ctrl + cmd - n : open -a 'Notes'
