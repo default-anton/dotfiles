@@ -76,15 +76,20 @@ local add_to_llm_context = {
     local entry = oil.get_cursor_entry()
     local cwd = oil.get_current_dir()
     
-    if not vim.g.llm_sidekick_last_ask_buffer or not vim.api.nvim_buf_is_valid(vim.g.llm_sidekick_last_ask_buffer) then
-      vim.cmd('Code')
-      -- Schedule to ensure the buffer is ready
-      vim.schedule(function()
-        add_files_under_cursor_to_llm_context(entry, cwd)
-      end)
-      return
-    end
     add_files_under_cursor_to_llm_context(entry, cwd)
+  end,
+}
+
+local start_new_coding_session_with_llm = {
+  desc = "Start new coding session with LLM",
+  callback = function(_)
+    local entry = oil.get_cursor_entry()
+    local cwd = oil.get_current_dir()
+    
+    vim.cmd('Code')
+    vim.schedule(function()
+      add_files_under_cursor_to_llm_context(entry, cwd)
+    end)
   end,
 }
 
@@ -106,6 +111,7 @@ oil.setup({
     ["<leader>m"] = live_grep_in_dir,
     ["<leader>,"] = find_files_in_dir,
     ["<leader>ad"] = add_to_llm_context,
+    ["<leader>af"] = start_new_coding_session_with_llm,
   },
 })
 
