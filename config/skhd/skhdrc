@@ -83,7 +83,7 @@ ctrl + cmd - g : shortcuts run 'Groq' -o /tmp/groq_output.txt && cat /tmp/groq_o
 ctrl + cmd - h : open -a 'Hey'
 ctrl + cmd - m : open -a 'Messages'
 ctrl + cmd - n : open -a 'Notes'
-ctrl + cmd - p : open -a '1password'
+ctrl + cmd - 1 : open -a '1password'
 ctrl + cmd - s : open -a 'Slack'
 ctrl + cmd - t : open -a 'Telegram'
 ctrl + cmd - space : open -a 'Alacritty' && tmux new-window -c '/Users/akuzmenko' 'nvim +Ask'
