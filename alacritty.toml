@@ -41,7 +41,7 @@ style = "Bold"
 family = "FiraCode Nerd Font Mono"
 style = "Medium"
 
-[shell]
+[terminal.shell]
 args = ["-l", "-c", "tmux attach &> /dev/null || tmux"]
 program = "/opt/homebrew/bin/bash"
 
