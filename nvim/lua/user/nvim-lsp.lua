@@ -65,6 +65,7 @@ local servers = {
     },
   },
   cssls = {},
+  ruby_lsp = {},
   bashls = {},
   dockerls = {},
   gopls = {
