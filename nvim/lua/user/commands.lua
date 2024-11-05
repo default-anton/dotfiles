@@ -21,10 +21,20 @@ vim.api.nvim_create_user_command("Ctest", function()
   vim.cmd("edit " .. spec_file)
 end, { desc = "Create a spec file for the current file" })
 
-vim.api.nvim_create_user_command("Strip", function()
+vim.api.nvim_create_user_command("Strip", function(opts)
   local Job = require "plenary.job"
   local bufnr = vim.api.nvim_get_current_buf()
-  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local start_line = 0
+  local end_line = -1
+  if opts.range == 2 then
+    start_line = opts.line1 - 1
+    end_line = opts.line2
+  end
+
+  local lines = vim.api.nvim_buf_get_lines(bufnr, start_line, end_line, false)
+  if #lines == 0 then
+    return
+  end
   local content = table.concat(lines, "\n")
   local strip = Job:new {
     command = "git",
@@ -34,11 +44,11 @@ vim.api.nvim_create_user_command("Strip", function()
   strip:sync()
   local result = strip:result()
   if #result > 0 then
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, result)
+    vim.api.nvim_buf_set_lines(bufnr, start_line, end_line, false, result)
     if vim.api.nvim_get_option_value('modified', { buf = bufnr }) then
       vim.cmd('write')
     end
   else
     error("Failed to strip whitespace")
   end
-end, { desc = "Remove trailing whitespace from current buffer" })
+end, { desc = "Remove trailing whitespace from buffer or selection", range = true })
