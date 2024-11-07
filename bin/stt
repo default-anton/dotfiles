@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 
-FILE_PATH=${1:-/tmp/recording.mp3}
+set -euo pipefail
 
-sox -q -d -c 1 -t mp3 -C 128.2 "${FILE_PATH}" rate 16k &&
-  curl https://api.groq.com/openai/v1/audio/transcriptions \
-      -H "Authorization: Bearer ${GROQ_API_KEY}" \
-      -H "Content-Type: multipart/form-data" \
-      -F file="@${FILE_PATH}" \
-      -F model="whisper-large-v3-turbo" \
-      -F temperature="0.0" \
-      -F response_format="text" \
-      -F language="en" \
-      -F prompt="Search for coffee shops near me. Send a message to John: Hey, want to grab lunch tomorrow? Open Gmail. Write an email to Sarah about the project deadline. Search YouTube for cooking tutorials. Set a reminder for dentist appointment next Tuesday at 2 PM. Reply to Mom's text: I'll be home for dinner. Search for weather forecast Surrey BC. Open calendar and add meeting with team." &&
-  rm /tmp/recording.wav
+FILE_PATH="${1:-}"
+
+if [ ! -f "${FILE_PATH}" ]; then
+  FILE_PATH=/tmp/recording.mp3
+  sox -q -d -c 1 -t mp3 -C 128.2 "${FILE_PATH}" rate 16k
+fi
+
+curl https://api.groq.com/openai/v1/audio/transcriptions \
+  -H "Authorization: Bearer ${GROQ_API_KEY}" \
+  -H "Content-Type: multipart/form-data" \
+  -F file="@${FILE_PATH}" \
+  -F model="whisper-large-v3-turbo" \
+  -F temperature="0.0" \
+  -F response_format="text" \
+  -F language="en" \
+  -F prompt="Search for coffee shops near me. Send a message to John: Hey, want to grab lunch tomorrow? Open Gmail. Write an email to Sarah about the project deadline. Search YouTube for cooking tutorials. Set a reminder for dentist appointment next Tuesday at 2 PM. Reply to Mom's text: I'll be home for dinner. Search for weather forecast Surrey BC. Open calendar and add meeting with team."
+
+rm -f /tmp/recording.mp3
