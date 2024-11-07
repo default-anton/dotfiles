@@ -1,6 +1,7 @@
 local Job = require('plenary.job')
 
 local FILE_PATH = "/tmp/recording.mp3"
+local PROMPT = "Search for coffee shops near me. Send a message to John: Hey, want to grab lunch tomorrow? Open Gmail. Write an email to Sarah about the project deadline. Search YouTube for cooking tutorials. Set a reminder for dentist appointment next Tuesday at 2 PM. Reply to Mom's text: I'll be home for dinner. Search for weather forecast Surrey BC. Open calendar and add meeting with team."
 
 local function send_inference_request(callback)
   Job:new({
@@ -13,7 +14,8 @@ local function send_inference_request(callback)
       "-F", "model=whisper-large-v3-turbo",
       "-F", "temperature=0.0",
       "-F", "response_format=text",
-      "-F", "language=en"
+      "-F", "language=en",
+      "-F", "prompt=" .. PROMPT,
     },
     on_exit = function(j, return_val)
       if return_val == 0 then
