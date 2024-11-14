@@ -2,6 +2,33 @@
 
 set -euo pipefail
 
+CHUNK_SIZE_MB=24
+TEMP_DIR="/tmp/stt_chunks_$$"
+# Rirectory for merged chunks
+MERGED_DIR="${TEMP_DIR}/merged"
+SILENCE_DURATION=1.0
+SILENCE_THRESHOLD=2%
+
+cleanup() {
+  rm -rf "${TEMP_DIR}"
+  rm -f /tmp/recording.mp3
+}
+
+#trap cleanup EXIT
+
+process_chunk() {
+  local chunk="$1"
+  curl -s https://api.groq.com/openai/v1/audio/transcriptions \
+    -H "Authorization: Bearer ${GROQ_API_KEY}" \
+    -H "Content-Type: multipart/form-data" \
+    -F file="@${chunk}" \
+    -F model="whisper-large-v3-turbo" \
+    -F temperature="0.0" \
+    -F response_format="text" \
+    -F language="en" \
+    -F prompt="Search for coffee shops near me. Send a message to John: Hey, want to grab lunch tomorrow? Open Gmail. Write an email to Sarah about the project deadline. Search YouTube for cooking tutorials. Set a reminder for dentist appointment next Tuesday at 2 PM. Reply to Mom's text: I'll be home for dinner. Search for weather forecast Surrey BC. Open calendar and add meeting with team."
+}
+
 FILE_PATH="${1:-}"
 
 if [ ! -f "${FILE_PATH}" ]; then
@@ -9,14 +36,65 @@ if [ ! -f "${FILE_PATH}" ]; then
   sox -q -d -c 1 -t mp3 -C 128.2 "${FILE_PATH}" rate 16k
 fi
 
-curl https://api.groq.com/openai/v1/audio/transcriptions \
-  -H "Authorization: Bearer ${GROQ_API_KEY}" \
-  -H "Content-Type: multipart/form-data" \
-  -F file="@${FILE_PATH}" \
-  -F model="whisper-large-v3-turbo" \
-  -F temperature="0.0" \
-  -F response_format="text" \
-  -F language="en" \
-  -F prompt="Search for coffee shops near me. Send a message to John: Hey, want to grab lunch tomorrow? Open Gmail. Write an email to Sarah about the project deadline. Search YouTube for cooking tutorials. Set a reminder for dentist appointment next Tuesday at 2 PM. Reply to Mom's text: I'll be home for dinner. Search for weather forecast Surrey BC. Open calendar and add meeting with team."
+# Get file size in bytes
+FILE_SIZE=$(stat -f %z "${FILE_PATH}" 2>/dev/null)
+MAX_SIZE=$((CHUNK_SIZE_MB * 1024 * 1024))
 
-rm -f /tmp/recording.mp3
+if [ "${FILE_SIZE}" -le "${MAX_SIZE}" ]; then
+  # Process single file if it's small enough
+  process_chunk "${FILE_PATH}"
+else
+  mkdir -p "${MERGED_DIR}"
+
+  # Convert to wav for processing
+  sox "${FILE_PATH}" "${TEMP_DIR}/audio.wav"
+
+  # Split on silence
+  sox "${TEMP_DIR}/audio.wav" "${TEMP_DIR}/chunk_.wav" silence 1 0.1 "${SILENCE_THRESHOLD}" 1 "${SILENCE_DURATION}" "${SILENCE_THRESHOLD}" : newfile : restart
+
+  # First convert all WAV chunks to MP3
+  find "${TEMP_DIR}" -name 'chunk_*.wav' -print0 | while IFS= read -r -d '' chunk; do
+    mp3_chunk="${chunk%.wav}.mp3"
+    sox "${chunk}" -c 1 -C 128.2 "${mp3_chunk}" rate 16k
+  done
+  
+  # Initialize variables for merging
+  current_size=0
+  merge_count=0
+  chunk_list="${TEMP_DIR}/chunk_list_${merge_count}.txt"
+  touch "${chunk_list}"
+  
+  # Sort chunks numerically (chunk_001.mp3, chunk_002.mp3, etc.)
+  while IFS= read -r -d '' mp3_chunk; do
+    chunk_size=$(stat -f %z "${mp3_chunk}" 2>/dev/null || stat -c %s "${mp3_chunk}")
+    
+    # If adding this chunk would exceed the limit, merge current chunks and reset
+    if [ $((current_size + chunk_size)) -gt "${MAX_SIZE}" ] && [ -s "${chunk_list}" ]; then
+      # Merge accumulated chunks using sox
+      sox $(cat "${chunk_list}") "${MERGED_DIR}/merged_${merge_count}.mp3"
+      merge_count=$((merge_count + 1))
+      # Reset for next batch
+      current_size=${chunk_size}
+      chunk_list="${TEMP_DIR}/chunk_list_${merge_count}.txt"
+      echo "${mp3_chunk}" > "${chunk_list}"
+    else
+      # Accumulate chunks
+      current_size=$((current_size + chunk_size))
+      echo "${mp3_chunk}" >> "${chunk_list}"
+    fi
+  done < <(find "${TEMP_DIR}" -maxdepth 1 -name 'chunk_*.mp3' -print0 | sort -z)
+  
+  # Merge any remaining chunks using sox
+  if [ -s "${chunk_list}" ]; then
+    sox $(cat "${chunk_list}") "${MERGED_DIR}/merged_${merge_count}.mp3"
+  fi
+  
+  # Clean up temporary chunk lists
+  rm -f "${TEMP_DIR}"/chunk_list_*.txt
+  
+  # Process merged chunks
+  find "${MERGED_DIR}" -name 'merged_*.mp3' -print0 | sort -z | while IFS= read -r -d '' merged_chunk; do
+    process_chunk "${merged_chunk}"
+    echo -n " " # Add space between chunk transcriptions
+  done
+fi
