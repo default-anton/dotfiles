@@ -14,7 +14,7 @@ cleanup() {
   rm -f /tmp/recording.mp3
 }
 
-#trap cleanup EXIT
+trap cleanup EXIT
 
 process_chunk() {
   local chunk="$1"
