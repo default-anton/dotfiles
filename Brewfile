@@ -80,6 +80,7 @@ brew 'gdu'
 brew 'ast-grep'
 brew 'pngpaste'
 brew 'uv'
+brew 'glow'
 
 cask 'alacritty'
 cask 'blackhole-16ch'
