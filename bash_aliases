@@ -13,7 +13,7 @@ alias v=nvim
 alias p3="ipython3"
 alias cat=bat
 alias shlint=shellcheck
-alias reranker="~/.cargo/bin/text-embeddings-router --model-id BAAI/bge-reranker-v2-m3 --revision 12e9746 --port 8787"
+alias reranker="text-embeddings-router --model-id BAAI/bge-reranker-v2-m3 --revision 12e9746 --port 8787"
 
 uname_out=$(uname -a)
 case "${uname_out}" in
