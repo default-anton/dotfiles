@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -e
+
+DOWNLOADS_DIR="${DOWNLOADS_DIR:-$HOME/Downloads}"
+OWNERS="${OWNERS:-Anton Anna}"
+CATEGORIES_FILE="${CATEGORIES_FILE:-$HOME/Library/Mobile Documents/com~apple~Numbers/Documents/transaction_categories.numbers}"
+
+show_help() {
+    echo "Usage: $(basename "$0") YYYY-MM"
+    echo "Process family cashflow for the specified month"
+    echo
+    echo "Environment variables:"
+    echo "  DOWNLOADS_DIR    Directory to process CSV files from (default: ~/Downloads)"
+    echo "  OWNERS          Space-separated list of owners (default: Anton Anna)"
+    echo "  CATEGORIES_FILE Path to categories file (default: ~/Library/.../transaction_categories.numbers)"
+}
+
+# Check if month argument is provided
+if [ $# -ne 1 ] || [[ ! $1 =~ ^[0-9]{4}-[0-9]{2}$ ]]; then
+    show_help
+    exit 1
+fi
+
+MONTH="$1"
+
+rm -f "${DOWNLOADS_DIR}"/*_processed_family_cashflow.csv
+
+uv --directory ~/code/family-cashflow run family_cashflow.py \
+    --owners ${OWNERS} \
+    --categories "${CATEGORIES_FILE}" \
+    --month "${MONTH}" \
+    "${DOWNLOADS_DIR}"/*.csv
