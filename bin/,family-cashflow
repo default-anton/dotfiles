@@ -24,7 +24,7 @@ fi
 
 MONTH="$1"
 
-rm -f "${DOWNLOADS_DIR}"/*_processed_family_cashflow.csv
+rm -f "${DOWNLOADS_DIR}"/*_family_cashflow.csv
 
 uv --directory ~/code/family-cashflow run family_cashflow.py \
     --owners ${OWNERS} \
