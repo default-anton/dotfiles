@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+CATEGORIES_FILE="${CATEGORIES_FILE:-$HOME/Library/Mobile Documents/com~apple~Numbers/Documents/family cashflow/transaction_categories.numbers}"
+
+open "${CATEGORIES_FILE}"

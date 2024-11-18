@@ -4,7 +4,7 @@ set -e
 
 DOWNLOADS_DIR="${DOWNLOADS_DIR:-$HOME/Downloads}"
 OWNERS="${OWNERS:-Anton Anna}"
-CATEGORIES_FILE="${CATEGORIES_FILE:-$HOME/Library/Mobile Documents/com~apple~Numbers/Documents/transaction_categories.numbers}"
+CATEGORIES_FILE="${CATEGORIES_FILE:-$HOME/Library/Mobile Documents/com~apple~Numbers/Documents/family cashflow/transaction_categories.numbers}"
 
 show_help() {
     echo "Usage: $(basename "$0") YYYY-MM"
