@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 SEARCH REPLACE"
+  exit 1
+fi
+
+SEARCH="$1"
+REPLACE="$2"
+
+echo "Found occurrences:"
+mapfile -t SEARCH_RESULTS < <(rg -s "${SEARCH}" --vimgrep || {
+  echo "No matches found."
+  exit 0
+})
+
+printf '%s\n' "${SEARCH_RESULTS[@]}"
+
+# Extract unique files from the search results
+mapfile -t MATCHED_FILES < <(printf '%s\n' "${SEARCH_RESULTS[@]}" | cut -d':' -f1 | sort -u)
+
+# Ask for global replacement
+read -r -p "Replace all occurrences? (y/N) " response
+if [[ "$response" =~ ^[Yy]$ ]]; then
+  for file in "${MATCHED_FILES[@]}"; do
+    echo "Replacing in: $file"
+    rg -s "${SEARCH}" -r "${REPLACE}" "$file" | sponge "$file"
+  done
+  exit 0
+fi
+
+# Handle files individually
+for file in "${MATCHED_FILES[@]}"; do
+  echo -e "\nOccurrences in: $file"
+  grep -F "${file}" <(printf '%s\n' "${SEARCH_RESULTS[@]}")
+
+  read -r -p "Replace occurrences in this file? (y/N) " response
+  if [[ "$response" =~ ^[Yy]$ ]]; then
+    rg -s "${SEARCH}" -r "${REPLACE}" "$file" | sponge "$file"
+    echo "Replaced in: $file"
+  fi
+done
