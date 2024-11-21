@@ -55,7 +55,7 @@ read -r -p "Replace all occurrences? (y/N) " response
 if [[ "$response" =~ ^[Yy]$ ]]; then
   for file in "${MATCHED_FILES[@]}"; do
     echo "Replacing in: $file"
-    rg -s "${SEARCH}" -r "${REPLACE}" "$file" | sponge "$file"
+    rg --passthru -s "${SEARCH}" -r "${REPLACE}" "$file" | sponge "$file"
   done
   exit 0
 fi
@@ -67,7 +67,7 @@ for file in "${MATCHED_FILES[@]}"; do
 
   read -r -p "Replace occurrences in this file? (y/N) " response
   if [[ "$response" =~ ^[Yy]$ ]]; then
-    rg -s "${SEARCH}" -r "${REPLACE}" "$file" | sponge "$file"
+    rg --passthru -s "${SEARCH}" -r "${REPLACE}" "$file" | sponge "$file"
     echo "Replaced in: $file"
   fi
 done
