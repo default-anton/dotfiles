@@ -2,16 +2,45 @@
 
 set -euo pipefail
 
-if [ $# -ne 2 ]; then
-  echo "Usage: $0 SEARCH REPLACE"
+usage() {
+  echo "Usage: $0 -s SEARCH -r REPLACE [-d DIRECTORY]"
+  echo "Options:"
+  echo "  -s SEARCH     Search string"
+  echo "  -r REPLACE    Replacement string"
+  echo "  -d DIRECTORY  Directory to search in (default: current directory)"
+  exit 1
+}
+
+# Initialize variables
+SEARCH=""
+REPLACE=""
+DIRECTORY="."
+
+# Parse command line options
+while getopts ":s:r:d:" opt; do
+  case $opt in
+    s) SEARCH="$OPTARG" ;;
+    r) REPLACE="$OPTARG" ;;
+    d) DIRECTORY="$OPTARG" ;;
+    \?) echo "Invalid option: -$OPTARG" >&2; usage ;;
+    :) echo "Option -$OPTARG requires an argument" >&2; usage ;;
+  esac
+done
+
+# Validate required arguments
+if [ -z "$SEARCH" ] || [ -z "$REPLACE" ]; then
+  echo "Error: -s SEARCH and -r REPLACE are required" >&2
+  usage
+fi
+
+# Validate directory exists
+if [ ! -d "$DIRECTORY" ]; then
+  echo "Error: Directory '$DIRECTORY' does not exist" >&2
   exit 1
 fi
 
-SEARCH="$1"
-REPLACE="$2"
-
 echo "Found occurrences:"
-mapfile -t SEARCH_RESULTS < <(rg -s "${SEARCH}" --vimgrep || {
+mapfile -t SEARCH_RESULTS < <(rg -s "${SEARCH}" --vimgrep "$DIRECTORY" || {
   echo "No matches found."
   exit 0
 })
