@@ -6,16 +6,7 @@ vim.api.nvim_set_keymap('n', '<leader>qc', ':cclose<CR>', { noremap = true, sile
 vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz', { noremap = true, silent = true })
 
-local function yank_files_in_current_dir()
-  local current_dir = vim.fn.expand('%:p:h')
-  local bash_cmd = { "fd", "", "-tf", current_dir, "-X", "tail", "+1" }
-  local result = table.concat(vim.fn.systemlist(bash_cmd), "\n")
-  vim.fn.setreg('"', "Here is what I'm working on:\n```\n" .. result .. "\n```", 'l')
-end
-
 -- LLM integration
-vim.keymap.set('n', '<leader>yd', yank_files_in_current_dir,
-  { noremap = true, silent = true, desc = "Yank files in current directory" })
 vim.api.nvim_set_keymap('n', '<leader>ask', ':Ask split<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '<leader>ask', ':Ask split<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>aa', ':Code split<CR>', { noremap = true, silent = true })
