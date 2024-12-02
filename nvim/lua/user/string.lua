@@ -12,6 +12,20 @@ local function to_snake_case(text)
   return text
 end
 
+local function to_kebab_case(text)
+  -- Handle camelCase and PascalCase
+  text = text:gsub('(%u)(%u%l)', '%1-%2'):gsub('(%l)(%u)', '%1-%2')
+  -- Convert to lowercase
+  text = text:lower()
+  -- Replace non-alphanumeric characters with hyphens
+  text = text:gsub('[^%w]+', '-')
+  -- Remove leading/trailing hyphens
+  text = text:gsub('^-+', ''):gsub('-+$', '')
+  -- Replace consecutive hyphens with a single hyphen
+  text = text:gsub('-+', '-')
+  return text
+end
+
 local function to_mixed_case(text)
   -- Split the text by non-alphanumeric characters
   local parts = vim.split(text, '[^%w]+')
@@ -64,6 +78,10 @@ end
 
 _G.convert_to_snake_case_opfunc = function(motion_type)
   convert_case(motion_type, to_snake_case)
+end
+
+_G.convert_to_kebab_case_opfunc = function(motion_type)
+  convert_case(motion_type, to_kebab_case)
 end
 
 _G.convert_to_mixed_case_opfunc = function(motion_type)
