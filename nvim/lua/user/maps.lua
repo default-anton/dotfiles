@@ -7,11 +7,10 @@ vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz', { noremap = true, silent = true })
 
 -- LLM integration
-vim.api.nvim_set_keymap('n', '<leader>ask', ':Ask split<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>ask', ':Ask split<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>aa', ':Code split<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>aa', ':Code split<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>aff', ':Code file split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>la', ':Ask split file<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>la', ':Ask split<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>lc', ':Code split file<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>lc', ':Code split<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>', { noremap = true, silent = true })
 

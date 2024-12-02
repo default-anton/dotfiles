@@ -111,7 +111,7 @@ oil.setup({
     ["<leader>m"] = live_grep_in_dir,
     ["<leader>,"] = find_files_in_dir,
     ["<leader>ad"] = add_to_llm_context,
-    ["<leader>af"] = start_new_coding_session_with_llm,
+    ["<leader>lc"] = start_new_coding_session_with_llm,
   },
 })
 
