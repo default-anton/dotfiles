@@ -11,7 +11,7 @@ vim.api.nvim_create_user_command("Pr", function()
     end
   end))
   open_pr:start()
-end, {})
+end, { desc = "Open PR in browser or create a new one if none exists" })
 
 vim.api.nvim_create_user_command("Ctest", function()
   local current_file = vim.fn.expand("%")
