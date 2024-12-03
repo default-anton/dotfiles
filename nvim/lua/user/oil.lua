@@ -40,43 +40,15 @@ local find_files_in_dir = {
   end,
 }
 
-local function add_files_under_cursor_to_llm_context(entry, cwd)
-  if entry and cwd then
-    if entry.type ~= "directory" then
-      local full_path = vim.fn.fnameescape(cwd .. entry.parsed_name)
-      vim.cmd('Add ' .. full_path)
-      return
-    end
-    local path = cwd .. entry.parsed_name
-
-    local function add_files_recursively(dir)
-      local handle = vim.loop.fs_scandir(dir)
-      if not handle then return end
-
-      while true do
-        local name, type = vim.loop.fs_scandir_next(handle)
-        if not name then break end
-
-        local full_path = vim.fn.fnameescape(dir .. '/' .. name)
-        if type == 'file' then
-          vim.cmd('Add ' .. full_path)
-        elseif type == 'directory' then
-          add_files_recursively(dir .. '/' .. name)
-        end
-      end
-    end
-
-    add_files_recursively(path)
-  end
-end
-
 local add_to_llm_context = {
   desc = "Add to LLM context",
   callback = function(_)
     local entry = oil.get_cursor_entry()
     local cwd = oil.get_current_dir()
-    
-    add_files_under_cursor_to_llm_context(entry, cwd)
+    if entry and cwd then
+      local full_path = vim.fn.fnameescape(cwd .. entry.parsed_name)
+      vim.cmd('Add ' .. full_path)
+    end
   end,
 }
 
@@ -85,11 +57,13 @@ local start_new_coding_session_with_llm = {
   callback = function(_)
     local entry = oil.get_cursor_entry()
     local cwd = oil.get_current_dir()
-    
-    vim.cmd('Code')
-    vim.schedule(function()
-      add_files_under_cursor_to_llm_context(entry, cwd)
-    end)
+    if entry and cwd then
+      vim.cmd('Code')
+      vim.schedule(function()
+        local full_path = vim.fn.fnameescape(cwd .. entry.parsed_name)
+        vim.cmd('Add ' .. full_path)
+      end)
+    end
   end,
 }
 
