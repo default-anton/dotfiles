@@ -9,24 +9,24 @@ vim.api.nvim_set_keymap('n', '<leader>yl', [[:let @+ = expand('%') . ':' . line(
   { noremap = true, silent = true, desc = "Yank file path with line number" })
 
 -- Quickfix list navigation
-vim.api.nvim_set_keymap('n', '<leader>qo', ':copen<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>qc', ':cclose<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>qo', ':copen<CR>', { noremap = true, silent = true, desc = "Open quickfix list" })
+vim.api.nvim_set_keymap('n', '<leader>qc', ':cclose<CR>', { noremap = true, silent = true, desc = "Close quickfix list" })
+vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent = true, desc = "Next quickfix item" })
+vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz', { noremap = true, silent = true, desc = "Previous quickfix item" })
 
 -- LLM integration
-vim.api.nvim_set_keymap('n', '<leader>la', ':Ask split file<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>la', ':Ask split<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>lc', ':Code split file<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>lc', ':Code split<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>la', ':Ask split file<CR>', { noremap = true, silent = true, desc = "Ask LLM about current buffer" })
+vim.api.nvim_set_keymap('v', '<leader>la', ':Ask split<CR>', { noremap = true, silent = true, desc = "Ask LLM about selection" })
+vim.api.nvim_set_keymap('n', '<leader>lc', ':Code split file<CR>', { noremap = true, silent = true, desc = "Start coding with LLM on current buffer" })
+vim.api.nvim_set_keymap('v', '<leader>lc', ':Code split<CR>', { noremap = true, silent = true, desc = "Start coding with LLM on selection" })
+vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
+vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add selected context to LLM" })
 
 -- Run tests
-vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>rr', '<cmd>TestNearest<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>rl', '<cmd>TestLast<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>ra', '<cmd>TestSuite<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>', { noremap = true, silent = true, desc = "Run tests in current file" })
+vim.api.nvim_set_keymap('n', '<leader>rr', '<cmd>TestNearest<CR>', { noremap = true, silent = true, desc = "Run nearest test" })
+vim.api.nvim_set_keymap('n', '<leader>rl', '<cmd>TestLast<CR>', { noremap = true, silent = true, desc = "Run last test" })
+vim.api.nvim_set_keymap('n', '<leader>ra', '<cmd>TestSuite<CR>', { noremap = true, silent = true, desc = "Run all tests" })
 
 -- LazyGit integration
 vim.api.nvim_set_keymap('n', '<leader>gg', '<cmd>LazyGit<CR>', { noremap = true, silent = true })
