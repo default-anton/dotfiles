@@ -4,14 +4,14 @@ require("gitlinker").setup {
 
 vim.api.nvim_set_keymap(
   "n",
-  "<leader>cr",
+  "<leader>yr",
   '<cmd>lua require"gitlinker".get_buf_range_url("n")<cr>',
   { silent = true, desc = "Copy git link for current line" }
 )
 
 vim.api.nvim_set_keymap(
   "v",
-  "<leader>cr",
+  "<leader>yr",
   '<cmd>lua require"gitlinker".get_buf_range_url("v")<cr>',
   { desc = "Copy git link for selected lines" }
 )
