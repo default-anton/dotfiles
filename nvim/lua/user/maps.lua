@@ -1,5 +1,13 @@
 local stt = require("user.stt")
 
+-- Yank current file path relative to the project root
+vim.api.nvim_set_keymap('n', '<leader>yf', [[:let @+ = expand('%')<CR>]],
+  { noremap = true, silent = true, desc = "Yank file path" })
+
+-- Yank current file path with line number relative to the project root
+vim.api.nvim_set_keymap('n', '<leader>yl', [[:let @+ = expand('%') . ':' . line('.')<CR>]],
+  { noremap = true, silent = true, desc = "Yank file path with line number" })
+
 -- Quickfix list navigation
 vim.api.nvim_set_keymap('n', '<leader>qo', ':copen<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>qc', ':cclose<CR>', { noremap = true, silent = true })
