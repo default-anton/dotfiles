@@ -1,6 +1,5 @@
 local builtin = require "telescope.builtin"
 
-vim.keymap.set("n", "<leader>h", builtin.help_tags, {})
 vim.keymap.set("n", "<leader>,", builtin.find_files, {})
 vim.keymap.set("n", "<leader>m", builtin.live_grep, {})
 vim.keymap.set("n", "<leader>w", builtin.grep_string, {})
@@ -10,6 +9,13 @@ vim.keymap.set("v", "<leader>m", function()
   local selection = vim.fn.getreg("v")
   vim.fn.setreg("v", saved_reg)
   builtin.grep_string({ search = selection })
+end, {})
+vim.keymap.set("v", "<leader>,", function()
+  local saved_reg = vim.fn.getreg("v")
+  vim.cmd('noau normal! "vy"')
+  local selection = vim.fn.getreg("v")
+  vim.fn.setreg("v", saved_reg)
+  builtin.find_files { default_text = selection }
 end, {})
 vim.keymap.set("n", "<leader>.", builtin.buffers, {})
 vim.keymap.set("n", "<leader>/", function()
