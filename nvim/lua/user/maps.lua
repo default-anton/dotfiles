@@ -1,5 +1,3 @@
-local stt = require("user.stt")
-
 -- Yank current file path relative to the project root
 vim.api.nvim_set_keymap('n', '<leader>yf', [[:let @+ = expand('%')<CR>]],
   { noremap = true, silent = true, desc = "Yank file path" })
@@ -56,8 +54,7 @@ vim.api.nvim_set_keymap('v', '<leader>y', '"+y', { noremap = true, silent = true
 vim.api.nvim_set_keymap('n', '<leader>p', '"+p', { noremap = true, silent = true, desc = "Paste from system clipboard" })
 vim.api.nvim_set_keymap('v', '<leader>p', '"+p', { noremap = true, silent = true, desc = "Paste from system clipboard" })
 
-vim.keymap.set('i', '<C-o>', stt.run_whisper_transcription,
-  { noremap = true, silent = true, desc = "Run Whisper transcription" })
+vim.api.nvim_set_keymap('i', '<C-o>', '<cmd>Stt<CR>', { noremap = true, silent = true, desc = "Speech to text" })
 
 vim.api.nvim_set_keymap('n', 'sm', '<cmd>set opfunc=v:lua.convert_to_mixed_case_opfunc<CR>g@', { desc = "Convert to mixed case" })
 vim.api.nvim_set_keymap('v', 'sm', '<cmd>set opfunc=v:lua.convert_to_mixed_case_opfunc<CR>g@', { desc = "Convert to mixed case" })
