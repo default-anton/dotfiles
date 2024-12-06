@@ -1,7 +1,7 @@
 local Job = require('plenary.job')
 
 local FILE_PATH = "/tmp/recording.mp3"
-local PROMPT = "Search for coffee shops near me. Send a message to John: Hey, want to grab lunch tomorrow? Open Gmail. Write an email to Sarah about the project deadline. Search YouTube for cooking tutorials. Set a reminder for dentist appointment next Tuesday at 2 PM. Reply to Mom's text: I'll be home for dinner. Search for weather forecast Surrey BC. Open calendar and add meeting with team."
+local PROMPT = "Hey, I've been looking at the project implementation details and thinking about our approach. You know, we might need to refactor some of the core modules to improve performance. What are your thoughts on using async patterns for the new features?"
 
 local function send_inference_request(callback)
   Job:new({
@@ -72,3 +72,4 @@ end
 return {
   run_whisper_transcription = run_whisper_transcription
 }
+
