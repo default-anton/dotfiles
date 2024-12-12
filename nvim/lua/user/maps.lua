@@ -17,6 +17,7 @@ vim.api.nvim_set_keymap('n', '<leader>la', ':Ask split file<CR>', { noremap = tr
 vim.api.nvim_set_keymap('v', '<leader>la', ':Ask split<CR>', { noremap = true, silent = true, desc = "Ask LLM about selection" })
 vim.api.nvim_set_keymap('n', '<leader>lc', ':Code split file<CR>', { noremap = true, silent = true, desc = "Start coding with LLM on current buffer" })
 vim.api.nvim_set_keymap('v', '<leader>lc', ':Code split<CR>', { noremap = true, silent = true, desc = "Start coding with LLM on selection" })
+vim.api.nvim_set_keymap('n', '<leader>lp', ':Apply all<CR>', { noremap = true, silent = true, desc = "Apply all LLM changes" })
 vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
 vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add selected context to LLM" })
 
@@ -66,3 +67,4 @@ vim.api.nvim_set_keymap('n', 's-', '<cmd>set opfunc=v:lua.convert_to_kebab_case_
 vim.api.nvim_set_keymap('v', 's-', '<cmd>set opfunc=v:lua.convert_to_kebab_case_opfunc<CR>g@', { desc = "Convert to kebab-case" })
 vim.api.nvim_set_keymap('n', 'sc', '<cmd>set opfunc=v:lua.convert_to_camel_case_opfunc<CR>g@', { desc = "Convert to camelCase" })
 vim.api.nvim_set_keymap('v', 'sc', '<cmd>set opfunc=v:lua.convert_to_camel_case_opfunc<CR>g@', { desc = "Convert to camelCase" })
+
