@@ -81,6 +81,13 @@ require("lazy").setup({
     end,
   },
   "mfussenegger/nvim-dap",
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
   "AndrewRadev/splitjoin.vim",
   "preservim/nerdcommenter",
   "junegunn/vim-easy-align",

@@ -6,5 +6,4 @@ vim.wo.colorcolumn = "99999"
 
 require("ibl").setup {
   scope = { enabled = true },
-  indent = { char = "▏" },
 }
