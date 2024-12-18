@@ -41,12 +41,6 @@ vim.api.nvim_set_keymap('n', '<C-S-Down>', '<cmd>resize +6<CR>', { noremap = tru
 vim.api.nvim_set_keymap('n', '<C-S-Left>', '<cmd>vertical resize -6<CR>', { noremap = true, silent = true, desc = "Decrease window width" })
 vim.api.nvim_set_keymap('n', '<C-S-Right>', '<cmd>vertical resize +6<CR>', { noremap = true, silent = true, desc = "Increase window width" })
 
--- Window navigation using Ctrl + hjkl
-vim.api.nvim_set_keymap('n', '<C-k>', '<C-W>k', { noremap = true, silent = true, desc = "Move to window above" })
-vim.api.nvim_set_keymap('n', '<C-j>', '<C-W>j', { noremap = true, silent = true, desc = "Move to window below" })
-vim.api.nvim_set_keymap('n', '<C-h>', '<C-W>h', { noremap = true, silent = true, desc = "Move to left window" })
-vim.api.nvim_set_keymap('n', '<C-l>', '<C-W>l', { noremap = true, silent = true, desc = "Move to right window" })
-
 -- Enhanced scrolling with Ctrl-d/u
 vim.api.nvim_set_keymap('n', '<C-d>', '8jzzzv', { noremap = true, silent = true, desc = "Scroll 8 lines down" })
 vim.api.nvim_set_keymap('n', '<C-u>', '8kzzzv', { noremap = true, silent = true, desc = "Scroll 8 lines up" })
