@@ -66,6 +66,13 @@ require("lazy").setup({
   "nvim-telescope/telescope-ui-select.nvim",
   {
     dir = "~/code/llm-sidekick.nvim",
+    config = function()
+      require('llm-sidekick').setup({
+        smart_model = "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        fast_model = "anthropic.claude-3-5-haiku-20241022-v1:0",
+        reasoning_model = "o1",
+      })
+    end,
   },
   "Marskey/telescope-sg",
   {
