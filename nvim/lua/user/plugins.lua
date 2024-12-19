@@ -96,7 +96,6 @@ require("lazy").setup({
     opts = {},
   },
   "AndrewRadev/splitjoin.vim",
-  "preservim/nerdcommenter",
   "junegunn/vim-easy-align",
   "vim-test/vim-test",
   "schickling/vim-bufonly",
