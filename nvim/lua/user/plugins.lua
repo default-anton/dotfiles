@@ -76,19 +76,6 @@ require("lazy").setup({
   },
   "Marskey/telescope-sg",
   {
-    "akinsho/flutter-tools.nvim",
-    config = function()
-      require('flutter-tools').setup {
-        lsp = {
-          settings = {
-            lineLength = 140,
-          },
-        },
-      }
-    end,
-  },
-  "mfussenegger/nvim-dap",
-  {
     'MeanderingProgrammer/render-markdown.nvim',
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
     ---@module 'render-markdown'
