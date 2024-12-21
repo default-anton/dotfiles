@@ -17,9 +17,9 @@ vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz', { noremap = true, silent = true, desc = "Previous quickfix item" })
 
 -- LLM integration
-vim.api.nvim_set_keymap('n', '<leader>la', ':Ask split file<CR>', { noremap = true, silent = true, desc = "Ask LLM about current buffer" })
+vim.api.nvim_set_keymap('n', '<leader>la', ':Ask split %<CR>', { noremap = true, silent = true, desc = "Ask LLM about current buffer" })
 vim.api.nvim_set_keymap('v', '<leader>la', ':Ask split<CR>', { noremap = true, silent = true, desc = "Ask LLM about selection" })
-vim.api.nvim_set_keymap('n', '<leader>lc', ':Code split file<CR>', { noremap = true, silent = true, desc = "Start coding with LLM on current buffer" })
+vim.api.nvim_set_keymap('n', '<leader>lc', ':Code split %<CR>', { noremap = true, silent = true, desc = "Start coding with LLM on current buffer" })
 vim.api.nvim_set_keymap('v', '<leader>lc', ':Code split<CR>', { noremap = true, silent = true, desc = "Start coding with LLM on selection" })
 vim.api.nvim_set_keymap('n', '<leader>lp', ':Apply all<CR>', { noremap = true, silent = true, desc = "Apply all LLM changes" })
 vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
