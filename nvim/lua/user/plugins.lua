@@ -69,8 +69,8 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         smart_model = "anthropic.claude-3-5-sonnet-20241022-v2:0",
-        fast_model = "anthropic.claude-3-5-haiku-20241022-v1:0",
-        reasoning_model = "o1",
+        fast_model = "gpt-4o-2024-11-20",
+        reasoning_model = "gemini-2.0-flash-thinking-exp-1219",
       })
     end,
   },
