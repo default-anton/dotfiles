@@ -18,7 +18,10 @@ vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz',
   { noremap = true, silent = true, desc = "Previous quickfix item" })
 
 local function execute_llm_command(cmd)
-  local model_char = vim.fn.input('Select model (f)ast/(s)mart/(r)eason: ')
+  vim.api.nvim_echo({{ "Select model (f)ast/(s)mart/(r)eason: ", "Normal" }}, false, {})
+  local model_char_code = vim.fn.getchar()
+  vim.api.nvim_echo({}, false, {})
+  local model_char = string.char(model_char_code)
   local model_map = {
     f = 'fast',
     s = 'smart',
