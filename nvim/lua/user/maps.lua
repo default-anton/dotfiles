@@ -17,31 +17,78 @@ vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz',
   { noremap = true, silent = true, desc = "Previous quickfix item" })
 
-local function execute_llm_command(cmd)
-  vim.api.nvim_echo({{ "Select model (f)ast/(s)mart/(r)eason: ", "Normal" }}, false, {})
-  local model_char_code = vim.fn.getchar()
-  vim.api.nvim_echo({}, false, {})
-  local model_char = string.char(model_char_code)
-  local model_map = {
-    f = 'fast',
-    s = 'smart',
-    r = 'reason'
-  }
-  local model = model_map[model_char]
+local function prompt_for_model(aliases)
+  local model_map = {}
+  for _, alias in ipairs(aliases) do
+    local first_char = alias:sub(1, 1):lower()
+    model_map[first_char] = model_map[first_char] or {}
+    table.insert(model_map[first_char], alias)
+  end
 
-  if model then
-    local mode = vim.fn.mode()
-    if mode == 'n' then
-      vim.cmd(string.format('%s %s split %%', cmd, model))
-    elseif mode == 'v' or mode == 'V' then
-      -- Get the start and end positions of the visual selection
-      local start_pos = vim.fn.getpos("'<")
-      local end_pos = vim.fn.getpos("'>")
-      local range = string.format('%d,%d', start_pos[2], end_pos[2])
-      vim.cmd(string.format('%s:%s split %s', range, cmd, model))
-    end
-  else
-    error("Can't find model for " .. model_char)
+  local options = {""} -- Start with empty line
+  for key, values in pairs(model_map) do
+    table.insert(options, string.format("[%s] %s", key:lower(), table.concat(values, ", ")))
+  end
+
+  -- Display with proper highlighting
+  vim.api.nvim_echo({
+    {  "┌─ Select a model ─────────────────", "Title" },  -- Header
+    { table.concat(options, "\n") .. "\n└───────────────────────────────", "Normal" }, -- Options
+    { "Type letter to select (any invalid input cancels): ", "Question" }     -- Input prompt
+  }, false, {})
+  local model_char_code = vim.fn.getchar()
+  local model_char = string.char(model_char_code):lower()
+  vim.api.nvim_echo({}, false, {})
+
+  local matches = model_map[model_char]
+  if not matches then
+    return nil
+  end
+
+  if #matches == 1 then
+    return matches[1]
+  end
+
+  options = {""} -- Start with empty line
+  for i, match in ipairs(matches) do
+    table.insert(options, string.format('%d. %s', i, match))
+  end
+
+  -- Clear the prompt line
+  -- Display with proper highlighting
+  vim.api.nvim_echo({
+    { "\n\n┌─ Multiple models found. Select a model ─────────────────", "Title" },  -- Header
+    { table.concat(options, "\n") .. "\n└───────────────────────────────", "Normal" }, -- Options
+    { "Type number to select (any invalid input cancels): ", "Question" }     -- Input prompt
+  }, false, {})
+
+  local number = tonumber(string.char(vim.fn.getchar()))
+  vim.api.nvim_echo({}, false, {})
+
+  if not number or number < 1 or number > #matches then
+    return nil
+  end
+
+  return matches[number]
+end
+
+local function execute_llm_command(cmd)
+  local aliases = require("llm-sidekick.settings").get_aliases()
+  local model = prompt_for_model(aliases)
+
+  if not model then
+    return
+  end
+
+  local mode = vim.fn.mode()
+  if mode == 'n' then
+    vim.cmd(string.format('%s %s split %%', cmd, model))
+  elseif mode == 'v' or mode == 'V' then
+    -- Get the start and end positions of the visual selection
+    local start_pos = vim.fn.getpos("'<")
+    local end_pos = vim.fn.getpos("'>")
+    local range = string.format('%d,%d', start_pos[2], end_pos[2])
+    vim.cmd(string.format('%s:%s split %s', range, cmd, model))
   end
 end
 
