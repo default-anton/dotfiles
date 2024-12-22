@@ -68,9 +68,15 @@ require("lazy").setup({
     dir = "~/code/llm-sidekick.nvim",
     config = function()
       require('llm-sidekick').setup({
-        smart_model = "anthropic.claude-3-5-sonnet-20241022-v2:0",
-        fast_model = "gpt-4o-2024-11-20",
-        reasoning_model = "gemini-2.0-flash-thinking-exp-1219",
+        aliases = {
+          sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
+          gpt = "gpt-4o-2024-11-20",
+          o1 = "o1-preview",
+          mini = "o1-mini",
+          flash = "gemini-2.0-flash-exp",
+          think = "gemini-2.0-flash-thinking-exp-1219",
+        },
+        default = "sonnet",
       })
     end,
   },
