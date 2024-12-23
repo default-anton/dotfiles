@@ -25,16 +25,16 @@ local function prompt_for_model(aliases)
     table.insert(model_map[first_char], alias)
   end
 
-  local options = {""} -- Start with empty line
+  local options = { "" } -- Start with empty line
   for key, values in pairs(model_map) do
     table.insert(options, string.format("[%s] %s", key:lower(), table.concat(values, ", ")))
   end
 
   -- Display with proper highlighting
   vim.api.nvim_echo({
-    {  "┌─ Select a model ─────────────────", "Title" },  -- Header
+    { "┌─ Select a model ─────────────────", "Title" }, -- Header
     { table.concat(options, "\n") .. "\n└───────────────────────────────", "Normal" }, -- Options
-    { "Type letter to select (any invalid input cancels): ", "Question" }     -- Input prompt
+    { "Type letter to select (any invalid input cancels): ", "Question" } -- Input prompt
   }, false, {})
   local model_char_code = vim.fn.getchar()
   local model_char = string.char(model_char_code):lower()
@@ -49,7 +49,7 @@ local function prompt_for_model(aliases)
     return matches[1]
   end
 
-  options = {""} -- Start with empty line
+  options = { "" } -- Start with empty line
   for i, match in ipairs(matches) do
     table.insert(options, string.format('%d. %s', i, match))
   end
@@ -57,9 +57,9 @@ local function prompt_for_model(aliases)
   -- Clear the prompt line
   -- Display with proper highlighting
   vim.api.nvim_echo({
-    { "\n\n┌─ Multiple models found. Select a model ─────────────────", "Title" },  -- Header
+    { "\n\n┌─ Multiple models found. Select a model ─────────────────", "Title" }, -- Header
     { table.concat(options, "\n") .. "\n└───────────────────────────────", "Normal" }, -- Options
-    { "Type number to select (any invalid input cancels): ", "Question" }     -- Input prompt
+    { "Type number to select (any invalid input cancels): ", "Question" } -- Input prompt
   }, false, {})
 
   local number = tonumber(string.char(vim.fn.getchar()))
@@ -84,10 +84,16 @@ local function execute_llm_command(cmd)
   if mode == 'n' then
     vim.cmd(string.format('%s %s split %%', cmd, model))
   elseif mode == 'v' or mode == 'V' then
-    -- Get the start and end positions of the visual selection
-    local start_pos = vim.fn.getpos("'<")
-    local end_pos = vim.fn.getpos("'>")
-    local range = string.format('%d,%d', start_pos[2], end_pos[2])
+    -- Get the current visual selection positions
+    local start_line = vim.fn.line("v")
+    local end_line = vim.fn.line(".")
+
+    -- Ensure start_line is before end_line
+    if start_line > end_line then
+      start_line, end_line = end_line, start_line
+    end
+
+    local range = string.format('%d,%d', start_line, end_line)
     vim.cmd(string.format('%s:%s split %s', range, cmd, model))
   end
 end
