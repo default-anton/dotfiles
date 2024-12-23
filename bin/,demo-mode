@@ -8,7 +8,7 @@ else
   current_res=""
 fi
 
-demo_res="1280x720"
+demo_res="1600x900"
 normal_res="2560x1440"
 
 if [[ "$current_res" == "$demo_res" ]]; then
