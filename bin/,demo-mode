@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+current_display_info=$(displayplacer list | grep "current")
+
+if [[ $current_display_info == *"res:"* ]]; then
+  current_res=$(echo "$current_display_info" | grep -o 'res:[0-9]*x[0-9]*' | cut -d':' -f2)
+else
+  current_res=""
+fi
+
+demo_res="1280x720"
+normal_res="2560x1440"
+
+if [[ "$current_res" == "$demo_res" ]]; then
+  target_res="$normal_res"
+  scaling="off"
+elif [[ "$current_res" == "$normal_res" ]]; then
+  target_res="$demo_res"
+  scaling="on"
+else
+  target_res="$normal_res"
+  scaling="off"
+fi
+
+displayplacer "id:E7E732C7-9072-4BF4-8D39-6A15A280ED75 res:${target_res} hz:75 color_depth:8 scaling:${scaling}"

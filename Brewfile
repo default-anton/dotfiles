@@ -81,6 +81,7 @@ brew 'ast-grep'
 brew 'pngpaste'
 brew 'uv'
 brew 'glow'
+brew 'displayplacer'
 
 cask 'alacritty'
 cask 'blackhole-16ch'
