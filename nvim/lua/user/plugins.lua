@@ -73,6 +73,7 @@ require("lazy").setup({
           fast = "gpt-4o-2024-11-20",
           o1 = "o1-preview",
           mini = "o1-mini",
+          experimental = "gemini-exp-1206"
         },
         default = "sonnet",
       })
