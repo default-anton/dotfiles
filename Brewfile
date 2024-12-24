@@ -82,6 +82,7 @@ brew 'pngpaste'
 brew 'uv'
 brew 'glow'
 brew 'displayplacer'
+brew 'awscurl'
 
 cask 'alacritty'
 cask 'blackhole-16ch'
