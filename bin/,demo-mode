@@ -1,25 +1,24 @@
 #!/usr/bin/env bash
 
-current_display_info=$(displayplacer list | grep "current")
-
-if [[ $current_display_info == *"res:"* ]]; then
-  current_res=$(echo "$current_display_info" | grep -o 'res:[0-9]*x[0-9]*' | cut -d':' -f2)
-else
-  current_res=""
-fi
-
 demo_res="1600x900"
 normal_res="2560x1440"
 
-if [[ "$current_res" == "$demo_res" ]]; then
-  target_res="$normal_res"
-  scaling="off"
-elif [[ "$current_res" == "$normal_res" ]]; then
-  target_res="$demo_res"
+if [[ "$1" == "on" ]]; then
+  res="$demo_res"
   scaling="on"
-else
-  target_res="$normal_res"
+elif [[ "$1" == "off" ]]; then
+  res="$normal_res"
   scaling="off"
+else
+  echo "Error: Invalid argument."
+  echo "Usage: ,bin/demo-mode <on|off>"
+  echo "Turn demo mode on or off."
+  echo ""
+  echo "Examples:"
+  echo "  ,bin/demo-mode on    # Activate demo mode with resolution $demo_res and scaling on"
+  echo "  ,bin/demo-mode off   # Deactivate demo mode with resolution $normal_res and scaling off"
+  exit 1
 fi
 
-displayplacer "id:E7E732C7-9072-4BF4-8D39-6A15A280ED75 res:${target_res} hz:75 color_depth:8 scaling:${scaling}"
+# displayplacer list | rg '^displayplacer "'
+displayplacer "id:E7E732C7-9072-4BF4-8D39-6A15A280ED75 res:$res hz:75 color_depth:8 enabled:true scaling:$scaling origin:(0,0) degree:0" "id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:1168x755 hz:120 color_depth:8 enabled:true scaling:on origin:(-1168,0) degree:0"
