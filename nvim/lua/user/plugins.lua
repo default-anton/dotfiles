@@ -73,6 +73,7 @@ require("lazy").setup({
           mini = "o1-mini",
           o1 = "o1-preview",
           sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
+          flash = "gemini-2.0-flash-exp",
         },
         default = "sonnet",
       })
