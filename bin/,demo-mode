@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-demo_res="1600x900"
+demo_res="1920x1080"
 normal_res="2560x1440"
 
 if [[ "$1" == "on" ]]; then
