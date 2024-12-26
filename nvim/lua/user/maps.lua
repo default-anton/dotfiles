@@ -82,7 +82,7 @@ local function execute_llm_command(cmd)
 
   local mode = vim.fn.mode()
   if mode == 'n' then
-    vim.cmd(string.format('%s %s split %%', cmd, model))
+    vim.cmd(string.format('%s %s split', cmd, model))
   elseif mode == 'v' or mode == 'V' then
     -- Get the current visual selection positions
     local start_line = vim.fn.line("v")
@@ -98,15 +98,17 @@ local function execute_llm_command(cmd)
   end
 end
 
-vim.keymap.set('n', '<leader>la', function() execute_llm_command('Ask') end,
+vim.keymap.set('n', '<leader>la', function() execute_llm_command('Ask %') end,
   { silent = true, desc = "Ask LLM about current buffer" })
 vim.keymap.set('v', '<leader>la', function() execute_llm_command('Ask') end,
   { silent = true, desc = "Ask LLM about selection" })
-vim.keymap.set('n', '<leader>lc', function() execute_llm_command('Code') end,
+vim.keymap.set('n', '<leader>lc', function() execute_llm_command('Code %') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
 vim.keymap.set('v', '<leader>lc', function() execute_llm_command('Code') end,
   { silent = true, desc = "Start coding with LLM on selection" })
-vim.api.nvim_set_keymap('n', '<leader>lp', ':Apply all<CR>',
+vim.keymap.set('n', '<leader>ld', function() execute_llm_command('Code %:h') end,
+  { silent = true, desc = "Start coding with LLM on current buffer" })
+vim.api.nvim_set_keymap('n', '<leader>lk', ':Apply all<CR>',
   { noremap = true, silent = true, desc = "Apply all LLM changes" })
 vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
 vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>',
