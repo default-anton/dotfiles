@@ -108,7 +108,7 @@ vim.keymap.set('v', '<leader>lc', function() execute_llm_command('Code') end,
   { silent = true, desc = "Start coding with LLM on selection" })
 vim.keymap.set('n', '<leader>ld', function() execute_llm_command('Code %:h') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
-vim.api.nvim_set_keymap('n', '<leader>lk', ':Apply all<CR>',
+vim.api.nvim_set_keymap('n', '<leader>lp', ':Apply all<CR>',
   { noremap = true, silent = true, desc = "Apply all LLM changes" })
 vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
 vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>',
