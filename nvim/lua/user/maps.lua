@@ -106,6 +106,10 @@ vim.keymap.set('n', '<leader>lc', function() execute_llm_command('Code %') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
 vim.keymap.set('v', '<leader>lc', function() execute_llm_command('Code') end,
   { silent = true, desc = "Start coding with LLM on selection" })
+vim.keymap.set('n', '<leader>ll', function() execute_llm_command('Yolo %') end,
+  { silent = true, desc = "Start coding with LLM on current buffer" })
+vim.keymap.set('v', '<leader>ll', function() execute_llm_command('Yolo') end,
+  { silent = true, desc = "Start coding with LLM on selection" })
 vim.keymap.set('n', '<leader>ld', function() execute_llm_command('Code %:h') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
 vim.api.nvim_set_keymap('n', '<leader>lp', ':Apply all<CR>',
