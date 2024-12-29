@@ -146,6 +146,47 @@ vim.api.nvim_set_keymap('n', '<C-S-Right>', '<cmd>vertical resize +6<CR>',
 vim.api.nvim_set_keymap('n', '<C-d>', '8jzzzv', { noremap = true, silent = true, desc = "Scroll 8 lines down" })
 vim.api.nvim_set_keymap('n', '<C-u>', '8kzzzv', { noremap = true, silent = true, desc = "Scroll 8 lines up" })
 
+local function get_diagnostic_info()
+  local diagnostics = vim.diagnostic.get(0)
+  if #diagnostics == 0 then
+    return "No diagnostics found for current buffer"
+  end
+
+  local result = {}
+  local processed_lines = {}
+
+  for _, diag in ipairs(diagnostics) do
+    if not processed_lines[diag.lnum] then
+      local start_line = math.max(0, diag.lnum - 3)
+      local end_line = diag.lnum + 3
+      local lines = vim.api.nvim_buf_get_lines(0, start_line, end_line + 1, false)
+
+      table.insert(result, string.format(
+        "[%s] %s: %s",
+        diag.severity and vim.diagnostic.severity[diag.severity] or "UNKNOWN",
+        diag.code or "N/A",
+        diag.message:gsub("\n", " ")
+      ))
+
+      table.insert(result, "Code context:")
+      table.insert(result, "```")
+      for _, line in ipairs(lines) do
+        table.insert(result, line)
+      end
+      table.insert(result, "```")
+      table.insert(result, "")
+      processed_lines[diag.lnum] = true
+    end
+  end
+
+  return table.concat(result, "\n")
+end
+
+vim.keymap.set('n', '<leader>yd', function()
+  local diagnostics = get_diagnostic_info()
+  vim.fn.setreg('"', diagnostics)
+end, { desc = "Copy diagnostic info to default register" })
+
 -- Yank to clipboard
 vim.api.nvim_set_keymap('n', '<leader>y', '"+y', { noremap = true, silent = true, desc = "Yank to system clipboard" })
 vim.api.nvim_set_keymap('v', '<leader>y', '"+y', { noremap = true, silent = true, desc = "Yank to system clipboard" })
