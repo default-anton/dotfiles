@@ -93,7 +93,6 @@ require("lazy").setup({
   "junegunn/vim-easy-align",
   "vim-test/vim-test",
   "schickling/vim-bufonly",
-  "tpope/vim-dispatch",
   "tpope/vim-projectionist",
   "tpope/vim-surround",
   "tpope/vim-repeat",
