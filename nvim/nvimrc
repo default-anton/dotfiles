@@ -8,6 +8,7 @@ nmap <silent> gx :!open <cfile><cr>
 vnoremap <silent> * :<C-u>call GetVisualSelection()<cr>/<C-R>=@/<cr><cr>
 vnoremap <silent> # :<C-u>call GetVisualSelection()<cr>?<C-R>=@/<cr><cr>
 
+let g:test#neovim#start_normal = 1
 let test#strategy = "neovim"
 let test#lua#busted#executable = "ntest"
 "let test#transformation = 'tmux'
