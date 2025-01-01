@@ -9,12 +9,14 @@ laptop_screen_demo_res="1168x755"
 alacritty_default_font_size="17"
 alacritty_demo_font_size="24"
 
-if [[ "$1" == "on" ]]; then
+mode="$1"
+
+if [[ "$mode" == "on" ]]; then
   external_monitor_res="$external_monitor_demo_res"
   laptop_screen_res="$laptop_screen_demo_res"
   scaling="on"
   alacritty_font_size="$alacritty_demo_font_size"
-elif [[ "$1" == "off" ]]; then
+elif [[ "$mode" == "off" ]]; then
   external_monitor_res="$external_minotor_native_res"
   laptop_screen_res="$laptop_screen_native_res"
   scaling="off"
@@ -59,4 +61,10 @@ fi
 if [[ $? -ne 0 ]]; then
   echo "Error: Failed to update display configurations."
   exit 1
+fi
+
+if [[ "$mode" == "on" ]]; then
+  ,set-chrome-zoom 1.25
+else
+  ,set-chrome-zoom 1
 fi

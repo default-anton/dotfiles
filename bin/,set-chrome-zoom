@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+if [[ -z "$1" || ! "$1" =~ ^[0-9]*\.?[0-9]+$ ]]; then
+  echo "Usage: $(basename "$0") <zoom_level>"
+  echo "Example: $(basename "$0") 1.25"
+  exit 1
+fi
+
+ZOOM_LEVEL="$1"
+
+open -a "Google Chrome" chrome://settings/appearance
+
+osascript <<EOF
+tell application "Google Chrome"
+    activate
+    delay 0.5
+    
+    try
+        tell active tab of front window
+            execute javascript "
+                const ui = document.querySelector('body > settings-ui').shadowRoot;
+                const main = ui.querySelector('#main').shadowRoot;
+                const basicPage = main.querySelector('settings-basic-page').shadowRoot;
+                const appearancePage = basicPage.querySelector('#basicPage > settings-section > settings-appearance-page').shadowRoot;
+                const zoomLevel = appearancePage.querySelector('#zoomLevel');
+                zoomLevel.value = '$ZOOM_LEVEL';
+            "
+        end tell
+    on error errMsg
+        display dialog "Error setting zoom level: " & errMsg
+    end try
+end tell
+EOF
