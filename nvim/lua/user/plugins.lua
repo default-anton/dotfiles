@@ -89,6 +89,12 @@ require("lazy").setup({
     ---@type render.md.UserConfig
     opts = {},
   },
+  {
+    'laytan/cloak.nvim',
+    config = function()
+      require('cloak').setup()
+    end
+  },
   "AndrewRadev/splitjoin.vim",
   "junegunn/vim-easy-align",
   "vim-test/vim-test",
