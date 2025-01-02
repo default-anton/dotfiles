@@ -1,39 +1,5 @@
 #!/usr/bin/env bash
 
-external_monitor_demo_res="1920x1080"
-external_minotor_native_res="2560x1440"
-
-laptop_screen_native_res="1728x1117"
-laptop_screen_demo_res="1168x755"
-
-alacritty_default_font_size="17"
-alacritty_demo_font_size="24"
-
-mode="$1"
-
-if [[ "$mode" == "on" ]]; then
-  external_monitor_res="$external_monitor_demo_res"
-  laptop_screen_res="$laptop_screen_demo_res"
-  scaling="on"
-  alacritty_font_size="$alacritty_demo_font_size"
-elif [[ "$mode" == "off" ]]; then
-  external_monitor_res="$external_minotor_native_res"
-  laptop_screen_res="$laptop_screen_native_res"
-  scaling="off"
-  alacritty_font_size="$alacritty_default_font_size"
-else
-  echo "Error: Invalid argument."
-  echo "Usage: ,bin/demo-mode <on|off>"
-  echo "Turn demo mode on or off."
-  echo ""
-  echo "Examples:"
-  echo "  ,bin/demo-mode on    # Activate demo mode with resolution $external_monitor_demo_res and scaling on"
-  echo "  ,bin/demo-mode off   # Deactivate demo mode with resolution $external_minotor_native_res and scaling off"
-  exit 1
-fi
-
-alacritty msg config "font.size=$alacritty_font_size"
-
 display_configs=$(displayplacer list)
 
 if [[ $? -ne 0 ]]; then
@@ -44,27 +10,85 @@ fi
 is_laptop_lid_open=$(echo "$display_configs" | grep "id:37D8832A-2D66-02CA-B9F7-8F30A301B230")
 is_external_monitor_connected=$(echo "$display_configs" | grep "id:E7E732C7-9072-4BF4-8D39-6A15A280ED75")
 
-external_monitor_config="id:E7E732C7-9072-4BF4-8D39-6A15A280ED75 res:$external_monitor_res hz:75 color_depth:8 enabled:true scaling:$scaling origin:(0,0) degree:0"
-laptop_screen_config="id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:$laptop_screen_res hz:120 color_depth:8 enabled:true scaling:on origin:(-1168,0) degree:0"
+external_monitor_native_res="2560x1440"
+external_monitor_demo_res="1920x1080"
 
-if [[ -n "$is_external_monitor_connected" && -n "$is_laptop_lid_open" ]]; then
-  displayplacer "$external_monitor_config" "$laptop_screen_config"
-elif [[ -n "$is_external_monitor_connected" ]]; then
-  displayplacer "$external_monitor_config"
-elif [[ -n "$is_laptop_lid_open" ]]; then
-  displayplacer "$laptop_screen_config"
+laptop_screen_native_res="1728x1117"
+laptop_screen_as_secondary_demo_res="1168x755"
+laptop_screen_as_primary_demo_res="$laptop_screen_native_res"
+
+alacritty_default_font_size="17"
+alacritty_demo_font_size="24"
+
+status="$1"
+
+if [[ "$status" == "on" ]]; then
+  external_monitor_config="id:E7E732C7-9072-4BF4-8D39-6A15A280ED75 res:$external_monitor_demo_res hz:75 color_depth:8 enabled:true scaling:on origin:(0,0) degree:0"
+
+  if [[ -n "$is_external_monitor_connected" && -n "$is_laptop_lid_open" ]]; then
+    laptop_screen_config="id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:$laptop_screen_as_secondary_demo_res hz:120 color_depth:8 enabled:true scaling:on origin:(-1168,0) degree:0"
+    if ! displayplacer "$external_monitor_config" "$laptop_screen_config"; then
+      echo "Error: Failed to update display configurations."
+      exit 1
+    fi
+  elif [[ -n "$is_external_monitor_connected" ]]; then
+    if ! displayplacer "$external_monitor_config"; then
+      echo "Error: Failed to update display configurations."
+      exit 1
+    fi
+  elif [[ -n "$is_laptop_lid_open" ]]; then
+    laptop_screen_config="id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:$laptop_screen_as_primary_demo_res hz:120 color_depth:8 enabled:true scaling:on origin:(-1168,0) degree:0"
+    if ! displayplacer "$laptop_screen_config"; then
+      echo "Error: Failed to update display configurations."
+      exit 1
+    fi
+  else
+    echo "Error: No displays found."
+    exit 1
+  fi
+
+  if ! alacritty msg config "font.size=$alacritty_demo_font_size"; then
+    echo "Error: Failed to update Alacritty font size."
+    exit 1
+  fi
 else
-  echo "Error: No displays found."
-  exit 1
+  external_monitor_config="id:E7E732C7-9072-4BF4-8D39-6A15A280ED75 res:$external_monitor_native_res hz:75 color_depth:8 enabled:true scaling:off origin:(0,0) degree:0"
+  laptop_screen_config="id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:$laptop_screen_native_res hz:120 color_depth:8 enabled:true scaling:on origin:(-1168,0) degree:0"
+
+  if [[ -n "$is_external_monitor_connected" && -n "$is_laptop_lid_open" ]]; then
+    if ! displayplacer "$external_monitor_config" "$laptop_screen_config"; then
+      echo "Error: Failed to update display configurations."
+      exit 1
+    fi
+  elif [[ -n "$is_external_monitor_connected" ]]; then
+    if ! displayplacer "$external_monitor_config"; then
+      echo "Error: Failed to update display configurations."
+      exit 1
+    fi
+  elif [[ -n "$is_laptop_lid_open" ]]; then
+    if ! displayplacer "$laptop_screen_config"; then
+      echo "Error: Failed to update display configurations."
+      exit 1
+    fi
+  else
+    echo "Error: No displays found."
+    exit 1
+  fi
+
+  if ! alacritty msg config "font.size=$alacritty_default_font_size"; then
+    echo "Error: Failed to update Alacritty font size."
+    exit 1
+  fi
 fi
 
-if [[ $? -ne 0 ]]; then
-  echo "Error: Failed to update display configurations."
-  exit 1
-fi
-
-if [[ "$mode" == "on" ]]; then
-  ,set-chrome-zoom 1.25
+if [[ "$status" == "on" ]]; then
+  if ! ,set-chrome-zoom 1.25; then
+    echo "Error: Failed to update Chrome zoom level."
+    exit 1
+  fi
 else
-  ,set-chrome-zoom 1
+  if ! ,set-chrome-zoom 1; then
+    echo "Error: Failed to update Chrome zoom level."
+    exit 1
+  fi
 fi
