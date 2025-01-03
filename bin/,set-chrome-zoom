@@ -23,7 +23,13 @@ tell application "Google Chrome"
                 const basicPage = main.querySelector('settings-basic-page').shadowRoot;
                 const appearancePage = basicPage.querySelector('#basicPage > settings-section > settings-appearance-page').shadowRoot;
                 const zoomLevel = appearancePage.querySelector('#zoomLevel');
+                zoomLevel.scrollIntoView();
+                zoomLevel.focus();
                 zoomLevel.value = '$ZOOM_LEVEL';
+                const inputEvent = new Event('input', { bubbles: true });
+                const changeEvent = new Event('change', { bubbles: true });
+                zoomLevel.dispatchEvent(inputEvent);
+                zoomLevel.dispatchEvent(changeEvent);
             "
         end tell
     on error errMsg
