@@ -87,7 +87,7 @@ if [[ "$status" == "on" ]]; then
     exit 1
   fi
 else
-  if ! ,set-chrome-zoom 1; then
+  if ! ,set-chrome-zoom 1.1; then
     echo "Error: Failed to update Chrome zoom level."
     exit 1
   fi
