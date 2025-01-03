@@ -197,6 +197,8 @@ vim.api.nvim_set_keymap('v', '<leader>p', '"+p', { noremap = true, silent = true
 
 vim.api.nvim_set_keymap('i', '<C-o>', '<cmd>Stt<CR>', { noremap = true, silent = true, desc = "Speech to text" })
 
+vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
+
 vim.api.nvim_set_keymap('n', 'sm', '<cmd>set opfunc=v:lua.convert_to_mixed_case_opfunc<CR>g@',
   { desc = "Convert to mixed case" })
 vim.api.nvim_set_keymap('v', 'sm', '<cmd>set opfunc=v:lua.convert_to_mixed_case_opfunc<CR>g@',
