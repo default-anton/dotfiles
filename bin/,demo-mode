@@ -17,8 +17,8 @@ laptop_screen_native_res="1728x1117"
 laptop_screen_as_secondary_demo_res="1168x755"
 laptop_screen_as_primary_demo_res="$laptop_screen_native_res"
 
-alacritty_default_font_size="17"
-alacritty_demo_font_size="20"
+alacritty_default_font_size="18"
+alacritty_demo_font_size="22"
 
 status="$1"
 
