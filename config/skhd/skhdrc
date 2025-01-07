@@ -80,6 +80,8 @@ ctrl + cmd - a : open -a 'Alacritty'
 ctrl + cmd - c : open -a 'Google Chrome'
 ctrl + cmd - f : open -a 'Finder'
 ctrl + cmd - h : open -a 'Hey'
+ctrl + cmd - g : open -a 'Gemini'
+ctrl + cmd - t : open -a 'Telegram'
 ctrl + cmd - space : open -a 'Alacritty' && tmux new-window -c '/Users/akuzmenko' 'nvim +Chat'
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
