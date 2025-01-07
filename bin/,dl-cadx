@@ -3,8 +3,16 @@
 set -e
 
 CSV_FILE=~/Downloads/FXUSDCAD.csv
-start_date=$(date +'%Y-01-01')
-end_date=$(date +'%Y-%m-%d')
+if [ $# -eq 0 ]; then
+  start_date=$(date +'%Y-01-01')
+  end_date=$(date +'%Y-%m-%d')
+elif [ $# -eq 2 ]; then
+  start_date="$1"
+  end_date="$2"
+else
+  echo "Usage: ,dl-cadx [start_date end_date]"
+  exit 1
+fi
 
 rm -f $CSV_FILE
 curl "https://www.bankofcanada.ca/valet/observations/FXUSDCAD/csv?start_date=${start_date}&end_date=${end_date}" -o $CSV_FILE 2>/dev/null
