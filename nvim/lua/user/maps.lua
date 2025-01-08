@@ -1,13 +1,13 @@
 -- Yank current file path relative to the project root
-vim.api.nvim_set_keymap('n', '<leader>yf', [[:let @+ = expand('%')<CR>]],
+vim.api.nvim_set_keymap('n', 'gyf', [[:let @+ = expand('%')<CR>]],
   { noremap = true, silent = true, desc = "Yank file path" })
 
 -- Yank current file path with line number relative to the project root
-vim.api.nvim_set_keymap('n', '<leader>yl', [[:let @+ = expand('%') . ':' . line('.')<CR>]],
+vim.api.nvim_set_keymap('n', 'gyl', [[:let @+ = expand('%') . ':' . line('.')<CR>]],
   { noremap = true, silent = true, desc = "Yank file path with line number" })
 
 -- Yank absolute path of current file
-vim.api.nvim_set_keymap('n', '<leader>ya', [[:let @+ = expand('%:p')<CR>]],
+vim.api.nvim_set_keymap('n', 'gya', [[:let @+ = expand('%:p')<CR>]],
   { noremap = true, silent = true, desc = "Yank absolute file path" })
 
 -- Quickfix list navigation
@@ -182,7 +182,7 @@ local function get_diagnostic_info()
   return table.concat(result, "\n")
 end
 
-vim.keymap.set('n', '<leader>yd', function()
+vim.keymap.set('n', 'gyd', function()
   local diagnostics = get_diagnostic_info()
   vim.fn.setreg('"', diagnostics)
 end, { desc = "Copy diagnostic info to default register" })
