@@ -93,7 +93,17 @@ require("lazy").setup({
       require('cloak').setup()
     end
   },
-  "AndrewRadev/splitjoin.vim",
+  {
+    'Wansmer/treesj',
+    keys = { 'gm' },
+    dependencies = { 'nvim-treesitter/nvim-treesitter' }, -- if you install parsers with `nvim-treesitter`
+    config = function()
+      require('treesj').setup({
+        use_default_keymaps = false,
+        max_join_length = 200,
+      })
+    end,
+  },
   "junegunn/vim-easy-align",
   "vim-test/vim-test",
   "schickling/vim-bufonly",
