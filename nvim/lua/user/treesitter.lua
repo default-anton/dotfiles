@@ -30,12 +30,15 @@ require("nvim-treesitter.configs").setup {
       goto_next_start = {
         ["]f"] = "@function.outer",
         ["]]"] = "@class.outer",
+        ["]b"] = { query = "@local.scope", query_group = "locals", desc = "Next scope" },
       },
       goto_previous_start = {
         ["[f"] = "@function.outer",
         ["[["] = "@class.outer",
+        ["[b"] = { query = "@local.scope", query_group = "locals", desc = "Previous scope" },
       },
     },
+
     select = {
       enable = true,
 
@@ -48,15 +51,16 @@ require("nvim-treesitter.configs").setup {
         ["if"] = "@function.inner",
         ["ac"] = "@class.outer",
         ["ic"] = "@class.inner",
-        ["ab"] = "@block.outer",
-        ["ib"] = "@block.inner",
+        ["ab"] = { query = "@local.scope", query_group = "locals", desc = "Select language scope" },
       },
 
       selection_modes = {
-        ["@function.outer"] = "V",
+        ["@function.outer"] = "v",
         ["@class.outer"] = "V",
-        ["@block.outer"] = "V",
-      }
+        ["@local.scope"] = "v",
+      },
+
+      include_surrounding_whitespace = true,
     },
   },
   indent = {
