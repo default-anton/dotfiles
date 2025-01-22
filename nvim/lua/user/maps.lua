@@ -26,7 +26,12 @@ local function prompt_for_model(aliases)
   end
 
   local options = { "" } -- Start with empty line
-  for key, values in pairs(model_map) do
+  -- Collect and sort keys case-insensitively
+  local keys = vim.tbl_keys(model_map)
+  table.sort(keys, function(a, b) return a:lower() < b:lower() end)
+
+  for _, key in ipairs(keys) do
+    local values = model_map[key]
     table.insert(options, string.format("[%s] %s", key:lower(), table.concat(values, ", ")))
   end
 
