@@ -2,20 +2,20 @@ local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
 -- Repeat movement with ; and ,
 -- ensure ; goes forward and , goes backward regardless of the last direction
-vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
-vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
+vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next, { desc = "Repeat last move next" })
+vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous, { desc = "Repeat last move previous" })
 
 -- Optionally, make builtin f, F, t, T also repeatable with ; and ,
-vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
-vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true })
-vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
-vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true })
+vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true, desc = "Repeat f" })
+vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true, desc = "Repeat F" })
+vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true, desc = "Repeat t" })
+vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true, desc = "Repeat T" })
 
 -- toggle node under cursor (split if one-line and join if multiline)
-vim.keymap.set("n", "gj", require('treesj').toggle)
+vim.keymap.set("n", "gj", require('treesj').toggle, { desc = "Toggle treesj node" })
 vim.keymap.set("n", "gJ", function()
   require('treesj').toggle({ split = { recursive = true } })
-end)
+end, { desc = "Toggle treesj node recursively" })
 
 -- Yank current file path relative to the project root
 vim.api.nvim_set_keymap('n', 'gyf', [[:let @+ = expand('%')<CR>]],
@@ -221,7 +221,7 @@ vim.api.nvim_set_keymap('v', '<leader>p', '"+p', { noremap = true, silent = true
 
 vim.api.nvim_set_keymap('i', '<C-o>', '<cmd>Stt<CR>', { noremap = true, silent = true, desc = "Speech to text" })
 
-vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
+vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)', { desc = "Accept copilot word" })
 
 vim.api.nvim_set_keymap('n', 'sm', '<cmd>set opfunc=v:lua.convert_to_mixed_case_opfunc<CR>g@',
   { desc = "Convert to mixed case" })
