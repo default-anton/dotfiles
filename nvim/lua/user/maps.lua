@@ -12,8 +12,8 @@ vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = t
 vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true })
 
 -- toggle node under cursor (split if one-line and join if multiline)
-vim.keymap.set("n", "gm", require('treesj').toggle)
-vim.keymap.set("n", "gM", function()
+vim.keymap.set("n", "gj", require('treesj').toggle)
+vim.keymap.set("n", "gJ", function()
   require('treesj').toggle({ split = { recursive = true } })
 end)
 
