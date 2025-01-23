@@ -10,13 +10,13 @@
   name: (constant) @module.name) @context
   (#set! "context.line" true))
 
-(method
-  (body_statement) @context.end
-) @context
+((method
+  name: (identifier) @method.name) @context
+  (#set! "context.line" true))
 
-(singleton_method
-  (body_statement) @context.end
-) @context
+((singleton_method
+  name: (identifier) @method.name) @context
+  (#set! "context.line" true))
 
 (if
   (then) @context.end
