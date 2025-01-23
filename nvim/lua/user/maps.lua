@@ -136,6 +136,8 @@ vim.keymap.set('v', '<leader>ll', function() execute_llm_command('Yolo') end,
   { silent = true, desc = "Start coding with LLM on selection" })
 vim.keymap.set('n', '<leader>ld', function() execute_llm_command('Code %:h') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
+vim.keymap.set('n', '<leader>ch', function() execute_llm_command('Chat') end,
+  { silent = true, desc = "Open chat with LLM" })
 vim.api.nvim_set_keymap('n', '<leader>lp', ':ApplyAll<CR>',
   { noremap = true, silent = true, desc = "Apply all LLM changes" })
 vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
