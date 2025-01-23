@@ -104,6 +104,14 @@ require("lazy").setup({
       })
     end,
   },
+  {
+    'stevearc/quicker.nvim',
+    event = "FileType qf",
+    opts = {},
+    config = function()
+      require('quicker').setup()
+    end,
+  },
   "junegunn/vim-easy-align",
   "vim-test/vim-test",
   "schickling/vim-bufonly",
