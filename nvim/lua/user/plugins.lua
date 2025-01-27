@@ -69,11 +69,11 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          deepseek = "deepseek-chat",
-          flash = "gemini-2.0-flash-exp",
+          deepseek_chat = "deepseek-chat",
+          flash_gemini = "gemini-2.0-flash-exp",
           r1 = "deepseek-reasoner",
           sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
-          think_flash = "gemini-2.0-flash-thinking-exp-01-21",
+          think_gemini = "gemini-2.0-flash-thinking-exp-01-21",
         },
         default = "sonnet",
       })
