@@ -40,15 +40,25 @@ require("telescope").setup {
     },
     mappings = {
       i = {
-        ["<C-a>"] = function()
+        ["<C-a>"] = function(prompt_bufnr)
           local action_state = require("telescope.actions.state")
-          local selected_entry = action_state.get_selected_entry()
-          if selected_entry and selected_entry.path then
-            local filepath = selected_entry.path
-            vim.cmd('Add ' .. filepath)
+
+          local picker = action_state.get_current_picker(prompt_bufnr)
+          local multi_selections = picker:get_multi_selection()
+
+          if vim.tbl_isempty(multi_selections) then
+            local selected_entry = action_state.get_selected_entry()
+            if selected_entry and selected_entry.path then
+              local filepath = selected_entry.path
+              vim.cmd('Add ' .. filepath)
+            else
+              vim.notify("No selection")
+            end
           else
-            vim.notify("No selection")
+            local files = vim.tbl_map(function(s) return s.path end, multi_selections)
+            vim.cmd('Add ' .. table.concat(files, ' '))
           end
+
           return true
         end,
       },
