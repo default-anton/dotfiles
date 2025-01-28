@@ -38,6 +38,21 @@ require("telescope").setup {
     preview = {
       filesize_limit = 0.1, -- MB
     },
+    mappings = {
+      i = {
+        ["<C-a>"] = function()
+          local action_state = require("telescope.actions.state")
+          local selected_entry = action_state.get_selected_entry()
+          if selected_entry and selected_entry.path then
+            local filepath = selected_entry.path
+            vim.cmd('Add ' .. filepath)
+          else
+            vim.notify("No selection")
+          end
+          return true
+        end,
+      },
+    },
   },
   extensions = {
     fzf = {
