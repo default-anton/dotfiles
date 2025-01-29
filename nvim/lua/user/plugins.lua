@@ -71,7 +71,7 @@ require("lazy").setup({
         aliases = {
           -- deepseek_chat = "deepseek-chat",
           flash_gemini = "gemini-2.0-flash-exp",
-          -- r1 = "deepseek-reasoner",
+          r1 = "deepseek-reasoner",
           o1_mini = "o1-mini",
           sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
           think_gemini = "gemini-2.0-flash-thinking-exp-01-21",
