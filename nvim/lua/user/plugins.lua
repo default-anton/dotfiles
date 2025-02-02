@@ -69,10 +69,12 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          -- deepseek_chat = "deepseek-chat",
+          deepseek_chat = "deepseek-chat",
+          gpt = "gpt-4o-2024-11-20",
           flash_gemini = "gemini-2.0-flash-exp",
-          r1 = "deepseek-reasoner",
-          o1_mini = "o1-mini",
+          low_o3_mini = "o3-mini-low",
+          medium_o3_mini = "o3-mini-medium",
+          high_o3_mini = "o3-mini-high",
           sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
           think_gemini = "gemini-2.0-flash-thinking-exp-01-21",
         },
@@ -81,13 +83,13 @@ require("lazy").setup({
     end,
   },
   "Marskey/telescope-sg",
-  {
-    'MeanderingProgrammer/render-markdown.nvim',
-    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
-    ---@module 'render-markdown'
-    ---@type render.md.UserConfig
-    opts = {},
-  },
+  -- {
+  --   'MeanderingProgrammer/render-markdown.nvim',
+  --   dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+  --   ---@module 'render-markdown'
+  --   ---@type render.md.UserConfig
+  --   opts = {},
+  -- },
   {
     'laytan/cloak.nvim',
     config = function()
