@@ -104,9 +104,13 @@ local function execute_llm_command(cmd)
     return
   end
 
+  local max_columns = 70
+  local desired_width = math.min(max_columns, math.floor(vim.o.columns * 0.5))
+
   local mode = vim.fn.mode()
   if mode == 'n' then
-    vim.cmd(string.format('%s %s split', cmd, model))
+    vim.cmd(string.format('%s %s vsplit', cmd, model))
+    vim.cmd(string.format('vertical resize %d', desired_width))
   elseif mode == 'v' or mode == 'V' then
     -- Get the current visual selection positions
     local start_line = vim.fn.line("v")
@@ -118,7 +122,8 @@ local function execute_llm_command(cmd)
     end
 
     local range = string.format('%d,%d', start_line, end_line)
-    vim.cmd(string.format('%s:%s split %s', range, cmd, model))
+    vim.cmd(string.format('%s:%s vsplit %s', cmd, range, model))
+    vim.cmd(string.format('vertical resize %d', desired_width))
   end
 end
 
