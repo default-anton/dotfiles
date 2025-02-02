@@ -122,7 +122,7 @@ local function execute_llm_command(cmd)
     end
 
     local range = string.format('%d,%d', start_line, end_line)
-    vim.cmd(string.format('%s:%s vsplit %s', cmd, range, model))
+    vim.cmd(string.format('%s:%s vsplit %s', range, cmd, model))
     vim.cmd(string.format('vertical resize %d', desired_width))
   end
 end
