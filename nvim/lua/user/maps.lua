@@ -125,26 +125,22 @@ local function execute_llm_command(cmd)
   end
 end
 
-vim.keymap.set('n', '<leader>la', function() execute_llm_command('Ask %') end,
-  { silent = true, desc = "Ask LLM about current buffer" })
-vim.keymap.set('v', '<leader>la', function() execute_llm_command('Ask') end,
-  { silent = true, desc = "Ask LLM about selection" })
-vim.keymap.set('n', '<leader>lc', function() execute_llm_command('Code %') end,
+vim.keymap.set('n', '<leader>lk', function() execute_llm_command('Code %') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
-vim.keymap.set('v', '<leader>lc', function() execute_llm_command('Code') end,
+vim.keymap.set('n', '<leader>kl', function() execute_llm_command('Code %') end,
+  { silent = true, desc = "Start coding with LLM on current buffer" })
+vim.keymap.set('v', '<leader>kl', function() execute_llm_command('Code') end,
   { silent = true, desc = "Start coding with LLM on selection" })
-vim.keymap.set('n', '<leader>ll', function() execute_llm_command('Yolo %') end,
-  { silent = true, desc = "Start coding with LLM on current buffer" })
-vim.keymap.set('v', '<leader>ll', function() execute_llm_command('Yolo') end,
+vim.keymap.set('v', '<leader>lk', function() execute_llm_command('Code') end,
   { silent = true, desc = "Start coding with LLM on selection" })
 vim.keymap.set('n', '<leader>ld', function() execute_llm_command('Code %:h') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
-vim.keymap.set('n', '<leader>ch', function() execute_llm_command('Chat') end,
+vim.keymap.set('n', '<leader>L', function() execute_llm_command('Code') end,
   { silent = true, desc = "Open chat with LLM" })
 vim.api.nvim_set_keymap('n', '<leader>lp', ':ApplyAll<CR>',
   { noremap = true, silent = true, desc = "Apply all LLM changes" })
-vim.api.nvim_set_keymap('n', '<leader>ad', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
-vim.api.nvim_set_keymap('v', '<leader>ad', ':Add<CR>',
+vim.api.nvim_set_keymap('n', '<C-a>', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
+vim.api.nvim_set_keymap('v', '<C-a>', ':Add<CR>',
   { noremap = true, silent = true, desc = "Add selected context to LLM" })
 
 -- Run tests
