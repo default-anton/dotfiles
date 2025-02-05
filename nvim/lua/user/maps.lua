@@ -139,9 +139,23 @@ vim.keymap.set('n', '<leader>L', function() execute_llm_command('Code') end,
   { silent = true, desc = "Open chat with LLM" })
 vim.api.nvim_set_keymap('n', '<leader>lp', ':ApplyAll<CR>',
   { noremap = true, silent = true, desc = "Apply all LLM changes" })
-vim.api.nvim_set_keymap('n', '<C-a>', ':Add<CR>', { noremap = true, silent = true, desc = "Add context to LLM" })
-vim.api.nvim_set_keymap('v', '<C-a>', ':Add<CR>',
-  { noremap = true, silent = true, desc = "Add selected context to LLM" })
+
+-- Only set <C-a> mappings if not in telescope buffer
+local function set_add_keymap()
+  local opts = { noremap = true, silent = true }
+  -- Check if current buffer is not a telescope prompt
+  if vim.bo.filetype ~= "TelescopePrompt" and vim.bo.filetype ~= "oil" then
+    vim.keymap.set('n', '<C-a>', ':Add<CR>', vim.tbl_extend('force', opts, { desc = "Add context to LLM" }))
+    vim.keymap.set('v', '<C-a>', ':Add<CR>', vim.tbl_extend('force', opts, { desc = "Add selected context to LLM" }))
+  end
+end
+
+-- Set up an autocmd to run when entering buffers
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+  callback = function()
+    set_add_keymap()
+  end,
+})
 
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>',
