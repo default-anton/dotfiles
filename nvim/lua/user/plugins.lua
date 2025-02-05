@@ -69,7 +69,6 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          o_gpt4o = "gpt-4o-2024-11-20",
           flash_gemini = "gemini-2.0-flash-exp",
           low_o3_mini = "o3-mini-low",
           medium_o3_mini = "o3-mini-medium",
