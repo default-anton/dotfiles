@@ -84,8 +84,9 @@ oil.setup({
   keymaps = {
     ["<leader>m"] = live_grep_in_dir,
     ["<leader>,"] = find_files_in_dir,
-    ["<leader>ad"] = add_to_llm_context,
-    ["<leader>lc"] = start_new_coding_session_with_llm,
+    ["<C-a>"] = add_to_llm_context,
+    ["<leader>lk"] = start_new_coding_session_with_llm,
+    ["<leader>kl"] = start_new_coding_session_with_llm,
   },
 })
 
