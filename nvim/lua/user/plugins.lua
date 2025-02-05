@@ -69,7 +69,8 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          flash_gemini = "gemini-2.0-flash-exp",
+          flash_gemini = "gemini-2.0-flash",
+          pro_gemini = "gemini-2.0-pro",
           low_o3_mini = "o3-mini-low",
           medium_o3_mini = "o3-mini-medium",
           high_o3_mini = "o3-mini-high",
