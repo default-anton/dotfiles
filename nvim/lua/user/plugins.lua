@@ -75,7 +75,7 @@ require("lazy").setup({
           medium_o3_mini = "o3-mini-medium",
           high_o3_mini = "o3-mini-high",
           sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
-          think_gemini = "gemini-2.0-flash-thinking-exp-01-21",
+          think_gemini = "gemini-2.0-flash-thinking",
         },
         default = "sonnet",
       })
