@@ -58,7 +58,7 @@ local start_new_coding_session_with_llm = {
     local entry = oil.get_cursor_entry()
     local cwd = oil.get_current_dir()
     if entry and cwd then
-      vim.cmd('Code')
+      vim.cmd('Chat')
       vim.schedule(function()
         local full_path = vim.fn.fnameescape(cwd .. entry.parsed_name)
         vim.cmd('Add ' .. full_path)

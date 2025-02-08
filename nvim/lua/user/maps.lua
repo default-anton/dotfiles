@@ -125,20 +125,18 @@ local function execute_llm_command(cmd)
   end
 end
 
-vim.keymap.set('n', '<leader>lk', function() execute_llm_command('Code %') end,
+vim.keymap.set('n', '<leader>lk', function() execute_llm_command('Chat %') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
-vim.keymap.set('n', '<leader>kl', function() execute_llm_command('Code %') end,
+vim.keymap.set('n', '<leader>kl', function() execute_llm_command('Chat %') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
-vim.keymap.set('v', '<leader>kl', function() execute_llm_command('Code') end,
+vim.keymap.set('v', '<leader>kl', function() execute_llm_command('Chat') end,
   { silent = true, desc = "Start coding with LLM on selection" })
-vim.keymap.set('v', '<leader>lk', function() execute_llm_command('Code') end,
+vim.keymap.set('v', '<leader>lk', function() execute_llm_command('Chat') end,
   { silent = true, desc = "Start coding with LLM on selection" })
-vim.keymap.set('n', '<leader>ld', function() execute_llm_command('Code %:h') end,
+vim.keymap.set('n', '<leader>ld', function() execute_llm_command('Chat %:h') end,
   { silent = true, desc = "Start coding with LLM on current buffer" })
-vim.keymap.set('n', '<leader>L', function() execute_llm_command('Code') end,
+vim.keymap.set('n', '<leader>L', function() execute_llm_command('Chat') end,
   { silent = true, desc = "Open chat with LLM" })
-vim.api.nvim_set_keymap('n', '<leader>lp', ':ApplyAll<CR>',
-  { noremap = true, silent = true, desc = "Apply all LLM changes" })
 
 -- Only set <C-a> mappings if not in telescope buffer
 local function set_add_keymap()
