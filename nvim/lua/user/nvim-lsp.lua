@@ -116,6 +116,12 @@ local servers = {
   },
   ts_ls = {},
   tailwindcss = {},
+  eslint = {
+    settings = {
+      -- Add any specific ESLint settings here
+    },
+    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+  },
 }
 
 require("mason").setup()
