@@ -69,13 +69,13 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          flash_gemini = "gemini-2.0-flash",
+          pro = "gemini-2.0-pro",
+          sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
           high_o3_mini = "o3-mini-high",
           low_o3_mini = "o3-mini-low",
           medium_o3_mini = "o3-mini-medium",
-          pro_gemini = "gemini-2.0-pro",
-          sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
-          think_gemini = "gemini-2.0-flash-thinking",
+          gpt4o = "gpt-4o-2024-11-20",
+          flash = "gemini-2.0-flash",
         },
         default = "sonnet",
       })
