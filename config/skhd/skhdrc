@@ -85,6 +85,7 @@ ctrl + cmd - g : open -a 'Gemini'
 ctrl + cmd - p : open -a 'Perplexity'
 ctrl + cmd - t : open -a 'Telegram'
 ctrl + cmd - space : open -a 'Alacritty' && tmux new-window -c '/Users/akuzmenko' 'nvim +Chat'
+ctrl + cmd - o : source /Users/akuzmenko/.env && stt toggle
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
 
