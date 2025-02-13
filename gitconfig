@@ -28,6 +28,7 @@
     rom   = !git fap && git rebase origin/$(git_default_branch)
     changed = !git status --porcelain | grep '^ *[AM]' | cut -d ' ' -f 3-
     review = !git df $(git merge-base $(git_default_branch) HEAD)..HEAD
+    prdf = !git df $(git merge-base HEAD origin/$(git_default_branch))
 
 [color]
     ui   = true
