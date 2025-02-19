@@ -118,6 +118,9 @@ alt - 0x2F : yabai -m window --toggle zoom-parent
 alt - m : yabai -m window --toggle float;\
           yabai -m window --grid 7:7:1:0:5:7
 
+shift + alt - m : window_ids="$(yabai -m query --windows | jq -r '.[].id')" && \
+                  for id in $window_ids; do yabai -m window "$id" --toggle float && yabai -m window "$id" --grid 7:7:1:0:5:7; done
+
 # toggle padding and gap
 alt - g : yabai -m space --toggle padding; yabai -m space --toggle gap
 
