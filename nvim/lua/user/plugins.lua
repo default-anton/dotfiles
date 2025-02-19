@@ -74,7 +74,7 @@ require("lazy").setup({
           high_o3_mini = "o3-mini-high",
           low_o3_mini = "o3-mini-low",
           medium_o3_mini = "o3-mini-medium",
-          ogpt4 = "gpt-4o-2024-11-20",
+          chatgpt = "gpt-4o-2024-11-20",
           flash = "gemini-2.0-flash",
         },
         default = "sonnet",
