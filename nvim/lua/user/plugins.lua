@@ -74,9 +74,13 @@ require("lazy").setup({
           high_o3_mini = "o3-mini-high-chat",
           low_o3_mini = "o3-mini-low",
           medium_o3_mini = "o3-mini-medium-chat",
-          pro = "gemini-2.0-pro",
+          -- pro = "gemini-2.0-pro",
           sonnet = "anthropic.claude-3-5-sonnet-20241022-v2:0",
           think_gemini = "gemini-2.0-flash-thinking-chat",
+        },
+        yolo_mode = {
+          file_operations = false, -- Automatically accept file operations
+          terminal_commands = true, -- Automatically accept terminal commands
         },
         default = "sonnet",
       })
