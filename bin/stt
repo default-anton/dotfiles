@@ -68,8 +68,8 @@ stop_recording() {
         -F language="en" \
         -F prompt="Hey, I've been looking at the project implementation details and thinking about our approach. You know, we might need to refactor some of the core modules to improve performance. What are your thoughts on using async patterns for the new features?")
     
-    # Remove any trailing whitespace or carriage returns
-    TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | xargs)
+    # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
+    TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
     echo "${TRANSCRIPTION}" | pbcopy
     type_text
     
