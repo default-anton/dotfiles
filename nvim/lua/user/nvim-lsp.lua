@@ -90,7 +90,19 @@ local servers = {
       usePlaceholders = true,
     },
   },
-  pyright = {},
+  basedpyright = {
+    settings = {
+      python = {
+        analysis = {
+          autoImportCompletions = true,
+          autoSearchPaths = true,
+          diagnosticMode = "openFilesOnly",
+          useLibraryCodeForTypes = true,
+          typeCheckingMode = "basic",
+        },
+      },
+    },
+  },
   html = {},
   terraformls = {},
   vimls = {},
