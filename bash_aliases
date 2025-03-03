@@ -11,7 +11,7 @@ alias p3="ipython3"
 alias cat=bat
 alias ,envkeys="env | cut -d= -f1"
 alias reranker="text-embeddings-router --model-id BAAI/bge-reranker-v2-m3 --revision 12e9746 --port 8787"
-alias ,extract-expenses="llm -m gemini-2.0-pro-exp-02-05 --schema-multi \"date_created_or_issued,item_description,price_with_currency_before_tax,gst_with_currency_if_present\" \"extract expenses from the invoice\""
+alias ,extract-expenses="llm -m gemini-2.0-pro-exp-02-05 --schema-multi \"date_created_or_issued,item_description,price_with_currency_before_tax,gst_amount_with_currency_if_present,total_tax_amount_with_currency_if_present\" \"extract expenses from the invoice\""
 
 uname_out=$(uname -a)
 case "${uname_out}" in
