@@ -9,7 +9,25 @@ snippet abspath "absolute path to the current file"
 endsnippet
 
 snippet date "Current date"
-`!v strftime('%Y-%m-%d')`
+`!v strftime('%b %-d, %Y')`
+endsnippet
+
+snippet 3ps "What I've been working on"
+Get links to features and requirements closed by me in the last week. Today is `!v strftime('%b %-d, %Y')`. Here is how the links look like: [Aha! feature/requirement](<you want to get this link>)
+
+Example:
+
+\`\`\`sh
+gh pr list -R aha-app/aha-app --state closed --author @me --search "closed:2025-02-24..2025-03-02" --json number,title,closedAt,body
+\`\`\`
+
+Output:
+- https://big.aha.io/features/AIT-260
+- https://big.aha.io/develop/features/AIT-259
+- https://big.aha.io/features/AI-1926
+- https://big.aha.io/features/AI-1924
+- https://big.aha.io/features/AIT-257
+- https://big.aha.io/requirements/AI-1836-10
 endsnippet
 
 snippet pentrepreneur "As an experienced entrepreneur, ..."
