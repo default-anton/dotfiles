@@ -69,6 +69,7 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
+          deepseekchat = "deepseek-chat",
           chatgpt = "gpt-4o-2024-11-20",
           -- flash = "gemini-2.0-flash",
           high_o3_mini = "o3-mini-high-chat",
@@ -79,8 +80,8 @@ require("lazy").setup({
           -- think_gemini = "gemini-2.0-flash-thinking-chat",
         },
         yolo_mode = {
-          file_operations = false,  -- Automatically accept file operations
-          terminal_commands = true, -- Automatically accept terminal commands
+          file_operations = false,   -- Automatically accept file operations
+          terminal_commands = false, -- Automatically accept terminal commands
         },
         default = "sonnet",
         guidelines = [[
