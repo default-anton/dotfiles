@@ -13,26 +13,62 @@ snippet date "Current date"
 endsnippet
 
 snippet psentry "Get Sentry issue details"
-The Sentry issue data can be retrieved by making a GET request to the Sentry API. Here’s how you can use `curl` to fetch the issue data:
+To analyze a Sentry issue, you can retrieve the issue data by making a GET request to the Sentry API. The required environment variable \`SENTRY_AUTH_TOKEN\` is already set.
+
+Always use \`jq\` to filter the API responses for efficiency. Follow these steps:
+
+1. First, fetch the basic issue details with essential metadata:
 
 \`\`\`bash
 curl -X GET \
   -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
-  https://sentry.io/api/0/issues/<issue_id>/
+  "https://sentry.io/api/0/issues/<issue_id>/" | \
+  jq '{
+    id,
+    title,
+    culprit,
+    status,
+    metadata,
+    count,
+    userCount,
+    firstSeen,
+    lastSeen,
+    project: .project.name,
+    errorDetails: .metadata
+  }'
 \`\`\`
 
-### Steps:
-1. Replace \`<issue_id>\` with the numeric ID of the Sentry issue you want to retrieve.
-
-If you want to fetch the hashes (and potentially the latest event data for stacktrace details), you can also use:
+2. Then, fetch the specific event details with focus on the stack trace and error context:
 
 \`\`\`bash
 curl -X GET \
   -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
-  https://sentry.io/api/0/issues/<issue_id>/hashes/
+  "https://sentry.io/api/0/issues/<issue_id>/events/<event_id>/" | \
+  jq '{
+    id,
+    eventID,
+    errorType: .entries[0].data.values[0].type,
+    errorValue: .entries[0].data.values[0].value,
+    errorLocation: .metadata.filename,
+    errorFunction: .metadata.function,
+    relevantFrames: [.entries[0].data.values[0].stacktrace.frames[] | select(.inApp == true) | {
+      filename,
+      function,
+      lineNo,
+      context,
+      colNo
+    }]
+  }'
 \`\`\`
 
-This second endpoint will return the hashes associated with the issue, and from there, you can extract the \`latestEvent\` field to analyze the stacktrace.
+These jq filters will:
+- Extract only the most relevant information for error analysis
+- Focus on application code by filtering for \`inApp == true\` frames
+- Provide context around the error location
+- Make the output more readable and manageable
+- Significantly reduce response size for better performance
+
+This approach will make future Sentry error analyses more efficient and focused on the most important information.
 endsnippet
 
 snippet p3ps "What I've been working on"
