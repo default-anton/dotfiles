@@ -12,7 +12,30 @@ snippet date "Current date"
 `!v strftime('%b %-d, %Y')`
 endsnippet
 
-snippet 3ps "What I've been working on"
+snippet psentry "Get Sentry issue details"
+The Sentry issue data can be retrieved by making a GET request to the Sentry API. Here’s how you can use `curl` to fetch the issue data:
+
+\`\`\`bash
+curl -X GET \
+  -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
+  https://sentry.io/api/0/issues/<issue_id>/
+\`\`\`
+
+### Steps:
+1. Replace \`<issue_id>\` with the numeric ID of the Sentry issue you want to retrieve.
+
+If you want to fetch the hashes (and potentially the latest event data for stacktrace details), you can also use:
+
+\`\`\`bash
+curl -X GET \
+  -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
+  https://sentry.io/api/0/issues/<issue_id>/hashes/
+\`\`\`
+
+This second endpoint will return the hashes associated with the issue, and from there, you can extract the \`latestEvent\` field to analyze the stacktrace.
+endsnippet
+
+snippet p3ps "What I've been working on"
 Get links to features and requirements closed by me in the last week. Today is `!v strftime('%b %-d, %Y')`. Here is how the links look like: [Aha! feature/requirement](<you want to get this link>)
 
 Example:
