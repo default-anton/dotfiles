@@ -1,0 +1,92 @@
+priority 10
+
+snippet getsentry "Get Sentry issue details"
+To analyze a Sentry issue, you can retrieve the issue data by making a GET request to the Sentry API. The required environment variable \`SENTRY_AUTH_TOKEN\` is already set.
+
+Always use \`jq\` to filter the API responses for efficiency. Follow these steps:
+
+1. First, fetch the basic issue details with essential metadata:
+
+\`\`\`bash
+curl -X GET \
+  -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
+  "https://sentry.io/api/0/issues/<issue_id>/" | \
+  jq '{
+    id,
+    title,
+    culprit,
+    status,
+    metadata,
+    count,
+    userCount,
+    firstSeen,
+    lastSeen,
+    project: .project.name,
+    errorDetails: .metadata
+  }'
+\`\`\`
+
+2. Then, fetch the specific event details with focus on the stack trace and error context:
+
+\`\`\`bash
+curl -X GET \
+  -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
+  "https://sentry.io/api/0/issues/<issue_id>/events/<event_id>/" | \
+  jq '{
+    id,
+    eventID,
+    errorType: .entries[0].data.values[0].type,
+    errorValue: .entries[0].data.values[0].value,
+    errorLocation: .metadata.filename,
+    errorFunction: .metadata.function,
+    relevantFrames: [.entries[0].data.values[0].stacktrace.frames[] | select(.inApp == true) | {
+      filename,
+      function,
+      lineNo,
+      context,
+      colNo
+    }]
+  }'
+\`\`\`
+
+These jq filters will:
+- Extract only the most relevant information for error analysis
+- Focus on application code by filtering for \`inApp == true\` frames
+- Provide context around the error location
+- Make the output more readable and manageable
+- Significantly reduce response size for better performance
+
+This approach will make future Sentry error analyses more efficient and focused on the most important information.
+endsnippet
+
+snippet 3ps "What I've been working on"
+Get links to features and requirements closed by me in the last week. Today is `!v strftime('%b %-d, %Y')`. Here is how the links look like: [Aha! feature/requirement](<you want to get this link>)
+
+Example:
+
+\`\`\`sh
+gh pr list -R aha-app/aha-app --state closed --author @me --search "closed:2025-02-24..2025-03-02" --json number,title,closedAt,body
+\`\`\`
+
+Output:
+- https://company.aha.io/features/AIT-260
+- https://company.aha.io/develop/features/AIT-259
+endsnippet
+
+snippet gitcommit "Commit staged changes"
+Commit staged changes with a single-line commit message. Follow these steps:
+
+1. Check the staged changes to ensure they are correct:
+
+```bash
+git diff --staged
+```
+
+2. Commit the changes with a single-line commit message:
+
+```bash
+git commit -m "<your commit message here>"
+```
+
+Replace `<your commit message here>` with a concise description of the changes.
+endsnippet
