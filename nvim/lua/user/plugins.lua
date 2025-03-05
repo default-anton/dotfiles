@@ -69,13 +69,11 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          deepseekchat = "deepseek-chat",
           chatgpt = "gpt-4o-2024-11-20",
-          -- flash = "gemini-2.0-flash",
+          flash = "gemini-2.0-flash",
           high_o3_mini = "o3-mini-high-chat",
-          -- low_o3_mini = "o3-mini-low",
-          -- medium_o3_mini = "o3-mini-medium-chat",
-          -- pro = "gemini-2.0-pro",
+          lite = "gemini-2.0-flash-lite",
+          pro = "gemini-2.0-pro",
           sonnet = "anthropic.claude-3-7-sonnet",
           -- think_gemini = "gemini-2.0-flash-thinking-chat",
         },
