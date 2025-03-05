@@ -1,6 +1,6 @@
 priority 10
 
-snippet getsentry "Get Sentry issue details"
+snippet sentryissue "Get Sentry issue details"
 To analyze a Sentry issue, you can retrieve the issue data by making a GET request to the Sentry API. The required environment variable \`SENTRY_AUTH_TOKEN\` is already set.
 
 Always use \`jq\` to filter the API responses for efficiency. Follow these steps:
@@ -74,19 +74,26 @@ Output:
 endsnippet
 
 snippet gitcommit "Commit staged changes"
-Commit staged changes with a single-line commit message. Follow these steps:
+Commit staged changes with a single-line commit message.
 
-1. Check the staged changes to ensure they are correct:
+Here are the author's last three commits. You should match their style:
+\`\`\`
+`git log -3 --pretty=format:"%h %s"`
+\`\`\`
+
+Follow these steps:
+
+1. Check the staged changes:
 
 \`\`\`bash
 git diff --staged
 \`\`\`
 
-2. Commit the changes with a single-line commit message:
+2. Commit the changes with a single-line commit message that follows the repository's convention:
 
 \`\`\`bash
 git commit -m "<your commit message here>"
 \`\`\`
 
-Replace \`<your commit message here>\` with a concise description of the changes.
+Replace \`<your commit message here>\` with a concise description of the changes that matches the style used in the repository.
 endsnippet
