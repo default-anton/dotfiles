@@ -82,6 +82,9 @@ require("lazy").setup({
           terminal_commands = false, -- Automatically accept terminal commands
         },
         default = "sonnet",
+        safe_terminal_commands = {
+          "bin/bundle", "bundle", "bin/rspec", "rspec", "bin/rails", "rails", "bin/rake", "rake"
+        },
         guidelines = [[
 Feel free to use any terminal tools - I have `fd`, `rg`, `gh`, `jq`, `aws` installed and ready to use.]],
       })
