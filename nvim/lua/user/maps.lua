@@ -2,8 +2,8 @@ local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
 -- Repeat movement with ; and ,
 -- ensure ; goes forward and , goes backward regardless of the last direction
-vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next, { desc = "Repeat last move next" })
-vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous, { desc = "Repeat last move previous" })
+vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move, { desc = "Repeat last move next" })
+vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move, { desc = "Repeat last move previous" })
 
 -- Optionally, make builtin f, F, t, T also repeatable with ; and ,
 vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true, desc = "Repeat f" })
