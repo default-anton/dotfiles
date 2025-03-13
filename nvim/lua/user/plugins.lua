@@ -91,13 +91,13 @@ Feel free to use any terminal tools - I have `fd`, `rg`, `gh`, `jq`, `aws` insta
     end,
   },
   "Marskey/telescope-sg",
-  {
-    'MeanderingProgrammer/render-markdown.nvim',
-    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
-    ---@module 'render-markdown'
-    ---@type render.md.UserConfig
-    opts = {},
-  },
+  -- {
+  --   'MeanderingProgrammer/render-markdown.nvim',
+  --   dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+  --   ---@module 'render-markdown'
+  --   ---@type render.md.UserConfig
+  --   opts = {},
+  -- },
   {
     'laytan/cloak.nvim',
     config = function()
