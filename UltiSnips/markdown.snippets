@@ -64,7 +64,7 @@ Get links to features and requirements closed by me in the last week. Today is `
 
 Example:
 
-\`\`\`sh
+\`\`\`bash
 gh pr list -R aha-app/aha-app --state closed --author @me --search "closed:2025-02-24..2025-03-02" --json number,title,closedAt,body
 \`\`\`
 
@@ -77,8 +77,8 @@ snippet gitcommit "Commit staged changes"
 Commit staged changes with a single-line commit message.
 
 Here are the author's last three commits. You should match their style:
-\`\`\`
-`git log -3 --pretty=format:"%h %s"`
+\`\`\`bash
+`git log --author="$(git config user.email)" -n 3 --pretty=format:"%h %s" --no-merges`
 \`\`\`
 
 Follow these steps:
