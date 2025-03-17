@@ -65,7 +65,10 @@ Get links to features and requirements from pull requests that are open or were 
 Example:
 
 \`\`\`bash
-jq -s 'add' <(gh pr list -R aha-app/aha-app --state closed --author @me --search "closed:2025-02-24..2025-03-02" --json number,title,closedAt,body) <(gh pr list -R aha-app/aha-app --author @me --json number,title,closedAt,body)
+# Get PRs closed by me in the last week
+gh pr list -R aha-app/aha-app --state closed --author @me --search "closed:2025-02-24..2025-03-02" --json number,title,closedAt,body
+# Get PRs open by me
+gh pr list -R aha-app/aha-app --author @me --json number,title,body
 \`\`\`
 
 Closed last week:
