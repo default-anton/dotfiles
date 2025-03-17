@@ -60,17 +60,20 @@ This approach will make future Sentry error analyses more efficient and focused 
 endsnippet
 
 snippet 3ps "What I've been working on"
-Get links to features and requirements closed by me in the last week. Today is `!v strftime('%b %-d, %Y')`. Here is how the links look like: [Aha! feature/requirement](<you want to get this link>)
+Get links to features and requirements from pull requests that are open or were closed by me in the last week. Today is `!v strftime('%b %-d, %Y')`. Here is how the links look like: [Aha! feature/requirement](<you want to get this link>)
 
 Example:
 
 \`\`\`bash
-gh pr list -R aha-app/aha-app --state closed --author @me --search "closed:2025-02-24..2025-03-02" --json number,title,closedAt,body
+jq -s 'add' <(gh pr list -R aha-app/aha-app --state closed --author @me --search "closed:2025-02-24..2025-03-02" --json number,title,closedAt,body) <(gh pr list -R aha-app/aha-app --author @me --json number,title,closedAt,body)
 \`\`\`
 
-Output:
+Closed last week:
 - https://company.aha.io/features/AIT-260
 - https://company.aha.io/develop/features/AIT-259
+
+Open:
+- https://company.aha.io/develop/features/AIT-261
 endsnippet
 
 snippet gitcommit "Commit staged changes"
