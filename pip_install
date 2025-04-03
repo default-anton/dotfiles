@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-pip install --user -U pandas ipython yapf flake8 isort jedi pynvim black pyright osxphotos

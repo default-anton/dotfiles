@@ -24,7 +24,7 @@ SYM_LINKS: Final[List[Tuple[str, str]]] = [
 ]
 
 TEMPLATES: Final[List[Tuple[str, str]]] = [
-    ("~/.config/alacritty/alacritty.yml", "alacritty.yml"),
+    ("~/.config/alacritty/alacritty.toml", "alacritty.toml"),
 ]
 
 DIRECTORIES: Final[List[str]] = [
@@ -36,7 +36,6 @@ DOTFILES: Path = Path("~/.dotfiles").expanduser()
 SHELL_CMDS: Final[List[str]] = [
     "brew bundle --no-lock",
     ". $(brew --prefix)/opt/nvm/nvm.sh && nvm install node",
-    "./pip_install",
     "$(brew --prefix)/opt/fzf/install",
 ]
 
