@@ -21,8 +21,8 @@
     la    = !git l --all
     fap   = fetch --all -p
     amend = commit --amend
-    dc    = diff --cached
-    df    = diff
+    dc    = diff --cached --ignore-space-change
+    df    = diff --ignore-space-change
     all   = add --all
     poo   = push origin HEAD
     rom   = !git fap && git rebase origin/$(git_default_branch)
