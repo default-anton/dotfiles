@@ -30,11 +30,11 @@ stop_recording() {
         echo "No recording in progress"
         exit 1
     fi
-    
+
     # Kill the recording process with SIGINT (Ctrl+C) for proper cleanup
     kill -2 $(cat "${PID_FILE}")
     rm "${PID_FILE}"
-    
+
     # Wait for the file to be ready (no longer being written to)
     timeout=10  # Maximum seconds to wait
     elapsed=0
@@ -43,11 +43,11 @@ stop_recording() {
             echo "Error: Recording file not found"
             exit 1
         fi
-        
+
         if ! lsof "${RECORDING_FILE}" >/dev/null 2>&1; then
             break  # File is no longer being written to
         fi
-        
+
         sleep 0.1
         elapsed=$(echo "$elapsed + 0.1" | bc -l)
     done
@@ -56,7 +56,7 @@ stop_recording() {
         echo "Error: Timeout waiting for recording file to be ready"
         exit 1
     fi
-    
+
     # Transcribe the audio
     TRANSCRIPTION=$(curl -s https://api.groq.com/openai/v1/audio/transcriptions \
         -H "Authorization: Bearer ${GROQ_API_KEY}" \
@@ -66,13 +66,13 @@ stop_recording() {
         -F temperature="0.0" \
         -F response_format="text" \
         -F language="en" \
-        -F prompt="Hey, I've been looking at the project implementation details and thinking about our approach. You know, we might need to refactor some of the core modules to improve performance. What are your thoughts on using async patterns for the new features?")
-    
+        -F prompt="Hey, I've been looking at the project implementation details and thinking about our approach.")
+
     # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
     TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
     echo "${TRANSCRIPTION}" | pbcopy
     type_text
-    
+
     # Cleanup
     rm -f "${RECORDING_FILE}"
 }
