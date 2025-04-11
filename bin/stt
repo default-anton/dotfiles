@@ -70,7 +70,7 @@ stop_recording() {
 
     # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
     TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
-    echo "${TRANSCRIPTION}" | pbcopy
+    echo -n "${TRANSCRIPTION}" | pbcopy
     type_text
 
     # Cleanup
