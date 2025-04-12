@@ -76,7 +76,7 @@ require("lazy").setup({
           sonnet = "anthropic.claude-3-7-sonnet",
         },
         yolo_mode = {
-          file_operations = false,   -- Automatically accept file operations
+          file_operations = true,    -- Automatically accept file operations
           terminal_commands = false, -- Automatically accept terminal commands
         },
         default = "sonnet",
