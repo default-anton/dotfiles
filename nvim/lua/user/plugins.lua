@@ -76,13 +76,15 @@ require("lazy").setup({
           sonnet = "anthropic.claude-3-7-sonnet",
         },
         yolo_mode = {
-          file_operations = true,    -- Automatically accept file operations
-          terminal_commands = false, -- Automatically accept terminal commands
+          file_operations = false,         -- Automatically accept file operations
+          terminal_commands = false,       -- Automatically accept terminal commands
+          auto_commit_changes = true,      -- Enable auto-commit
         },
+        auto_commit_model = "gpt-4o-mini", -- Use a specific model for commit messages
         default = "sonnet",
         safe_terminal_commands = {
           "bin/bundle", "bundle", "bin/rspec", "rspec", "bin/rails", "rails", "bin/rake", "rake",
-          "mkdir", "touch"
+          "git commit", "mkdir", "touch",
         },
         guidelines = [[
 Feel free to use any terminal tools - I have `fd`, `rg`, `gh`, `jq`, `aws` installed and ready to use.]],
