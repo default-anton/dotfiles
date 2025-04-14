@@ -123,13 +123,19 @@ Follow these steps:
 git diff --staged
 \`\`\`
 
-2. Use scratchpad to think about the changes and the context of the current branch.
+2. Use scratchpad to think about the changes and the context of the current branch. Review the diffs carefully.
+The commit message should be structured as follows: <type>: <description>
+Use these for <type>: fix, feat, build, chore, ci, docs, style, refactor, perf, test.
+Ensure the commit message:
+- Has the appropriate type.
+- Is in the imperative mood (e.g., "add feature" not "added feature" or "adding feature").
+- Does not exceed 72 characters.
 
-3. Commit the changes with a single-line commit message that follows the repository's convention and is no longer than 50 characters:
+3. Commit the changes with a single-line commit message:
 
 \`\`\`bash
 git commit -m "<your commit message here>"
 \`\`\`
 
-Replace \`<your commit message here>\` with a concise description of the changes that matches the style used in the repository.
+Replace \`<your commit message here>\` with a concise description of the changes.
 endsnippet
