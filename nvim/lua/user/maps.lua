@@ -104,7 +104,7 @@ local function execute_llm_command(cmd)
     return
   end
 
-  local desired_width = math.floor(vim.o.columns * 0.7)
+  local desired_width = math.floor(vim.o.columns * 0.6)
   local mode = vim.fn.mode()
   if mode == 'n' then
     vim.cmd(string.format('%s %s vsplit', cmd, model))
