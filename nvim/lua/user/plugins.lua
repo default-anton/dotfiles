@@ -71,7 +71,6 @@ require("lazy").setup({
         aliases = {
           chatgpt = "gpt-4.1",
           mini = "gpt-4.1-mini",
-          nano = "gpt-4.1-nano",
           flash = "gemini-2.0-flash",
           pro = "gemini-2.5-pro",
           sonnet = "anthropic.claude-3-7-sonnet",
