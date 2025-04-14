@@ -69,18 +69,19 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          chatgpt = "gpt-4o-2024-11-20",
-          mini = "gpt-4o-mini",
+          chatgpt = "gpt-4.1",
+          mini = "gpt-4.1-mini",
+          nano = "gpt-4.1-nano",
           flash = "gemini-2.0-flash",
           pro = "gemini-2.5-pro",
           sonnet = "anthropic.claude-3-7-sonnet",
         },
         yolo_mode = {
-          file_operations = false,         -- Automatically accept file operations
-          terminal_commands = false,       -- Automatically accept terminal commands
-          auto_commit_changes = true,      -- Enable auto-commit
+          file_operations = false,          -- Automatically accept file operations
+          terminal_commands = false,        -- Automatically accept terminal commands
+          auto_commit_changes = true,       -- Enable auto-commit
         },
-        auto_commit_model = "gpt-4o-mini", -- Use a specific model for commit messages
+        auto_commit_model = "gpt-4.1-mini", -- Use a specific model for commit messages
         default = "sonnet",
         safe_terminal_commands = {
           "bin/bundle", "bundle", "bin/rspec", "rspec", "bin/rails", "rails", "bin/rake", "rake",
