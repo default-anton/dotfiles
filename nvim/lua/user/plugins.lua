@@ -78,7 +78,7 @@ require("lazy").setup({
         yolo_mode = {
           file_operations = false,          -- Automatically accept file operations
           terminal_commands = false,        -- Automatically accept terminal commands
-          auto_commit_changes = true,       -- Enable auto-commit
+          auto_commit_changes = false,      -- Enable auto-commit
         },
         auto_commit_model = "gpt-4.1-mini", -- Use a specific model for commit messages
         default = "sonnet",
