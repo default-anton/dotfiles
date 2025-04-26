@@ -69,10 +69,9 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          ["4o-mini"] = "o4-mini-high",
-          chatgpt = "gpt-4.1",
+          high = "o3-high",
+          medium = "o3-medium",
           flash = "gemini-2.5-flash",
-          mini = "gpt-4.1-mini",
           pro = "gemini-2.5-pro",
           sonnet = "anthropic.claude-3-7-sonnet",
         },
