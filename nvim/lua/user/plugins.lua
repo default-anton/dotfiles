@@ -71,7 +71,8 @@ require("lazy").setup({
         aliases = {
           high = "o3-high",
           medium = "o3-medium",
-          flash = "gemini-2.5-flash",
+          chatgpt = "gpt-4.1",
+          -- flash = "gemini-2.5-flash",
           pro = "gemini-2.5-pro",
           sonnet = "anthropic.claude-3-7-sonnet",
         },
