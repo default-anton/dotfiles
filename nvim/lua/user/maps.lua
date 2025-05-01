@@ -31,7 +31,7 @@ vim.api.nvim_set_keymap('n', 'gya', [[:let @+ = expand('%:p')<CR>]],
 
 -- Quickfix list navigation
 vim.api.nvim_set_keymap('n', '<leader>qo', ':copen<CR>', { noremap = true, silent = true, desc = "Open quickfix list" })
-vim.api.nvim_set_keymap('n', '<leader>qc', ':cclose<CR>', { noremap = true, silent = true, desc = "Close quickfix list" })
+vim.api.nvim_set_keymap('n', '<leader>qd', ':cclose<CR>', { noremap = true, silent = true, desc = "Close quickfix list" })
 vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent = true, desc = "Next quickfix item" })
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz',
   { noremap = true, silent = true, desc = "Previous quickfix item" })
