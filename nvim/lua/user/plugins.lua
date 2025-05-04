@@ -73,7 +73,7 @@ require("lazy").setup({
           medium = "o3-medium",
           chatgpt = "gpt-4.1",
           -- flash = "gemini-2.5-flash",
-          pro = "gemini-2.5-pro",
+          -- pro = "gemini-2.5-pro",
           sonnet = "anthropic.claude-3-7-sonnet",
         },
         yolo_mode = {
