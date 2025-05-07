@@ -31,9 +31,6 @@ stop_recording() {
         exit 1
     fi
 
-    # Save the current clipboard content
-    ORIGINAL_CLIPBOARD="$(pbpaste)"
-
     # Kill the recording process with SIGINT (Ctrl+C) for proper cleanup
     kill -2 $(cat "${PID_FILE}")
     rm "${PID_FILE}"
@@ -71,11 +68,15 @@ stop_recording() {
         -F language="en" \
         -F prompt="Hey, I've been looking at the project implementation details and thinking about our approach.")
 
+    # Save the current clipboard content
+    ORIGINAL_CLIPBOARD="$(pbpaste)"
+
     # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
     TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
     echo -n "${TRANSCRIPTION}" | pbcopy
     paste_transcript
 
+    sleep 0.15
     # Restore the original clipboard content
     echo -n "${ORIGINAL_CLIPBOARD}" | pbcopy
 
