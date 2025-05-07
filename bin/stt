@@ -31,6 +31,9 @@ stop_recording() {
         exit 1
     fi
 
+    # Save the current clipboard content
+    ORIGINAL_CLIPBOARD="$(pbpaste)"
+
     # Kill the recording process with SIGINT (Ctrl+C) for proper cleanup
     kill -2 $(cat "${PID_FILE}")
     rm "${PID_FILE}"
@@ -72,6 +75,9 @@ stop_recording() {
     TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
     echo -n "${TRANSCRIPTION}" | pbcopy
     paste_transcript
+
+    # Restore the original clipboard content
+    echo -n "${ORIGINAL_CLIPBOARD}" | pbcopy
 
     # Cleanup
     rm -f "${RECORDING_FILE}"
