@@ -5,7 +5,7 @@ set -euo pipefail
 RECORDING_FILE="/tmp/recording.mp3"
 PID_FILE="/tmp/stt.pid"
 
-type_text() {
+paste_transcript() {
     osascript <<EOF
         tell application "System Events"
             keystroke "v" using command down
@@ -71,7 +71,7 @@ stop_recording() {
     # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
     TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
     echo -n "${TRANSCRIPTION}" | pbcopy
-    type_text
+    paste_transcript
 
     # Cleanup
     rm -f "${RECORDING_FILE}"
