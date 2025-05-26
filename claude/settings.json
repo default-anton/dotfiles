@@ -5,7 +5,9 @@
       "Bash(git commit:*)",
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ],
     "deny": []
   },
