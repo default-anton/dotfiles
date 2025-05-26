@@ -6,6 +6,8 @@
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(git rebase:*)",
+      "Bash(bin/rspec:*)",
+      "Bash(bin/rubocop:*)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs"
     ],
