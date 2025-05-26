@@ -69,12 +69,12 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          high = "o3-high",
-          medium = "o3-medium",
+          -- high = "o3-high",
+          -- medium = "o3-medium",
           chatgpt = "gpt-4.1",
-          -- flash = "gemini-2.5-flash",
-          -- pro = "gemini-2.5-pro",
-          sonnet = "anthropic.claude-3-7-sonnet",
+          -- flash = "vertex/gemini-2.5-flash",
+          -- pro = "vertex/gemini-2.5-pro",
+          sonnet = "anthropic.claude-sonnet-4",
         },
         yolo_mode = {
           file_operations = false,          -- Automatically accept file operations
@@ -135,7 +135,6 @@ Feel free to use any terminal tools - I have `fd`, `rg`, `gh`, `jq`, `aws` insta
   "peitalin/vim-jsx-typescript",
   "leafgarland/typescript-vim",
   "moll/vim-node",
-  "hashivim/vim-terraform",
   "tpope/vim-rails",
   "tpope/vim-bundler",
   "editorconfig/editorconfig-vim",

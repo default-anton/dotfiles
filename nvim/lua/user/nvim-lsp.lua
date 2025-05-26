@@ -13,12 +13,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.keymap.set('n', keys, func, { buffer = event.buf })
     end
 
-    if client.name == 'dartls' then
-      map('gd', vim.lsp.buf.definition)
-    else
-      map('gd', builtin.lsp_definitions)
-    end
-
+    map('gd', builtin.lsp_definitions)
     map('gr', builtin.lsp_references)
     map('gi', builtin.lsp_implementations)
     map('gt', builtin.lsp_type_definitions)
@@ -104,7 +99,6 @@ local servers = {
     },
   },
   html = {},
-  terraformls = {},
   vimls = {},
   sqlls = {},
   lua_ls = {

@@ -31,7 +31,6 @@ require("nvim-treesitter.configs").setup {
     "typescript",
     "vim",
     "yaml",
-    "dart",
   },
   highlight = {
     enable = true,
