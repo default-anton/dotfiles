@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git rebase:*)"
+    ],
+    "deny": []
+  },
+  "env": {
+    "DISABLE_BUG_COMMAND": "1",
+    "DISABLE_COST_WARNINGS": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_TELEMETRY": "1"
+  }
+}
