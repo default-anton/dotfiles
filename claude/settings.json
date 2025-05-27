@@ -6,12 +6,17 @@
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(git rebase:*)",
+      "Bash(rspec:*)",
+      "Bash(rubocop:*)",
       "Bash(bin/rspec:*)",
       "Bash(bin/rubocop:*)",
+      "Bash(bundle exec rspec:*)",
+      "Bash(bundle exec rubocop:*)",
       "Bash(bundle list:*)",
       "Bash(grep:*)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs"
+      "mcp__context7__get-library-docs",
+      "mcp__sequential-thinking__sequentialthinking"
     ],
     "deny": []
   },
