@@ -8,6 +8,8 @@
       "Bash(git rebase:*)",
       "Bash(bin/rspec:*)",
       "Bash(bin/rubocop:*)",
+      "Bash(bundle list:*)",
+      "Bash(grep:*)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs"
     ],
