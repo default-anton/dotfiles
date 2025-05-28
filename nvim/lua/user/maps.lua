@@ -29,6 +29,9 @@ vim.api.nvim_set_keymap('n', 'gyl', [[:let @+ = expand('%') . ':' . line('.')<CR
 vim.api.nvim_set_keymap('n', 'gya', [[:let @+ = expand('%:p')<CR>]],
   { noremap = true, silent = true, desc = "Yank absolute file path" })
 
+vim.api.nvim_set_keymap('n', '<leader>tt', ':TSContextToggle<CR>',
+  { noremap = true, silent = true, desc = "Toggle Treesitter context" })
+
 -- Quickfix list navigation
 vim.api.nvim_set_keymap('n', '<leader>qo', ':copen<CR>', { noremap = true, silent = true, desc = "Open quickfix list" })
 vim.api.nvim_set_keymap('n', '<leader>qd', ':cclose<CR>', { noremap = true, silent = true, desc = "Close quickfix list" })
