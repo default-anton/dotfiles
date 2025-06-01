@@ -75,7 +75,7 @@ require("lazy").setup({
           -- flash = "vertex/gemini-2.5-flash",
           -- pro = "vertex/gemini-2.5-pro",
           sonnet = "anthropic.claude-sonnet-4",
-          oldsonnet = "anthropic.claude-3-7-sonnet",
+          opus = "anthropic.claude-opus-4",
         },
         yolo_mode = {
           file_operations = false,          -- Automatically accept file operations
