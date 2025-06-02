@@ -23,10 +23,10 @@
       "Bash(bundle exec rubocop:*)",
       "Bash(bundle list:*)",
       "Bash(grep:*)",
-      "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:github.com)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
       "mcp__scratchpad-tool__scratchpad"
     ],
     "deny": []
