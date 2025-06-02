@@ -1,4 +1,13 @@
 {
+  "env": {
+    "MAX_THINKING_TOKENS": "0",
+    "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    "DISABLE_BUG_COMMAND": "1",
+    "DISABLE_COST_WARNINGS": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_TELEMETRY": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(git add:*)",
@@ -17,16 +26,10 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "mcp__scratchpad-tool__scratchpad"
     ],
     "deny": []
   },
-  "env": {
-    "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-    "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
-    "DISABLE_BUG_COMMAND": "1",
-    "DISABLE_COST_WARNINGS": "1",
-    "DISABLE_ERROR_REPORTING": "1",
-    "DISABLE_TELEMETRY": "1"
-  }
+  "model": "opus"
 }
