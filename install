@@ -22,6 +22,7 @@ SYM_LINKS: Final[List[Tuple[str, str]]] = [
     ("~/.config/yabai", "config/yabai"),
     ("~/.config/skhd", "config/skhd"),
     ("~/.claude/settings.json", "claude/settings.json"),
+    ("~/.claude/CLAUDE.md", "claude/CLAUDE.md"),
 ]
 
 TEMPLATES: Final[List[Tuple[str, str]]] = [
