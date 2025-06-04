@@ -69,13 +69,12 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          -- high = "o3-high",
-          -- medium = "o3-medium",
           chatgpt = "gpt-4.1",
           -- flash = "vertex/gemini-2.5-flash",
           -- pro = "vertex/gemini-2.5-pro",
           sonnet = "anthropic.claude-sonnet-4",
-          opus = "anthropic.claude-opus-4",
+          -- opus = "anthropic.claude-opus-4",
+          oldsonnet = "anthropic.claude-3-7-sonnet",
         },
         yolo_mode = {
           file_operations = false,          -- Automatically accept file operations
