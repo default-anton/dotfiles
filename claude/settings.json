@@ -1,6 +1,5 @@
 {
   "env": {
-    "MAX_THINKING_TOKENS": "0",
     "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-20250514-v1:0",
     "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
     "DISABLE_BUG_COMMAND": "1",
@@ -27,7 +26,6 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "mcp__scratchpad-tool__scratchpad",
       "Bash(gh pr list:*)",
       "Bash(gh pr view:*)"
     ],
