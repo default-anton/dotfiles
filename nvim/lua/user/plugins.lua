@@ -71,7 +71,7 @@ require("lazy").setup({
         aliases = {
           chatgpt = "gpt-4.1",
           -- flash = "vertex/gemini-2.5-flash",
-          -- pro = "vertex/gemini-2.5-pro",
+          pro = "vertex_ai/gemini-2.5-pro",
           sonnet = "anthropic.claude-sonnet-4",
           -- opus = "anthropic.claude-opus-4",
           oldsonnet = "anthropic.claude-3-7-sonnet",
