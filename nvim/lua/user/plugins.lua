@@ -69,7 +69,6 @@ require("lazy").setup({
     config = function()
       require('llm-sidekick').setup({
         aliases = {
-          chatgpt = "gpt-4.1",
           pro = "vertex_ai/gemini-2.5-pro",
           -- sonnet = "anthropic.claude-sonnet-4",
           o3 = "o3-high",
