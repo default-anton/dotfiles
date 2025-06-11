@@ -82,7 +82,7 @@ require("lazy").setup({
           auto_commit_changes = false,      -- Enable auto-commit
         },
         auto_commit_model = "gpt-4.1-mini", -- Use a specific model for commit messages
-        default = "pro",
+        default = "sonnet",
         safe_terminal_commands = {
           "bin/bundle", "bundle", "bin/rspec", "rspec", "bin/rails", "rails", "bin/rake", "rake",
           "git commit", "mkdir", "touch",
