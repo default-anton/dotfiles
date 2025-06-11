@@ -70,11 +70,11 @@ require("lazy").setup({
       require('llm-sidekick').setup({
         aliases = {
           chatgpt = "gpt-4.1",
-          -- flash = "vertex/gemini-2.5-flash",
           pro = "vertex_ai/gemini-2.5-pro",
-          sonnet = "anthropic.claude-sonnet-4",
+          -- sonnet = "anthropic.claude-sonnet-4",
+          o3 = "o3-high",
           -- opus = "anthropic.claude-opus-4",
-          oldsonnet = "anthropic.claude-3-7-sonnet",
+          sonnet = "vertex_ai/claude-sonnet-4",
         },
         yolo_mode = {
           file_operations = false,          -- Automatically accept file operations
@@ -82,7 +82,7 @@ require("lazy").setup({
           auto_commit_changes = false,      -- Enable auto-commit
         },
         auto_commit_model = "gpt-4.1-mini", -- Use a specific model for commit messages
-        default = "sonnet",
+        default = "pro",
         safe_terminal_commands = {
           "bin/bundle", "bundle", "bin/rspec", "rspec", "bin/rails", "rails", "bin/rake", "rake",
           "git commit", "mkdir", "touch",
