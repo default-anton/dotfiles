@@ -1,7 +1,5 @@
 {
   "env": {
-    "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-    "ANTHROPIC_SMALL_FAST_MODEL": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
     "DISABLE_BUG_COMMAND": "1",
     "DISABLE_COST_WARNINGS": "1",
     "DISABLE_ERROR_REPORTING": "1",
@@ -22,6 +20,7 @@
       "Bash(grep:*)",
       "Bash(rspec:*)",
       "Bash(rubocop:*)",
+      "Bash(rg:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__context7__resolve-library-id",
