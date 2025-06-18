@@ -23,10 +23,9 @@
       "Bash(rg:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs",
       "Bash(gh pr list:*)",
-      "Bash(gh pr view:*)"
+      "Bash(gh pr view:*)",
+      "Bash(bin/rails generate:*)"
     ],
     "deny": []
   },
