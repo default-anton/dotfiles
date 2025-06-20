@@ -25,7 +25,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(gh pr list:*)",
       "Bash(gh pr view:*)",
-      "Bash(bin/rails generate:*)"
+      "Bash(bin/rails generate:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   },
