@@ -6,7 +6,7 @@ RECORDING_FILE="/tmp/recording.mp3"
 PID_FILE="/tmp/stt.pid"
 
 paste_transcript() {
-    osascript <<EOF
+  osascript <<EOF
         tell application "System Events"
             keystroke "v" using command down
         end tell
@@ -14,95 +14,95 @@ EOF
 }
 
 start_recording() {
-    if [ -f "${PID_FILE}" ]; then
-        echo "Recording is already in progress"
-        exit 1
-    fi
+  if [ -f "${PID_FILE}" ]; then
+    echo "Recording is already in progress"
+    exit 1
+  fi
 
-    rm -f "${RECORDING_FILE}"
-    # Start sox recording in background
-    sox -q -d -c 1 -t mp3 -C 128.2 "${RECORDING_FILE}" rate 16k &
-    echo $! > "${PID_FILE}"
+  rm -f "${RECORDING_FILE}"
+  # Start sox recording in background
+  sox -q -d -c 1 -t mp3 -C 128.2 "${RECORDING_FILE}" rate 16k &
+  echo $! >"${PID_FILE}"
 }
 
 stop_recording() {
-    if [ ! -f "${PID_FILE}" ]; then
-        echo "No recording in progress"
-        exit 1
+  if [ ! -f "${PID_FILE}" ]; then
+    echo "No recording in progress"
+    exit 1
+  fi
+
+  # Kill the recording process with SIGINT (Ctrl+C) for proper cleanup
+  kill -2 $(cat "${PID_FILE}")
+  rm "${PID_FILE}"
+
+  # Wait for the file to be ready (no longer being written to)
+  timeout=10 # Maximum seconds to wait
+  elapsed=0
+  while [ "$(echo "$elapsed < $timeout" | bc -l)" -eq 1 ]; do
+    if [ ! -f "${RECORDING_FILE}" ]; then
+      echo "Error: Recording file not found"
+      exit 1
     fi
 
-    # Kill the recording process with SIGINT (Ctrl+C) for proper cleanup
-    kill -2 $(cat "${PID_FILE}")
-    rm "${PID_FILE}"
-
-    # Wait for the file to be ready (no longer being written to)
-    timeout=10  # Maximum seconds to wait
-    elapsed=0
-    while [ "$(echo "$elapsed < $timeout" | bc -l)" -eq 1 ]; do
-        if [ ! -f "${RECORDING_FILE}" ]; then
-            echo "Error: Recording file not found"
-            exit 1
-        fi
-
-        if ! lsof "${RECORDING_FILE}" >/dev/null 2>&1; then
-            break  # File is no longer being written to
-        fi
-
-        sleep 0.1
-        elapsed=$(echo "$elapsed + 0.1" | bc -l)
-    done
-
-    if [ "$(echo "$elapsed >= $timeout" | bc -l)" -eq 1 ]; then
-        echo "Error: Timeout waiting for recording file to be ready"
-        exit 1
+    if ! lsof "${RECORDING_FILE}" >/dev/null 2>&1; then
+      break # File is no longer being written to
     fi
 
-    # Transcribe the audio
-    TRANSCRIPTION=$(curl -s https://api.groq.com/openai/v1/audio/transcriptions \
-        -H "Authorization: Bearer ${GROQ_API_KEY}" \
-        -H "Content-Type: multipart/form-data" \
-        -F file="@${RECORDING_FILE}" \
-        -F model="whisper-large-v3" \
-        -F temperature="0.0" \
-        -F response_format="text" \
-        -F language="en" \
-        -F prompt="Hey, I've been looking at the project implementation details and thinking about our approach.")
+    sleep 0.1
+    elapsed=$(echo "$elapsed + 0.1" | bc -l)
+  done
 
-    # Save the current clipboard content
-    ORIGINAL_CLIPBOARD="$(pbpaste)"
+  if [ "$(echo "$elapsed >= $timeout" | bc -l)" -eq 1 ]; then
+    echo "Error: Timeout waiting for recording file to be ready"
+    exit 1
+  fi
 
-    # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
-    TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
-    echo -n "${TRANSCRIPTION}" | pbcopy
-    paste_transcript
+  # Transcribe the audio
+  TRANSCRIPTION=$(curl -s https://api.groq.com/openai/v1/audio/transcriptions \
+    -H "Authorization: Bearer ${GROQ_API_KEY}" \
+    -H "Content-Type: multipart/form-data" \
+    -F file="@${RECORDING_FILE}" \
+    -F model="whisper-large-v3" \
+    -F temperature="0.0" \
+    -F response_format="text" \
+    -F language="en" \
+    -F prompt="Hey, I've been looking at the project implementation details and thinking about our approach.")
 
-    sleep 0.15
-    # Restore the original clipboard content
-    echo -n "${ORIGINAL_CLIPBOARD}" | pbcopy
+  # Save the current clipboard content
+  ORIGINAL_CLIPBOARD="$(pbpaste)"
 
-    # Cleanup
-    rm -f "${RECORDING_FILE}"
+  # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
+  TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
+  echo -n "${TRANSCRIPTION}" | pbcopy
+  paste_transcript
+
+  sleep 0.15
+  # Restore the original clipboard content
+  echo -n "${ORIGINAL_CLIPBOARD}" | pbcopy
+
+  # Cleanup
+  rm -f "${RECORDING_FILE}"
 }
 
 case "${1:-}" in
-    "start")
-        start_recording
-        ;;
-    "stop")
-        stop_recording
-        ;;
-    "toggle")
-        if [ -f "${PID_FILE}" ]; then
-            stop_recording
-        else
-            start_recording
-        fi
-        ;;
-    *)
-        echo "Usage: stt [start|stop|toggle]"
-        echo "  start  - Start recording audio"
-        echo "  stop   - Stop recording and transcribe"
-        echo "  toggle - Toggle recording on/off"
-        exit 1
-        ;;
+"start")
+  start_recording
+  ;;
+"stop")
+  stop_recording
+  ;;
+"toggle")
+  if [ -f "${PID_FILE}" ]; then
+    stop_recording
+  else
+    start_recording
+  fi
+  ;;
+*)
+  echo "Usage: stt [start|stop|toggle]"
+  echo "  start  - Start recording audio"
+  echo "  stop   - Stop recording and transcribe"
+  echo "  toggle - Toggle recording on/off"
+  exit 1
+  ;;
 esac
