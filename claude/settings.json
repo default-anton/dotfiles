@@ -22,12 +22,12 @@
       "Bash(rspec:*)",
       "Bash(rubocop:*)",
       "Bash(rg:*)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(gh pr list:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr create:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   },
