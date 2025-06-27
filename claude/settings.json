@@ -18,6 +18,7 @@
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(git rebase:*)",
+      "Bash(git diff:*)",
       "Bash(grep:*)",
       "Bash(rspec:*)",
       "Bash(rubocop:*)",
