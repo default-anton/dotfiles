@@ -30,6 +30,5 @@
       "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
-  },
-  "model": "opus"
+  }
 }
