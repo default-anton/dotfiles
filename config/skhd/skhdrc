@@ -81,6 +81,7 @@ ctrl + cmd - c : open -a 'Google Chrome'
 ctrl + cmd - f : open -a 'Finder'
 ctrl + cmd - g : open -a 'Gemini'
 ctrl + cmd - h : open -a 'Hey'
+ctrl + cmd - j : open -a 'Claude'
 ctrl + cmd - o : source /Users/akuzmenko/.env && stt toggle
 ctrl + cmd - t : open -a 'Google Tasks'
 
