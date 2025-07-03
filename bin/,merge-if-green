@@ -1,12 +1,22 @@
 #!/bin/bash
 
-# Check if PR number is provided
+# Check if PR number or URL is provided
 if [ -z "$1" ]; then
-  echo "Usage: $0 <pr-number>"
+  echo "Usage: $0 <pr-number-or-url>"
   exit 1
 fi
 
-PR_NUMBER=$1
+# Extract PR number from input (handles both number and URL)
+if [[ "$1" =~ ^[0-9]+$ ]]; then
+  # Input is a number
+  PR_NUMBER=$1
+elif [[ "$1" =~ /pull/([0-9]+) ]]; then
+  # Input is a GitHub PR URL
+  PR_NUMBER=${BASH_REMATCH[1]}
+else
+  echo "Error: Invalid input. Please provide a PR number or GitHub PR URL"
+  exit 1
+fi
 MAX_WAIT_TIME=$((60 * 60)) # 60 minutes in seconds
 CHECK_INTERVAL=30          # Check every 30 seconds
 START_TIME=$(date +%s)
