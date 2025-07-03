@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Check if PR number is provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 <pr-number>"
+  exit 1
+fi
+
+PR_NUMBER=$1
+MAX_WAIT_TIME=$((60 * 60)) # 60 minutes in seconds
+CHECK_INTERVAL=30          # Check every 30 seconds
+START_TIME=$(date +%s)
+
+echo "Monitoring PR #${PR_NUMBER} for up to 60 minutes..."
+echo "Press Ctrl+C to stop"
+
+while true; do
+  # Calculate elapsed time
+  CURRENT_TIME=$(date +%s)
+  ELAPSED=$((CURRENT_TIME - START_TIME))
+
+  # Check if we've exceeded max wait time
+  if [ $ELAPSED -gt $MAX_WAIT_TIME ]; then
+    echo "Timeout: Waited 60 minutes without PR becoming mergeable"
+    exit 1
+  fi
+
+  # Get PR info
+  PR_INFO=$(gh pr view "$PR_NUMBER" --json mergeable,mergeStateStatus,statusCheckRollup,reviews,isDraft,state 2>/dev/null)
+
+  if [ $? -ne 0 ]; then
+    echo "Error: Unable to fetch PR #${PR_NUMBER}"
+    exit 1
+  fi
+
+  # Check if PR is already merged or closed
+  PR_STATE=$(echo "$PR_INFO" | jq -r '.state')
+  if [ "$PR_STATE" = "MERGED" ]; then
+    echo "PR #${PR_NUMBER} is already merged"
+    exit 0
+  elif [ "$PR_STATE" = "CLOSED" ]; then
+    echo "PR #${PR_NUMBER} is closed"
+    exit 1
+  fi
+
+  # Parse PR status
+  IS_DRAFT=$(echo "$PR_INFO" | jq -r '.isDraft')
+  MERGEABLE=$(echo "$PR_INFO" | jq -r '.mergeable')
+  MERGE_STATE=$(echo "$PR_INFO" | jq -r '.mergeStateStatus')
+  CHECKS_STATUS=$(echo "$PR_INFO" | jq -r '.statusCheckRollup[].status // empty' | grep -v "COMPLETED" | head -1)
+  REVIEWS_CHANGES_REQUESTED=$(echo "$PR_INFO" | jq -r '.reviews[].state' | grep -c "CHANGES_REQUESTED")
+
+  # Display current status
+  ELAPSED_MIN=$((ELAPSED / 60))
+  echo -n "[$(date +%H:%M:%S)] (${ELAPSED_MIN}m elapsed) "
+
+  # Check conditions and display status
+  if [ "$IS_DRAFT" = "true" ]; then
+    echo "PR is still in draft state"
+  elif [ "$MERGEABLE" != "MERGEABLE" ]; then
+    echo "PR is not mergeable (conflicts or other issues)"
+  elif [ -n "$CHECKS_STATUS" ]; then
+    echo "Status checks not passing"
+  elif [ "$REVIEWS_CHANGES_REQUESTED" -gt 0 ]; then
+    echo "Changes requested in reviews"
+  elif [ "$MERGE_STATE" != "CLEAN" ]; then
+    echo "Merge state is not clean: $MERGE_STATE"
+  else
+    # All checks passed, merge the PR
+    echo "All checks passed! Merging PR #${PR_NUMBER}..."
+    gh pr merge "$PR_NUMBER" --merge --delete-branch
+
+    if [ $? -eq 0 ]; then
+      echo "Successfully merged PR #${PR_NUMBER}"
+      exit 0
+    else
+      echo "Failed to merge PR #${PR_NUMBER}"
+      exit 1
+    fi
+  fi
+
+  # Wait before next check
+  sleep $CHECK_INTERVAL
+done
