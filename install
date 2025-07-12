@@ -43,7 +43,8 @@ DOTFILES: Path = Path("~/.dotfiles").expanduser()
 SHELL_CMDS: Final[List[str]] = [
     "brew bundle --no-upgrade",
     f"$(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY} lua@{LUA}",
-    "echo pynvim ruff ty | xargs -n1 $(brew --prefix)/bin/uv tool install",
+    "echo ruff ty | xargs -n1 $(brew --prefix)/bin/uv tool install",
+    "pip3 install --break-system-packages --user pynvim",
     "$(brew --prefix)/opt/fzf/install",
 ]
 
@@ -55,7 +56,6 @@ BASH_PROFILE_LINES: Final[List[str]] = [
     "source ~/.bashrc",
     "source ~/.dotfiles/profile",
 ]
-
 
 def main():
     major, minor, patch = map(int, python_version().split('.'))
@@ -119,7 +119,6 @@ def main():
         for profile_line in BASH_PROFILE_LINES:
             if profile_line not in profile_content:
                 f.write(profile_line)
-
 
 if __name__ == "__main__":
     main()
