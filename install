@@ -7,8 +7,9 @@ from subprocess import Popen, check_output
 from typing import Final, Tuple, List
 from platform import python_version
 
-NODE: str = "24"
-RUBY: str = "3.4"
+NODE = "22"
+RUBY = "3.4"
+LUA = "5.1"
 
 SYM_LINKS: Final[List[Tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
@@ -41,8 +42,8 @@ DOTFILES: Path = Path("~/.dotfiles").expanduser()
 
 SHELL_CMDS: Final[List[str]] = [
     "brew bundle --no-upgrade",
-    f". $(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY}",
-    "./pip_install",
+    f"$(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY} lua@{LUA}",
+    "echo pynvim ruff ty | xargs -n1 $(brew --prefix)/bin/uv tool install",
     "$(brew --prefix)/opt/fzf/install",
 ]
 
