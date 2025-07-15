@@ -70,8 +70,7 @@ require("lazy").setup({
         aliases = {
           pro = "vertex_ai/gemini-2.5-pro",
           -- sonnet = "anthropic.claude-sonnet-4",
-          o3 = "o3-high",
-          -- opus = "anthropic.claude-opus-4",
+          opus = "vertex_ai/claude-opus-4",
           sonnet = "vertex_ai/claude-sonnet-4",
         },
         yolo_mode = {
@@ -80,7 +79,7 @@ require("lazy").setup({
           auto_commit_changes = false,      -- Enable auto-commit
         },
         auto_commit_model = "gpt-4.1-mini", -- Use a specific model for commit messages
-        default = "sonnet",
+        default = "opus",
         safe_terminal_commands = {
           "bin/bundle", "bundle", "bin/rspec", "rspec", "bin/rails", "rails", "bin/rake", "rake",
           "git commit", "mkdir", "touch",
