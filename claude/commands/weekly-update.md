@@ -4,6 +4,8 @@ description: Weekly update for management reporting
 
 Get the current date and look up my commits from the relevant week (Saturday through Friday). Create a concise bullet-point list of my progress for management reporting. Keep descriptions direct and factual without unnecessary elaboration. Avoid cliche, flowery and marketing language. Group progress by Aha! feature and requirement IDs, if applicable. Feature/requirement urls are automatically rendered as record pills when pasted in Aha!, so use them, e.g. https://big.aha.io/features/FEATURE-ID and https://big.aha.io/requirements/REQUIREMENT-ID.
 
+Expected Output: Generate a markdown file named `weekly-update.md` at the repository root containing the formatted weekly update.
+
 Logic: If today is Friday/Saturday/Sunday, report on THIS week. If today is Monday-Thursday, report on PREVIOUS week.
 
 Git user: !`git config user.name` (!`git config user.email`)
