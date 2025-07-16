@@ -25,6 +25,7 @@ SYM_LINKS: Final[List[Tuple[str, str]]] = [
     ("~/.config/starship.toml", "starship.toml"),
     ("~/.config/yabai", "config/yabai"),
     ("~/.config/skhd", "config/skhd"),
+    ("~/.claude/commands", "claude/commands"),
     ("~/.claude/settings.json", "claude/settings.json"),
     ("~/.claude/CLAUDE.md", "claude/CLAUDE.md"),
     ("~/.gemini/settings.json", "gemini/settings.json"),
