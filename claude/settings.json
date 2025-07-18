@@ -45,6 +45,7 @@
       "Bash(readlink:*)",
       "Bash(realpath:*)",
       "Bash(rg:*)",
+      "Bash(rm:*)",
       "Bash(rspec:*)",
       "Bash(rubocop:*)",
       "Bash(stat:*)",
@@ -54,8 +55,8 @@
       "Bash(wc:*)",
       "Bash(which:*)",
       "Bash(whoami:*)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch",
+      "WebSearch"
     ],
     "deny": []
   },
