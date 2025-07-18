@@ -15,6 +15,7 @@ SYM_LINKS: Final[List[Tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
     ("~/.gitconfig", "gitconfig"),
     ("~/.psqlrc", "psqlrc"),
+    ("~/.sqliterc", "sqliterc"),
     ("~/.bash_aliases", "bash_aliases"),
     ("~/.tmux.conf", "tmux.conf"),
     ("~/.config/pgcli/config", "pgcli/config"),
