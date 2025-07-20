@@ -10,3 +10,6 @@ success_symbol = "[➜](bold green)" # The "success_symbol" segment is being set
 
 [docker_context]
 disabled = true
+
+[aws]
+disabled = true
