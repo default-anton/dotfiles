@@ -1,5 +1,6 @@
 ---
 description: Weekly update for management reporting
+allowed-tools: Bash(git config user.name), Bash(git config user.email)
 ---
 
 Get the current date and look up my commits from the relevant week (Saturday through Friday). Create a concise bullet-point list of my progress for management reporting. Keep descriptions direct and factual without unnecessary elaboration. Avoid cliche, flowery and marketing language. Group progress by Aha! feature and requirement IDs, if applicable. Feature/requirement urls are automatically rendered as record pills when pasted in Aha!, so use them, e.g. https://big.aha.io/features/FEATURE-ID and https://big.aha.io/requirements/REQUIREMENT-ID.
