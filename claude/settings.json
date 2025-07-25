@@ -2,7 +2,10 @@
   "env": {
     "DISABLE_BUG_COMMAND": "1",
     "DISABLE_ERROR_REPORTING": "1",
-    "DISABLE_TELEMETRY": "1"
+    "DISABLE_TELEMETRY": "1",
+    "_CLAUDE_CODE_USE_VERTEX": "1",
+    "_CLOUD_ML_REGION": "us-east5",
+    "_ANTHROPIC_VERTEX_PROJECT_ID": "aha-staging-1"
   },
   "permissions": {
     "allow": [
@@ -29,6 +32,7 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git diff:*)",
+      "Bash(git log:*)",
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(git rebase:*)",
