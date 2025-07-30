@@ -1,5 +1,6 @@
 local telescope = require "telescope.builtin"
 local oil = require("oil")
+local claude_code = require("user.claude-code")
 
 local get_dir_under_cursor = function()
   local entry = oil.get_cursor_entry()
@@ -40,29 +41,13 @@ local find_files_in_dir = {
   end,
 }
 
-local add_to_llm_context = {
-  desc = "Add to LLM context",
+local send_file_to_claude = {
+  desc = "Send file reference to claude tmux pane",
   callback = function(_)
     local entry = oil.get_cursor_entry()
     local cwd = oil.get_current_dir()
     if entry and cwd then
-      local full_path = vim.fn.fnameescape(cwd .. entry.parsed_name)
-      vim.cmd('Add ' .. full_path)
-    end
-  end,
-}
-
-local start_new_coding_session_with_llm = {
-  desc = "Start new coding session with LLM",
-  callback = function(_)
-    local entry = oil.get_cursor_entry()
-    local cwd = oil.get_current_dir()
-    if entry and cwd then
-      vim.cmd('Chat')
-      vim.schedule(function()
-        local full_path = vim.fn.fnameescape(cwd .. entry.parsed_name)
-        vim.cmd('Add ' .. full_path)
-      end)
+      claude_code.send_file_references(cwd .. entry.parsed_name)
     end
   end,
 }
@@ -84,9 +69,7 @@ oil.setup({
   keymaps = {
     ["<leader>m"] = live_grep_in_dir,
     ["<leader>,"] = find_files_in_dir,
-    ["<C-a>"] = add_to_llm_context,
-    ["<leader>lk"] = start_new_coding_session_with_llm,
-    ["<leader>kl"] = start_new_coding_session_with_llm,
+    ["<C-a>"] = send_file_to_claude,
   },
 })
 
