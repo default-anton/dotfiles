@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+# Only run in tmux
+if [ -z "$TMUX" ]; then
+  echo "Error: This script must be run inside a tmux session" >&2
+  exit 1
+fi
+
+# Get current pane info
+current_session=$(tmux display-message -p '#{session_name}')
+current_window=$(tmux display-message -p '#{window_index}')
+current_pane=$(tmux display-message -p '#{pane_index}')
+
+# Get all PIDs running 'claude' command
+claude_pids=$(pgrep -x claude 2>/dev/null)
+
+if [ -z "$claude_pids" ]; then
+  # No claude processes found
+  exit 0
+fi
+
+# Function to find the tmux pane that owns a process
+find_tmux_pane_for_pid() {
+  local target_pid=$1
+  local current_pid=$target_pid
+
+  # Walk up the process tree until we find a tmux pane or reach init
+  while [ "$current_pid" -gt 1 ]; do
+    # Check if this PID belongs to any tmux pane
+    local pane_info=$(tmux list-panes -a -F "#{session_name}:#{window_index}.#{pane_index} #{pane_pid}" 2>/dev/null | grep " ${current_pid}$")
+
+    if [ -n "$pane_info" ]; then
+      echo "${pane_info%% *}"
+      return 0
+    fi
+
+    # Get parent PID
+    current_pid=$(ps -o ppid= -p "$current_pid" 2>/dev/null | tr -d ' ')
+
+    # Break if we can't get parent
+    if [ -z "$current_pid" ]; then
+      break
+    fi
+  done
+
+  return 1
+}
+
+# Function to calculate distance between panes
+calculate_distance() {
+  local pane_id=$1
+  local session window pane
+
+  # Parse session:window.pane format
+  IFS=':.' read -r session window pane <<<"$pane_id"
+
+  # Distance calculation:
+  # 0 = same pane
+  # 1 = same window, different pane
+  # 2 = same session, different window
+  # 3 = different session
+
+  if [ "$session" = "$current_session" ] && [ "$window" = "$current_window" ] && [ "$pane" = "$current_pane" ]; then
+    echo 0
+  elif [ "$session" = "$current_session" ] && [ "$window" = "$current_window" ]; then
+    echo 1
+  elif [ "$session" = "$current_session" ]; then
+    echo 2
+  else
+    echo 3
+  fi
+}
+
+# Find all panes with claude and calculate distances
+closest_pane=""
+min_distance=999
+
+for pid in $claude_pids; do
+  pane=$(find_tmux_pane_for_pid "$pid")
+  if [ -n "$pane" ]; then
+    distance=$(calculate_distance "$pane")
+    if [ "$distance" -lt "$min_distance" ]; then
+      min_distance=$distance
+      closest_pane=$pane
+    fi
+  fi
+done
+
+# Output the closest pane
+if [ -n "$closest_pane" ]; then
+  echo "$closest_pane"
+fi
