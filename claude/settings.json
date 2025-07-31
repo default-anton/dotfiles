@@ -8,6 +8,7 @@
     "_ANTHROPIC_VERTEX_PROJECT_ID": "aha-staging-1"
   },
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(basename:*)",
       "Bash(bin/bundle:*)",
