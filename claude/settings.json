@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
     "DISABLE_BUG_COMMAND": "1",
     "DISABLE_ERROR_REPORTING": "1",
@@ -10,7 +11,6 @@
     "_ANTHROPIC_VERTEX_PROJECT_ID": "aha-staging-1"
   },
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(basename:*)",
       "Bash(bin/bundle:*)",
@@ -32,6 +32,7 @@
       "Bash(file:*)",
       "Bash(find:*)",
       "Bash(gh pr create:*)",
+      "Bash(gh pr diff:*)",
       "Bash(gh pr list:*)",
       "Bash(gh pr view:*)",
       "Bash(git add:*)",
@@ -74,7 +75,8 @@
       "mcp__screenshot-website-fast__take_screencast",
       "mcp__screenshot-website-fast__capture_console"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   },
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
 }
