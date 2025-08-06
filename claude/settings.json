@@ -24,6 +24,7 @@
       "Bash(bundle exec rubocop:*)",
       "Bash(bundle list:*)",
       "Bash(cat:*)",
+      "Bash(chmod +x:*)",
       "Bash(date:*)",
       "Bash(dirname:*)",
       "Bash(echo:*)",
@@ -78,5 +79,6 @@
     "deny": [],
     "defaultMode": "acceptEdits"
   },
-  "enableAllProjectMcpServers": true,
+  "model": "opus",
+  "enableAllProjectMcpServers": true
 }
