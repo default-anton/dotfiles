@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Check if PDF file is provided as argument
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <pdf_file>"
+  echo "Example: $0 download.pdf"
+  exit 1
+fi
+
+PDF_FILE="$1"
+
+# Check if file exists
+if [ ! -f "$PDF_FILE" ]; then
+  echo "Error: File '$PDF_FILE' not found!"
+  exit 1
+fi
+
+# Get the base name without extension
+BASE_NAME=$(basename "$PDF_FILE" .pdf)
+
+# Create output directory
+OUTPUT_DIR="${BASE_NAME}_pages"
+
+~/code/print-gemini-storybook/extract_pdf_pages.sh "$PDF_FILE" &&
+  ~/code/print-gemini-storybook/split_storybook_pages.sh "$OUTPUT_DIR"
