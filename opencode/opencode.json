@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mode": {
+    "build": {},
+    "plan": {}
+  },
+  "theme": "one-dark",
+  "model": "openai/gpt-5",
+  "small_model": "openai/gpt-5-nano",
+  "agent": {
+    "build": {
+      "model": "openai/gpt-5",
+      "reasoningEffort": "medium",
+      "textVerbosity": "medium"
+    },
+    "plan": {
+      "model": "openai/gpt-5",
+      "reasoningEffort": "medium",
+      "textVerbosity": "medium"
+    },
+    "general": {
+      "model": "openai/gpt-5",
+      "reasoningEffort": "medium",
+      "textVerbosity": "low"
+    }
+  },
+  "permission": {
+    "bash": {
+      "basename *": "allow",
+      "bin/bundle *": "allow",
+      "bin/rails *": "allow",
+      "bin/rake *": "allow",
+      "bin/rspec *": "allow",
+      "bin/rubocop *": "allow",
+      "bundle exec rails *": "allow",
+      "bundle exec rake *": "allow",
+      "bundle exec rspec *": "allow",
+      "bundle exec rubocop *": "allow",
+      "bundle list *": "allow",
+      "cat *": "allow",
+      "chmod +x *": "allow",
+      "date *": "allow",
+      "dirname *": "allow",
+      "echo *": "allow",
+      "env *": "allow",
+      "fd *": "allow",
+      "file *": "allow",
+      "find *": "allow",
+      "gh pr create *": "allow",
+      "gh pr diff *": "allow",
+      "gh pr list *": "allow",
+      "gh pr view *": "allow",
+      "git add *": "allow",
+      "git commit *": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "git fetch *": "allow",
+      "git pull *": "allow",
+      "git rebase *": "allow",
+      "grep *": "allow",
+      "head *": "allow",
+      "ls *": "allow",
+      "mkdir *": "allow",
+      "npm install *": "allow",
+      "npm run *": "allow",
+      "pnpm run *": "allow",
+      "pnpm test *": "allow",
+      "pnpm exec *": "allow",
+      "printenv *": "allow",
+      "ps *": "allow",
+      "pwd *": "allow",
+      "rails *": "allow",
+      "rake *": "allow",
+      "readlink *": "allow",
+      "realpath *": "allow",
+      "rg *": "allow",
+      "rm *": "allow",
+      "rspec *": "allow",
+      "rubocop *": "allow",
+      "stat *": "allow",
+      "tail *": "allow",
+      "tree *": "allow",
+      "type *": "allow",
+      "wc *": "allow",
+      "which *": "allow",
+      "whoami *": "allow"
+    }
+  },
+  "mcp": {
+    "screenshot-website": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@just-every/mcp-screenshot-website-fast"
+      ],
+      "environment": {
+        "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true"
+      },
+      "enabled": true
+    }
+  }
+}

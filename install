@@ -30,7 +30,7 @@ SYM_LINKS: Final[List[Tuple[str, str]]] = [
     ("~/.claude/settings.json", "claude/settings.json"),
     ("~/.claude/CLAUDE.md", "claude/CLAUDE.md"),
     ("~/.gemini/settings.json", "gemini/settings.json"),
-    ("~/.config/crush/crush.json", "crush/crush.json"),
+    ("~/.config/opencode/opencode.json", "opencode/opencode.json"),
 ]
 
 TEMPLATES: Final[List[Tuple[str, str]]] = [
