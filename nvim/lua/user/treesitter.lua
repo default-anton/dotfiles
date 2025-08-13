@@ -1,4 +1,5 @@
-local disabled_langs = { "ruby" }
+local disabled_langs = {}
+-- local disabled_langs = { "ruby" }
 
 require("nvim-treesitter.configs").setup {
   -- A list of parser names, or "all"
@@ -88,8 +89,6 @@ require("nvim-treesitter.configs").setup {
         ["@class.outer"] = "V",
         ["@local.scope"] = "v",
       },
-
-      include_surrounding_whitespace = true,
     },
   },
   indent = {
@@ -99,4 +98,8 @@ require("nvim-treesitter.configs").setup {
     enable = true, -- mandatory, false will disable the whole extension
     disable = {},  -- optional, list of language that will be disabled
   },
+}
+
+require'treesitter-context'.setup{
+  multiline_threshold = 5, -- Maximum number of lines to show for a single context
 }
