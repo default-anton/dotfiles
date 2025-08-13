@@ -6,16 +6,18 @@ if [ -z "$TMUX" ]; then
   exit 1
 fi
 
+TARGET="${1:-claude}" # Default target is 'claude' if not specified
+
 # Get current pane info
 current_session=$(tmux display-message -p '#{session_name}')
 current_window=$(tmux display-message -p '#{window_index}')
 current_pane=$(tmux display-message -p '#{pane_index}')
 
-# Get all PIDs running 'claude' command
-claude_pids=$(pgrep -x claude 2>/dev/null)
+# Get all PIDs running '$TARGET' command
+target_pids=$(pgrep -x "$TARGET" 2>/dev/null)
 
-if [ -z "$claude_pids" ]; then
-  # No claude processes found
+if [ -z "$target_pids" ]; then
+  # No target processes found
   exit 0
 fi
 
@@ -71,11 +73,11 @@ calculate_distance() {
   fi
 }
 
-# Find all panes with claude and calculate distances
+# Find all panes with target and calculate distances
 closest_pane=""
 min_distance=999
 
-for pid in $claude_pids; do
+for pid in $target_pids; do
   pane=$(find_tmux_pane_for_pid "$pid")
   if [ -n "$pane" ]; then
     distance=$(calculate_distance "$pane")

@@ -6,7 +6,10 @@ function M.send_file_references(paths)
   end
 
   -- Get the closest tmux pane running claude
-  local tmux_pane = vim.trim(vim.fn.system('tmux-find-claude'))
+  local tmux_pane = vim.trim(vim.fn.system('tmux-find claude'))
+  if tmux_pane == '' then
+    tmux_pane = vim.trim(vim.fn.system('tmux-find opencode'))
+  end
 
   if tmux_pane ~= '' then
     local relative_paths = vim.tbl_map(function(path)
@@ -25,7 +28,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     if vim.bo.filetype ~= "TelescopePrompt" and vim.bo.filetype ~= "oil" then
       vim.keymap.set('n', '<C-a>', function()
         M.send_file_references({ vim.fn.expand('%') })
-      end, vim.tbl_extend('force', opts, { desc = 'Send file reference to claude tmux pane' }))
+      end, vim.tbl_extend('force', opts, { desc = 'Send file reference to claude or opencode tmux pane' }))
 
       vim.keymap.set('v', '<C-a>', function()
         -- Get the current visual selection positions
@@ -45,11 +48,15 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
         end
 
         -- Get the closest tmux pane running claude
-        local tmux_pane = vim.trim(vim.fn.system('tmux-find-claude'))
+        local tmux_pane = vim.trim(vim.fn.system('tmux-find claude'))
+        if tmux_pane == '' then
+          tmux_pane = vim.trim(vim.fn.system('tmux-find opencode'))
+        end
+
         if tmux_pane ~= '' then
           vim.fn.system(string.format('tmux send-keys -t %s "%s"', tmux_pane, reference))
         end
-      end, vim.tbl_extend('force', opts, { desc = 'Send line reference to claude tmux pane' }))
+      end, vim.tbl_extend('force', opts, { desc = 'Send line reference to claude or opencode tmux pane' }))
     end
   end,
 })
