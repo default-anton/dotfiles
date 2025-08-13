@@ -75,6 +75,7 @@
       "realpath *": "allow",
       "rg *": "allow",
       "rm *": "allow",
+      "mv *": "allow",
       "rspec *": "allow",
       "rubocop *": "allow",
       "stat *": "allow",
