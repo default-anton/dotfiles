@@ -80,6 +80,10 @@
     "deny": [],
     "defaultMode": "acceptEdits"
   },
-  "model": "opus",
-  "enableAllProjectMcpServers": true
+  "model": "opusplan",
+  "enableAllProjectMcpServers": true,
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); current_dir=$(echo \"$input\" | jq -r '.workspace.current_dir'); cd \"$current_dir\"; branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'no-git'); printf \"\\033[34m%s\\033[0m \\033[33m(%s)\\033[0m\" \"$(basename \"$current_dir\")\" \"$branch\""
+  }
 }
