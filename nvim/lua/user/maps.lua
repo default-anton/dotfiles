@@ -25,6 +25,23 @@ vim.api.nvim_set_keymap('n', 'gyf', [[:let @+ = expand('%')<CR>]],
 vim.api.nvim_set_keymap('n', 'gyl', [[:let @+ = expand('%') . ':' . line('.')<CR>]],
   { noremap = true, silent = true, desc = "Yank file path with line number" })
 
+function copy_line_nums_to_clipboard()
+  local start_line = vim.fn.line("v")
+  local end_line = vim.fn.line(".")
+
+  -- Ensure start_line is before end_line
+  if start_line > end_line then
+    start_line, end_line = end_line, start_line
+  end
+
+  local file_path = vim.fn.expand('%:p')
+  local range = string.format('%s#L%d-%d', file_path, start_line, end_line)
+  vim.fn.setreg('+', range)
+end
+
+vim.keymap.set('v', 'gyl', copy_line_nums_to_clipboard,
+  { noremap = true, silent = true, desc = "Yank file path with line numbers" })
+
 -- Yank absolute path of current file
 vim.api.nvim_set_keymap('n', 'gya', [[:let @+ = expand('%:p')<CR>]],
   { noremap = true, silent = true, desc = "Yank absolute file path" })
