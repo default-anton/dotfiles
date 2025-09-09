@@ -34,7 +34,7 @@ function copy_line_nums_to_clipboard()
     start_line, end_line = end_line, start_line
   end
 
-  local file_path = vim.fn.expand('%:p')
+  local file_path = vim.fn.expand('%')
   local range = string.format('%s#L%d-%d', file_path, start_line, end_line)
   vim.fn.setreg('+', range)
 end
