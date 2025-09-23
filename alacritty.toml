@@ -31,7 +31,7 @@ background = "0x24283b"
 foreground = "0xc0caf5"
 
 [font]
-size = 18.0
+size = 16.0
 
 [font.bold]
 family = "FiraCode Nerd Font Mono"
