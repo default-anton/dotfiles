@@ -82,7 +82,6 @@ ctrl + cmd - f : open -a 'Finder'
 ctrl + cmd - g : open -a 'Gemini'
 ctrl + cmd - p : open -a 'Perplexity'
 ctrl + cmd - h : open -a 'Hey'
-ctrl + cmd - o : source /Users/akuzmenko/.env && stt toggle
 ctrl + cmd - t : open -a 'Google Tasks'
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
