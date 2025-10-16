@@ -6,9 +6,9 @@
     "DISABLE_TELEMETRY": "1",
     "BASH_DEFAULT_TIMEOUT_MS": "180000",
     "BASH_MAX_TIMEOUT_MS": "300000",
-    "_CLAUDE_CODE_USE_VERTEX": "1",
-    "_CLOUD_ML_REGION": "us-east5",
-    "_ANTHROPIC_VERTEX_PROJECT_ID": "aha-staging-1"
+    "CLAUDE_CODE_USE_VERTEX": "1",
+    "CLOUD_ML_REGION": "us-east5",
+    "ANTHROPIC_VERTEX_PROJECT_ID": "aha-staging-1"
   },
   "permissions": {
     "allow": [
@@ -80,10 +80,10 @@
     "deny": [],
     "defaultMode": "acceptEdits"
   },
-  "model": "opusplan",
   "enableAllProjectMcpServers": true,
   "statusLine": {
     "type": "command",
     "command": "input=$(cat); current_dir=$(echo \"$input\" | jq -r '.workspace.current_dir'); cd \"$current_dir\"; branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'no-git'); printf \"\\033[34m%s\\033[0m \\033[33m(%s)\\033[0m\" \"$(basename \"$current_dir\")\" \"$branch\""
-  }
+  },
+  "alwaysThinkingEnabled": true
 }
