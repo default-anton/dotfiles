@@ -42,9 +42,9 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
 
         local reference
         if start_line == end_line then
-          reference = string.format('@%s#L%d, ', file_path, start_line)
+          reference = string.format('%s#L%d, ', file_path, start_line)
         else
-          reference = string.format('@%s#L%d-%d, ', file_path, start_line, end_line)
+          reference = string.format('%s#L%d-%d, ', file_path, start_line, end_line)
         end
 
         local is_claude = true
