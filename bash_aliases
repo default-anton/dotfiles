@@ -14,7 +14,8 @@ alias reranker="text-embeddings-router --model-id BAAI/bge-reranker-v2-m3 --revi
 alias ,extract-expenses="llm -m gemini-2.0-pro-exp-02-05 --schema-multi \"date_created_or_issued,item_description,price_with_currency_before_tax,gst_amount_with_currency_if_present,total_tax_amount_with_currency_if_present\" \"extract expenses from the invoice\""
 alias cccost="npx ccusage@latest"
 alias c="claude --dangerously-skip-permissions"
-alias co="codex --dangerously-bypass-approvals-and-sandbox --enable web_search_request"
+alias ch="c --model haiku"
+alias co="codex --yolo --enable web_search_request"
 
 uname_out=$(uname -a)
 case "${uname_out}" in

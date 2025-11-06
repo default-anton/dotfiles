@@ -8,7 +8,7 @@ function M.send_file_references(paths)
   -- Get the closest tmux pane running claude
   local tmux_pane = vim.trim(vim.fn.system('tmux-find claude'))
   if tmux_pane == '' then
-    tmux_pane = vim.trim(vim.fn.system('tmux-find opencode'))
+    tmux_pane = vim.trim(vim.fn.system('tmux-find codex'))
   end
 
   if tmux_pane ~= '' then
@@ -52,7 +52,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
         local tmux_pane = vim.trim(vim.fn.system('tmux-find claude'))
         if tmux_pane == '' then
           is_claude = false
-          tmux_pane = vim.trim(vim.fn.system('tmux-find opencode'))
+          tmux_pane = vim.trim(vim.fn.system('tmux-find codex'))
         end
 
         if is_claude then
