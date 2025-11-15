@@ -39,7 +39,7 @@
 
 [merge]
     ff = false
-    conflictstyle = diff3
+    conflictStyle = zdiff3
 
 [core]
     editor = nvim
@@ -51,9 +51,9 @@
 
 [delta]
     navigate = true
-    line-numbers = true
-    side-by-side = false
     syntax-theme = base16-256
+    line-numbers = true
+    side-by-side = true
 
 [init]
     templatedir = ~/.dotfiles/git-templates/
