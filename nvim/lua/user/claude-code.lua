@@ -5,15 +5,18 @@ function M.send_file_references(paths)
     paths = { paths }
   end
 
+  local reference_prefix = ""
   -- Get the closest tmux pane running claude
   local tmux_pane = vim.trim(vim.fn.system('tmux-find claude'))
   if tmux_pane == '' then
     tmux_pane = vim.trim(vim.fn.system('tmux-find codex'))
+  else
+    reference_prefix = "@"
   end
 
   if tmux_pane ~= '' then
     local relative_paths = vim.tbl_map(function(path)
-      return vim.fn.fnamemodify(path, ":.")
+      return reference_prefix .. vim.fn.fnamemodify(path, ":.")
     end, paths)
     local references = table.concat(relative_paths, ', ')
     vim.fn.system(string.format('tmux send-keys -t %s "%s"', tmux_pane, references .. ", "))
