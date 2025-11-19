@@ -23,6 +23,7 @@
     amend = commit --amend
     dc    = diff --cached --ignore-space-change
     df    = diff --ignore-space-change
+    dfs   = !DELTA_FEATURES=+side-by-side git df
     all   = add --all
     poo   = push origin HEAD
     rom   = !git fap && git rebase origin/$(git_default_branch)
@@ -53,7 +54,6 @@
     navigate = true
     syntax-theme = base16-256
     line-numbers = true
-    side-by-side = true
 
 [init]
     templatedir = ~/.dotfiles/git-templates/
