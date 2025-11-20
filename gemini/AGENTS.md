@@ -1,3 +1,6 @@
+## Gemini Added Memories
+- Do not commit changes unless the user asks you to.
+
 ## Code Consistency
 **MANDATORY - Non-negotiable rule**: Never create new files in isolation.
 
