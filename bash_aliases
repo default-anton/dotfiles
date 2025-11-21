@@ -15,10 +15,6 @@ alias ,extract-expenses="llm -m gemini-2.0-pro-exp-02-05 --schema-multi \"date_c
 alias cccost="npx ccusage@latest"
 alias c="claude --dangerously-skip-permissions"
 alias cm="c --model haiku"
-alias co="codex --yolo --search --model gpt-5.1-codex -c model_reasoning_effort="medium""
-alias coh="codex --yolo --search --model gpt-5.1-codex -c model_reasoning_effort="high""
-alias com="codex --yolo --search --model gpt-5.1-codex-mini -c model_reasoning_effort="medium""
-alias chat="codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="medium""
 alias ge="gemini --model pro --yolo"
 
 uname_out=$(uname -a)
