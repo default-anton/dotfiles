@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Priority lists - highest priority first
+INPUT_PRIORITY=(
+  "RØDE VideoMic GO II"
+  "MacBook Pro Microphone"
+  "OpenFit 2 by Shokz"
+)
+
+OUTPUT_PRIORITY=(
+  "OpenFit 2 by Shokz"
+  "Headphones"
+  "DELL S3225QS"
+  "MacBook Pro Speakers"
+)
+
+available=$(SwitchAudioSource -af json | jq -s '.')
+
+for device in "${INPUT_PRIORITY[@]}"; do
+  if jq -e --arg d "$device" '.[] | select(.name == $d and .type == "input")' <<< "$available" > /dev/null; then
+    SwitchAudioSource -s "$device" -t input
+    break
+  fi
+done
+
+for device in "${OUTPUT_PRIORITY[@]}"; do
+  if jq -e --arg d "$device" '.[] | select(.name == $d and .type == "output")' <<< "$available" > /dev/null; then
+    SwitchAudioSource -s "$device" -t output
+    break
+  fi
+done

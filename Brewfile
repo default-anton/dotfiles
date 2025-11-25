@@ -62,5 +62,6 @@ brew 'displayplacer'
 brew 'llm'
 brew 'bandwhich'
 brew 'lua-language-server'
+brew 'switchaudio-osx'
 
 cask 'font-fira-code-nerd-font'
