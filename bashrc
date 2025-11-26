@@ -1,4 +1,6 @@
 command -v mise >/dev/null 2>&1 && eval "$($(brew --prefix)/bin/mise activate bash)"
+command -v wt >/dev/null 2>&1 && eval "$(wt shell-init bash)"
+command -v wt >/dev/null 2>&1 && eval "$(wt completion bash)"
 
 [ -f ~/.local_bash_aliases ] && source ~/.local_bash_aliases
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
