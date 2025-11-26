@@ -11,6 +11,7 @@
     "ANTHROPIC_VERTEX_PROJECT_ID": "aha-staging-1",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5@20251001"
   },
+  "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
       "Bash(basename:*)",
@@ -81,6 +82,7 @@
     "deny": [],
     "defaultMode": "acceptEdits"
   },
+  "model": "claude-opus-4-5@20251101",
   "enableAllProjectMcpServers": true,
   "statusLine": {
     "type": "command",
