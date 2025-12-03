@@ -22,6 +22,7 @@
     fap   = fetch --all -p
     amend = commit --amend
     dc    = diff --cached --ignore-space-change
+    dcs   = !DELTA_FEATURES=+side-by-side git dc
     df    = diff --ignore-space-change
     dfs   = !DELTA_FEATURES=+side-by-side git df
     all   = add --all
