@@ -11,12 +11,14 @@ if ! command -v codex >/dev/null 2>&1; then
 fi
 
 mapfile -t options <<'OPTIONS'
-Default - GPT-5.1 Codex:::codex --yolo --search --model gpt-5.1-codex -c model_reasoning_effort="medium" -c model_verbosity="medium"
-Reasoning - GPT-5.1 Codex:::codex --yolo --search --model gpt-5.1-codex -c model_reasoning_effort="high" -c model_verbosity="medium"
-Fast - GPT-5.1 Codex Mini:::codex --yolo --search --model gpt-5.1-codex-mini -c model_reasoning_effort="medium" -c model_verbosity="low"
-Chat - GPT-5.1 :::codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="medium" -c model_verbosity="medium"
-Chat Reasoning - GPT-5.1 :::codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="high" -c model_verbosity="medium"
-Chat Fast - GPT-5.1 :::codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="medium" -c model_verbosity="low"
+Default:::codex --yolo --search --model gpt-5.1-codex-max -c model_reasoning_effort="medium" -c model_verbosity="medium"
+Fast:::codex --yolo --search --model gpt-5.1-codex-max -c model_reasoning_effort="high" -c model_verbosity="low"
+Reasoning:::codex --yolo --search --model gpt-5.1-codex-max -c model_reasoning_effort="high" -c model_verbosity="medium"
+Reasoning Fast:::codex --yolo --search --model gpt-5.1-codex-max -c model_reasoning_effort="high" -c model_verbosity="low"
+Chat:::codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="medium" -c model_verbosity="medium"
+Chat Fast:::codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="medium" -c model_verbosity="low"
+Chat Reasoning:::codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="high" -c model_verbosity="medium"
+Chat Reasoning Fast:::codex --yolo --search --model gpt-5.1 -c model_reasoning_effort="high" -c model_verbosity="low"
 OPTIONS
 
 if [ ${#options[@]} -eq 0 ]; then
