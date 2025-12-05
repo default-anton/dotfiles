@@ -1,4 +1,4 @@
-model = "gpt-5.1"
+model = "gpt-5.1-codex-max"
 approval_policy = "on-failure"
 sandbox_mode    = "workspace-write"
 tool_output_token_limit = 25000
@@ -7,5 +7,10 @@ model_auto_compact_token_limit = 233000
 model_reasoning_effort = "medium"
 model_reasoning_summary = "auto"
 
+[features]
+web_search_request = true
+apply_patch_freeform = true
+
 [notice]
 hide_gpt5_1_migration_prompt = true
+"hide_gpt-5.1-codex-max_migration_prompt" = true
