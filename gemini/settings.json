@@ -1,7 +1,7 @@
 {
   "contextFileName": "AGENTS.md",
   "autoAccept": true,
-  "preferredEditor": "vim",
+  "preferredEditor": "nvim",
   "usageStatisticsEnabled": false,
   "theme": "Default",
   "selectedAuthType": "vertex-ai"
