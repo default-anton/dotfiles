@@ -1,6 +1,7 @@
 .tags
 .libtags
 .vimrc
+.gemini
 .nvimrc
 .projections.json
 .llmsidekick.lua

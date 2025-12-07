@@ -11,3 +11,15 @@ Code comments should be minimal, professional, and strictly high-value, avoiding
 
 ## Available CLI Tools
 ast-grep, direnv, fd, fzf, gcc, gh, git, go, jq, mise, ripgrep, uv, tmux.
+
+## Add .gemini/settings In The CWD When I Ask To Install Gemini
+
+.gemini/settings:
+```json
+{
+  "general": {
+    "preferredEditor": "nvim",
+    "previewFeatures": true
+  }
+}
+```
