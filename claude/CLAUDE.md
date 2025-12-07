@@ -8,3 +8,6 @@ Before creating ANY new file (model, controller, test, component, etc.), you MUS
 Exception: ad hoc one-off artifacts (e.g., RCA write-ups, investigation notes, planning docs) — no pattern review required; keep them token-efficient.
 
 Code comments should be minimal, professional, and strictly high-value, avoiding conversational filler or explanations of obvious logic, assuming a senior developer audience.
+
+## Available CLI Tools
+ast-grep, direnv, fd, fzf, gcc, gh, git, go, jq, mise, ripgrep, uv, tmux.
