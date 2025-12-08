@@ -13,7 +13,6 @@ alias reranker="text-embeddings-router --model-id BAAI/bge-reranker-v2-m3 --revi
 alias c="claude --dangerously-skip-permissions"
 alias cchrome="c --mcp-config ~/.dotfiles/claude/chrome.mcp.json"
 alias ge="gemini --model pro --yolo"
-alias krok="~/code/krok/bin/krok"
 
 uname_out=$(uname -a)
 case "${uname_out}" in
