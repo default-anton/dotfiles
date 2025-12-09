@@ -1,0 +1,11 @@
+{
+  "lastChangelogVersion": "0.17.0",
+  "defaultThinkingLevel": "medium",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-reasoner",
+  "queueMode": "one-at-a-time",
+  "compaction": {
+    "enabled": false
+  },
+  "hideThinkingBlock": false
+}

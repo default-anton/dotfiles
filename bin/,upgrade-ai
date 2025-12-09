@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 (brew update && brew upgrade claude-code) &
-npm i -g @openai/codex@latest @google/gemini-cli@latest &
+npm i -g @mariozechner/pi-coding-agent @openai/codex@latest @google/gemini-cli@latest &
 
 wait
