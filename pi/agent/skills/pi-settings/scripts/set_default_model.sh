@@ -33,7 +33,8 @@ else
     > "$tmp"
 fi
 
-mv "$tmp" "$settings"
+cat "$tmp" > "$settings"
+rm "$tmp"
 echo "Updated $settings" >&2
 echo "defaultProvider=$provider" >&2
 echo "defaultModel=$modelId" >&2
