@@ -17,4 +17,6 @@
    ```
 - Read web pages with `read_web_page <url>` - it returns markdown.
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ddgr, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
-- When I tell you to "remember" something, store it in `~/.dotfiles/pi/agent/AGENTS.md` under `## Rules You MUST Follow` for future reference.
+- When I tell you to "remember" something, I'll specify whether it's global or project-specific (keep both files token-efficient):
+  - Global: store in this file (~/.pi/agent/AGENTS.md)
+  - Project: store in ./AGENTS.md (repo root). That file must contain only one section: `## Project Rules You MUST Follow`. If global and project rules conflict, project rules win for that repo.
