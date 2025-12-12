@@ -16,3 +16,4 @@
    ddgr --json -t w "recent news"
    ```
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ddgr, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
+- When I tell you to "remember" something, store it in `~/.dotfiles/pi/agent/AGENTS.md` under `## Rules You MUST Follow` for future reference.
