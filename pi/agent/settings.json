@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.19.1",
-  "defaultThinkingLevel": "medium",
-  "defaultProvider": "openai",
-  "defaultModel": "gpt-5.2",
+  "defaultThinkingLevel": "minimal",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-reasoner",
   "queueMode": "one-at-a-time",
   "compaction": {
     "enabled": false
