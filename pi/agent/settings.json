@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.20.2",
-  "defaultThinkingLevel": "minimal",
+  "defaultThinkingLevel": "medium",
   "defaultProvider": "deepseek",
   "defaultModel": "deepseek-reasoner",
   "queueMode": "one-at-a-time",
