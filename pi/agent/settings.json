@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.19.1",
+  "lastChangelogVersion": "0.20.2",
   "defaultThinkingLevel": "minimal",
   "defaultProvider": "deepseek",
   "defaultModel": "deepseek-reasoner",
