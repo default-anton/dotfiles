@@ -62,11 +62,11 @@ qgui:
   portraitMode: auto
   filterMode: substring
 git:
-  paging:
-    colorArg: always
-    pager: delta --dark --paging=never
-    useConfig: false
-    externalDiffCommand: ""
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never
+      useConfig: false
+      externalDiffCommand: ""
   commit:
     signOff: false
     autoWrapCommitMessage: true
@@ -194,7 +194,7 @@ keybinding:
     viewResetOptions: D
     fetch: f
     toggleTreeView: '`'
-    openMergeTool: M
+    openMergeOptions: M
     openStatusFilter: <c-b>
     copyFileInfoToClipboard: "y"
   branches:
