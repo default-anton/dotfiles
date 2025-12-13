@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# To set up crwl, run `uvx --from crawl4ai crawl4ai-setup`
+# If it's still not working, run `uvx --from crawl4ai crawl4ai-doctor`
+
 URL="$1"
 
 BROWSER_SETTINGS="headless=true,viewport_width=1280,user_agent_mode=random"
