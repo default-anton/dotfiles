@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+
+"$DOTFILES_DIR/pi/agent/skills/pi-settings/scripts/set_default_model.sh" deepseek deepseek-reasoner low 2>/dev/null && pi
