@@ -13,7 +13,8 @@ alias reranker="text-embeddings-router --model-id BAAI/bge-reranker-v2-m3 --revi
 alias c="claude --dangerously-skip-permissions"
 alias cchrome="c --mcp-config ~/.dotfiles/claude/chrome.mcp.json"
 alias ge="gemini --model pro --yolo"
-alias pir="pi --model deepseek-reasoner --thinking low"
+alias pir="~/.pi/agent/skills/pi-settings/scripts/set_default_model.sh deepseek deepseek-reasoner low 2>/dev/null && pi"
+alias pin="~/.pi/agent/skills/pi-settings/scripts/set_default_model.sh deepseek deepseek-chat off 2>/dev/null && pi"
 
 uname_out=$(uname -a)
 case "${uname_out}" in
