@@ -3,4 +3,4 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 
-"$DOTFILES_DIR/pi/agent/skills/pi-settings/scripts/set_default_model.sh" deepseek deepseek-chat off 2>/dev/null && pi
+"$DOTFILES_DIR/pi/agent/skills/pi-settings/scripts/set_default_model.sh" deepseek deepseek-chat off 2>/dev/null && pi "$@"
