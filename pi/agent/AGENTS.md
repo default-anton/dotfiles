@@ -3,7 +3,7 @@
    - Examine 2-3 existing files of the same type to identify established patterns
    - Match their structure, style, and conventions exactly
 
-   Exception: ad hoc one-off artifacts (e.g., RCA write-ups, investigation notes, planning docs) — no pattern review required; keep them token-efficient.
+   Exception: ad hoc one-off artifacts (e.g., RCA write-ups, investigation notes, planning docs, proposals, suggestions, etc.) — no pattern review required; keep them token-efficient.
 - Code comments should be minimal, professional, and strictly high-value, avoiding conversational filler or explanations of obvious logic, assuming a senior developer audience.
 - Prefer `fd` over `find` for file searching tasks.
 - Prefer `rg` (ripgrep) over `grep` for text searching tasks.
