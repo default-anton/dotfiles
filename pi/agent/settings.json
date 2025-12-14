@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.20.2",
-  "defaultThinkingLevel": "medium",
+  "lastChangelogVersion": "0.21.0",
+  "defaultThinkingLevel": "off",
   "defaultProvider": "deepseek",
-  "defaultModel": "deepseek-reasoner",
+  "defaultModel": "deepseek-chat",
   "queueMode": "one-at-a-time",
   "compaction": {
     "enabled": false
