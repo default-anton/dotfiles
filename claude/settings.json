@@ -62,7 +62,6 @@
       "Bash(readlink:*)",
       "Bash(realpath:*)",
       "Bash(rg:*)",
-      "Bash(rm:*)",
       "Bash(mv:*)",
       "Bash(rspec:*)",
       "Bash(rubocop:*)",
