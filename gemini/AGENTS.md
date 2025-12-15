@@ -1,25 +1,13 @@
-## Code Consistency
-**MANDATORY - Non-negotiable rule**: Never create new files in isolation.
+## Rules You MUST Follow
+- Never create new files in isolation. Before creating ANY new file (model, controller, test, component, etc.), you MUST:
+   - Examine 2-3 existing files of the same type to identify established patterns
+   - Match their structure, style, and conventions exactly
 
-Before creating ANY new file (model, controller, test, component, etc.), you MUST:
-1. Examine 2-3 existing files of the same type to identify established patterns
-2. Match their structure, style, and conventions exactly
+   Exception: ad hoc one-off artifacts (e.g., RCA write-ups, investigation notes, planning docs, proposals, suggestions, etc.) — no pattern review required; keep them token-efficient.
+- Do NOT add code comments unless they explain **why** something non-obvious exists:
+  - Business logic driven by external requirements (regulations, contracts, legacy constraints, etc.)
+  - Workarounds for bugs/quirks in dependencies
+  - Non-trivial algorithms where the approach isn't self-evident
 
-Exception: ad hoc one-off artifacts (e.g., RCA write-ups, investigation notes, planning docs) — no pattern review required; keep them token-efficient.
-
-Code comments should be minimal, professional, and strictly high-value, avoiding conversational filler or explanations of obvious logic, assuming a senior developer audience.
-
-## Available CLI Tools
-ast-grep, direnv, fd, fzf, gcc, gh, git, go, jq, mise, ripgrep, uv, tmux.
-
-## Add .gemini/settings In The CWD When I Ask To Install Gemini
-
-.gemini/settings:
-```json
-{
-  "general": {
-    "preferredEditor": "nvim",
-    "previewFeatures": true
-  }
-}
-```
+  If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment.
+- Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
