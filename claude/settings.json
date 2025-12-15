@@ -73,10 +73,7 @@
       "Bash(which:*)",
       "Bash(whoami:*)",
       "WebFetch",
-      "WebSearch",
-      "mcp__screenshot-website-fast__take_screenshot",
-      "mcp__screenshot-website-fast__take_screencast",
-      "mcp__screenshot-website-fast__capture_console"
+      "WebSearch"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
