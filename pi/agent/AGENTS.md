@@ -8,6 +8,10 @@
   - Business logic driven by external requirements (regulations, contracts, legacy constraints, etc.)
   - Workarounds for bugs/quirks in dependencies
   - Non-trivial algorithms where the approach isn't self-evident
+  - Temporal context with clear expiration (version-specific code, removal conditions)
+  - Intentional absence of expected patterns ("why NOT" comments)
+  - Security rationale where the naive approach would be vulnerable
+  - External system coupling (third-party API quirks that can't be inferred from your code)
 
   If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment.
 - Prefer `fd` over `find` for file searching tasks.
