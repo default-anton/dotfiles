@@ -12,6 +12,8 @@ function M.send_file_references(paths)
     tmux_pane = vim.trim(vim.fn.system('tmux-find gemini'))
     if tmux_pane == '' then
       tmux_pane = vim.trim(vim.fn.system('tmux-find codex'))
+    else
+      reference_prefix = "@"
     end
   else
     reference_prefix = "@"
@@ -61,6 +63,8 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
           tmux_pane = vim.trim(vim.fn.system('tmux-find gemini'))
           if tmux_pane == '' then
             tmux_pane = vim.trim(vim.fn.system('tmux-find codex'))
+          else
+            is_claude = true
           end
         end
 
