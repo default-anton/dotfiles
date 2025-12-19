@@ -15,3 +15,4 @@
 
   If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment.
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
+- If you need to use `grep` and `find`, prefer `rg` and `fd` respectively for better performance and usability.
