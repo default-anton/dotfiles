@@ -1,7 +1,7 @@
 require "user.options"
 require "user.plugins"
 require "user.autocmd"
-require "user.claude-code"
+require "user.ai-coders"
 require "user.cmp"
 require "user.colors"
 require "user.commands"
