@@ -1,6 +1,6 @@
 local telescope = require "telescope.builtin"
 local oil = require("oil")
-local claude_code = require("user.claude-code")
+local ai_coders = require("user.ai-coders")
 
 local get_dir_under_cursor = function()
   local entry = oil.get_cursor_entry()
@@ -47,7 +47,7 @@ local send_file_to_claude = {
     local entry = oil.get_cursor_entry()
     local cwd = oil.get_current_dir()
     if entry and cwd then
-      claude_code.send_file_references(cwd .. entry.parsed_name)
+      ai_coders.send_file_references(cwd .. entry.parsed_name)
     end
   end,
 }

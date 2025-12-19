@@ -1,5 +1,5 @@
 local builtin = require "telescope.builtin"
-local claude_code = require("user.claude-code")
+local ai_coders = require("user.ai-coders")
 
 vim.keymap.set("n", "<leader>,", builtin.find_files, {})
 vim.keymap.set("n", "<leader>m", builtin.live_grep, {})
@@ -51,13 +51,13 @@ require("telescope").setup {
             local selected_entry = action_state.get_selected_entry()
             if selected_entry and selected_entry.path then
               local filepath = selected_entry.path
-              claude_code.send_file_references(filepath)
+              ai_coders.send_file_references(filepath)
             else
               vim.notify("No selection")
             end
           else
             local files = vim.tbl_map(function(s) return s.path end, multi_selections)
-            claude_code.send_file_references(files)
+            ai_coders.send_file_references(files)
           end
 
           return true
