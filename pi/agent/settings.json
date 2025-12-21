@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.25.2",
-  "defaultThinkingLevel": "low",
+  "defaultThinkingLevel": "high",
   "defaultProvider": "google-antigravity",
   "defaultModel": "gemini-3-flash",
   "queueMode": "one-at-a-time",
