@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.25.2",
+  "lastChangelogVersion": "0.25.3",
   "defaultThinkingLevel": "high",
-  "defaultProvider": "google-antigravity",
-  "defaultModel": "gemini-3-flash",
+  "defaultProvider": "google-gemini-cli",
+  "defaultModel": "gemini-3-flash-preview",
   "queueMode": "one-at-a-time",
   "compaction": {
     "enabled": false
