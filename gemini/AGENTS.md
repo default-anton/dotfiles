@@ -3,16 +3,9 @@
    - Examine 2-3 existing files of the same type to identify established patterns
    - Match their structure, style, and conventions exactly
 
-   Exception: ad hoc one-off artifacts (e.g., RCA write-ups, investigation notes, planning docs, proposals, suggestions, etc.) — no pattern review required; keep them token-efficient.
-- Do NOT add code comments unless they explain **why** something non-obvious exists:
-  - Business logic driven by external requirements (regulations, contracts, legacy constraints, etc.)
-  - Workarounds for bugs/quirks in dependencies
-  - Non-trivial algorithms where the approach isn't self-evident
-  - Temporal context with clear expiration (version-specific code, removal conditions)
-  - Intentional absence of expected patterns ("why NOT" comments)
-  - Security rationale where the naive approach would be vulnerable
-  - External system coupling (third-party API quirks that can't be inferred from your code)
-
-  If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment.
+   Exception: ad hoc one-off artifacts (e.g., RCA write-ups, notes, plans, proposals, suggestions, etc.) — no pattern review required; keep them token-efficient
+- Do NOT add code comments unless they explain **why** something non-obvious exists. If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment
+- Prefer fd over find for file searching tasks
+- Prefer rg (ripgrep) over grep for text searching tasks
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
 - If you need to use `grep` and `find`, prefer `rg` and `fd` respectively for better performance and usability.
