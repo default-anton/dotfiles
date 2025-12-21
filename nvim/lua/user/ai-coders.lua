@@ -1,6 +1,7 @@
 local M = {}
 
 local CLIS = {
+  { name = "bin/pi", prefix = "@" },
   { name = "claude", prefix = "@" },
   { name = "gemini", prefix = "@" },
   { name = "codex",  prefix = "" },
@@ -28,6 +29,7 @@ function M.send_file_references(paths)
       return (reference_prefix or "") .. vim.fn.fnamemodify(path, ":.")
     end, paths)
     local references = table.concat(relative_paths, ", ")
+    print("Sending references to AI CLI:", tmux_pane, references)
     vim.fn.system(string.format('tmux send-keys -t %s "%s"', tmux_pane, references .. ", "))
   end
 end
