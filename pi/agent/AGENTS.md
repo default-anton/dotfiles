@@ -21,7 +21,7 @@
    # Get JSON output
    ddgr --json "search query"
 
-   # Search with time limit (last week)
+   # Search with time limit (d=day, w=week, m=month, y=year)
    ddgr --json -t w "recent news"
    ```
 - Read web pages with `read_web_page <url>` - it returns markdown.
