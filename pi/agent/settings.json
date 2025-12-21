@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.22.2",
-  "defaultThinkingLevel": "off",
-  "defaultProvider": "deepseek",
-  "defaultModel": "deepseek-chat",
+  "lastChangelogVersion": "0.25.2",
+  "defaultThinkingLevel": "low",
+  "defaultProvider": "google-antigravity",
+  "defaultModel": "gemini-3-flash",
   "queueMode": "one-at-a-time",
   "compaction": {
     "enabled": false
