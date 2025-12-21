@@ -1,29 +1,33 @@
 local M = {}
 
+local CLIS = {
+  { name = "claude", prefix = "@" },
+  { name = "gemini", prefix = "@" },
+  { name = "codex",  prefix = "" },
+}
+
+function M.get_active_cli()
+  for _, cli in ipairs(CLIS) do
+    local tmux_pane = vim.trim(vim.fn.system("tmux-find " .. cli.name))
+    if tmux_pane ~= "" then
+      return tmux_pane, cli.prefix
+    end
+  end
+  return nil, nil
+end
+
 function M.send_file_references(paths)
-  if type(paths) ~= 'table' then
+  if type(paths) ~= "table" then
     paths = { paths }
   end
 
-  local reference_prefix = ""
-  -- Get the closest tmux pane running claude
-  local tmux_pane = vim.trim(vim.fn.system('tmux-find claude'))
-  if tmux_pane == '' then
-    tmux_pane = vim.trim(vim.fn.system('tmux-find gemini'))
-    if tmux_pane == '' then
-      tmux_pane = vim.trim(vim.fn.system('tmux-find codex'))
-    else
-      reference_prefix = "@"
-    end
-  else
-    reference_prefix = "@"
-  end
+  local tmux_pane, reference_prefix = M.get_active_cli()
 
-  if tmux_pane ~= '' then
+  if tmux_pane then
     local relative_paths = vim.tbl_map(function(path)
-      return reference_prefix .. vim.fn.fnamemodify(path, ":.")
+      return (reference_prefix or "") .. vim.fn.fnamemodify(path, ":.")
     end, paths)
-    local references = table.concat(relative_paths, ', ')
+    local references = table.concat(relative_paths, ", ")
     vim.fn.system(string.format('tmux send-keys -t %s "%s"', tmux_pane, references .. ", "))
   end
 end
@@ -36,7 +40,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     if vim.bo.filetype ~= "TelescopePrompt" and vim.bo.filetype ~= "oil" then
       vim.keymap.set('n', '<C-a>', function()
         M.send_file_references({ vim.fn.expand('%') })
-      end, vim.tbl_extend('force', opts, { desc = 'Send file reference to claude, gemini or codex tmux pane' }))
+      end, vim.tbl_extend('force', opts, { desc = 'Send file reference to AI CLI tmux pane' }))
 
       vim.keymap.set('v', '<C-a>', function()
         -- Get the current visual selection positions
@@ -55,27 +59,13 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
           reference = string.format('%s#L%d-%d, ', file_path, start_line, end_line)
         end
 
-        local is_claude = true
-        -- Get the closest tmux pane running claude
-        local tmux_pane = vim.trim(vim.fn.system('tmux-find claude'))
-        if tmux_pane == '' then
-          is_claude = false
-          tmux_pane = vim.trim(vim.fn.system('tmux-find gemini'))
-          if tmux_pane == '' then
-            tmux_pane = vim.trim(vim.fn.system('tmux-find codex'))
-          else
-            is_claude = true
-          end
-        end
+        local tmux_pane, reference_prefix = M.get_active_cli()
 
-        if is_claude then
-          reference = "@" .. reference
-        end
-
-        if tmux_pane ~= '' then
+        if tmux_pane then
+          reference = (reference_prefix or "") .. reference
           vim.fn.system(string.format('tmux send-keys -t %s "%s"', tmux_pane, reference))
         end
-      end, vim.tbl_extend('force', opts, { desc = 'Send line reference to claude, gemini or codex tmux pane' }))
+      end, vim.tbl_extend('force', opts, { desc = 'Send line reference to AI CLI tmux pane' }))
     end
   end,
 })
