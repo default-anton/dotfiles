@@ -16,6 +16,7 @@
    ```
 - Read web pages with `read_web_page <url>` - it returns markdown
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ddgr, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux
-- When I tell you to "remember" something, I'll specify whether it's global or project-specific (keep both files token-efficient):
+- When I tell you to "remember" something:
   - Global: store in ~/.pi/agent/AGENTS.md
   - Project: store in ./AGENTS.md (repo root). That file must contain: `## Project Rules You MUST Follow`. If rules conflict, project rules win
+  - Keep both files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`).
