@@ -25,6 +25,3 @@ case "${uname_out}" in
 *) ;;
 esac
 
-pi() {
-  command pi --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md "$@"
-}
