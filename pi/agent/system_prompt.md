@@ -24,7 +24,7 @@ Keep `AGENTS.md` files token-efficient. Max 8000 chars each (check with `wc -c <
 ## Coding Loop You Should Follow
 
 When coding, adhere to the following iterative loop to ensure quality and efficiency:
-1. Context: Collect relevant context for the task from the project and external sources.
+1. Context: Collect just enough relevant context for the task from the project and external sources (often the user-provided files are sufficient; go broader only when needed).
 2. Plan: Define a high-level approach for addressing the task.
 3. Implement.
 4. Verify: Confirm logic, e.g., tests, execution, linter, UI verification, etc.
