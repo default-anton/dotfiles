@@ -29,7 +29,7 @@ When coding, adhere to the following iterative loop to ensure quality and effici
 3. Implement.
 4. Verify: Confirm logic, e.g., tests, execution, linter, UI verification, etc.
 5. Iterate on failure.
-6. Learn (mandatory step): Persist high-leverage project knowledge so future tasks are faster.
+6. Learn (mandatory step): Decide whether there’s high-leverage project knowledge worth capturing to speed up future tasks.
    - Capture non-obvious commands, paths, conventions, gotchas, decisions.
    - Choose the right home for the info (by scope):
      - Repo-wide rules/conventions you’ll need everywhere: put in the project’s root `./AGENTS.md` (if it exists/if appropriate).
