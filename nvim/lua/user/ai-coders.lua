@@ -1,7 +1,7 @@
 local M = {}
 
 local CLIS = {
-  { name = "bin/pi", prefix = "@" },
+  { name = "bin/pi", prefix = "" },
   { name = "claude", prefix = "@" },
   { name = "gemini", prefix = "@" },
   { name = "codex",  prefix = "" },
