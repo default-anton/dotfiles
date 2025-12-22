@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.25.3",
-  "defaultThinkingLevel": "high",
-  "defaultProvider": "google-gemini-cli",
-  "defaultModel": "gemini-3-flash-preview",
+  "lastChangelogVersion": "0.27.0",
+  "defaultThinkingLevel": "medium",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-5.1-codex-max",
   "queueMode": "one-at-a-time",
   "compaction": {
     "enabled": false
