@@ -1,3 +1,7 @@
+## AGENTS.md
+
+Keep `AGENTS.md` files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`).
+
 ## Coding Loop You Should Follow
 
 When coding, adhere to the following iterative loop to ensure quality and efficiency:

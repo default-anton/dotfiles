@@ -19,4 +19,3 @@
 - When I tell you to "remember" something:
   - Global: store in ~/.pi/agent/AGENTS.md
   - Project: store in ./AGENTS.md (repo root). That file must contain: `## Project Rules You MUST Follow`. If rules conflict, project rules win
-  - Keep both files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`).
