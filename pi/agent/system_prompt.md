@@ -21,7 +21,7 @@ Suggested structure (optional, but tends to work well):
 
 Keep `AGENTS.md` files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`). If a subdir AGENTS.md starts turning into a tutorial, move the long-form content into `docs/` (or a local `docs/` in that subtree) and leave a tight checklist + links in AGENTS.
 
-## Coding Loop You Should Follow
+## Coding Loop You Must Follow
 
 When coding, adhere to the following iterative loop to ensure quality and efficiency:
 1. Context: Collect just enough relevant context for the task from the project and external sources (often the user-provided files are sufficient; go broader only when needed).
