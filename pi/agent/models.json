@@ -11,9 +11,16 @@
           "id": "deepseek-reasoner",
           "name": "DeepSeek-V3.2 Reasoner",
           "reasoning": true,
-          "input": ["text"],
+          "input": [
+            "text"
+          ],
           "temperature": 0.0,
-          "cost": {"input": 0.028, "output": 0.42, "cacheRead": 0.028, "cacheWrite": 0},
+          "cost": {
+            "input": 0.028,
+            "output": 0.42,
+            "cacheRead": 0.028,
+            "cacheWrite": 0
+          },
           "contextWindow": 128000,
           "maxTokens": 32000,
           "compat": {
@@ -25,14 +32,53 @@
           "id": "deepseek-chat",
           "name": "DeepSeek-V3.2",
           "reasoning": false,
-          "input": ["text"],
+          "input": [
+            "text"
+          ],
           "temperature": 0.0,
-          "cost": {"input": 0.028, "output": 0.42, "cacheRead": 0.028, "cacheWrite": 0},
+          "cost": {
+            "input": 0.028,
+            "output": 0.42,
+            "cacheRead": 0.028,
+            "cacheWrite": 0
+          },
           "contextWindow": 128000,
           "maxTokens": 8000,
           "compat": {
             "supportsDeveloperRole": false,
             "maxTokensField": "max_tokens"
+          }
+        }
+      ]
+    },
+    "vertex-openai": {
+      "baseUrl": "https://aiplatform.googleapis.com/v1/projects/aha-staging-1/locations/global/endpoints/openapi",
+      "apiKey": "VERTEX_OPENAI_TOKEN",
+      "api": "openai-completions",
+      "authHeader": true,
+      "headers": {
+        "x-goog-user-project": "aha-staging-1"
+      },
+      "models": [
+        {
+          "id": "google/gemini-3-flash-preview",
+          "name": "Gemini 3 Flash Preview (Vertex)",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0.5,
+            "output": 3.0,
+            "cacheRead": 0.05,
+            "cacheWrite": 0
+          },
+          "contextWindow": 1000000,
+          "maxTokens": 65535,
+          "compat": {
+            "supportsDeveloperRole": false,
+            "supportsReasoningEffort": true
           }
         }
       ]
