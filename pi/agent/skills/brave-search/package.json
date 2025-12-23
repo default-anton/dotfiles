@@ -1,0 +1,11 @@
+{
+	"name": "brave-search",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Headless web search via Brave Search - no browser required",
+	"author": "Mario Zechner",
+	"license": "MIT",
+	"dependencies": {
+		"jsdom": "^27.0.1"
+	}
+}
