@@ -55,10 +55,6 @@
       "baseUrl": "https://aiplatform.googleapis.com/v1/projects/aha-staging-1/locations/global/endpoints/openapi",
       "apiKey": "VERTEX_OPENAI_TOKEN",
       "api": "openai-completions",
-      "authHeader": true,
-      "headers": {
-        "x-goog-user-project": "aha-staging-1"
-      },
       "models": [
         {
           "id": "google/gemini-3-flash-preview",
@@ -77,8 +73,7 @@
           "contextWindow": 1000000,
           "maxTokens": 65535,
           "compat": {
-            "supportsDeveloperRole": false,
-            "supportsReasoningEffort": true
+            "supportsDeveloperRole": false
           }
         }
       ]
