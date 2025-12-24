@@ -11,6 +11,4 @@ When coding, adhere to the following iterative loop to ensure quality and effici
 3. Implement.
 4. Verify: Confirm logic, e.g., test, execute, lint, verify UI, etc.
 5. Iterate on failure.
-6. Persist Knowledge: At the end of the task, do one of the following:
-   - Invoke the `persist-knowledge` skill and follow it.
-   - Explicitly respond with `Persist Knowledge: skipped (reason)`.
+6. Persist Knowledge: At the end of the task, invoke the `persist-knowledge` skill and follow it.
