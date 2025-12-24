@@ -64,6 +64,7 @@ brew 'bandwhich'
 brew 'lua-language-server'
 brew 'switchaudio-osx'
 brew 'default-anton/tap/wt'
+brew 'tw93/tap/mole'
 
 cask 'font-fira-code-nerd-font'
 cask 'ghostty'
