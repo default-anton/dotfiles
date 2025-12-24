@@ -7,7 +7,7 @@ description: Capture high-leverage, non-obvious project knowledge for future tas
 
 ## Goal
 
-Turn task-specific discoveries into small, durable artifacts (AGENTS.md, docs, skills) that make future work faster and less error-prone.
+Turn discoveries into small, durable artifacts (AGENTS.md, docs, skills) that make future work faster and less error-prone.
 
 ## Protocol (required)
 
@@ -15,23 +15,40 @@ At the end of a task, do one of the following:
 - If there is anything worth persisting, follow this skill and mention what you updated.
 - Otherwise output: `Persist Knowledge: skipped (reason)`.
 
+## The gate (required)
+
+Persist something only if **at least one** is true:
+- **High cost of rediscovery**: it took significant time or >1 failed attempt to learn
+- **High blast radius**: getting it wrong risks prod bugs/security issues/data loss
+- **High frequency**: likely needed again within ~3 future tasks
+- **Not easily searchable**: you wouldn’t find it quickly via `rg` / existing docs
+
+If none apply: `Persist Knowledge: skipped (too task-specific / already discoverable)`.
+
 ## What to persist
 
 Persist information that is likely to be reused and was not obvious upfront:
-- Non-obvious commands, paths, scripts, flags, environment variables, etc.
+- Non-obvious commands, paths, scripts, flags, environment variables
 - Conventions/patterns you had to infer by reading existing code
-- Gotchas that caused failures or iteration (e.g., tests, tooling, auth, permissions)
+- Gotchas that caused failures or iteration (tests, tooling, auth, permissions)
 - Decisions/tradeoffs that constrain future changes
 
-Avoid persisting:
+### Prefer encoding over documenting
+
+If the knowledge can be made true/enforced via code (types, tests, lint rules, CI checks, schemas, component APIs), prefer implementing that. Persist only the minimal “where/how to run it” pointer.
+
+## Avoid persisting (common failure modes)
+
+Do **not** persist:
 - Generic best practices
 - Facts already obvious from the codebase
-- Task-specific transient details
+- “What I just did” task logs
+- Reminders/TODOs (open an issue instead)
 
 ## Choose the right home for the info (by scope)
 
 1. **Repo-wide rules/conventions you’ll need everywhere**: put in the repo root `./AGENTS.md` (if it exists/if appropriate).
-2. **Directory/component-specific rules, workflows, schemas, or gotchas**: put in the nearest relevant subdirectory `AGENTS.md` so it auto-loads when working in that subtree. If you had to “rediscover” it while working there, add it there.
+2. **Directory/component-specific rules, workflows, schemas, or gotchas**: put in the nearest relevant subdirectory `AGENTS.md` so it auto-loads when working in that subtree.
 3. **Cross-project/global habits**: put in `~/.pi/agent/AGENTS.md`.
 
 ## AGENTS.md files
@@ -45,29 +62,29 @@ Avoid persisting:
 
 ### What subdirectory `AGENTS.md` files are for
 
-- Critical requirements: “must/must not” rules, security constraints, formatting requirements.
-- Local workflows: the 1–3 commands you actually run (e.g., how to run evals/tests for that area).
-- Key patterns & APIs: the conventions/DSLs used in that subtree (with short snippets).
-- Canonical examples: point to 1–3 “reference” files that demonstrate best practice.
-- Gotchas: non-obvious traps specific to that code/data.
+- Critical requirements: “must/must not” rules, security constraints, formatting requirements
+- Local workflows: the 1–3 commands you actually run
+- Key patterns & APIs: conventions/DSLs used in that subtree (short snippets)
+- Canonical examples: point to 1–3 “reference” files that demonstrate best practice
+- Gotchas: non-obvious traps specific to that code/data
 
 ### Suggested structure (optional)
 
-- 1–2 lines: what this directory is and when you’re in here.
-- “Running …” / “Quickstart” commands.
-- “Critical requirements” (hard rules).
-- “Common patterns” (short snippets).
-- “Reference example(s)” (paths).
-- “Useful links” to longer docs/how-tos.
+- 1–2 lines: what this directory is and when you’re in here
+- “Running …” / “Quickstart” commands
+- “Critical requirements” (hard rules)
+- “Common patterns” (short snippets)
+- “Reference example(s)” (paths)
+- “Useful links” to longer docs/how-tos
 
 ### AGENTS.md vs docs/
 
-- `AGENTS.md`: short, actionable bullets/checklists optimized for fast scanning.
-- `docs/`: longer explanations; keep `AGENTS.md` as the entrypoint (link out instead of duplicating).
+- `AGENTS.md`: short, actionable bullets/checklists optimized for fast scanning
+- `docs/`: longer explanations; keep `AGENTS.md` as the entrypoint (link out instead of duplicating)
 
 ### Maintenance
 
-Keep `AGENTS.md` files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`). If a subdir `AGENTS.md` starts turning into a tutorial, move the long-form content into `docs/` (or a local `docs/` in that subtree) and leave a tight checklist + links in `AGENTS.md`.
+Keep `AGENTS.md` files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`). If a subdir `AGENTS.md` starts turning into a tutorial, move long-form content into `docs/` (or a local `docs/` in that subtree) and leave a tight checklist + links.
 
 ## When it should be a skill
 
@@ -75,6 +92,6 @@ If the knowledge is a repeatable workflow (commands/tools with a reliable sequen
 
 ## Quality bar
 
-- Keep notes token-efficient and non-duplicative.
-- Never store secrets (tokens, credentials, private URLs).
-- Prefer copy/pastable commands and concrete paths over prose.
+- Keep notes token-efficient and non-duplicative
+- Never store secrets (tokens, credentials, private URLs)
+- Prefer copy/pastable commands and concrete paths over prose
