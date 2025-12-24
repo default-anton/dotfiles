@@ -1,6 +1,6 @@
 ---
 name: persist-knowledge
-description: Capture high-leverage, non-obvious project knowledge for future tasks (AGENTS.md/docs/skills). Includes AGENTS.md maintenance guidance. Use at the end of a task; otherwise explicitly skip.
+description: Capture high-leverage, non-obvious project knowledge for future tasks (AGENTS.md/docs/skills). Includes AGENTS.md maintenance guidance. Use at the end of a task
 ---
 
 # Persist Knowledge
