@@ -5,7 +5,12 @@
 
 URL="$1"
 
+if [[ "$URL" =~ ^https://raw\.githubusercontent\.com/.+\.md$ ]] || [[ "$URL" =~ ^https://gist\.githubusercontent\.com/.+/raw/.+\.md$ ]]; then
+  curl -sSL "$URL"
+  exit $?
+fi
+
 BROWSER_SETTINGS="headless=true,viewport_width=1280,user_agent_mode=random"
-CRAWLER_SETTINGS="wait_until=networkidle,page_timeout=60000,scan_full_page=true,scroll_delay=0.3,delay_before_return_html=0.5,process_iframes=false,remove_overlay_elements=true,magic=true"
+CRAWLER_SETTINGS="wait_until=networkidle,page_timeout=30000,scan_full_page=true,scroll_delay=0.2,delay_before_return_html=0.5,process_iframes=false,remove_overlay_elements=true,magic=true"
 
 uvx --from crawl4ai crwl "$URL" -o markdown-fit -b "$BROWSER_SETTINGS" -c "$CRAWLER_SETTINGS"
