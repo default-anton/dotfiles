@@ -1,5 +1,6 @@
 ## AGENTS.md
 
+If the project contains an AGENTS.md file, it will be automatically added to your context.
 AGENTS.md files in the cwd’s subdirectories are auto-loaded whenever you read a file inside them.
 - Closer-to-file rules override higher-level ones.
 
