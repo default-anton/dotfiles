@@ -66,3 +66,4 @@ brew 'switchaudio-osx'
 brew 'default-anton/tap/wt'
 
 cask 'font-fira-code-nerd-font'
+cask 'ghostty'
