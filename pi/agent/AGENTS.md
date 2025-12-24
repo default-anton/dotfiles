@@ -11,4 +11,4 @@
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ddgr, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux
 - When I tell you to "remember" something:
   - Global: store in ~/.pi/agent/AGENTS.md
-  - Project: store in ./AGENTS.md (repo root). That file must contain: `## Project Rules You MUST Follow`. If rules conflict, project rules win
+  - Project: store in ./AGENTS.md (repo root) or a relevant subdirectory AGENTS.md. That file must contain: `## Project Rules You MUST Follow`. If rules conflict, project rules win
