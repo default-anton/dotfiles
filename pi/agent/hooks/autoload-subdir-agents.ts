@@ -45,7 +45,7 @@ export default function(pi: HookAPI) {
   }
 
   pi.on("session", async (event, ctx) => {
-    if (event.reason === "start" || event.reason === "switch" || event.reason === "clear") {
+    if (event.reason === "start" || event.reason === "switch" || event.reason === "new") {
       resetSession(ctx.cwd);
     }
   });
