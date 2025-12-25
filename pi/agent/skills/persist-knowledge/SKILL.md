@@ -82,6 +82,7 @@ Do **not** persist:
 
 - `AGENTS.md`: short, actionable bullets/checklists optimized for fast scanning
 - `docs/`: longer explanations; keep `AGENTS.md` as the entrypoint (link out instead of duplicating)
+- `AGENTS.md` references should be canonical and long-lived (stable docs/specs or stable code paths); avoid ephemeral work artifacts (task files, scratch notes, PR branch names)
 
 ### Maintenance
 
