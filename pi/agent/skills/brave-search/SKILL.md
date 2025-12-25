@@ -28,6 +28,7 @@ npm ci
 ## Extract Page Content
 
 ```bash
+# Not part of this skill, but useful in conjunction with it
 read_web_page <url>
 ```
 
