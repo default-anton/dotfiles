@@ -12,16 +12,17 @@ Turn discoveries into small, durable artifacts (AGENTS.md, docs, skills) that ma
 ## Protocol (required)
 
 At the end of a task, do one of the following:
-- If there is anything worth persisting, follow this skill and mention what you updated.
+- If there is anything worth persisting (or cleaning up), follow this skill and mention what you updated.
 - Otherwise output: `Persist Knowledge: skipped (reason)`.
 
 ## The gate (required)
 
-Persist something only if **at least one** is true:
+Persist or clean up something only if **at least one** is true:
 - **High cost of rediscovery**: it took significant time or >1 failed attempt to learn
 - **High blast radius**: getting it wrong risks prod bugs/security issues/data loss
 - **High frequency**: likely needed again within ~3 future tasks
 - **Not easily searchable**: you wouldn’t find it quickly via `rg` / existing docs
+- **Stale guidance exists**: you found instructions that are wrong, expired, or contradicted by reality
 
 If none apply: `Persist Knowledge: skipped (too task-specific / already discoverable)`.
 
@@ -84,7 +85,13 @@ Do **not** persist:
 
 ### Maintenance
 
-Keep `AGENTS.md` files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`). If a subdir `AGENTS.md` starts turning into a tutorial, move long-form content into `docs/` (or a local `docs/` in that subtree) and leave a tight checklist + links.
+Keep `AGENTS.md` files token-efficient. Max 8000 chars each (check with `wc -c <AGENTS.md>`).
+
+If a subdir `AGENTS.md` starts turning into a tutorial, move long-form content into `docs/` (or a local `docs/` in that subtree) and leave a tight checklist + links.
+
+Treat staleness as a bug:
+- delete invalid/expired guidance
+- avoid contradictory duplicates; keep one canonical rule
 
 ## When it should be a skill
 
@@ -95,3 +102,4 @@ If the knowledge is a repeatable workflow (commands/tools with a reliable sequen
 - Keep notes token-efficient and non-duplicative
 - Never store secrets (tokens, credentials, private URLs)
 - Prefer copy/pastable commands and concrete paths over prose
+- If you changed reality (e.g., scripts/config), ensure the docs/rules match it; if docs were stale, delete/update them
