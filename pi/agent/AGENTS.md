@@ -12,5 +12,5 @@
 - When I tell you to "remember" something:
   - Global: store in ~/.dotfiles/pi/agent/AGENTS.md
   - Project: store in ./AGENTS.md (repo root) or a relevant subdirectory AGENTS.md. That file must contain: `## Project Rules You MUST Follow`. If rules conflict, project rules win
-- Files in `~/.pi` are symlinked to `~/.dotfiles/pi`. Their true location is in the `~/.dotfiles` repository.
+- Files in `~/.pi` are symlinked to `~/.dotfiles/pi`. Their true location is in the `~/.dotfiles/pi` repository. Make changes there.
 - Communication and writing MUST have High Signal-to-Noise Ratio/Meaty.
