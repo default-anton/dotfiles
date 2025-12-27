@@ -44,7 +44,6 @@ interface FinderDetails {
   subagentModelId?: string;
   turns: number;
   toolCalls: ToolCall[];
-  partialText?: string;
   summaryText?: string;
   error?: string;
   startedAt: number;
@@ -56,20 +55,19 @@ function shorten(text: string, max: number): string {
   return `${text.slice(0, max)}…`;
 }
 
-function keepLast(text: string, max: number): string {
-  if (text.length <= max) return text;
-  return text.slice(text.length - max);
-}
-
 function getLastAssistantText(messages: any[]): string {
   for (let i = messages.length - 1; i >= 0; i--) {
     const msg = messages[i];
     if (msg?.role !== "assistant") continue;
     const parts = msg.content;
     if (!Array.isArray(parts)) continue;
+
+    const blocks: string[] = [];
     for (const part of parts) {
-      if (part?.type === "text" && typeof part.text === "string") return part.text;
+      if (part?.type === "text" && typeof part.text === "string") blocks.push(part.text);
     }
+
+    if (blocks.length > 0) return blocks.join("");
   }
   return "";
 }
@@ -129,6 +127,53 @@ function buildFinderUserPrompt(query: string): string {
   ].join("\n");
 }
 
+type HasProviderAndId = { provider: string; id: string };
+
+function selectSubagentModel<T extends HasProviderAndId>(models: T[], currentProvider?: string): T | undefined {
+  if (models.length === 0) return undefined;
+
+  const preferredIdsByProvider: Record<string, string[]> = {
+    "google-antigravity": ["gemini-3-flash"],
+    "google-vertex": ["gemini-3-flash-preview"],
+    openai: ["gpt-5.1-codex-mini"],
+    anthropic: ["claude-haiku-4-5"],
+  };
+
+  const pickFromProvider = (provider: string): T | undefined => {
+    const providerModels = models.filter((m) => m.provider === provider);
+    if (providerModels.length === 0) return undefined;
+
+    const preferredIds = preferredIdsByProvider[provider] ?? [];
+    for (const id of preferredIds) {
+      const match = providerModels.find((m) => m.id === id);
+      if (match) return match;
+    }
+
+    const heuristic = providerModels.find((m) => /flash|haiku|mini/i.test(m.id));
+    return heuristic ?? providerModels[0];
+  };
+
+  if (currentProvider) {
+    const match = pickFromProvider(currentProvider);
+    if (match) return match;
+  }
+
+  const globalPreferred: Array<{ provider: string; id: string }> = [
+    { provider: "google-antigravity", id: "gemini-3-flash" },
+    { provider: "google-vertex", id: "gemini-3-flash-preview" },
+    { provider: "openai", id: "gpt-5.1-codex-mini" },
+    { provider: "anthropic", id: "claude-haiku-4-5" },
+  ];
+
+  for (const pref of globalPreferred) {
+    const match = models.find((m) => m.provider === pref.provider && m.id === pref.id);
+    if (match) return match;
+  }
+
+  const heuristic = models.find((m) => /flash|haiku|mini/i.test(m.id));
+  return heuristic ?? models[0];
+}
+
 const factory: CustomToolFactory = (pi) => {
   let lastDetectedProvider: string | undefined;
 
@@ -143,7 +188,6 @@ const factory: CustomToolFactory = (pi) => {
       const startedAt = Date.now();
       const toolCalls: ToolCall[] = [];
       let turns = 0;
-      let partialText = "";
       let summaryText = "";
 
       const currentProvider = (() => {
@@ -156,9 +200,34 @@ const factory: CustomToolFactory = (pi) => {
       })();
       lastDetectedProvider = currentProvider;
 
-      const useAntigravity = currentProvider === "google-antigravity";
-      const subagentProvider = useAntigravity ? "google-antigravity" : "google-vertex";
-      const subagentModelId = useAntigravity ? "gemini-3-flash" : "gemini-3-flash-preview";
+      const authStorage = discoverAuthStorage();
+      const modelRegistry = discoverModels(authStorage);
+
+      const availableModels = await modelRegistry.getAvailable();
+      const preferredModel = selectSubagentModel(availableModels, currentProvider);
+      if (!preferredModel) {
+        const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
+        summaryText = error;
+        return {
+          content: [{ type: "text", text: error }],
+          details: {
+            status: "error",
+            query: params.query,
+            currentProvider,
+            turns,
+            toolCalls,
+            summaryText,
+            error,
+            startedAt,
+            endedAt: Date.now(),
+          },
+          isError: true,
+        };
+      }
+
+      const subModel = preferredModel;
+      const subagentProvider = subModel.provider;
+      const subagentModelId = subModel.id;
 
       const emit = (details: Partial<FinderDetails> & { status: FinderStatus }) => {
         const text =
@@ -175,7 +244,6 @@ const factory: CustomToolFactory = (pi) => {
             subagentModelId,
             turns,
             toolCalls,
-            partialText,
             summaryText,
             startedAt,
             ...details,
@@ -184,55 +252,6 @@ const factory: CustomToolFactory = (pi) => {
       };
 
       emit({ status: "running" });
-
-      const authStorage = discoverAuthStorage();
-      const modelRegistry = discoverModels(authStorage);
-
-      const subModel = modelRegistry.find(subagentProvider, subagentModelId);
-      if (!subModel) {
-        const error = `Model not found: ${subagentProvider}/${subagentModelId}`;
-        summaryText = error;
-        return {
-          content: [{ type: "text", text: error }],
-          details: {
-            status: "error",
-            query: params.query,
-            currentProvider,
-            subagentProvider,
-            subagentModelId,
-            turns,
-            toolCalls,
-            summaryText,
-            error,
-            startedAt,
-            endedAt: Date.now(),
-          },
-          isError: true,
-        };
-      }
-
-      const apiKey = await modelRegistry.getApiKey(subModel);
-      if (!apiKey) {
-        const error = `No credentials available for ${subModel.provider}. Use /login (google-antigravity) or set up Google Cloud credentials (google-vertex).`;
-        summaryText = error;
-        return {
-          content: [{ type: "text", text: error }],
-          details: {
-            status: "error",
-            query: params.query,
-            currentProvider,
-            subagentProvider,
-            subagentModelId,
-            turns,
-            toolCalls,
-            summaryText,
-            error,
-            startedAt,
-            endedAt: Date.now(),
-          },
-          isError: true,
-        };
-      }
 
       const tools = createReadOnlyTools(pi.cwd);
       const contextFiles = discoverContextFiles(pi.cwd);
@@ -284,13 +303,6 @@ const factory: CustomToolFactory = (pi) => {
             maybeEmit();
             break;
           }
-          case "message_update": {
-            if (event.assistantMessageEvent?.type === "text_delta") {
-              partialText = keepLast(partialText + event.assistantMessageEvent.delta, 8000);
-              maybeEmit();
-            }
-            break;
-          }
           case "tool_execution_start": {
             toolCalls.push({
               id: event.toolCallId,
@@ -317,7 +329,7 @@ const factory: CustomToolFactory = (pi) => {
       try {
         await session.prompt(buildFinderUserPrompt(params.query), { expandSlashCommands: false });
         summaryText = getLastAssistantText(session.state.messages as any[]).trim();
-        if (!summaryText) summaryText = "(no output)";
+        if (!summaryText) summaryText = aborted ? "Aborted" : "(no output)";
 
         const endedAt = Date.now();
         emit({ status: aborted ? "aborted" : "done", summaryText, endedAt });
@@ -332,12 +344,11 @@ const factory: CustomToolFactory = (pi) => {
             subagentModelId,
             turns,
             toolCalls,
-            partialText,
             summaryText,
             startedAt,
             endedAt,
           },
-          isError: aborted,
+          isError: false,
         };
       } catch (e) {
         const endedAt = Date.now();
@@ -354,13 +365,12 @@ const factory: CustomToolFactory = (pi) => {
             subagentModelId,
             turns,
             toolCalls,
-            partialText,
             summaryText,
             error,
             startedAt,
             endedAt,
           },
-          isError: true,
+          isError: !aborted,
         };
       } finally {
         unsubscribe();
