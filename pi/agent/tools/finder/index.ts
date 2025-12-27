@@ -20,8 +20,10 @@ const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent
 
 const FinderParams = Type.Object({
   query: Type.String({
-    description:
-      "What to find in the codebase. Be specific and include success criteria (what output is considered correct).",
+    description: [
+      "A self-contained codebase search request for the Finder subagent.",
+      "Include: (1) goal, (2) expected keywords/identifiers, (3) desired output (paths + line ranges), (4) success criteria.",
+    ].join(" "),
   }),
 });
 
@@ -105,24 +107,46 @@ function formatToolCall(call: ToolCall): string {
 
 function buildFinderSystemPrompt(): string {
   return [
-    "You are Finder, a specialized code search agent.",
-    "Your job is to answer the user query by locating the relevant files, symbols, and code locations.",
-    "Constraints:",
-    "- Use the provided tools to explore the repository (prefer grep/find/ls/read).",
-    "- Do not modify files.",
-    "- Keep tool usage efficient: start broad, then narrow down.",
-    "Output format:",
-    "- Return a concise answer with file paths and (if applicable) line numbers.",
-    "- Include only small, relevant snippets.",
-    "- If uncertain, describe the best candidate locations and what to check next.",
+    "You are Finder, an evidence-first repository scout.",
+    "You operate in a read-only environment and may only use the provided tools (ls/find/grep/read).",
+    "Your job: locate and cite the exact code locations that answer the manager's query.",
+    "",
+    "Non-negotiable constraints:",
+    "- Do not modify files, propose patches, or refactor.",
+    "- Do not guess: every claim must be supported by evidence you actually read.",
+    "- Avoid large dumps: only include minimal snippets (≈5–15 lines) when needed.",
+    "",
+    "How to work:",
+    "1) Translate the query into a checklist of things to locate.",
+    "2) Search broadly (grep/find), then narrow.",
+    "3) Validate by opening the smallest relevant ranges with read.",
+    "   Always call read with offset+limit so you can cite line ranges.",
+    "",
+    "Citations:",
+    "- Cite sources as `path:lineStart-lineEnd` using the read ranges you opened.",
+    "- If you didn't read it, don't cite it and don't present it as fact.",
+    "",
+    "Output format (Markdown, use this section order):",
+    "## Summary",
+    "(1–3 sentences)",
+    "## Locations",
+    "- `path:lineStart-lineEnd` — what is here and why it matters",
+    "## Evidence (optional)",
+    "(snippets, each preceded by a citation)",
+    "## Searched (only if incomplete / not found)",
+    "(patterns and directories you tried)",
+    "## Next steps (optional)",
+    "(what to check next if ambiguous)",
   ].join("\n");
 }
 
 function buildFinderUserPrompt(query: string): string {
   return [
-    "Find the answer to the query below in the codebase.",
-    "Return file paths + line numbers and a brief explanation.",
-    "\nQuery:",
+    "Task: locate and cite the exact code locations that answer the query.",
+    "Return Markdown in the required section order (Summary, Locations, Evidence?, Searched?, Next steps?).",
+    "Citations must be in the form `path:lineStart-lineEnd` based on the read ranges you opened.",
+    "",
+    "Query:",
     query.trim(),
   ].join("\n");
 }
@@ -181,7 +205,7 @@ const factory: CustomToolFactory = (pi) => {
     name: "finder",
     label: "Finder",
     description:
-      "Spawns a specialized code-search subagent (isolated context) that finds files/locations relevant to a query and returns a concise summary.",
+      "Read-only codebase scout: spawns an isolated subagent that searches with ls/find/grep/read and returns an evidence-backed Markdown summary with citations (path:lineStart-lineEnd).",
     parameters: FinderParams,
 
     async execute(_toolCallId, params, signal, onUpdate) {

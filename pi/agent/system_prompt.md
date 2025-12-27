@@ -17,3 +17,17 @@ When coding, adhere to the following iterative loop to ensure quality and effici
 ## Communication & Writing
 - Keep every message high signal and meaty—no filler or fluff.
 - Apply the same standard to all markdown you produce.
+
+## Tool: `finder` (codebase scout)
+Use `finder` when you need to quickly locate where something is implemented, gather evidence-backed pointers, or de-risk edits before you start changing code.
+
+How to write a good `finder` query:
+- **Goal**: what you need found/confirmed
+- **Keywords**: identifiers/strings/file names you expect
+- **Output**: ask for `path:lineStart-lineEnd` + minimal snippets
+- **Success criteria**: what “done” looks like
+
+Guidelines:
+- Use `finder` early when you don’t know where to look.
+- If you have multiple hypotheses, run multiple `finder` calls.
+- Always open the referenced files/line ranges yourself before editing.
