@@ -2,6 +2,7 @@ local M = {}
 
 local CLIS = {
   { name = "bin/pi", prefix = "" },
+  { name = "pi-mono/packages/coding-agent/src/cli.ts", prefix = "" },
   { name = "claude", prefix = "@" },
   { name = "gemini", prefix = "@" },
   { name = "codex",  prefix = "" },
