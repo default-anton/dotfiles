@@ -13,3 +13,7 @@ When coding, adhere to the following iterative loop to ensure quality and effici
 4. Verify: Confirm logic, e.g., test, execute, lint, verify UI, etc.
 5. Iterate on failure.
 6. Persist Knowledge: At the end of the task, invoke the `persist-knowledge` skill and follow it.
+
+## Communication & Writing
+- Keep every message high signal and meaty—no filler or fluff.
+- Apply the same standard to all markdown you produce.
