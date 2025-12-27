@@ -1,0 +1,454 @@
+import os from "node:os";
+import nodePath from "node:path";
+
+import type { CustomAgentTool, CustomToolFactory } from "@mariozechner/pi-coding-agent";
+import {
+  SessionManager,
+  createAgentSession,
+  createReadOnlyTools,
+  discoverAuthStorage,
+  discoverContextFiles,
+  discoverModels,
+  getMarkdownTheme,
+} from "@mariozechner/pi-coding-agent";
+import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
+import { Type } from "@sinclair/typebox";
+
+import autoloadSubdirAgents from "../../hooks/autoload-subdir-agents";
+
+const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent/hooks/autoload-subdir-agents.ts");
+
+const FinderParams = Type.Object({
+  query: Type.String({
+    description:
+      "What to find in the codebase. Be specific and include success criteria (what output is considered correct).",
+  }),
+});
+
+type FinderStatus = "running" | "done" | "error" | "aborted";
+
+type ToolCall = {
+  id: string;
+  name: string;
+  args: unknown;
+  startedAt: number;
+  endedAt?: number;
+  isError?: boolean;
+};
+
+interface FinderDetails {
+  status: FinderStatus;
+  query: string;
+  currentProvider?: string;
+  subagentProvider?: string;
+  subagentModelId?: string;
+  turns: number;
+  toolCalls: ToolCall[];
+  partialText?: string;
+  summaryText?: string;
+  error?: string;
+  startedAt: number;
+  endedAt?: number;
+}
+
+function shorten(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return `${text.slice(0, max)}…`;
+}
+
+function keepLast(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return text.slice(text.length - max);
+}
+
+function getLastAssistantText(messages: any[]): string {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    if (msg?.role !== "assistant") continue;
+    const parts = msg.content;
+    if (!Array.isArray(parts)) continue;
+    for (const part of parts) {
+      if (part?.type === "text" && typeof part.text === "string") return part.text;
+    }
+  }
+  return "";
+}
+
+function formatToolCall(call: ToolCall): string {
+  const args = call.args && typeof call.args === "object" ? (call.args as Record<string, any>) : undefined;
+
+  if (call.name === "grep") {
+    const pattern = typeof args?.pattern === "string" ? args.pattern : "";
+    const path = typeof args?.path === "string" ? args.path : ".";
+    return `grep /${pattern}/ in ${path}`;
+  }
+
+  if (call.name === "find") {
+    const pattern = typeof args?.pattern === "string" ? args.pattern : "*";
+    const path = typeof args?.path === "string" ? args.path : ".";
+    return `find ${pattern} in ${path}`;
+  }
+
+  if (call.name === "ls") {
+    const path = typeof args?.path === "string" ? args.path : ".";
+    return `ls ${path}`;
+  }
+
+  if (call.name === "read") {
+    const path = typeof args?.path === "string" ? args.path : typeof args?.file_path === "string" ? args.file_path : "";
+    const offset = typeof args?.offset === "number" ? args.offset : undefined;
+    const limit = typeof args?.limit === "number" ? args.limit : undefined;
+    const range = offset || limit ? `:${offset ?? 1}${limit ? `-${(offset ?? 1) + limit - 1}` : ""}` : "";
+    return `read ${path}${range}`;
+  }
+
+  return call.name;
+}
+
+function buildFinderSystemPrompt(): string {
+  return [
+    "You are Finder, a specialized code search agent.",
+    "Your job is to answer the user query by locating the relevant files, symbols, and code locations.",
+    "Constraints:",
+    "- Use the provided tools to explore the repository (prefer grep/find/ls/read).",
+    "- Do not modify files.",
+    "- Keep tool usage efficient: start broad, then narrow down.",
+    "Output format:",
+    "- Return a concise answer with file paths and (if applicable) line numbers.",
+    "- Include only small, relevant snippets.",
+    "- If uncertain, describe the best candidate locations and what to check next.",
+  ].join("\n");
+}
+
+function buildFinderUserPrompt(query: string): string {
+  return [
+    "Find the answer to the query below in the codebase.",
+    "Return file paths + line numbers and a brief explanation.",
+    "\nQuery:",
+    query.trim(),
+  ].join("\n");
+}
+
+const factory: CustomToolFactory = (pi) => {
+  let lastDetectedProvider: string | undefined;
+
+  const tool: CustomAgentTool<typeof FinderParams, FinderDetails> = {
+    name: "finder",
+    label: "Finder",
+    description:
+      "Spawns a specialized code-search subagent (isolated context) that finds files/locations relevant to a query and returns a concise summary.",
+    parameters: FinderParams,
+
+    async execute(_toolCallId, params, signal, onUpdate) {
+      const startedAt = Date.now();
+      const toolCalls: ToolCall[] = [];
+      let turns = 0;
+      let partialText = "";
+      let summaryText = "";
+
+      const currentProvider = (() => {
+        try {
+          const sessionManager = SessionManager.continueRecent(pi.cwd);
+          return sessionManager.buildSessionContext().model?.provider;
+        } catch {
+          return undefined;
+        }
+      })();
+      lastDetectedProvider = currentProvider;
+
+      const useAntigravity = currentProvider === "google-antigravity";
+      const subagentProvider = useAntigravity ? "google-antigravity" : "google-vertex";
+      const subagentModelId = useAntigravity ? "gemini-3-flash" : "gemini-3-flash-preview";
+
+      const emit = (details: Partial<FinderDetails> & { status: FinderStatus }) => {
+        const text =
+          details.summaryText ??
+          summaryText ??
+          (details.status === "running" ? "(searching...)" : "(no output yet)");
+
+        onUpdate?.({
+          content: [{ type: "text", text }],
+          details: {
+            query: params.query,
+            currentProvider,
+            subagentProvider,
+            subagentModelId,
+            turns,
+            toolCalls,
+            partialText,
+            summaryText,
+            startedAt,
+            ...details,
+          },
+        });
+      };
+
+      emit({ status: "running" });
+
+      const authStorage = discoverAuthStorage();
+      const modelRegistry = discoverModels(authStorage);
+
+      const subModel = modelRegistry.find(subagentProvider, subagentModelId);
+      if (!subModel) {
+        const error = `Model not found: ${subagentProvider}/${subagentModelId}`;
+        summaryText = error;
+        return {
+          content: [{ type: "text", text: error }],
+          details: {
+            status: "error",
+            query: params.query,
+            currentProvider,
+            subagentProvider,
+            subagentModelId,
+            turns,
+            toolCalls,
+            summaryText,
+            error,
+            startedAt,
+            endedAt: Date.now(),
+          },
+          isError: true,
+        };
+      }
+
+      const apiKey = await modelRegistry.getApiKey(subModel);
+      if (!apiKey) {
+        const error = `No credentials available for ${subModel.provider}. Use /login (google-antigravity) or set up Google Cloud credentials (google-vertex).`;
+        summaryText = error;
+        return {
+          content: [{ type: "text", text: error }],
+          details: {
+            status: "error",
+            query: params.query,
+            currentProvider,
+            subagentProvider,
+            subagentModelId,
+            turns,
+            toolCalls,
+            summaryText,
+            error,
+            startedAt,
+            endedAt: Date.now(),
+          },
+          isError: true,
+        };
+      }
+
+      const tools = createReadOnlyTools(pi.cwd);
+      const contextFiles = discoverContextFiles(pi.cwd);
+      const systemPrompt = buildFinderSystemPrompt();
+
+      const { session } = await createAgentSession({
+        cwd: pi.cwd,
+        authStorage,
+        modelRegistry,
+        sessionManager: SessionManager.inMemory(pi.cwd),
+        model: subModel,
+        thinkingLevel: "off",
+        tools,
+        customTools: [],
+        hooks: [{ path: autoloadSubdirAgentsPath, factory: autoloadSubdirAgents }],
+        skills: [],
+        slashCommands: [],
+        contextFiles,
+        systemPrompt,
+      });
+
+      let aborted = false;
+      const abort = async () => {
+        aborted = true;
+        try {
+          await session.abort();
+        } catch {
+          // ignore
+        }
+      };
+
+      if (signal) {
+        if (signal.aborted) await abort();
+        else signal.addEventListener("abort", () => void abort(), { once: true });
+      }
+
+      let lastUpdate = 0;
+      const maybeEmit = (force = false) => {
+        const now = Date.now();
+        if (!force && now - lastUpdate < 200) return;
+        lastUpdate = now;
+        emit({ status: "running" });
+      };
+
+      const unsubscribe = session.subscribe((event) => {
+        switch (event.type) {
+          case "turn_end": {
+            turns += 1;
+            maybeEmit();
+            break;
+          }
+          case "message_update": {
+            if (event.assistantMessageEvent?.type === "text_delta") {
+              partialText = keepLast(partialText + event.assistantMessageEvent.delta, 8000);
+              maybeEmit();
+            }
+            break;
+          }
+          case "tool_execution_start": {
+            toolCalls.push({
+              id: event.toolCallId,
+              name: event.toolName,
+              args: event.args,
+              startedAt: Date.now(),
+            });
+            if (toolCalls.length > 50) toolCalls.splice(0, toolCalls.length - 50);
+            maybeEmit(true);
+            break;
+          }
+          case "tool_execution_end": {
+            const call = toolCalls.find((c) => c.id === event.toolCallId);
+            if (call) {
+              call.endedAt = Date.now();
+              call.isError = event.isError;
+            }
+            maybeEmit(true);
+            break;
+          }
+        }
+      });
+
+      try {
+        await session.prompt(buildFinderUserPrompt(params.query), { expandSlashCommands: false });
+        summaryText = getLastAssistantText(session.state.messages as any[]).trim();
+        if (!summaryText) summaryText = "(no output)";
+
+        const endedAt = Date.now();
+        emit({ status: aborted ? "aborted" : "done", summaryText, endedAt });
+
+        return {
+          content: [{ type: "text", text: summaryText }],
+          details: {
+            status: aborted ? "aborted" : "done",
+            query: params.query,
+            currentProvider,
+            subagentProvider,
+            subagentModelId,
+            turns,
+            toolCalls,
+            partialText,
+            summaryText,
+            startedAt,
+            endedAt,
+          },
+          isError: aborted,
+        };
+      } catch (e) {
+        const endedAt = Date.now();
+        const error = aborted ? "Aborted" : e instanceof Error ? e.message : String(e);
+        summaryText = error;
+        emit({ status: aborted ? "aborted" : "error", error, summaryText, endedAt });
+        return {
+          content: [{ type: "text", text: error }],
+          details: {
+            status: aborted ? "aborted" : "error",
+            query: params.query,
+            currentProvider,
+            subagentProvider,
+            subagentModelId,
+            turns,
+            toolCalls,
+            partialText,
+            summaryText,
+            error,
+            startedAt,
+            endedAt,
+          },
+          isError: true,
+        };
+      } finally {
+        unsubscribe();
+        session.dispose();
+      }
+    },
+
+    renderCall(args, theme) {
+      const providerNote = lastDetectedProvider ? theme.fg("dim", ` (${lastDetectedProvider})`) : "";
+      const preview = shorten(args.query.replace(/\s+/g, " ").trim(), 90);
+      const text =
+        theme.fg("toolTitle", theme.bold("finder")) +
+        providerNote +
+        "\n" +
+        theme.fg("muted", preview);
+      return new Text(text, 0, 0);
+    },
+
+    renderResult(result, { expanded, isPartial }, theme) {
+      const details = result.details as FinderDetails | undefined;
+      if (!details) {
+        const text = result.content[0];
+        return new Text(text?.type === "text" ? text.text : "(no output)", 0, 0);
+      }
+
+      const icon =
+        details.status === "done"
+          ? theme.fg("success", "✓")
+          : details.status === "error"
+            ? theme.fg("error", "✗")
+            : details.status === "aborted"
+              ? theme.fg("warning", "◼")
+              : theme.fg("warning", "⏳");
+
+      const header =
+        icon +
+        " " +
+        theme.fg("toolTitle", theme.bold("finder ")) +
+        theme.fg(
+          "dim",
+          `${details.subagentProvider ?? "?"}/${details.subagentModelId ?? "?"} • ${details.turns} turn${details.turns === 1 ? "" : "s"
+          } • ${details.toolCalls.length} tool call${details.toolCalls.length === 1 ? "" : "s"}`,
+        );
+
+      const callsToShow = expanded ? details.toolCalls : details.toolCalls.slice(-6);
+      let callsText = "";
+      if (callsToShow.length > 0) {
+        callsText += theme.fg("muted", "\n\nTools:\n");
+        for (const c of callsToShow) {
+          const callIcon = c.isError ? theme.fg("error", "✗") : theme.fg("dim", "→");
+          callsText += `${callIcon} ${theme.fg("toolOutput", formatToolCall(c))}\n`;
+        }
+        callsText = callsText.trimEnd();
+        if (!expanded && details.toolCalls.length > 6) {
+          callsText += `\n${theme.fg("muted", "(Ctrl+O to expand)")}`;
+        }
+      }
+
+      if (details.status === "running" || isPartial) {
+        const body = `\n\n${theme.fg("muted", "Searching…")}`;
+        return new Text((header + callsText + body).trimEnd(), 0, 0);
+      }
+
+      const mdTheme = getMarkdownTheme();
+      const summary = (details.summaryText ?? (result.content[0]?.type === "text" ? result.content[0].text : ""))
+        .trim()
+        .slice(0, expanded ? 20000 : 4000);
+
+      if (!expanded) {
+        const preview = summary ? summary.split("\n").slice(0, 12).join("\n") : "(no output)";
+        let text = `${header}\n\n${theme.fg("toolOutput", preview)}`;
+        if (summary.split("\n").length > 12) text += `\n${theme.fg("muted", "(Ctrl+O to expand)")}`;
+        return new Text(text, 0, 0);
+      }
+
+      const container = new Container();
+      container.addChild(new Text(header, 0, 0));
+      if (callsText) {
+        container.addChild(new Spacer(1));
+        container.addChild(new Text(callsText.trim(), 0, 0));
+      }
+      container.addChild(new Spacer(1));
+      container.addChild(new Markdown(summary || "(no output)", 0, 0, mdTheme));
+      return container;
+    },
+  };
+
+  return tool;
+};
+
+export default factory;
