@@ -1,7 +1,7 @@
 import os from "node:os";
 import nodePath from "node:path";
 
-import type { CustomAgentTool, CustomToolFactory } from "@mariozechner/pi-coding-agent";
+import type { CustomAgentTool, CustomToolFactory, HookFactory } from "@mariozechner/pi-coding-agent";
 import {
   SessionManager,
   createAgentSession,
@@ -18,6 +18,8 @@ import autoloadSubdirAgents from "../../hooks/autoload-subdir-agents";
 
 const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent/hooks/autoload-subdir-agents.ts");
 
+const DEFAULT_MAX_TURNS = 10;
+
 const FinderParams = Type.Object({
   query: Type.String({
     description: [
@@ -25,6 +27,14 @@ const FinderParams = Type.Object({
       "Include: (1) goal, (2) expected keywords/identifiers, (3) desired output (paths + line ranges), (4) success criteria.",
     ].join(" "),
   }),
+  maxTurns: Type.Optional(
+    Type.Integer({
+      minimum: 1,
+      maximum: 25,
+      default: DEFAULT_MAX_TURNS,
+      description: "Maximum number of agent turns allowed for this search (includes the final answering turn).",
+    }),
+  ),
 });
 
 type FinderStatus = "running" | "done" | "error" | "aborted";
@@ -45,6 +55,7 @@ interface FinderDetails {
   subagentProvider?: string;
   subagentModelId?: string;
   turns: number;
+  maxTurns: number;
   toolCalls: ToolCall[];
   summaryText?: string;
   error?: string;
@@ -105,11 +116,15 @@ function formatToolCall(call: ToolCall): string {
   return call.name;
 }
 
-function buildFinderSystemPrompt(): string {
+function buildFinderSystemPrompt(maxTurns: number): string {
   return [
     "You are Finder, an evidence-first repository scout.",
     "You operate in a read-only environment and may only use the provided tools (ls/find/grep/read).",
     "Your job: locate and cite the exact code locations that answer the manager's query.",
+    "",
+    `Turn budget: you have at most ${maxTurns} turns total (including the final answering turn).`,
+    "To conserve turns, batch independent searches: you may issue multiple tool calls in a single turn (e.g., several grep/find/read calls).",
+    "On the final turn you MUST NOT call tools; produce the final answer in the required format using only evidence already gathered.",
     "",
     "Non-negotiable constraints:",
     "- Do not modify files, propose patches, or refactor.",
@@ -140,15 +155,46 @@ function buildFinderSystemPrompt(): string {
   ].join("\n");
 }
 
-function buildFinderUserPrompt(query: string): string {
+function buildFinderUserPrompt(query: string, maxTurns: number): string {
   return [
     "Task: locate and cite the exact code locations that answer the query.",
     "Return Markdown in the required section order (Summary, Locations, Evidence?, Searched?, Next steps?).",
     "Citations must be in the form `path:lineStart-lineEnd` based on the read ranges you opened.",
+    `Turn budget: ${maxTurns} turns total. Optimize for fewer turns by batching tool calls.`,
     "",
     "Query:",
     query.trim(),
   ].join("\n");
+}
+
+function createTurnBudgetHook(maxTurns: number): HookFactory {
+  return (pi) => {
+    let turnIndex = 0;
+
+    pi.on("turn_start", async (event) => {
+      turnIndex = event.turnIndex;
+    });
+
+    pi.on("tool_call", async () => {
+      if (turnIndex < maxTurns - 1) return undefined;
+
+      const humanTurn = Math.min(turnIndex + 1, maxTurns);
+      return {
+        block: true,
+        reason: `Tool use is disabled on the final turn (turn ${humanTurn}/${maxTurns}). Provide your final answer now without calling tools.`,
+      };
+    });
+
+    pi.on("tool_result", async (event) => {
+      const remainingAfter = Math.max(0, maxTurns - (turnIndex + 1));
+      const humanTurn = Math.min(turnIndex + 1, maxTurns);
+      const budgetLine = `[turn budget] turn ${humanTurn}/${maxTurns}; remaining after this turn: ${remainingAfter}`;
+
+      return {
+        content: [...event.content, { type: "text", text: `\n\n${budgetLine}` }],
+      };
+    });
+  };
 }
 
 type HasProviderAndId = { provider: string; id: string };
@@ -213,6 +259,7 @@ const factory: CustomToolFactory = (pi) => {
       const toolCalls: ToolCall[] = [];
       let turns = 0;
       let summaryText = "";
+      const maxTurns = params.maxTurns ?? DEFAULT_MAX_TURNS;
 
       const currentProvider = (() => {
         try {
@@ -239,6 +286,7 @@ const factory: CustomToolFactory = (pi) => {
             query: params.query,
             currentProvider,
             turns,
+            maxTurns,
             toolCalls,
             summaryText,
             error,
@@ -267,6 +315,7 @@ const factory: CustomToolFactory = (pi) => {
             subagentProvider,
             subagentModelId,
             turns,
+            maxTurns,
             toolCalls,
             summaryText,
             startedAt,
@@ -279,7 +328,7 @@ const factory: CustomToolFactory = (pi) => {
 
       const tools = createReadOnlyTools(pi.cwd);
       const contextFiles = discoverContextFiles(pi.cwd);
-      const systemPrompt = buildFinderSystemPrompt();
+      const systemPrompt = buildFinderSystemPrompt(maxTurns);
 
       const { session } = await createAgentSession({
         cwd: pi.cwd,
@@ -290,7 +339,10 @@ const factory: CustomToolFactory = (pi) => {
         thinkingLevel: "off",
         tools,
         customTools: [],
-        hooks: [{ path: autoloadSubdirAgentsPath, factory: autoloadSubdirAgents }],
+        hooks: [
+          { path: autoloadSubdirAgentsPath, factory: autoloadSubdirAgents },
+          { path: "<finder-turn-budget>", factory: createTurnBudgetHook(maxTurns) },
+        ],
         skills: [],
         slashCommands: [],
         contextFiles,
@@ -351,7 +403,7 @@ const factory: CustomToolFactory = (pi) => {
       });
 
       try {
-        await session.prompt(buildFinderUserPrompt(params.query), { expandSlashCommands: false });
+        await session.prompt(buildFinderUserPrompt(params.query, maxTurns), { expandSlashCommands: false });
         summaryText = getLastAssistantText(session.state.messages as any[]).trim();
         if (!summaryText) summaryText = aborted ? "Aborted" : "(no output)";
 
@@ -367,6 +419,7 @@ const factory: CustomToolFactory = (pi) => {
             subagentProvider,
             subagentModelId,
             turns,
+            maxTurns,
             toolCalls,
             summaryText,
             startedAt,
@@ -388,6 +441,7 @@ const factory: CustomToolFactory = (pi) => {
             subagentProvider,
             subagentModelId,
             turns,
+            maxTurns,
             toolCalls,
             summaryText,
             error,
@@ -435,8 +489,7 @@ const factory: CustomToolFactory = (pi) => {
         theme.fg("toolTitle", theme.bold("finder ")) +
         theme.fg(
           "dim",
-          `${details.subagentProvider ?? "?"}/${details.subagentModelId ?? "?"} • ${details.turns} turn${details.turns === 1 ? "" : "s"
-          } • ${details.toolCalls.length} tool call${details.toolCalls.length === 1 ? "" : "s"}`,
+          `${details.subagentProvider ?? "?"}/${details.subagentModelId ?? "?"} • ${details.turns}/${details.maxTurns} turn${details.turns === 1 ? "" : "s"} • ${details.toolCalls.length} tool call${details.toolCalls.length === 1 ? "" : "s"}`,
         );
 
       const callsToShow = expanded ? details.toolCalls : details.toolCalls.slice(-6);

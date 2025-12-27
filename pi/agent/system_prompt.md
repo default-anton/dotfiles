@@ -30,4 +30,6 @@ How to write a good `finder` query:
 Guidelines:
 - Use `finder` early when you don’t know where to look.
 - If you have multiple hypotheses, run multiple `finder` calls.
+- Keep queries search-focused; let Finder do exploration, not design.
+- Default budget is ~10 turns; set `maxTurns` if you need tighter/looser scouting.
 - Always open the referenced files/line ranges yourself before editing.
