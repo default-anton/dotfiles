@@ -1,11 +1,11 @@
 {
-  "lastChangelogVersion": "0.27.7",
+  "lastChangelogVersion": "0.30.2",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai",
   "defaultModel": "gpt-5.1-codex-max",
   "queueMode": "one-at-a-time",
   "compaction": {
-    "enabled": false
+    "enabled": true
   },
   "hideThinkingBlock": false
 }
