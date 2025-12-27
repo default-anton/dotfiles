@@ -229,8 +229,8 @@ function selectSubagentModel<T extends HasProviderAndId>(models: T[], currentPro
   }
 
   const globalPreferred: Array<{ provider: string; id: string }> = [
-    { provider: "google-antigravity", id: "gemini-3-flash" },
     { provider: "google-vertex", id: "gemini-3-flash-preview" },
+    { provider: "google-antigravity", id: "gemini-3-flash" },
     { provider: "openai", id: "gpt-5.1-codex-mini" },
     { provider: "anthropic", id: "claude-haiku-4-5" },
   ];
