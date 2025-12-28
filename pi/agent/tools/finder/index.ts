@@ -240,6 +240,7 @@ function selectSubagentModel<T extends HasProviderAndId>(models: T[], currentPro
   if (models.length === 0) return undefined;
 
   const preferredIdsByProvider: Record<string, string[]> = {
+    zai: ["glm-4.7"],
     "google-antigravity": ["gemini-3-flash"],
     "google-vertex": ["gemini-3-flash-preview"],
     openai: ["gpt-5.1-codex-mini"],
@@ -266,6 +267,7 @@ function selectSubagentModel<T extends HasProviderAndId>(models: T[], currentPro
   }
 
   const globalPreferred: Array<{ provider: string; id: string }> = [
+    { provider: "zai", id: "glm-4.7" },
     { provider: "google-vertex", id: "gemini-3-flash-preview" },
     { provider: "google-antigravity", id: "gemini-3-flash" },
     { provider: "openai", id: "gpt-5.1-codex-mini" },
