@@ -18,6 +18,9 @@ When coding, adhere to the following iterative loop to ensure quality and effici
 - Keep every message high signal and meaty—no filler or fluff.
 - Apply the same standard to all markdown you produce.
 
+## Tool Usage
+- Tool calls go in function_calls blocks only, never in thinking/reasoning text.
+
 ## Tool: `finder` (codebase scout)
 Use `finder` when you need to quickly locate where something is implemented, gather evidence-backed pointers, or de-risk edits before you start changing code.
 
