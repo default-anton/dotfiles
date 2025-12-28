@@ -124,7 +124,8 @@ function buildFinderSystemPrompt(maxTurns: number): string {
     "",
     `Turn budget: you have at most ${maxTurns} turns total (including the final answering turn).`,
     "To conserve turns, batch independent searches: you may issue multiple tool calls in a single turn (e.g., several grep/find/read calls).",
-    "On the final turn you MUST NOT call tools; produce the final answer in the required format using only evidence already gathered.",
+    "Finish as soon as you can answer with high confidence — do NOT try to use all available turns.",
+    "Tool use is disabled on the last allowed turn; once you have enough evidence, produce your final answer immediately.",
     "",
     "Non-negotiable constraints:",
     "- Do not modify files, propose patches, or refactor.",
@@ -134,18 +135,20 @@ function buildFinderSystemPrompt(maxTurns: number): string {
     "How to work:",
     "1) Translate the query into a checklist of things to locate.",
     "2) Search broadly (grep/find), then narrow.",
-    "3) Validate by opening the smallest relevant ranges with read.",
-    "   Always call read with offset+limit so you can cite line ranges.",
+    "3) Validate by opening the smallest relevant ranges with read when you need line-level evidence.",
+    "   If the query is only about file paths / directory structure, prefer ls/find and do not open files unnecessarily.",
+    "   When you do use read, always include offset+limit so you can cite line ranges.",
     "",
     "Citations:",
-    "- Cite sources as `path:lineStart-lineEnd` using the read ranges you opened.",
-    "- If you didn't read it, don't cite it and don't present it as fact.",
+    "- For claims about file contents, cite as `path:lineStart-lineEnd` using the read ranges you opened.",
+    "- For claims only about the existence of files/paths (e.g., directory listings), you may cite just `path` based on ls/find output.",
+    "- If you didn't observe it in tool output, don't cite it and don't present it as fact.",
     "",
     "Output format (Markdown, use this section order):",
     "## Summary",
     "(1–3 sentences)",
     "## Locations",
-    "- `path:lineStart-lineEnd` — what is here and why it matters",
+    "- `path` or `path:lineStart-lineEnd` — what is here and why it matters",
     "## Evidence (optional)",
     "(snippets, each preceded by a citation)",
     "## Searched (only if incomplete / not found)",
@@ -159,7 +162,8 @@ function buildFinderUserPrompt(query: string, maxTurns: number): string {
   return [
     "Task: locate and cite the exact code locations that answer the query.",
     "Return Markdown in the required section order (Summary, Locations, Evidence?, Searched?, Next steps?).",
-    "Citations must be in the form `path:lineStart-lineEnd` based on the read ranges you opened.",
+    "For claims about file contents, citations must be in the form `path:lineStart-lineEnd` based on the read ranges you opened.",
+    "For path-only results (e.g., list files in a directory), you may cite just `path` based on ls/find output.",
     `Turn budget: ${maxTurns} turns total. Optimize for fewer turns by batching tool calls.`,
     "",
     "Query:",
@@ -511,7 +515,7 @@ const factory: CustomToolFactory = (pi) => {
         return new Text((header + callsText + body).trimEnd(), 0, 0);
       }
 
-      const mdTheme = getMarkdownTheme();
+      const mdTheme = getMarkdownTheme(theme);
       const summary = (details.summaryText ?? (result.content[0]?.type === "text" ? result.content[0].text : ""))
         .trim()
         .slice(0, expanded ? 20000 : 4000);
