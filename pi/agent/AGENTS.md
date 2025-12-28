@@ -13,3 +13,6 @@
   - Global: store in ~/.dotfiles/pi/agent/AGENTS.md
   - Project: store in ./AGENTS.md (repo root) or a relevant subdirectory AGENTS.md. That file must contain: `## Project Rules You MUST Follow`. If rules conflict, project rules win
 - Files in `~/.pi` are symlinked to `~/.dotfiles/pi`. Their true location is in the `~/.dotfiles/pi` repository. Make changes there.
+
+## Custom tool gotchas
+- Build Markdown themes for custom tool output from the `theme` passed into `renderResult` instead of `getMarkdownTheme()`; the global theme can be undefined for tools and will crash expanded Ctrl+O output.

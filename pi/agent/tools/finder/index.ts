@@ -5,13 +5,13 @@ import type { CustomAgentTool, CustomToolFactory, HookFactory } from "@mariozech
 import {
   SessionManager,
   createAgentSession,
-  createReadOnlyTools,
+  createReadTool,
+  createBashTool,
   discoverAuthStorage,
   discoverContextFiles,
   discoverModels,
-  getMarkdownTheme,
 } from "@mariozechner/pi-coding-agent";
-import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
+import { Container, Markdown, Spacer, Text, type MarkdownTheme } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
 import autoloadSubdirAgents from "../../hooks/autoload-subdir-agents";
@@ -61,6 +61,38 @@ interface FinderDetails {
   error?: string;
   startedAt: number;
   endedAt?: number;
+}
+
+type RenderTheme = {
+  fg: (color: string, text: string) => string;
+  bold: (text: string) => string;
+  italic: (text: string) => string;
+  underline: (text: string) => string;
+};
+
+function strikethrough(text: string): string {
+  return `\u001b[9m${text}\u001b[29m`;
+}
+
+function buildMarkdownTheme(theme: RenderTheme): MarkdownTheme {
+  return {
+    heading: (text) => theme.fg("mdHeading", text),
+    link: (text) => theme.fg("mdLink", text),
+    linkUrl: (text) => theme.fg("mdLinkUrl", text),
+    code: (text) => theme.fg("mdCode", text),
+    codeBlock: (text) => theme.fg("mdCodeBlock", text),
+    codeBlockBorder: (text) => theme.fg("mdCodeBlockBorder", text),
+    quote: (text) => theme.fg("mdQuote", text),
+    quoteBorder: (text) => theme.fg("mdQuoteBorder", text),
+    hr: (text) => theme.fg("mdHr", text),
+    listBullet: (text) => theme.fg("mdListBullet", text),
+    bold: (text) => theme.bold(text),
+    italic: (text) => theme.italic(text),
+    underline: (text) => theme.underline(text),
+    strikethrough: (text) => strikethrough(text),
+    highlightCode: (code: string, _lang?: string): string[] =>
+      code.split("\n").map((line) => theme.fg("mdCodeBlock", line)),
+  };
 }
 
 function shorten(text: string, max: number): string {
@@ -122,9 +154,9 @@ function buildFinderSystemPrompt(maxTurns: number): string {
     "You operate in a read-only environment and may only use the provided tools (ls/find/grep/read).",
     "Your job: locate and cite the exact code locations that answer the manager's query.",
     "",
-    `Turn budget: you have at most ${maxTurns} turns total (including the final answering turn).`,
+    `Turn budget: you have at most ${maxTurns} turns total (including the final answering turn). This is a hard cap, not a target.`,
     "To conserve turns, batch independent searches: you may issue multiple tool calls in a single turn (e.g., several grep/find/read calls).",
-    "Finish as soon as you can answer with high confidence — do NOT try to use all available turns.",
+    "Finish as soon as you can answer with high confidence — do NOT try to use all available turns (it's fine to answer in 2–3 turns).",
     "Tool use is disabled on the last allowed turn; once you have enough evidence, produce your final answer immediately.",
     "",
     "Non-negotiable constraints:",
@@ -164,7 +196,8 @@ function buildFinderUserPrompt(query: string, maxTurns: number): string {
     "Return Markdown in the required section order (Summary, Locations, Evidence?, Searched?, Next steps?).",
     "For claims about file contents, citations must be in the form `path:lineStart-lineEnd` based on the read ranges you opened.",
     "For path-only results (e.g., list files in a directory), you may cite just `path` based on ls/find output.",
-    `Turn budget: ${maxTurns} turns total. Optimize for fewer turns by batching tool calls.`,
+    `Turn budget: at most ${maxTurns} turns total (hard cap, not a target). If you can answer in 2–3 turns, do so.`,
+    "Optimize for fewer turns by batching tool calls.",
     "",
     "Query:",
     query.trim(),
@@ -330,7 +363,7 @@ const factory: CustomToolFactory = (pi) => {
 
       emit({ status: "running" });
 
-      const tools = createReadOnlyTools(pi.cwd);
+      const tools = [createReadTool(pi.cwd), createBashTool(pi.cwd)];
       const contextFiles = discoverContextFiles(pi.cwd);
       const systemPrompt = buildFinderSystemPrompt(maxTurns);
 
@@ -515,7 +548,7 @@ const factory: CustomToolFactory = (pi) => {
         return new Text((header + callsText + body).trimEnd(), 0, 0);
       }
 
-      const mdTheme = getMarkdownTheme(theme);
+      const mdTheme = buildMarkdownTheme(theme);
       const summary = (details.summaryText ?? (result.content[0]?.type === "text" ? result.content[0].text : ""))
         .trim()
         .slice(0, expanded ? 20000 : 4000);
