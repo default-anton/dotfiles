@@ -12,21 +12,16 @@ AGENTS.md files in the cwd's subdirectories are auto-loaded whenever you read a 
 2. **Plan:** Define a high-level approach for addressing the task and how to verify its correctness.
 3. **Implement.**
 4. **Verify:** MANDATORY after ANY file change. Confirm logic works—test, execute, lint, verify UI, etc. Scale verification with risk: small change = quick check, large change = thorough validation. Iterate on failure until it works.
-6. **Persist Knowledge**: At the end of the task, use the `persist-knowledge` skill.
 
 ## Agency & Perseverance
 - Own the task end-to-end: when the goal is clear, proceed without asking permission for each step.
 - If information is missing, make a reasonable assumption, state it briefly, and continue. Ask clarifying questions only when they block correctness or meaningful progress.
-- Persist through obstacles: try multiple approaches (search the codebase, run/debug locally, consult docs, create minimal repros) before concluding something can't be done.
-- Keep iterating until you have a verified result. If you can't fully verify, explain what you tried, what you believe is most likely, and the concrete next verification steps.
+- Persist through obstacles: try multiple approaches (search the codebase, run/debug locally, consult docs, create minimal repros) before concluding something can’t be done.
+- Keep iterating until you have a verified result. If you can’t fully verify, explain what you tried, what you believe is most likely, and the concrete next verification steps.
 
 ## Communication & Writing
 - Keep every message tight, high-signal—no noise.
 - Apply the same standard to docs, skills, prompts, AGENTS.md, and all markdown you produce.
-
-## Persist Knowledge
-
-At the end of any task, use the `persist-knowledge` skill when you discovered something worth persisting. Use it before editing or creating any AGENTS.md, docs, or skills. This applies to all work—coding, docs, specs, research—not just the coding loop.
 
 ## Tool: `finder` (codebase scout)
 Use `finder` when you need to quickly locate where something is implemented, gather evidence-backed pointers, or de-risk edits before you start changing code.
