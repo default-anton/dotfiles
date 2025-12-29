@@ -1,6 +1,6 @@
 ---
 name: persist-knowledge
-description: After tasks where you: struggled to discover something, hit gotchas, found broken docs/commands, or learned non-obvious patterns. Capture high-leverage knowledge AND improve AGENTS.md/docs/skills. Use at task end.
+description: After tasks where you: struggled to discover something, hit gotchas, found broken AGENTS.md/skills/docs/commands, or learned non-obvious patterns. Capture high-leverage knowledge AND improve AGENTS.md/docs/skills. Use this skill at task end and before editing/creating AGENTS.md/docs/skills.
 ---
 
 # Persist Knowledge
