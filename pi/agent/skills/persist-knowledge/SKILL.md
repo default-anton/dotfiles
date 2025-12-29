@@ -11,9 +11,10 @@ Turn discoveries into small, durable artifacts (AGENTS.md, docs, skills) that ma
 
 ## Protocol (required)
 
-At the end of a task, do one of the following:
-- If there is anything worth persisting (or cleaning up), follow this skill and mention what you updated.
-- Otherwise output: `Persist Knowledge: skipped (reason)`.
+At the end of a task:
+- Evaluate **The gate** below.
+- If **any** gate criterion applies: persist/clean up the highest-leverage item(s) and mention what you updated.
+- If **none** apply: output `Persist Knowledge: skipped (reason)`.
 
 ## The gate (required)
 
@@ -123,9 +124,9 @@ Treat staleness as a bug:
 
 If the knowledge is a repeatable workflow (commands/tools with a reliable sequence), consider creating/updating a project skill in `<cwd>/.pi/skills/<name>/SKILL.md` (plus scripts/assets), and then add a short pointer in the relevant `AGENTS.md`.
 
-## Quality bar
+## Quality bar (applies to AGENTS.md, docs/, and skills)
 
-- Keep notes token-efficient and non-duplicative
+- Keep content tight, high-signal, and void of noise
 - Never store secrets (tokens, credentials, private URLs)
 - Prefer copy/pastable commands and concrete paths over prose
 - If you changed reality (e.g., scripts/config), ensure the docs/rules match it; if docs were stale, delete/update them
