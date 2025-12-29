@@ -12,6 +12,6 @@ pi() {
     shift
     (npx --prefix ~/code/pi-mono/packages/coding-agent tsx ~/code/pi-mono/packages/coding-agent/src/cli.ts --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --tool "$HOME/.dotfiles/pi/agent/vision_tool/index.ts" "$@")
   else
-    (npx --prefix ~/code/pi-mono/packages/coding-agent tsx ~/code/pi-mono/packages/coding-agent/src/cli.ts --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md "$@")
+    (npx --prefix ~/code/pi-mono/packages/coding-agent tsx ~/code/pi-mono/packages/coding-agent/src/cli.ts --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.1-codex-max "$@")
   fi
 }
