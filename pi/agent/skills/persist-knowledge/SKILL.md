@@ -23,6 +23,7 @@ Persist or clean up something only if **at least one** is true:
 - **High frequency**: likely needed again within ~3 future tasks
 - **Not easily searchable**: you wouldn’t find it quickly via `rg` / existing docs
 - **Stale guidance exists**: you found instructions that are wrong, expired, or contradicted by reality
+- **Skill/doc can be improved**: using a skill or doc revealed gaps, bugs, missing scripts, or unclear steps that should be fixed for future uses
 
 If none apply: `Persist Knowledge: skipped (too task-specific / already discoverable)`.
 
@@ -37,6 +38,30 @@ Persist information that is likely to be reused and was not obvious upfront:
 ### Prefer encoding over documenting
 
 If the knowledge can be made true/enforced via code (types, tests, lint rules, CI checks, schemas, component APIs), prefer implementing that. Persist only the minimal “where/how to run it” pointer.
+
+## Improve skills/docs/AGENTS.md when using them
+
+When you use a skill, doc, or AGENTS.md and encounter problems, gaps, or opportunities, update the source file itself so future uses are better:
+
+**Update skills when:**
+- Commands are broken, outdated, or missing flags/arguments
+- Steps are unclear, ambiguous, or wrong order
+- Missing helper scripts that would automate repetitive steps
+- Undocumented gotchas that cause failures
+- Examples don't match reality (paths, filenames, outputs)
+
+**Update docs/AGENTS.md when:**
+- You discover undocumented requirements, constraints, or gotchas
+- Instructions reference non-existent files/paths
+- "Quickstart" or "how to" sections don't actually work
+- Critical information is buried or missing
+
+**What "improving a skill" looks like:**
+- Add/create helper scripts in the skill's directory (e.g., `<skill>/*.sh`)
+- Fix command examples (add missing flags, correct paths, update syntax)
+- Clarify ambiguous steps with concrete examples
+- Add troubleshooting section for common failure modes
+- Remove outdated workarounds that are no longer needed
 
 ## Avoid persisting (common failure modes)
 
