@@ -87,3 +87,26 @@ Navigate to a URL and extract readable content as markdown. Uses Mozilla Readabi
 - When user needs to visually see or interact with a page
 - Debugging authentication or session issues
 - Scraping dynamic content that requires JS execution
+
+## Troubleshooting
+
+### JavaScript Evaluation
+Code is wrapped in `return (${code})` — expressions only, no statements:
+
+```bash
+# ✅ Works
+./browser-eval.js 'document.title'
+./browser-eval.js 'document.querySelectorAll("a").forEach(a => a.href)'
+
+# ❌ Fails
+./browser-eval.js 'const btn = document.querySelector("button")'
+```
+
+### Run Location
+Scripts must run from `browser-tools/` dir or use full paths.
+
+### Timing
+Add `sleep` between operations for UI updates:
+```bash
+sleep 0.5 && ./browser-screenshot.js
+```
