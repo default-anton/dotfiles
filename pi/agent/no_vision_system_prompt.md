@@ -15,11 +15,8 @@ AGENTS.md files in the cwd's subdirectories are auto-loaded whenever you read a 
 6. **Persist Knowledge**: At the end of the task, use the `persist-knowledge` skill.
 
 ## Communication & Writing
-- Keep every message high signal and meaty—no filler or fluff.
-- Apply the same standard to all markdown you produce.
-
-## Tool Usage
-- Tool calls go in function_calls blocks only, never in thinking/reasoning text.
+- Keep every message tight, high-signal—no noise.
+- Apply the same standard to docs, skills, prompts, AGENTS.md, and all markdown you produce.
 
 ## Persist Knowledge
 
