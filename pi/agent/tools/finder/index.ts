@@ -51,7 +51,6 @@ type ToolCall = {
 interface FinderDetails {
   status: FinderStatus;
   query: string;
-  currentProvider?: string;
   subagentProvider?: string;
   subagentModelId?: string;
   turns: number;
@@ -236,56 +235,21 @@ function createTurnBudgetHook(maxTurns: number): HookFactory {
 
 type HasProviderAndId = { provider: string; id: string };
 
-function selectSubagentModel<T extends HasProviderAndId>(models: T[], currentProvider?: string): T | undefined {
+function selectSubagentModel<T extends HasProviderAndId>(models: T[]): T | undefined {
   if (models.length === 0) return undefined;
 
-  const preferredIdsByProvider: Record<string, string[]> = {
-    "google-vertex": ["gemini-3-flash-preview"],
-    anthropic: ["claude-haiku-4-5"],
-    zai: ["glm-4.7"],
-    "google-antigravity": ["gemini-3-flash"],
-    openai: ["gpt-5.1-codex-mini"],
-  };
-
-  const pickFromProvider = (provider: string): T | undefined => {
-    const providerModels = models.filter((m) => m.provider === provider);
-    if (providerModels.length === 0) return undefined;
-
-    const preferredIds = preferredIdsByProvider[provider] ?? [];
-    for (const id of preferredIds) {
-      const match = providerModels.find((m) => m.id === id);
-      if (match) return match;
-    }
-
-    const heuristic = providerModels.find((m) => /flash|haiku|mini/i.test(m.id));
-    return heuristic ?? providerModels[0];
-  };
-
-  if (currentProvider) {
-    const match = pickFromProvider(currentProvider);
-    if (match) return match;
-  }
-
   const globalPreferred: Array<{ provider: string; id: string }> = [
-    { provider: "zai", id: "glm-4.7" },
     { provider: "google-vertex", id: "gemini-3-flash-preview" },
-    { provider: "google-antigravity", id: "gemini-3-flash" },
-    { provider: "openai", id: "gpt-5.1-codex-mini" },
-    { provider: "anthropic", id: "claude-haiku-4-5" },
+    { provider: "zai", id: "glm-4.7" },
   ];
 
   for (const pref of globalPreferred) {
     const match = models.find((m) => m.provider === pref.provider && m.id === pref.id);
     if (match) return match;
   }
-
-  const heuristic = models.find((m) => /flash|haiku|mini/i.test(m.id));
-  return heuristic ?? models[0];
 }
 
 const factory: CustomToolFactory = (pi) => {
-  let lastDetectedProvider: string | undefined;
-
   const tool: CustomAgentTool<typeof FinderParams, FinderDetails> = {
     name: "finder",
     label: "Finder",
@@ -300,21 +264,11 @@ const factory: CustomToolFactory = (pi) => {
       let summaryText = "";
       const maxTurns = params.maxTurns ?? DEFAULT_MAX_TURNS;
 
-      const currentProvider = (() => {
-        try {
-          const sessionManager = SessionManager.continueRecent(pi.cwd);
-          return sessionManager.buildSessionContext().model?.provider;
-        } catch {
-          return undefined;
-        }
-      })();
-      lastDetectedProvider = currentProvider;
-
       const authStorage = discoverAuthStorage();
       const modelRegistry = discoverModels(authStorage);
 
       const availableModels = await modelRegistry.getAvailable();
-      const preferredModel = selectSubagentModel(availableModels, currentProvider);
+      const preferredModel = selectSubagentModel(availableModels);
       if (!preferredModel) {
         const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
         summaryText = error;
@@ -323,7 +277,6 @@ const factory: CustomToolFactory = (pi) => {
           details: {
             status: "error",
             query: params.query,
-            currentProvider,
             turns,
             maxTurns,
             toolCalls,
@@ -350,7 +303,6 @@ const factory: CustomToolFactory = (pi) => {
           content: [{ type: "text", text }],
           details: {
             query: params.query,
-            currentProvider,
             subagentProvider,
             subagentModelId,
             turns,
@@ -454,7 +406,6 @@ const factory: CustomToolFactory = (pi) => {
           details: {
             status: aborted ? "aborted" : "done",
             query: params.query,
-            currentProvider,
             subagentProvider,
             subagentModelId,
             turns,
@@ -476,7 +427,6 @@ const factory: CustomToolFactory = (pi) => {
           details: {
             status: aborted ? "aborted" : "error",
             query: params.query,
-            currentProvider,
             subagentProvider,
             subagentModelId,
             turns,
@@ -496,11 +446,9 @@ const factory: CustomToolFactory = (pi) => {
     },
 
     renderCall(args, theme) {
-      const providerNote = lastDetectedProvider ? theme.fg("dim", ` (${lastDetectedProvider})`) : "";
       const preview = shorten(args.query.replace(/\s+/g, " ").trim(), 90);
       const text =
         theme.fg("toolTitle", theme.bold("finder")) +
-        providerNote +
         "\n" +
         theme.fg("muted", preview);
       return new Text(text, 0, 0);

@@ -58,7 +58,6 @@ interface VisionDetails {
   status: VisionStatus;
   task: string;
   images: string[];
-  currentProvider?: string;
   subagentProvider?: string;
   subagentModelId?: string;
   turns: number;
@@ -274,8 +273,6 @@ function selectVisionModel<T extends HasProviderAndId>(models: T[]): T | undefin
 }
 
 const factory: CustomToolFactory = (pi) => {
-  let lastDetectedProvider: string | undefined;
-
   const tool: CustomAgentTool<typeof VisionParams, VisionDetails> = {
     name: "vision",
     label: "Vision",
@@ -288,16 +285,6 @@ const factory: CustomToolFactory = (pi) => {
       const toolCalls: ToolCall[] = [];
       let turns = 0;
       let summaryText = "";
-
-      const currentProvider = (() => {
-        try {
-          const sessionManager = SessionManager.continueRecent(pi.cwd);
-          return sessionManager.buildSessionContext().model?.provider;
-        } catch {
-          return undefined;
-        }
-      })();
-      lastDetectedProvider = currentProvider;
 
       const authStorage = discoverAuthStorage();
       const modelRegistry = discoverModels(authStorage);
@@ -314,6 +301,7 @@ const factory: CustomToolFactory = (pi) => {
             task: params.task,
             images: params.images,
             turns,
+            maxTurns: VISION_MAX_TURNS,
             toolCalls,
             summaryText,
             error,
@@ -339,10 +327,10 @@ const factory: CustomToolFactory = (pi) => {
           details: {
             task: params.task,
             images: params.images,
-            currentProvider,
             subagentProvider,
             subagentModelId,
             turns,
+            maxTurns: VISION_MAX_TURNS,
             toolCalls,
             summaryText,
             startedAt,
@@ -447,7 +435,6 @@ const factory: CustomToolFactory = (pi) => {
             status: aborted ? "aborted" : "done",
             task: params.task,
             images: params.images,
-            currentProvider,
             subagentProvider,
             subagentModelId,
             turns,
@@ -470,7 +457,6 @@ const factory: CustomToolFactory = (pi) => {
             status: aborted ? "aborted" : "error",
             task: params.task,
             images: params.images,
-            currentProvider,
             subagentProvider,
             subagentModelId,
             turns,
@@ -490,12 +476,10 @@ const factory: CustomToolFactory = (pi) => {
     },
 
     renderCall(args, theme) {
-      const providerNote = lastDetectedProvider ? theme.fg("dim", ` (${lastDetectedProvider})`) : "";
       const imageFiles = args.images.map((p) => nodePath.basename(p)).join(" ");
       const preview = shorten(args.task.replace(/\s+/g, " ").trim(), 90);
       const text =
         theme.fg("toolTitle", theme.bold("vision")) +
-        providerNote +
         "\n" +
         theme.fg("muted", imageFiles + "\n" + preview);
       return new Text(text, 0, 0);
