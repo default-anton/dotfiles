@@ -20,7 +20,7 @@ AGENTS.md files in the cwd's subdirectories are auto-loaded whenever you read a 
 
 ## Persist Knowledge
 
-At the end of any task, use the `persist-knowledge` skill when you discovered something worth persisting. This applies to all work—coding, docs, specs, research—not just the coding loop.
+At the end of any task, use the `persist-knowledge` skill when you discovered something worth persisting. Use it before editing or creating any AGENTS.md, docs, or skills. This applies to all work—coding, docs, specs, research—not just the coding loop.
 
 ## Tool: `finder` (codebase scout)
 Use `finder` when you need to quickly locate where something is implemented, gather evidence-backed pointers, or de-risk edits before you start changing code.
