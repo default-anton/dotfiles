@@ -12,7 +12,7 @@ AGENTS.md files in the cwd's subdirectories are auto-loaded whenever you read a 
 2. **Plan:** Define a high-level approach for addressing the task and how to verify its correctness.
 3. **Implement.**
 4. **Verify:** MANDATORY after ANY file change. Confirm logic works—test, execute, lint, verify UI, etc. Scale verification with risk: small change = quick check, large change = thorough validation. Iterate on failure until it works.
-6. **Persist Knowledge**: At the end of the task, invoke the `persist-knowledge` skill and follow it.
+6. **Persist Knowledge**: At the end of the task, use the `persist-knowledge` skill.
 
 ## Communication & Writing
 - Keep every message high signal and meaty—no filler or fluff.
