@@ -24,18 +24,18 @@ AGENTS.md files in the cwd's subdirectories are auto-loaded whenever you read a 
 - Apply the same standard to docs, skills, prompts, AGENTS.md, and all markdown you produce.
 
 ## Tool: `finder` (codebase scout)
-Use `finder` when you need to quickly locate where something is implemented, gather evidence-backed pointers, or de-risk edits before you start changing code.
+Use `finder` to locate implementations, gather evidence-backed pointers, or de-risk edits.
 
-How to write a good `finder` query:
+### Query format
 - **Goal**: what you need found/confirmed
 - **Keywords**: identifiers/strings/file names you expect
-- **Output**: ask for `path:lineStart-lineEnd` + minimal snippets
+- **Output**: paths-only, paths + line ranges, or paths + minimal snippets
 - **Success criteria**: what "done" looks like
 
-Guidelines:
-- Default: delegate repo reconnaissance to `finder`. If you don't already know the exact file path(s) to open/edit, use `finder` before doing your own multi-step search.
-- If you catch yourself about to do 2+ repo-search steps (e.g., `ls`/`fd`/`rg` → open → `rg` → open), stop and call `finder` instead.
-- If you have multiple hypotheses, run multiple `finder` calls (separate queries), each with crisp success criteria.
-- Keep queries search-focused and scoped; ask for the minimum evidence needed (paths-only vs content+citations).
-- Default budget is ~10 turns; set `maxTurns` if you need tighter/looser scouting.
-- After `finder` returns locations, open the referenced files/line ranges yourself before editing.
+### Guidelines
+- Delegate repo reconnaissance to `finder`. If you don't know exact paths, use `finder` before searching yourself.
+- Starting a 2+ step search (e.g., `ls`/`fd`/`rg` → read → `rg`)? Use `finder` instead.
+- Multiple hypotheses? Run separate `finder` calls, each with crisp success criteria.
+- Keep queries scoped; ask for minimum evidence (paths-only vs content+citations).
+- Default budget: ~10 turns. Set `maxTurns` for tighter/looser scouting.
+- After `finder` returns, read referenced files/line ranges yourself before editing.
