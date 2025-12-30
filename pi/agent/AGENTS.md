@@ -7,7 +7,7 @@
 - Do NOT add code comments unless they explain **why** something non-obvious exists. If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment
 - Prefer fd over find for file searching tasks
 - Prefer rg (ripgrep) over grep for text searching tasks
-- Read web pages via bash: `read_web_page <url>` (CLI tool). Returns markdown.
+- When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ddgr, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux
 - When I tell you to "remember" something:
   - Global: store in ~/.dotfiles/pi/agent/AGENTS.md
