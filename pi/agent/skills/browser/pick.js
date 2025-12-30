@@ -4,9 +4,9 @@ import puppeteer from "puppeteer-core";
 
 const message = process.argv.slice(2).join(" ");
 if (!message) {
-	console.log("Usage: browser-pick.js 'message'");
+	console.log("Usage: pick.js 'message'");
 	console.log("\nExample:");
-	console.log('  browser-pick.js "Click the submit button"');
+	console.log('  pick.js "Click the submit button"');
 	process.exit(1);
 }
 
@@ -18,7 +18,7 @@ const b = await Promise.race([
 	new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
 ]).catch((e) => {
 	console.error("✗ Could not connect to browser:", e.message);
-	console.error("  Run: browser-start.js");
+	console.error("  Run: start.js");
 	process.exit(1);
 });
 

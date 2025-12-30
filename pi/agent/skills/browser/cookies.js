@@ -10,7 +10,7 @@ const b = await Promise.race([
 	new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
 ]).catch((e) => {
 	console.error("✗ Could not connect to browser:", e.message);
-	console.error("  Run: browser-start.js");
+	console.error("  Run: start.js");
 	process.exit(1);
 });
 

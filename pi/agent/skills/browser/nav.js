@@ -6,10 +6,10 @@ const url = process.argv[2];
 const newTab = process.argv[3] === "--new";
 
 if (!url) {
-	console.log("Usage: browser-nav.js <url> [--new]");
+	console.log("Usage: nav.js <url> [--new]");
 	console.log("\nExamples:");
-	console.log("  browser-nav.js https://example.com       # Navigate current tab");
-	console.log("  browser-nav.js https://example.com --new # Open in new tab");
+	console.log("  nav.js https://example.com       # Navigate current tab");
+	console.log("  nav.js https://example.com --new # Open in new tab");
 	process.exit(1);
 }
 
@@ -21,7 +21,7 @@ const b = await Promise.race([
 	new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
 ]).catch((e) => {
 	console.error("✗ Could not connect to browser:", e.message);
-	console.error("  Run: browser-start.js");
+	console.error("  Run: start.js");
 	process.exit(1);
 });
 

@@ -6,13 +6,13 @@ import puppeteer from "puppeteer-core";
 const useProfile = process.argv[2] === "--profile";
 
 if (process.argv[2] && process.argv[2] !== "--profile") {
-	console.log("Usage: browser-start.js [--profile]");
+	console.log("Usage: start.js [--profile]");
 	console.log("\nOptions:");
 	console.log("  --profile  Copy your default Chrome profile (cookies, logins)");
 	process.exit(1);
 }
 
-const SCRAPING_DIR = `${process.env.HOME}/.cache/browser-tools`;
+const SCRAPING_DIR = `${process.env.HOME}/.cache/tools`;
 
 // Check if already running on :9222
 try {
@@ -57,7 +57,7 @@ spawn(
 		"--remote-debugging-port=9222",
 		`--user-data-dir=${SCRAPING_DIR}`,
 		"--no-first-run",
-		"--no-default-browser-check",
+		"--no-default-check",
 	],
 	{ detached: true, stdio: "ignore" },
 ).unref();

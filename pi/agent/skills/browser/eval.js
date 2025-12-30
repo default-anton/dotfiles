@@ -4,10 +4,10 @@ import puppeteer from "puppeteer-core";
 
 const code = process.argv.slice(2).join(" ");
 if (!code) {
-	console.log("Usage: browser-eval.js 'code'");
+	console.log("Usage: eval.js 'code'");
 	console.log("\nExamples:");
-	console.log('  browser-eval.js "document.title"');
-	console.log('  browser-eval.js "document.querySelectorAll(\'a\').length"');
+	console.log('  eval.js "document.title"');
+	console.log('  eval.js "document.querySelectorAll(\'a\').length"');
 	process.exit(1);
 }
 
@@ -19,7 +19,7 @@ const b = await Promise.race([
 	new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
 ]).catch((e) => {
 	console.error("✗ Could not connect to browser:", e.message);
-	console.error("  Run: browser-start.js");
+	console.error("  Run: start.js");
 	process.exit(1);
 });
 
