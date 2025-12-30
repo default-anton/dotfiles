@@ -1,6 +1,6 @@
 ---
 name: persist-knowledge
-description: At the end of EVERY task and before editing/creating AGENTS.md/docs/skills: evaluate whether discoveries should be persisted. Turn learnings into AGENTS.md/docs/skills updates when: you struggled to discover something, hit gotchas, found broken docs/commands, learned non-obvious patterns, or improved existing workflows.
+description: Required at end of every task; and before editing/creating AGENTS.md/docs/skills
 ---
 
 # Persist Knowledge
