@@ -1,7 +1,7 @@
 pi() {
   local MODELS="gpt-5.1-codex-max:high,gpt-5.2:high,gemini-3-flash-preview:high,gemini-3-pro-preview:high"
   # local PI="npx --prefix ~/code/pi-mono/packages/coding-agent tsx ~/code/pi-mono/packages/coding-agent/src/cli.ts"
-  local PI="pi"
+  local PI="command pi"
 
   if [ "${1:-}" = "chat" ]; then
     shift
