@@ -240,6 +240,7 @@ function selectSubagentModel<T extends HasProviderAndId>(models: T[]): T | undef
 
   const globalPreferred: Array<{ provider: string; id: string }> = [
     { provider: "google-vertex", id: "gemini-3-flash-preview" },
+    { provider: "openai", id: "gpt-5.1-codex-mini" },
     { provider: "zai", id: "glm-4.7" },
   ];
 
