@@ -12,17 +12,16 @@ Headless web search and content extraction using Brave Search. No browser requir
 Assume packages are already installed. If not, run once:
 
 ```bash
-cd {baseDir}/brave-search
-npm ci
+cd ~/.pi/agent/skills/brave-search/ && npm ci
 ```
 
 ## Search
 
 ```bash
 # Basic search (5 results)
-./search.js "query"
+~/.pi/agent/skills/brave-search/search.js "query"
 # More results
-./search.js "query" -n 10
+~/.pi/agent/skills/brave-search/search.js "query" -n 10
 ```
 
 ## Extract Page Content
