@@ -5,6 +5,7 @@
 
    Exception: ad hoc one-off artifacts (e.g., RCA write-ups, notes, plans, proposals, suggestions, etc.) — no pattern review required; keep them token-efficient
 - Do NOT add code comments unless they explain **why** something non-obvious exists. If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment
+- If the project says it contains AGENTS.md in subdirectories, `fd -tf AGENTS.md` and read the relevant ones for additional rules or context for that subdirectory
 - Prefer fd over find for file searching tasks
 - Prefer rg (ripgrep) over grep for text searching tasks
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
