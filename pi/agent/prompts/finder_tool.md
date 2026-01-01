@@ -1,11 +1,10 @@
 ## Tool: `finder` (codebase scout)
-Use `finder` to locate implementations, gather evidence-backed pointers, or de-risk edits.
 
 ### Query format
-- **Goal**: what you need found/confirmed
-- **Keywords**: identifiers/strings/file names you expect
-- **Output**: paths-only, paths + line ranges, or paths + minimal snippets
-- **Success criteria**: what "done" looks like
+- Goal: what you need found/confirmed
+- Keywords: identifiers/strings/file names you expect
+- Output: paths and/or line ranges and/or minimal snippets
+- Success criteria: what "done" looks like
 
 ### Guidelines
 - Delegate repo reconnaissance to `finder`. If you don't know exact paths, use `finder` before searching yourself.
