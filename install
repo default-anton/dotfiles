@@ -4,14 +4,14 @@ import argparse
 import os
 from pathlib import Path
 from subprocess import Popen, check_output
-from typing import Final, Tuple, List
+from typing import Final
 from platform import python_version
 
 NODE = "22"
 RUBY = "3.4"
 LUA = "5.1"
 
-SYM_LINKS: Final[List[Tuple[str, str]]] = [
+SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
     ("~/.gitconfig", "gitconfig"),
     ("~/.psqlrc", "psqlrc"),
@@ -44,17 +44,17 @@ SYM_LINKS: Final[List[Tuple[str, str]]] = [
     ("~/.config/opencode/opencode.json", "opencode/opencode.json"),
 ]
 
-TEMPLATES: Final[List[Tuple[str, str]]] = [
+TEMPLATES: Final[list[tuple[str, str]]] = [
     ("~/.config/alacritty/alacritty.toml", "alacritty.toml"),
 ]
 
-DIRECTORIES: Final[List[str]] = [
+DIRECTORIES: Final[list[str]] = [
     "~/code",
 ]
 
 DOTFILES: Path = Path("~/.dotfiles").expanduser()
 
-SHELL_CMDS: Final[List[str]] = [
+SHELL_CMDS: Final[list[str]] = [
     "brew bundle --no-upgrade",
     f"$(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY} lua@{LUA}",
     "echo ruff ty | xargs -n1 $(brew --prefix)/bin/uv tool install",
@@ -62,11 +62,11 @@ SHELL_CMDS: Final[List[str]] = [
     "$(brew --prefix)/opt/fzf/install",
 ]
 
-BASHRC_LINES: Final[List[str]] = [
+BASHRC_LINES: Final[list[str]] = [
     "source ~/.dotfiles/bashrc",
 ]
 
-BASH_PROFILE_LINES: Final[List[str]] = [
+BASH_PROFILE_LINES: Final[list[str]] = [
     "source ~/.bashrc",
     "source ~/.dotfiles/profile",
 ]
