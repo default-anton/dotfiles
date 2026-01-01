@@ -44,6 +44,11 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.config/opencode/opencode.json", "opencode/opencode.json"),
 ]
 
+COPY_FILES: Final[list[tuple[str, str]]] = [
+    ("~/.codex/skills/persist-knowledge", "pi/agent/skills/persist-knowledge"),
+    ("~/.codex/skills/browser", "pi/agent/skills/browser"),
+]
+
 TEMPLATES: Final[list[tuple[str, str]]] = [
     ("~/.config/alacritty/alacritty.toml", "alacritty.toml"),
 ]
@@ -103,6 +108,18 @@ def main():
         print(f"ln -s {src} {dst}")
         src.unlink(missing_ok=True)
         src.symlink_to(dst, target_is_directory=dst.is_dir())
+
+    for (dst, src) in COPY_FILES:
+        dst, src = Path(dst).expanduser(), DOTFILES.joinpath(src)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        print(f"cp -cRp {src} {dst}")
+        process = Popen(
+            f'cp -cRp "{src}" "{dst}"',
+            cwd=DOTFILES,
+            shell=True,
+            executable=os.getenv("SHELL"),
+        )
+        process.wait(timeout=3600)
 
     for (dst, template) in TEMPLATES:
         dst, template = Path(dst).expanduser(), DOTFILES.joinpath(template)
