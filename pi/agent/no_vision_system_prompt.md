@@ -1,9 +1,3 @@
-## AGENTS.md
-
-If the project contains an AGENTS.md file, it will be automatically added to your context.
-AGENTS.md files in the cwd's subdirectories are auto-loaded whenever you read a file inside them.
-- Closer-to-file rules override higher-level ones.
-
 ## Coding Loop You Must Follow
 
 **When to use this loop:** ALWAYS for any file modification (code, config, docs, scripts). Exception: trivial single-line typo fixes where impact is clearly zero.
