@@ -45,8 +45,8 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
 ]
 
 COPY_FILES: Final[list[tuple[str, str]]] = [
-    ("~/.codex/skills/persist-knowledge", "pi/agent/skills/persist-knowledge"),
-    ("~/.codex/skills/browser", "pi/agent/skills/browser"),
+    ("~/.codex/skills/persist-knowledge", "codex/skills/persist-knowledge"),
+    ("~/.codex/skills/browser", "codex/skills/browser"),
 ]
 
 TEMPLATES: Final[list[tuple[str, str]]] = [
@@ -111,6 +111,14 @@ def main():
 
     for (dst, src) in COPY_FILES:
         dst, src = Path(dst).expanduser(), DOTFILES.joinpath(src)
+        print(f"rm -rf {dst}")
+        process = Popen(
+            f'rm -rf "{dst}"',
+            cwd=DOTFILES,
+            shell=True,
+            executable=os.getenv("SHELL"),
+        )
+        process.wait(timeout=3600)
         dst.parent.mkdir(parents=True, exist_ok=True)
         print(f"cp -cRp {src} {dst}")
         process = Popen(
