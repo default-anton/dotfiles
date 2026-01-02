@@ -1,7 +1,8 @@
 import os from "node:os";
 import nodePath from "node:path";
 
-import type { CustomAgentTool, CustomToolFactory, HookFactory } from "@mariozechner/pi-coding-agent";
+import type { CustomTool, CustomToolFactory } from "@mariozechner/pi-coding-agent";
+import type { HookFactory } from "@mariozechner/pi-coding-agent/hooks";
 import {
   SessionManager,
   createAgentSession,
@@ -14,7 +15,7 @@ import {
 import { Container, Markdown, Spacer, Text, type MarkdownTheme } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
-import autoloadSubdirAgents from "../../_hooks/autoload-subdir-agents";
+import autoloadSubdirAgents from "../../../../.dotfiles/pi/agent/_hooks/autoload-subdir-agents";
 
 const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent/_hooks/autoload-subdir-agents.ts");
 
@@ -248,17 +249,19 @@ function selectSubagentModel<T extends HasProviderAndId>(models: T[]): T | undef
     const match = models.find((m) => m.provider === pref.provider && m.id === pref.id);
     if (match) return match;
   }
+
+  return models[0];
 }
 
 const factory: CustomToolFactory = (pi) => {
-  const tool: CustomAgentTool<typeof FinderParams, FinderDetails> = {
+  const tool: CustomTool<typeof FinderParams, FinderDetails> = {
     name: "finder",
     label: "Finder",
     description:
       "Read-only codebase scout: spawns an isolated subagent that searches with ls/find/grep/read and returns an evidence-backed Markdown summary with citations (path:lineStart-lineEnd).",
     parameters: FinderParams,
 
-    async execute(_toolCallId, params, signal, onUpdate) {
+    async execute(_toolCallId, params, onUpdate, ctx, signal) {
       const startedAt = Date.now();
       const toolCalls: ToolCall[] = [];
       let turns = 0;
@@ -266,7 +269,7 @@ const factory: CustomToolFactory = (pi) => {
       const maxTurns = params.maxTurns ?? DEFAULT_MAX_TURNS;
 
       const authStorage = discoverAuthStorage();
-      const modelRegistry = discoverModels(authStorage);
+      const modelRegistry = ctx?.modelRegistry ?? discoverModels(authStorage);
 
       const availableModels = await modelRegistry.getAvailable();
       const preferredModel = selectSubagentModel(availableModels);

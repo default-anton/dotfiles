@@ -2,8 +2,9 @@ import fs from "node:fs";
 import os from "node:os";
 import nodePath from "node:path";
 
-import type { Attachment } from "@mariozechner/agent";
-import type { CustomAgentTool, CustomToolFactory, HookFactory } from "@mariozechner/pi-coding-agent";
+import type { ImageContent } from "@mariozechner/pi-ai";
+import type { CustomTool, CustomToolFactory } from "@mariozechner/pi-coding-agent";
+import type { HookFactory } from "@mariozechner/pi-coding-agent/hooks";
 import {
   SessionManager,
   createAgentSession,
@@ -15,9 +16,9 @@ import {
 import { Container, Markdown, Spacer, Text, type MarkdownTheme } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
-import autoloadSubdirAgents from "../../hooks/autoload-subdir-agents";
+import autoloadSubdirAgents from "../../../../.dotfiles/pi/agent/_hooks/autoload-subdir-agents";
 
-const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent/hooks/autoload-subdir-agents.ts");
+const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent/_hooks/autoload-subdir-agents.ts");
 
 const VISION_MAX_TURNS = 50;
 
@@ -199,8 +200,8 @@ function buildVisionUserPrompt(images: string[], task: string): string {
   ].join("\n");
 }
 
-async function createImageAttachments(imagePaths: string[], cwd: string): Promise<Attachment[]> {
-  const attachments: Attachment[] = [];
+async function createImageContents(imagePaths: string[], cwd: string): Promise<ImageContent[]> {
+  const images: ImageContent[] = [];
 
   for (const imagePath of imagePaths) {
     const resolvedPath = nodePath.isAbsolute(imagePath) ? imagePath : nodePath.resolve(cwd, imagePath);
@@ -209,7 +210,6 @@ async function createImageAttachments(imagePaths: string[], cwd: string): Promis
       const buffer = await fs.promises.readFile(resolvedPath);
       const base64 = buffer.toString("base64");
       const ext = nodePath.extname(resolvedPath).toLowerCase();
-      const fileName = nodePath.basename(resolvedPath);
 
       const mimeTypeMap: Record<string, string> = {
         ".jpg": "image/jpeg",
@@ -221,20 +221,17 @@ async function createImageAttachments(imagePaths: string[], cwd: string): Promis
 
       const mimeType = mimeTypeMap[ext] || "image/png";
 
-      attachments.push({
-        id: `img-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      images.push({
         type: "image",
-        fileName,
+        data: base64,
         mimeType,
-        size: buffer.length,
-        content: base64,
       });
     } catch (e) {
       throw new Error(`Failed to read image: ${imagePath} (${e instanceof Error ? e.message : String(e)})`);
     }
   }
 
-  return attachments;
+  return images;
 }
 
 function createTurnBudgetHook(maxTurns: number): HookFactory {
@@ -270,24 +267,26 @@ function selectVisionModel<T extends HasProviderAndId>(models: T[]): T | undefin
     const match = models.find((m) => m.provider === pref.provider && m.id === pref.id);
     if (match) return match;
   }
+
+  return models[0];
 }
 
 const factory: CustomToolFactory = (pi) => {
-  const tool: CustomAgentTool<typeof VisionParams, VisionDetails> = {
+  const tool: CustomTool<typeof VisionParams, VisionDetails> = {
     name: "vision",
     label: "Vision",
     description:
       "Vision-enabled subagent that analyzes screenshots/images and makes code changes based on visual input. Spawns as an isolated agent with access to coding tools (read, bash, edit, write).",
     parameters: VisionParams,
 
-    async execute(_toolCallId, params, signal, onUpdate) {
+    async execute(_toolCallId, params, onUpdate, ctx, signal) {
       const startedAt = Date.now();
       const toolCalls: ToolCall[] = [];
       let turns = 0;
       let summaryText = "";
 
       const authStorage = discoverAuthStorage();
-      const modelRegistry = discoverModels(authStorage);
+      const modelRegistry = ctx?.modelRegistry ?? discoverModels(authStorage);
 
       const availableModels = await modelRegistry.getAvailable();
       const preferredModel = selectVisionModel(availableModels);
@@ -418,10 +417,10 @@ const factory: CustomToolFactory = (pi) => {
       });
 
       try {
-        const attachments = await createImageAttachments(params.images, pi.cwd);
+        const images = await createImageContents(params.images, pi.cwd);
         await session.prompt(buildVisionUserPrompt(params.images, params.task), {
           expandSlashCommands: false,
-          attachments,
+          images,
         });
         summaryText = getLastAssistantText(session.state.messages as any[]).trim();
         if (!summaryText) summaryText = aborted ? "Aborted" : "(no output)";

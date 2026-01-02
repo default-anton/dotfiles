@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { HookAPI } from "@mariozechner/pi-coding-agent/hooks";
+import type { HookAPI, HookContext } from "@mariozechner/pi-coding-agent/hooks";
 
 type TextContent = { type: "text"; text: string };
 
@@ -44,13 +44,15 @@ export default function(pi: HookAPI) {
     return agentsFiles.reverse();
   }
 
-  pi.on("session", async (event, ctx) => {
-    if (event.reason === "start" || event.reason === "switch" || event.reason === "new") {
-      resetSession(ctx.cwd);
-    }
-  });
+  const handleSessionChange = (_event: unknown, ctx: HookContext) => {
+    resetSession(ctx.cwd);
+  };
 
-  pi.on("tool_result", async (event, ctx) => {
+  pi.on("session_start", handleSessionChange);
+  pi.on("session_switch", handleSessionChange);
+  pi.on("session_new", handleSessionChange);
+
+  pi.on("tool_result", async (event, ctx: HookContext) => {
     if (event.toolName !== "read" || event.isError) return undefined;
 
     const pathInput = event.input.path as string | undefined;
