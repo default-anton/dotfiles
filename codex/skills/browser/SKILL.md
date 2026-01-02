@@ -7,22 +7,22 @@ description: Minimal Chrome DevTools Protocol tools for browser automation and s
 
 Minimal CDP tools for collaborative site exploration and scraping.
 
-**IMPORTANT**: All scripts are located in `~/.pi/agent/skills/browser/` and must be called with full paths.
+**IMPORTANT**: All scripts are located in `~/.codex/skills/browser/` and must be called with full paths.
 
 ## Setup
 
 Assume packages are already installed. If not, run once:
 
 ```bash
-cd ~/.pi/agent/skills/browser/
+cd ~/.codex/skills/browser/
 npm install
 ```
 
 ## Start Chrome
 
 ```bash
-~/.pi/agent/skills/browser/start.js              # Fresh profile
-~/.pi/agent/skills/browser/start.js --profile    # Copy user's profile (cookies, logins)
+~/.codex/skills/browser/start.js              # Fresh profile
+~/.codex/skills/browser/start.js --profile    # Copy user's profile (cookies, logins)
 ```
 
 Start Chrome on `:9222` with remote debugging.
@@ -30,8 +30,8 @@ Start Chrome on `:9222` with remote debugging.
 ## Navigate
 
 ```bash
-~/.pi/agent/skills/browser/nav.js https://example.com
-~/.pi/agent/skills/browser/nav.js https://example.com --new
+~/.codex/skills/browser/nav.js https://example.com
+~/.codex/skills/browser/nav.js https://example.com --new
 ```
 
 Navigate current tab or open new tab.
@@ -39,25 +39,25 @@ Navigate current tab or open new tab.
 ## Evaluate JavaScript
 
 ```bash
-~/.pi/agent/skills/browser/eval.js 'document.title'
-~/.pi/agent/skills/browser/eval.js 'document.querySelectorAll("a").length'
+~/.codex/skills/browser/eval.js 'document.title'
+~/.codex/skills/browser/eval.js 'document.querySelectorAll("a").length'
 ```
 
 Execute JavaScript in active tab. Code is wrapped in `return (${code})` — expressions or IIFE for multiple statements:
 
 ```bash
 # ✅ Works
-~/.pi/agent/skills/browser/eval.js 'document.title'
-~/.pi/agent/skills/browser/eval.js '(() => { const x = 1; return x + 1; })()'
+~/.codex/skills/browser/eval.js 'document.title'
+~/.codex/skills/browser/eval.js '(() => { const x = 1; return x + 1; })()'
 
 # ❌ Fails
-~/.pi/agent/skills/browser/eval.js 'const btn = document.querySelector("button")'
+~/.codex/skills/browser/eval.js 'const btn = document.querySelector("button")'
 ```
 
 ## Screenshot
 
 ```bash
-~/.pi/agent/skills/browser/screenshot.js
+~/.codex/skills/browser/screenshot.js
 ```
 
 Screenshot current viewport, returns temp file path.
@@ -65,7 +65,7 @@ Screenshot current viewport, returns temp file path.
 ## Pick Elements
 
 ```bash
-~/.pi/agent/skills/browser/pick.js "Click the submit button"
+~/.codex/skills/browser/pick.js "Click the submit button"
 ```
 
 **IMPORTANT**: Use this tool when the user wants to select specific DOM elements on the page. This launches an interactive picker that lets the user click elements to select them. The user can select multiple elements (Cmd/Ctrl+Click) and press Enter when done. The tool returns CSS selectors for the selected elements.
@@ -78,7 +78,7 @@ Common use cases:
 ## Cookies
 
 ```bash
-~/.pi/agent/skills/browser/cookies.js
+~/.codex/skills/browser/cookies.js
 ```
 
 Display all cookies for the current tab including domain, path, httpOnly, and secure flags. Use this to debug authentication issues or inspect session state.
@@ -95,5 +95,5 @@ Display all cookies for the current tab including domain, path, httpOnly, and se
 ### Timing
 Add `sleep` between operations for UI updates:
 ```bash
-sleep 0.5 && ~/.pi/agent/skills/browser/screenshot.js
+sleep 0.5 && ~/.codex/skills/browser/screenshot.js
 ```
