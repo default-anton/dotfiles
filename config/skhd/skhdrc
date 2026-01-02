@@ -79,7 +79,6 @@
 ctrl + cmd - a : open -a 'Ghostty'
 ctrl + cmd - c : open -a 'Google Chrome'
 ctrl + cmd - f : open -a 'Finder'
-ctrl + cmd - g : open -a 'Gemini'
 ctrl + cmd - h : open -a 'Hey'
 ctrl + cmd - t : open -a 'Google Tasks'
 
