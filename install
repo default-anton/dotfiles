@@ -35,7 +35,6 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.pi/agent/tools", "pi/agent/tools"),
     ("~/Library/Application Support/com.mitchellh.ghostty/config", "ghostty/config"),
     ("~/.codex/AGENTS.md", "codex/AGENTS.md"),
-    ("~/.codex/config.toml", "codex/config.toml"),
     ("~/.claude/commands", "claude/commands"),
     ("~/.claude/settings.json", "claude/settings.json"),
     ("~/.claude/CLAUDE.md", "claude/CLAUDE.md"),
@@ -45,6 +44,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
 ]
 
 COPY_FILES: Final[list[tuple[str, str]]] = [
+    ("~/.codex/config.toml", "codex/config.toml"),
     ("~/.codex/skills/persist-knowledge", "codex/skills/persist-knowledge"),
     ("~/.codex/skills/browser", "codex/skills/browser"),
 ]
