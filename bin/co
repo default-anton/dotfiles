@@ -11,10 +11,10 @@ if ! command -v codex >/dev/null 2>&1; then
 fi
 
 mapfile -t options <<'OPTIONS'
-Default:::codex --yolo --search --model gpt-5.1-codex-max -c model_reasoning_effort="high" -c model_verbosity="medium" -c preferred_auth_method="apikey"
-Fast:::codex --yolo --search --model gpt-5.1-codex-max -c model_reasoning_effort="high" -c model_verbosity="low" -c preferred_auth_method="apikey"
-Chat:::codex --yolo --search --model gpt-5.2 -c model_reasoning_effort="high" -c model_verbosity="medium" -c preferred_auth_method="apikey"
-Chat Fast:::codex --yolo --search --model gpt-5.2 -c model_reasoning_effort="high" -c model_verbosity="low" -c preferred_auth_method="apikey"
+Default:::codex --yolo --search --model gpt-5.2-codex -c model_reasoning_effort="high" -c model_verbosity="medium"
+Fast:::codex --yolo --search --model gpt-5.2-codex -c model_reasoning_effort="high" -c model_verbosity="low"
+Chat:::codex --yolo --search --model gpt-5.2 -c model_reasoning_effort="high" -c model_verbosity="medium"
+Chat Fast:::codex --yolo --search --model gpt-5.2 -c model_reasoning_effort="high" -c model_verbosity="low"
 OPTIONS
 
 if [ ${#options[@]} -eq 0 ]; then
