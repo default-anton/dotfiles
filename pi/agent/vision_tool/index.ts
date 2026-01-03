@@ -260,7 +260,6 @@ function selectVisionModel<T extends HasProviderAndId>(models: T[]): T | undefin
 
   const visionModels: Array<{ provider: string; id: string }> = [
     { provider: "zai", id: "glm-4.6v" },
-    { provider: "google-vertex", id: "gemini-3-flash-preview" },
   ];
 
   for (const pref of visionModels) {
