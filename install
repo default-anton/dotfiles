@@ -45,8 +45,8 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
 
 COPY_FILES: Final[list[tuple[str, str]]] = [
     ("~/.codex/config.toml", "codex/config.toml"),
-    ("~/.codex/skills/persist-knowledge", "codex/skills/persist-knowledge"),
-    ("~/.codex/skills/browser", "codex/skills/browser"),
+    ("~/.codex/skills/capture-learnings", "pi/agent/skills/capture-learnings"),
+    ("~/.codex/skills/browser", "pi/agent/skills/browser"),
 ]
 
 TEMPLATES: Final[list[tuple[str, str]]] = [
