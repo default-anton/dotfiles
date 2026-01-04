@@ -1,11 +1,15 @@
 {
-  "lastChangelogVersion": "0.33.0",
+  "lastChangelogVersion": "0.34.2",
   "defaultThinkingLevel": "high",
   "defaultProvider": "zai",
   "defaultModel": "glm-4.7",
-  "queueMode": "one-at-a-time",
   "compaction": {
     "enabled": true
   },
-  "hideThinkingBlock": false
+  "hideThinkingBlock": false,
+  "steeringMode": "one-at-a-time",
+  "skills": {
+    "enabled": true,
+    "enableCodexUser": false
+  }
 }
