@@ -1,6 +1,7 @@
 import os from "node:os";
 import nodePath from "node:path";
 
+import { getModel } from "@mariozechner/pi-ai";
 import type { CustomTool, CustomToolFactory } from "@mariozechner/pi-coding-agent";
 import type { HookFactory } from "@mariozechner/pi-coding-agent/hooks";
 import {
@@ -10,7 +11,6 @@ import {
   createBashTool,
   discoverAuthStorage,
   discoverContextFiles,
-  discoverModels,
 } from "@mariozechner/pi-coding-agent";
 import { Container, Markdown, Spacer, Text, type MarkdownTheme } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
@@ -234,24 +234,7 @@ function createTurnBudgetHook(maxTurns: number): HookFactory {
   };
 }
 
-type HasProviderAndId = { provider: string; id: string };
 
-function selectSubagentModel<T extends HasProviderAndId>(models: T[]): T | undefined {
-  if (models.length === 0) return undefined;
-
-  const globalPreferred: Array<{ provider: string; id: string }> = [
-    { provider: "google-vertex", id: "gemini-3-flash-preview" },
-    { provider: "openai", id: "gpt-5.1-codex-mini" },
-    { provider: "zai", id: "glm-4.7" },
-  ];
-
-  for (const pref of globalPreferred) {
-    const match = models.find((m) => m.provider === pref.provider && m.id === pref.id);
-    if (match) return match;
-  }
-
-  return models[0];
-}
 
 const factory: CustomToolFactory = (pi) => {
   const tool: CustomTool<typeof FinderParams, FinderDetails> = {
@@ -271,10 +254,15 @@ const factory: CustomToolFactory = (pi) => {
       const authStorage = discoverAuthStorage();
       const modelRegistry = ctx?.modelRegistry ?? discoverModels(authStorage);
 
-      const availableModels = await modelRegistry.getAvailable();
-      const preferredModel = selectSubagentModel(availableModels);
-      if (!preferredModel) {
-        const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
+      // Select subagent model based on current provider/model
+      const currentModel = ctx?.model;
+      const useZai = currentModel?.provider === "zai" || currentModel?.id?.startsWith("glm-");
+      const subModel = useZai
+        ? getModel("zai", "glm-4.7")
+        : getModel("google-vertex", "gemini-3-flash-preview");
+
+      if (!subModel) {
+        const error = `No models available. Configure credentials (e.g. /login or auth.json) and try again.`;
         summaryText = error;
         return {
           content: [{ type: "text", text: error }],
@@ -293,7 +281,6 @@ const factory: CustomToolFactory = (pi) => {
         };
       }
 
-      const subModel = preferredModel;
       const subagentProvider = subModel.provider;
       const subagentModelId = subModel.id;
 
