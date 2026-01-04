@@ -1,9 +1,9 @@
 ---
-name: persist-knowledge
-description: Required at end of every task; and before editing/creating AGENTS.md/docs/skills
+name: capture-learnings
+description: End-of-task gate/checklist to turn non-obvious discoveries into durable artifacts (code/config/tests/skills/AGENTS.md/docs) and avoid rediscovery. Use at the end of every task.
 ---
 
-# Persist Knowledge
+# Capture Learnings
 
 Turn non-obvious discoveries into the smallest durable artifact so future work is faster and safer.
 
@@ -12,7 +12,7 @@ Turn non-obvious discoveries into the smallest durable artifact so future work i
 At the end of every task:
 - Apply **Gate**
 - If it matches: persist/update the highest-leverage artifact(s) and say what you changed
-- If it doesn’t: output `Persist Knowledge: skipped (<reason>)`
+- If it doesn’t: output `Capture Learnings: skipped (<reason>)`
 
 ## Gate (persist only if ≥1 is true)
 
@@ -23,7 +23,7 @@ At the end of every task:
 - Stale guidance exists (wrong/expired/contradictory)
 - While using a doc/skill/AGENTS.md you found gaps worth fixing
 
-If none apply: `Persist Knowledge: skipped (too task-specific / already discoverable)`.
+If none apply: `Capture Learnings: skipped (too task-specific / already discoverable)`.
 
 ## Choose The Artifact
 
