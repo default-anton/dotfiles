@@ -1,13 +1,13 @@
 ---
 name: capture-learnings
-description: End-of-task gate/checklist to turn non-obvious discoveries into durable artifacts (code/config/tests/skills/AGENTS.md/docs) and avoid rediscovery. Use at the end of every task.
+description: End-of-task gate/checklist to turn non-obvious discoveries into durable artifacts (code/config/tests/skills/AGENTS.md/docs) and avoid rediscovery. Use at the end of every task (mandatory).
 ---
 
 # Capture Learnings
 
-Turn non-obvious discoveries into the smallest durable artifact so future work is faster and safer.
+Turn non-obvious discoveries into the **smallest durable artifact** so future work is faster and safer.
 
-## Do Every Task
+## Do this at the end of every task (mandatory)
 
 At the end of every task:
 - Apply **Gate**
@@ -21,31 +21,68 @@ At the end of every task:
 - High frequency (likely again within ~3 future tasks)
 - Low discoverability (no obvious keyword/entrypoint; you’d have to “already know”)
 - Stale guidance exists (wrong/expired/contradictory)
-- While using a doc/skill/AGENTS.md you found gaps worth fixing
+- While using an existing doc/skill/AGENTS.md you found gaps worth fixing
 
 If none apply: `Capture Learnings: skipped (too task-specific / already discoverable)`.
 
-## Choose The Artifact
+## Choose the artifact (routing rules)
 
 Prefer changing reality over documenting it:
-1. **Code/config**: make it true (types/tests/lint/CI/scripts)
-2. **Skill**: repeatable workflow you can run/script (skills are auto-discovered by the harness)
-3. **AGENTS.md**: hard rules + “how to work here” for a subtree (1–3 real commands + local gotchas)
-4. **docs/**: only when you need narrative (architecture/rationale/troubleshooting) that would bloat `AGENTS.md`/skills
+
+1) Code/config/tests/CI: make it true (types/tests/lint/CI/scripts).
+
+2) Nearest subtree `AGENTS.md`: a rule/gotcha you must follow while working in a specific part of the tree.
+   - Do **not** dump subtree rules into the repo root.
+   - If unsure where a rule belongs, run `fd AGENTS.md` and read the relevant ones for the subtree you touched.
+   - If the repo has multiple `AGENTS.md` files: update the **closest one that governs the files you touched**.
+   - If none exists in the relevant subtree, create one in that subtree (keep it tiny and command-oriented).
+
+3) Project-local skill (`$REPO/.pi/skills/<name>/SKILL.md`): a repeatable agent workflow.
+   - Use when it’s **3+ steps**, easy to mess up, and has clear **verification**.
+   - Do **not** create a skill for a single rule (that belongs in `AGENTS.md`).
+
+4) `docs/`: only for durable artifacts like **feature specs**, **agent TODOs**, and **developer docs**.
+   - `docs/` is not a dumping ground for generic background/rationale.
 
 ### Quick checks
 
-- If it’s a **rule you must follow while editing a subtree** → that subtree’s `AGENTS.md`
-- If it’s a **workflow you can run** (commands/tools with a reliable sequence) → a skill (+ scripts)
-- If it’s **background/rationale/troubleshooting** → `docs/` (optional: add a short pointer where humans will look)
+- “I must remember a rule while editing files under `X/**`” → nearest `X/**/AGENTS.md`
+- “I must run a playbook and verify it worked” → project-local skill in `.pi/skills/`
+- “I need a living spec/todo/runbook that will be referenced” → `docs/` (update an existing doc if possible)
+
+## Hard constraints (prevents low-signal artifacts)
+
+### `docs/` gate (avoid junk)
+
+Write to `docs/` only if at least one is true:
+- The task explicitly asked for a spec/todo/doc.
+- The information is a structured artifact you’ll reuse (spec/checklist/runbook), not “what I learned”.
+- There is a clear existing place to put it (an existing file/section).
+
+If you do write/update `docs/`:
+- Prefer **updating an existing doc** over creating a new doc.
+- Do not add long narrative sections (“Architecture”, “Rationale”, “Troubleshooting”) unless explicitly requested.
+
+### Skills: local-first + pi grounding
+
+Skills are often misunderstood; keep them concrete and procedural.
+
+**Local-first rule:**
+- Default to **project-local** skills in `$REPO/.pi/skills/`.
+- Only create a global skill if it is truly cross-repo and contains no repo-specific paths/commands.
+
+**Before creating/updating a skill (or hooks/tools/providers/themes):**
+- Read the pi docs and follow cross-references:
+  - `/path/to/@mariozechner/pi-coding-agent/docs/skills.md`
+- Also read 2–3 existing skills in the same scope (project-local vs global) and match their conventions.
 
 ## Scope (where it lives)
 
-- Project-specific workflow → `$CWD/.codex/skills/<name>/`
-- Cross-repo/personal habit → `~/.codex/skills/<name>/`
-- Cross-repo agent rules/workflow → `~/.codex/AGENTS.md`
-- Subtree-specific rules/workflow → nearest relevant `AGENTS.md`
-- Repo-wide → repo root `AGENTS.md` and/or `docs/`
+- Project-specific workflow → `$REPO/.pi/skills/<name>/`
+- Cross-repo/personal habit → `~/.pi/agent/skills/<name>/`
+- Cross-repo agent rules/workflow → `~/.pi/agent/AGENTS.md`
+- Subtree-specific rules/workflow → nearest relevant `AGENTS.md` (in that subtree)
+- Repo-wide rules/workflow → repo root `AGENTS.md`
 
 Prefer updating an existing artifact over creating a new one; avoid duplicates.
 
@@ -62,7 +99,7 @@ Do **not** persist:
 - Generic best practices
 - Facts already obvious from the codebase
 - Task logs (“what I just did”)
-- Reminders/TODOs (open an issue instead)
+- One-off reminders/TODOs outside the agreed `docs/` TODO workflow
 
 ## Quality bar
 
