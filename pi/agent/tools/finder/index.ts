@@ -15,9 +15,9 @@ import {
 import { Container, Markdown, Spacer, Text, type MarkdownTheme } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
-import autoloadSubdirAgents from "../../../../.dotfiles/pi/agent/_hooks/autoload-subdir-agents";
+import autoloadSubdirAgents from "../../../../.dotfiles/pi/agent/hooks/autoload-subdir-agents";
 
-const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent/_hooks/autoload-subdir-agents.ts");
+const autoloadSubdirAgentsPath = nodePath.join(os.homedir(), ".dotfiles/pi/agent/hooks/autoload-subdir-agents.ts");
 
 const DEFAULT_MAX_TURNS = 10;
 

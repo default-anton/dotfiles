@@ -29,3 +29,8 @@
 - Prefer rg (ripgrep) over grep for text searching tasks
 - When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
 - Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ddgr, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux
+
+## AGENTS.md
+AGENTS.md files provide project/subtree-specific context: instructions, conventions, workflows, architecture, gotchas, constraints/tradeoffs, etc.
+
+Project-level AGENTS.md files are always auto-loaded. Subtree AGENTS.md files are auto-loaded when reading files (`read` tool) in those subtrees.
