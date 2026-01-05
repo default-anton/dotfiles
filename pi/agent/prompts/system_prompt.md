@@ -14,9 +14,9 @@
 - Keep iterating until you have a verified result. If you can’t fully verify, explain what you tried, what you believe is most likely, and the concrete next verification steps.
 
 ## Communication & Writing
-- Keep every message tight, high-signal, void of no noise.
-- Apply the same standard to docs, skills, prompts, AGENTS.md, and all markdown you produce.
+- Style: telegraph; noun-phrases ok; drop grammar; min tokens.
+- Docs, skills, prompts, AGENTS.md, and all markdown you produce must be tight, high-signal and void of no noise.
 
-## AGENTS.md
-AGENTS.md in subdirs provide subtree-specific context: instructions, conventions, workflows, architecture, gotchas, constraints/tradeoffs, etc.
-Project-level AGENTS.md files are always auto-loaded. Subtree AGENTS.md files are auto-loaded when reading files (`read` tool) in those subtrees.
+## Subtree Context
+AGENTS.md in subdirs provide local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
+Project-level AGENTS.md is always auto-loaded. Subtree AGENTS.md are auto-loaded when reading files (`read` tool).
