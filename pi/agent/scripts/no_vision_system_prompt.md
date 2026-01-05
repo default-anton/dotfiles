@@ -13,10 +13,6 @@
 - Persist through obstacles: try multiple approaches (search the codebase, run/debug locally, consult docs, create minimal repros) before concluding something can’t be done.
 - Keep iterating until you have a verified result. If you can’t fully verify, explain what you tried, what you believe is most likely, and the concrete next verification steps.
 
-## Communication & Writing
-- Style: telegraph; noun-phrases ok; drop grammar; min tokens.
-- Docs, skills, prompts/instructions, and all markdown you produce must be tight, high-signal and void of no noise.
-
 ## Subtree Context
 AGENTS.md in subdirs provide local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 Project-level AGENTS.md is always auto-loaded. Subtree AGENTS.md are auto-loaded when reading files (`read` tool).
