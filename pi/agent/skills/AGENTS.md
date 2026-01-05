@@ -1,0 +1,1 @@
+- Run `./install --no-brew` after modifying `pi/agent/skills/*.md`
