@@ -45,8 +45,6 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
 
 COPY_FILES: Final[list[tuple[str, str]]] = [
     ("~/.codex/config.toml", "codex/config.toml"),
-    ("~/.codex/skills/capture-learnings", "pi/agent/skills/capture-learnings"),
-    ("~/.codex/skills/browser", "pi/agent/skills/browser"),
 ]
 
 TEMPLATES: Final[list[tuple[str, str]]] = [
@@ -146,6 +144,32 @@ def main():
             print(f"cp {md_file} {dst}")
             process = Popen(
                 f'cp "{md_file}" "{dst}"',
+                cwd=DOTFILES,
+                shell=True,
+                executable=os.getenv("SHELL"),
+            )
+            process.wait(timeout=3600)
+
+    # Dynamically copy all skills files from pi/agent/skills/ to ~/.codex/skills/
+    skills_dir = DOTFILES.joinpath("pi/agent/skills")
+    if skills_dir.exists():
+        for skill_dir in skills_dir.iterdir():
+            if skill_dir.name == "brave-search":
+                continue
+
+            dst = Path("~/.codex/skills").expanduser().joinpath(skill_dir.name)
+            print(f"rm -rf {dst}")
+            process = Popen(
+                f'rm -rf "{dst}"',
+                cwd=DOTFILES,
+                shell=True,
+                executable=os.getenv("SHELL"),
+            )
+            process.wait(timeout=3600)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            print(f"cp -cRp {skill_dir} {dst}")
+            process = Popen(
+                f'cp -cRp "{skill_dir}" "{dst}"',
                 cwd=DOTFILES,
                 shell=True,
                 executable=os.getenv("SHELL"),
