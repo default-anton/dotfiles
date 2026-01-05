@@ -176,6 +176,13 @@ def main():
             )
             process.wait(timeout=3600)
 
+            skill_md = dst.joinpath("SKILL.md")
+            if skill_md.exists():
+                content = skill_md.read_text()
+                updated = content.replace(".pi", ".codex")
+                skill_md.write_text(updated)
+                print(f"replaced .pi with .codex in {skill_md}")
+
     for (dst, template) in TEMPLATES:
         dst, template = Path(dst).expanduser(), DOTFILES.joinpath(template)
         dst.parent.mkdir(parents=True, exist_ok=True)
