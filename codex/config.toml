@@ -3,8 +3,10 @@ approval_policy = "on-failure"
 sandbox_mode    = "workspace-write"
 tool_output_token_limit = 25000
 # 273000 - (25000 + 15000), where 25000 is tool output limit and 15000 is buffer for prompt and response
-model_auto_compact_token_limit = 233000
-model_reasoning_effort = "high"
+# disabled for now
+model_auto_compact_token_limit = 0
+# model_auto_compact_token_limit = 233000
+model_reasoning_effort = "medium"
 model_reasoning_summary = "auto"
 
 [features]
