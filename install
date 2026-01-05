@@ -129,6 +129,29 @@ def main():
         )
         process.wait(timeout=3600)
 
+    # Dynamically copy all .md files from pi/agent/commands/ to ~/.codex/prompts/
+    commands_dir = DOTFILES.joinpath("pi/agent/commands")
+    if commands_dir.exists():
+        for md_file in commands_dir.glob("*.md"):
+            dst = Path("~/.codex/prompts").expanduser().joinpath(md_file.name)
+            print(f"rm -f {dst}")
+            process = Popen(
+                f'rm -f "{dst}"',
+                cwd=DOTFILES,
+                shell=True,
+                executable=os.getenv("SHELL"),
+            )
+            process.wait(timeout=3600)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            print(f"cp {md_file} {dst}")
+            process = Popen(
+                f'cp "{md_file}" "{dst}"',
+                cwd=DOTFILES,
+                shell=True,
+                executable=os.getenv("SHELL"),
+            )
+            process.wait(timeout=3600)
+
     for (dst, template) in TEMPLATES:
         dst, template = Path(dst).expanduser(), DOTFILES.joinpath(template)
         dst.parent.mkdir(parents=True, exist_ok=True)
