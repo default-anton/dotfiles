@@ -4,6 +4,7 @@
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 - File search: `fd` > `find`. Text search: `rg` > `grep`.
-- OK to use CLI tools: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
+- OK to use CLI tools: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux, gifgrep.
+- Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
 - Keep files <~500 LOC; split/refactor as needed.

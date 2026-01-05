@@ -4,6 +4,7 @@
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
 - File search: `fd` > `find`. Text search: `rg` > `grep`.
 - When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
-- OK to use CLI tools: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
+- OK to use CLI tools: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux, gifgrep.
+- Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
 - Keep files <~500 LOC; split/refactor as needed.
