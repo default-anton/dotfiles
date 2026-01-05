@@ -65,6 +65,7 @@ brew 'lua-language-server'
 brew 'switchaudio-osx'
 brew 'default-anton/tap/wt'
 brew 'tw93/tap/mole'
+brew 'steipete/tap/gifgrep'
 
 cask 'font-fira-code-nerd-font'
 cask 'ghostty'
