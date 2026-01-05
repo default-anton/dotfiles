@@ -11,5 +11,6 @@
   "skills": {
     "enabled": true,
     "enableCodexUser": false
-  }
+  },
+  "doubleEscapeAction": "branch"
 }
