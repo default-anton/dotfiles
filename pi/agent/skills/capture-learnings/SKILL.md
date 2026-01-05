@@ -32,6 +32,7 @@ Prefer changing reality over documenting it:
 1) Code/config/tests/CI: make it true (types/tests/lint/CI/scripts).
 
 2) Nearest subtree `AGENTS.md`: a rule/gotcha you must follow while working in a specific part of the tree.
+   - Style: telegraph; noun-phrases ok; drop filler/grammar; min tokens.
    - Do **not** dump subtree rules into the repo root.
    - If unsure where a rule belongs, run `fd AGENTS.md` and read the relevant ones for the subtree you touched.
    - If the repo has multiple `AGENTS.md` files: update the **closest one that governs the files you touched**.
