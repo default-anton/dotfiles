@@ -75,7 +75,7 @@ Skills are often misunderstood; keep them concrete and procedural.
 **Before creating/updating a skill (or hooks/tools/providers/themes):**
 - Read the pi docs and follow cross-references:
   - `/path/to/@mariozechner/pi-coding-agent/docs/skills.md`
-- Also read 2–3 existing skills in the same scope (project-local vs global) and match their conventions.
+- Read ~2 existing skills in the same scope (project-local vs global) and match their conventions.
 
 ## Scope (where it lives)
 
