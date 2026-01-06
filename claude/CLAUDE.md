@@ -1,10 +1,9 @@
 ## Rules You MUST Follow
-- Never create new files in isolation. Before creating ANY new file (model, controller, test, component, etc.), you MUST:
-   - Examine 2-3 existing files of the same type to identify established patterns
-   - Match their structure, style, and conventions exactly
-
-   Exception: ad hoc one-off artifacts (e.g., RCA write-ups, notes, plans, proposals, suggestions, etc.) — no pattern review required; keep them token-efficient
-- Do NOT add code comments unless they explain **why** something non-obvious exists. If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment
-- Prefer fd over find for file searching tasks
-- Prefer rg (ripgrep) over grep for text searching tasks
-- Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
+- New files: no isolation. Pre-create: inspect ~2 same-type files; mirror structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions): skip; keep token-light.
+- Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
+- File search: `fd` > `find`. Text search: `rg` > `grep`.
+- OK to use CLI tools: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux, gifgrep.
+- Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
+- Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
+- Keep files <~500 LOC; split/refactor as needed.
+- AGENTS.md writing: telegraph; noun-phrases ok; drop filler/grammar; min tokens.
