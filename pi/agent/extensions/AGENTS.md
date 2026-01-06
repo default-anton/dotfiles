@@ -1,0 +1,1 @@
+- Extensions: register tools eagerly at extension init; gate availability via `pi.setActiveTools()`/`tool_call` blocking (no on-demand `registerTool()` later).

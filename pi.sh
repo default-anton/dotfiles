@@ -14,7 +14,7 @@ pi() {
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider google-vertex --model gemini-3-pro-preview --thinking high --models "$MODELS" "$@")
   elif [ "${1:-}" = "glm" ]; then
     shift
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --models glm-4.7:high --tool "$HOME/.dotfiles/pi/agent/vision_tool/index.ts" "$@")
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --models glm-4.7:high "$@")
   else
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.1-codex-max --thinking medium --models "$MODELS" "$@")
   fi
