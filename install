@@ -29,7 +29,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.pi/agent/settings.json", "pi/agent/settings.json"),
     ("~/.pi/agent/models.json", "pi/agent/models.json"),
     ("~/.pi/agent/AGENTS.md", "pi/agent/AGENTS.md"),
-    ("~/.pi/agent/commands", "pi/agent/commands"),
+    ("~/.pi/agent/prompts", "pi/agent/prompts"),
     ("~/.pi/agent/hooks", "pi/agent/hooks"),
     ("~/.pi/agent/skills", "pi/agent/skills"),
     ("~/.pi/agent/tools", "pi/agent/tools"),
@@ -127,10 +127,10 @@ def main():
         )
         process.wait(timeout=3600)
 
-    # Dynamically copy all .md files from pi/agent/commands/ to ~/.codex/prompts/
-    commands_dir = DOTFILES.joinpath("pi/agent/commands")
-    if commands_dir.exists():
-        for md_file in commands_dir.glob("*.md"):
+    # Dynamically copy all .md files from pi/agent/prompts/ to ~/.codex/prompts/
+    prompts_dir = DOTFILES.joinpath("pi/agent/prompts")
+    if prompts_dir.exists():
+        for md_file in prompts_dir.glob("*.md"):
             dst = Path("~/.codex/prompts").expanduser().joinpath(md_file.name)
             print(f"rm -f {dst}")
             process = Popen(

@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROMPTS_DIR="$(dirname "$SCRIPT_DIR")/prompts"
+PROMPTS_DIR="$(dirname "$SCRIPT_DIR")/system_prompts"
 
 # Generate system_prompt.md (system + finder)
 cat "$PROMPTS_DIR/system_prompt.md" > "$SCRIPT_DIR/system_prompt.md"
