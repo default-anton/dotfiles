@@ -32,11 +32,13 @@ Prefer changing reality over documenting it:
 1) Code/config/tests/CI: make it true (types/tests/lint/CI/scripts).
 
 2) Nearest subtree `AGENTS.md`: a rule/gotcha you must follow while working in a specific part of the tree.
+   - `AGENTS.md` is canonical + portable for all agents (not just Claude).
+   - **Mandatory for Claude Code** (loads `CLAUDE.md`, not `AGENTS.md`): same-dir `CLAUDE.md` containing `@AGENTS.md`.
    - Style: telegraph; noun-phrases ok; drop filler/grammar; min tokens.
    - Do **not** dump subtree rules into the repo root.
    - If unsure where a rule belongs, run `fd AGENTS.md` and read the relevant ones for the subtree you touched.
    - If the repo has multiple `AGENTS.md` files: update the **closest one that governs the files you touched**.
-   - If none exists in the relevant subtree, create one in that subtree (keep it tiny and command-oriented).
+   - If none exists in the relevant subtree, create both `AGENTS.md` (rules) + `CLAUDE.md` (`@AGENTS.md`) in that subtree.
 
 3) Project-local skill (`$REPO/.pi/skills/<name>/SKILL.md`): a repeatable agent workflow.
    - Use when it’s **3+ steps**, easy to mess up, and has clear **verification**.
@@ -47,7 +49,7 @@ Prefer changing reality over documenting it:
 
 ### Quick checks
 
-- “I must remember a rule while editing files under `X/**`” → nearest `X/**/AGENTS.md`
+- “I must remember a rule while editing files under `X/**`” → nearest `X/**/AGENTS.md` (+ same-dir `CLAUDE.md` with `@AGENTS.md`)
 - “I must run a playbook and verify it worked” → project-local skill in `.pi/skills/`
 - “I need a living spec/todo/runbook that will be referenced” → `docs/` (update an existing doc if possible)
 
@@ -81,9 +83,9 @@ Skills are often misunderstood; keep them concrete and procedural.
 
 - Project-specific workflow → `$REPO/.pi/skills/<name>/`
 - Cross-repo/personal habit → `~/.pi/agent/skills/<name>/`
-- Cross-repo agent rules/workflow → `~/.pi/agent/AGENTS.md`
-- Subtree-specific rules/workflow → nearest relevant `AGENTS.md` (in that subtree)
-- Repo-wide rules/workflow → repo root `AGENTS.md`
+- Cross-repo agent rules/workflow → `~/.pi/agent/AGENTS.md` (don't create `CLAUDE.md` here)
+- Subtree-specific rules/workflow → nearest relevant `AGENTS.md` (+ same-dir `CLAUDE.md` with `@AGENTS.md`)
+- Repo-wide rules/workflow → repo root `AGENTS.md` (+ same-dir `CLAUDE.md` with `@AGENTS.md`)
 
 Prefer updating an existing artifact over creating a new one; avoid duplicates.
 
