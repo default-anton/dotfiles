@@ -109,17 +109,26 @@ function formatToolCall(call: ToolCall): string {
 		return `read ${path}${range}`;
 	}
 
+	if (call.name === "bash") {
+		const command = typeof args?.command === "string" ? args.command : "";
+		const timeout = typeof args?.timeout === "number" ? args.timeout : undefined;
+		const normalized = command.replace(/\s+/g, " ").trim();
+		const suffix = timeout ? ` (timeout ${timeout}s)` : "";
+		return `bash ${shorten(normalized, 120)}${suffix}`.trimEnd();
+	}
+
 	return call.name;
 }
 
 function buildFinderSystemPrompt(maxTurns: number): string {
 	return [
 		"You are Finder, an evidence-first repository scout.",
-		"You operate in a read-only environment and may only use the provided tools (ls/find/grep/read).",
+		"You operate in a read-only environment and may only use the provided tools (bash/read).",
+		"Use bash for repository scouting (e.g., `rg`, `fd`, `ls`). Use read to open specific file ranges for line-level citations.",
 		"Your job: locate and cite the exact code locations that answer the manager's query.",
 		"",
 		`Turn budget: you have at most ${maxTurns} turns total (including the final answering turn). This is a hard cap, not a target.`,
-		"To conserve turns, batch independent searches: you may issue multiple tool calls in a single turn (e.g., several grep/find/read calls).",
+		"To conserve turns, batch independent searches: you may issue multiple tool calls in a single turn (e.g., several bash/read calls).",
 		"Finish as soon as you can answer with high confidence — do NOT try to use all available turns (it's fine to answer in 2–3 turns).",
 		"Tool use is disabled on the last allowed turn; once you have enough evidence, produce your final answer immediately.",
 		"",
@@ -130,14 +139,14 @@ function buildFinderSystemPrompt(maxTurns: number): string {
 		"",
 		"How to work:",
 		"1) Translate the query into a checklist of things to locate.",
-		"2) Search broadly (grep/find), then narrow.",
+		"2) Search broadly with bash (prefer `rg` + `fd`), then narrow.",
 		"3) Validate by opening the smallest relevant ranges with read when you need line-level evidence.",
-		"   If the query is only about file paths / directory structure, prefer ls/find and do not open files unnecessarily.",
+		"   If the query is only about file paths / directory structure, prefer bash `ls`/`fd` and do not open files unnecessarily.",
 		"   When you do use read, always include offset+limit so you can cite line ranges.",
 		"",
 		"Citations:",
 		"- For claims about file contents, cite as `path:lineStart-lineEnd` using the read ranges you opened.",
-		"- For claims only about the existence of files/paths (e.g., directory listings), you may cite just `path` based on ls/find output.",
+		"- For path-only claims (e.g., directory listings), you may cite just `path` based on bash output (`ls`, `fd`, `rg`).",
 		"- If you didn't observe it in tool output, don't cite it and don't present it as fact.",
 		"",
 		"Output format (Markdown, use this section order):",
@@ -159,7 +168,7 @@ function buildFinderUserPrompt(query: string, maxTurns: number): string {
 		"Task: locate and cite the exact code locations that answer the query.",
 		"Return Markdown in the required section order (Summary, Locations, Evidence?, Searched?, Next steps?).",
 		"For claims about file contents, citations must be in the form `path:lineStart-lineEnd` based on the read ranges you opened.",
-		"For path-only results (e.g., list files in a directory), you may cite just `path` based on ls/find output.",
+		"For path-only results (e.g., list files in a directory), you may cite just `path` based on bash output (`ls`, `fd`, `rg`).",
 		`Turn budget: at most ${maxTurns} turns total (hard cap, not a target). If you can answer in 2–3 turns, do so.`,
 		"Optimize for fewer turns by batching tool calls.",
 		"",
@@ -203,7 +212,7 @@ export default function finderExtension(pi: ExtensionAPI) {
 		name: "finder",
 		label: "Finder",
 		description:
-			"Read-only codebase scout: spawns an isolated subagent that searches with ls/find/grep/read and returns an evidence-backed Markdown summary with citations (path:lineStart-lineEnd).",
+			"Read-only codebase scout: spawns an isolated subagent that searches with bash/read (e.g., rg/fd/ls + read) and returns an evidence-backed Markdown summary with citations (path:lineStart-lineEnd).",
 		parameters: FinderParams,
 
 		async execute(_toolCallId, params, onUpdate, ctx, signal) {
