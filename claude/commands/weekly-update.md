@@ -3,9 +3,24 @@ description: Weekly update for management reporting
 allowed-tools: Bash(git config user.name), Bash(git config user.email)
 ---
 
-Get the current date and look up my commits from the relevant week (Saturday through Friday). Create a concise bullet-point list of my progress for management reporting. Keep descriptions direct and factual without unnecessary elaboration. Avoid cliche, flowery and marketing language. Group progress by Aha! feature and requirement IDs, if applicable. Feature/requirement urls are automatically rendered as record pills when pasted in Aha!, so use them, e.g. https://big.aha.io/features/FEATURE-ID and https://big.aha.io/requirements/REQUIREMENT-ID.
+Get the current date and look up my commits from the relevant week (Saturday through Friday). Create a concise bullet-point list of my progress for management reporting. Keep descriptions direct and factual without unnecessary elaboration. Avoid cliche, flowery and marketing language. Group progress by Aha! feature and requirement IDs, if applicable. Feature/requirement urls are automatically rendered as record pills when pasted in Aha!, so use them, e.g. https://big.aha.io/features/FEATURE-ID and https://big.aha.io/requirements/REQUIREMENT-ID. Target audience is team leads and management, so focus on clarity and relevance instead of technical details.
 
 Expected Output: Generate a markdown file named `weekly-update.md` at the repository root containing the formatted weekly update.
+
+Expected Format:
+```markdown
+# Week: Dec 28, 2025 – Jan 10, 2026
+
+https://big.aha.io/features/[FEATURE-ID]
+
+PR: https://github.com/aha-app/aha-app/pull/44100 (significant progress, not merged)
+
+- [Bullet points of work done]
+
+---
+
+...
+```
 
 Logic: If today is Friday/Saturday/Sunday, report on THIS week. If today is Monday-Thursday, report on PREVIOUS week.
 
