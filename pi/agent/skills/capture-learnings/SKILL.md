@@ -36,9 +36,13 @@ Prefer changing reality over documenting it:
    - **Mandatory for Claude Code** (loads `CLAUDE.md`, not `AGENTS.md`): same-dir `CLAUDE.md` containing `@AGENTS.md`.
    - Style: telegraph; noun-phrases ok; drop filler/grammar; min tokens.
    - Do **not** dump subtree rules into the repo root.
-   - If unsure where a rule belongs, run `fd AGENTS.md` and read the relevant ones for the subtree you touched.
-   - If the repo has multiple `AGENTS.md` files: update the **closest one that governs the files you touched**.
-   - If none exists in the relevant subtree, create both `AGENTS.md` (rules) + `CLAUDE.md` (`@AGENTS.md`) in that subtree.
+   - If unsure where a rule belongs:
+     - Run `fd AGENTS.md <subtree-root>` (or `fd AGENTS.md` if unsure) and pick the closest governing file.
+     - If the repo has multiple `AGENTS.md` files: update the **closest one that governs the files you touched**.
+     - If none exists in the relevant subtree: create both `AGENTS.md` (rules) + `CLAUDE.md` (`@AGENTS.md`) in that subtree.
+     - Repo root `AGENTS.md`: last resort; only repo-wide invariants.
+     - Scope test: would this be wrong/irrelevant for >50% of edits in the repo? If yes, it does not belong in root.
+   - Prefer pointing to an existing “good example” file/path over describing abstract patterns.
 
 3) Project-local skill (`$REPO/.pi/skills/<name>/SKILL.md`): a repeatable agent workflow.
    - Use when it’s **3+ steps**, easy to mess up, and has clear **verification**.
