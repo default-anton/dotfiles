@@ -6,9 +6,6 @@ pi() {
   if [ "${1:-}" = "chat" ]; then
     shift
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium --models "$MODELS" "$@")
-  elif [ "${1:-}" = "flash" ]; then
-    shift
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider google-vertex --model gemini-3-flash-preview --thinking high --models "$MODELS" "$@")
   elif [ "${1:-}" = "pro" ]; then
     shift
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider google-vertex --model gemini-3-pro-preview --thinking high --models "$MODELS" "$@")
@@ -19,6 +16,6 @@ pi() {
     shift
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2-codex --thinking medium --models "$MODELS" "$@")
   else
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.1-codex-max --thinking medium --models "$MODELS" "$@")
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium --models "$MODELS" "$@")
   fi
 }
