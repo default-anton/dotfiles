@@ -11,7 +11,7 @@ pi() {
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2-codex --thinking medium "$@")
   elif [ "${1:-}" = "ds" ]; then
     shift
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model deepseek-reasoner --thinking high "$@")
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider deepseek --model deepseek-reasoner --thinking high "$@")
   else
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium "$@")
   fi
