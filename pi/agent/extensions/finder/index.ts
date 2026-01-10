@@ -15,22 +15,21 @@ import { Type } from "@sinclair/typebox";
 
 import autoloadSubdirAgents from "../autoload-subdir-agents";
 
-const DEFAULT_MAX_TURNS = 10;
+const MAX_TURNS = 10;
 
 const FinderParams = Type.Object({
-	query: Type.String({
-		description: [
-			"A self-contained codebase search request for the Finder subagent.",
-			"Include: (1) goal, (2) expected keywords/identifiers, (3) desired output (paths + line ranges), (4) success criteria.",
-		].join(" "),
-	}),
-	maxTurns: Type.Optional(
-		Type.Integer({
-			minimum: 1,
-			maximum: 25,
-			default: DEFAULT_MAX_TURNS,
-			description: "Maximum number of agent turns allowed for this search (includes the final answering turn).",
+	queries: Type.Array(
+		Type.String({
+			description: [
+				"A self-contained codebase search request for the Finder subagent.",
+				"Include: (1) goal, (2) expected keywords/identifiers, (3) desired output (paths + line ranges), (4) success criteria.",
+			].join(" "),
 		}),
+		{
+			minItems: 1,
+			maxItems: 4,
+			description: "One to four independent Finder queries. They will run concurrently.",
+		},
 	),
 });
 
@@ -45,16 +44,24 @@ type ToolCall = {
 	isError?: boolean;
 };
 
-interface FinderDetails {
+interface FinderRunDetails {
 	status: FinderStatus;
 	query: string;
-	subagentProvider?: string;
-	subagentModelId?: string;
 	turns: number;
-	maxTurns: number;
 	toolCalls: ToolCall[];
 	summaryText?: string;
 	error?: string;
+	startedAt: number;
+	endedAt?: number;
+}
+
+interface FinderDetails {
+	status: FinderStatus;
+	queries: string[];
+	subagentProvider?: string;
+	subagentModelId?: string;
+	maxTurns: number;
+	runs: FinderRunDetails[];
 	startedAt: number;
 	endedAt?: number;
 }
@@ -102,7 +109,8 @@ function formatToolCall(call: ToolCall): string {
 	}
 
 	if (call.name === "read") {
-		const path = typeof args?.path === "string" ? args.path : typeof args?.file_path === "string" ? args.file_path : "";
+		const path =
+			typeof args?.path === "string" ? args.path : typeof args?.file_path === "string" ? args.file_path : "";
 		const offset = typeof args?.offset === "number" ? args.offset : undefined;
 		const limit = typeof args?.limit === "number" ? args.limit : undefined;
 		const range = offset || limit ? `:${offset ?? 1}${limit ? `-${(offset ?? 1) + limit - 1}` : ""}` : "";
@@ -118,6 +126,24 @@ function formatToolCall(call: ToolCall): string {
 	}
 
 	return call.name;
+}
+
+function computeOverallStatus(runs: FinderRunDetails[]): FinderStatus {
+	if (runs.some((r) => r.status === "running")) return "running";
+	if (runs.some((r) => r.status === "error")) return "error";
+	if (runs.every((r) => r.status === "aborted")) return "aborted";
+	return "done";
+}
+
+function renderCombinedMarkdown(runs: FinderRunDetails[]): string {
+	const blocks: string[] = [];
+	for (let i = 0; i < runs.length; i++) {
+		const r = runs[i];
+		const header = `### Query ${i + 1}\n\n${r.query.trim()}`;
+		const body = (r.summaryText ?? (r.status === "running" ? "(searching...)" : "(no output)")).trim();
+		blocks.push([header, "", body].join("\n"));
+	}
+	return blocks.join("\n\n---\n\n");
 }
 
 function buildFinderSystemPrompt(maxTurns: number): string {
@@ -212,38 +238,61 @@ export default function finderExtension(pi: ExtensionAPI) {
 		name: "finder",
 		label: "Finder",
 		description:
-			"Read-only codebase scout: spawns an isolated subagent that searches with bash/read (e.g., rg/fd/ls + read) and returns an evidence-backed Markdown summary with citations (path:lineStart-lineEnd).",
+			"Read-only codebase scout: spawns isolated subagents that search with bash/read (e.g., rg/fd/ls + read) and return evidence-backed Markdown summaries with citations (path:lineStart-lineEnd).",
 		parameters: FinderParams,
 
 		async execute(_toolCallId, params, onUpdate, ctx, signal) {
 			const startedAt = Date.now();
-			const toolCalls: ToolCall[] = [];
-			let turns = 0;
-			let summaryText = "";
-			const maxTurns = params.maxTurns ?? DEFAULT_MAX_TURNS;
+			const maxTurns = MAX_TURNS;
+			const queries = Array.isArray((params as any).queries) ? ((params as any).queries as string[]) : [];
+
+			if (queries.length < 1 || queries.length > 4 || queries.some((q) => typeof q !== "string" || !q.trim())) {
+				const error = "Invalid parameters: expected `queries` to be an array of 1–4 non-empty strings.";
+				return {
+					content: [{ type: "text", text: error }],
+					details: {
+						status: "error",
+						queries,
+						maxTurns,
+						runs: [],
+						startedAt,
+						endedAt: Date.now(),
+					} satisfies FinderDetails,
+					isError: true,
+				};
+			}
+
+			const runs: FinderRunDetails[] = queries.map((query) => ({
+				status: "running",
+				query,
+				turns: 0,
+				toolCalls: [],
+				startedAt: Date.now(),
+			}));
 
 			const authStorage = discoverAuthStorage();
 			const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
 
 			const currentModel = ctx.model;
 			const useZai = currentModel?.provider === "zai" || currentModel?.id?.startsWith("glm-");
-			const subModel = useZai
-				? getModel("zai", "glm-4.7")
-				: getModel("google-vertex", "gemini-3-flash-preview");
+			const subModel = useZai ? getModel("zai", "glm-4.7") : getModel("google-vertex", "gemini-3-flash-preview");
 
 			if (!subModel) {
 				const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
-				summaryText = error;
+				for (const r of runs) {
+					r.status = "error";
+					r.error = error;
+					r.summaryText = error;
+					r.endedAt = Date.now();
+				}
+				const text = renderCombinedMarkdown(runs);
 				return {
-					content: [{ type: "text", text: error }],
+					content: [{ type: "text", text }],
 					details: {
 						status: "error",
-						query: params.query,
-						turns,
+						queries,
 						maxTurns,
-						toolCalls,
-						summaryText,
-						error,
+						runs,
 						startedAt,
 						endedAt: Date.now(),
 					} satisfies FinderDetails,
@@ -254,155 +303,179 @@ export default function finderExtension(pi: ExtensionAPI) {
 			const subagentProvider = subModel.provider;
 			const subagentModelId = subModel.id;
 
-			const emit = (details: Partial<FinderDetails> & { status: FinderStatus }) => {
-				const text =
-					details.summaryText ?? summaryText ?? (details.status === "running" ? "(searching...)" : "(no output yet)");
+			let lastUpdate = 0;
+			const emitAll = (force = false) => {
+				const now = Date.now();
+				if (!force && now - lastUpdate < 150) return;
+				lastUpdate = now;
+
+				const status = computeOverallStatus(runs);
+				const text = renderCombinedMarkdown(runs);
 
 				onUpdate?.({
 					content: [{ type: "text", text }],
 					details: {
-						query: params.query,
+						status,
+						queries,
 						subagentProvider,
 						subagentModelId,
-						turns,
 						maxTurns,
-						toolCalls,
-						summaryText,
+						runs,
 						startedAt,
-						...details,
 					} satisfies FinderDetails,
 				});
 			};
 
-			emit({ status: "running" });
+			emitAll(true);
 
-			const tools = [createReadTool(ctx.cwd), createBashTool(ctx.cwd)];
 			const contextFiles = discoverContextFiles(ctx.cwd);
 			const systemPrompt = buildFinderSystemPrompt(maxTurns);
 
-			const { session } = await createAgentSession({
-				cwd: ctx.cwd,
-				authStorage,
-				modelRegistry,
-				sessionManager: SessionManager.inMemory(ctx.cwd),
-				model: subModel,
-				thinkingLevel: "off",
-				tools,
-				customTools: [],
-				extensions: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
-				skills: [],
-				contextFiles,
-				systemPrompt,
-			});
+			const runQuery = async (index: number) => {
+				const run = runs[index];
+				run.status = "running";
+				run.turns = 0;
+				run.toolCalls = [];
+				run.startedAt = Date.now();
+				run.endedAt = undefined;
+				run.error = undefined;
+				run.summaryText = undefined;
 
-			let aborted = false;
-			const abort = async () => {
-				aborted = true;
-				try {
-					await session.abort();
-				} catch {
-					// ignore
+				const { session } = await createAgentSession({
+					cwd: ctx.cwd,
+					authStorage,
+					modelRegistry,
+					sessionManager: SessionManager.inMemory(ctx.cwd),
+					model: subModel,
+					thinkingLevel: "off",
+					tools: [createReadTool(ctx.cwd), createBashTool(ctx.cwd)],
+					customTools: [],
+					extensions: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
+					skills: [],
+					contextFiles,
+					systemPrompt,
+				});
+
+				let aborted = false;
+				const abort = async () => {
+					aborted = true;
+					run.status = "aborted";
+					run.summaryText = run.summaryText ?? "Aborted";
+					run.endedAt = Date.now();
+					emitAll(true);
+					try {
+						await session.abort();
+					} catch {
+						// ignore
+					}
+				};
+
+				if (signal) {
+					if (signal.aborted) await abort();
+					else signal.addEventListener("abort", () => void abort(), { once: true });
 				}
-			};
 
-			if (signal) {
-				if (signal.aborted) await abort();
-				else signal.addEventListener("abort", () => void abort(), { once: true });
-			}
-
-			let lastUpdate = 0;
-			const maybeEmit = (force = false) => {
-				const now = Date.now();
-				if (!force && now - lastUpdate < 200) return;
-				lastUpdate = now;
-				emit({ status: "running" });
-			};
-
-			const unsubscribe = session.subscribe((event) => {
-				switch (event.type) {
-					case "turn_end": {
-						turns += 1;
-						maybeEmit();
-						break;
-					}
-					case "tool_execution_start": {
-						toolCalls.push({
-							id: event.toolCallId,
-							name: event.toolName,
-							args: event.args,
-							startedAt: Date.now(),
-						});
-						if (toolCalls.length > 50) toolCalls.splice(0, toolCalls.length - 50);
-						maybeEmit(true);
-						break;
-					}
-					case "tool_execution_end": {
-						const call = toolCalls.find((c) => c.id === event.toolCallId);
-						if (call) {
-							call.endedAt = Date.now();
-							call.isError = event.isError;
+				const unsubscribe = session.subscribe((event) => {
+					switch (event.type) {
+						case "turn_end": {
+							run.turns += 1;
+							emitAll();
+							break;
 						}
-						maybeEmit(true);
-						break;
+						case "tool_execution_start": {
+							run.toolCalls.push({
+								id: event.toolCallId,
+								name: event.toolName,
+								args: event.args,
+								startedAt: Date.now(),
+							});
+							if (run.toolCalls.length > 50) run.toolCalls.splice(0, run.toolCalls.length - 50);
+							emitAll(true);
+							break;
+						}
+						case "tool_execution_end": {
+							const call = run.toolCalls.find((c) => c.id === event.toolCallId);
+							if (call) {
+								call.endedAt = Date.now();
+								call.isError = event.isError;
+							}
+							emitAll(true);
+							break;
+						}
 					}
+				});
+
+				try {
+					await session.prompt(buildFinderUserPrompt(run.query, maxTurns), { expandPromptTemplates: false });
+					run.summaryText = getLastAssistantText(session.state.messages as any[]).trim();
+					if (!run.summaryText) run.summaryText = aborted ? "Aborted" : "(no output)";
+
+					run.status = aborted ? "aborted" : "done";
+					run.endedAt = Date.now();
+					emitAll(true);
+				} catch (e) {
+					const error = aborted ? "Aborted" : e instanceof Error ? e.message : String(e);
+					run.status = aborted ? "aborted" : "error";
+					run.error = aborted ? undefined : error;
+					run.summaryText = error;
+					run.endedAt = Date.now();
+					emitAll(true);
+				} finally {
+					unsubscribe();
+					session.dispose();
 				}
-			});
+			};
 
 			try {
-				await session.prompt(buildFinderUserPrompt(params.query, maxTurns), { expandPromptTemplates: false });
-				summaryText = getLastAssistantText(session.state.messages as any[]).trim();
-				if (!summaryText) summaryText = aborted ? "Aborted" : "(no output)";
-
+				await Promise.all(queries.map((_, i) => runQuery(i)));
 				const endedAt = Date.now();
-				emit({ status: aborted ? "aborted" : "done", summaryText, endedAt });
+				const status = computeOverallStatus(runs);
+				const text = renderCombinedMarkdown(runs);
 
 				return {
-					content: [{ type: "text", text: summaryText }],
+					content: [{ type: "text", text }],
 					details: {
-						status: aborted ? "aborted" : "done",
-						query: params.query,
+						status,
+						queries,
 						subagentProvider,
 						subagentModelId,
-						turns,
 						maxTurns,
-						toolCalls,
-						summaryText,
+						runs,
 						startedAt,
 						endedAt,
 					} satisfies FinderDetails,
-					isError: false,
+					isError: status === "error",
 				};
 			} catch (e) {
 				const endedAt = Date.now();
-				const error = aborted ? "Aborted" : e instanceof Error ? e.message : String(e);
-				summaryText = error;
-				emit({ status: aborted ? "aborted" : "error", error, summaryText, endedAt });
+				const error = e instanceof Error ? e.message : String(e);
+				const text = `Finder failed: ${error}`;
 				return {
-					content: [{ type: "text", text: error }],
+					content: [{ type: "text", text }],
 					details: {
-						status: aborted ? "aborted" : "error",
-						query: params.query,
+						status: "error",
+						queries,
 						subagentProvider,
 						subagentModelId,
-						turns,
 						maxTurns,
-						toolCalls,
-						summaryText,
-						error,
+						runs,
 						startedAt,
 						endedAt,
 					} satisfies FinderDetails,
-					isError: !aborted,
+					isError: true,
 				};
-			} finally {
-				unsubscribe();
-				session.dispose();
 			}
 		},
 
 		renderCall(args, theme) {
-			const preview = shorten(args.query.replace(/\s+/g, " ").trim(), 90);
-			const text = theme.fg("toolTitle", theme.bold("finder")) + "\n" + theme.fg("muted", preview);
+			const queries = Array.isArray((args as any)?.queries) ? (((args as any).queries as any[]) ?? []) : [];
+			const previews = queries
+				.filter((q) => typeof q === "string")
+				.slice(0, 4)
+				.map((q) => shorten(String(q).replace(/\s+/g, " ").trim(), 70));
+
+			const title = theme.fg("toolTitle", theme.bold("finder")) + theme.fg("dim", ` (${previews.length} quer${previews.length === 1 ? "y" : "ies"})`);
+			const text = title + (previews.length ? "\n" + theme.fg("muted", previews.join("\n")) : "");
 			return new Text(text, 0, 0);
 		},
 
@@ -413,14 +486,21 @@ export default function finderExtension(pi: ExtensionAPI) {
 				return new Text(text?.type === "text" ? text.text : "(no output)", 0, 0);
 			}
 
+			const status = isPartial ? "running" : details.status;
 			const icon =
-				details.status === "done"
+				status === "done"
 					? theme.fg("success", "✓")
-					: details.status === "error"
+					: status === "error"
 						? theme.fg("error", "✗")
-						: details.status === "aborted"
+						: status === "aborted"
 							? theme.fg("warning", "◼")
 							: theme.fg("warning", "⏳");
+
+			const doneCount = details.runs.filter((r) => r.status === "done").length;
+			const errorCount = details.runs.filter((r) => r.status === "error").length;
+			const abortedCount = details.runs.filter((r) => r.status === "aborted").length;
+			const totalToolCalls = details.runs.reduce((acc, r) => acc + r.toolCalls.length, 0);
+			const totalTurns = details.runs.reduce((acc, r) => acc + r.turns, 0);
 
 			const header =
 				icon +
@@ -428,48 +508,84 @@ export default function finderExtension(pi: ExtensionAPI) {
 				theme.fg("toolTitle", theme.bold("finder ")) +
 				theme.fg(
 					"dim",
-					`${details.subagentProvider ?? "?"}/${details.subagentModelId ?? "?"} • ${details.turns}/${details.maxTurns} turn${details.turns === 1 ? "" : "s"} • ${details.toolCalls.length} tool call${details.toolCalls.length === 1 ? "" : "s"}`,
+					`${details.subagentProvider ?? "?"}/${details.subagentModelId ?? "?"} • ${doneCount}/${details.runs.length} done • ${errorCount} error • ${abortedCount} aborted • ${totalTurns} turns • ${totalToolCalls} tool call${totalToolCalls === 1 ? "" : "s"}`,
 				);
 
-			const callsToShow = expanded ? details.toolCalls : details.toolCalls.slice(-6);
-			let callsText = "";
-			if (callsToShow.length > 0) {
-				callsText += theme.fg("muted", "\n\nTools:\n");
-				for (const c of callsToShow) {
-					const callIcon = c.isError ? theme.fg("error", "✗") : theme.fg("dim", "→");
-					callsText += `${callIcon} ${theme.fg("toolOutput", formatToolCall(c))}\n`;
+			const runLines = details.runs
+				.map((r, i) => {
+					const runIcon =
+						r.status === "done"
+							? theme.fg("success", "✓")
+							: r.status === "error"
+								? theme.fg("error", "✗")
+								: r.status === "aborted"
+									? theme.fg("warning", "◼")
+									: theme.fg("warning", "⏳");
+					const preview = shorten((r.query ?? "").replace(/\s+/g, " ").trim(), 90);
+					return `${runIcon} ${theme.fg("dim", `Q${i + 1}`)} ${theme.fg("muted", preview)}`;
+				})
+				.join("\n");
+
+			let toolsText = "";
+			if (expanded) {
+				const blocks: string[] = [];
+				for (let i = 0; i < details.runs.length; i++) {
+					const r = details.runs[i];
+					const calls = r.toolCalls;
+					if (calls.length === 0) continue;
+					blocks.push(theme.fg("muted", `\n\nTools (Q${i + 1}):`));
+					for (const c of calls) {
+						const callIcon = c.isError ? theme.fg("error", "✗") : theme.fg("dim", "→");
+						blocks.push(`${callIcon} ${theme.fg("toolOutput", formatToolCall(c))}`);
+					}
 				}
-				callsText = callsText.trimEnd();
-				if (!expanded && details.toolCalls.length > 6) {
-					callsText += `\n${theme.fg("muted", "(Ctrl+O to expand)")}`;
+				toolsText = blocks.join("\n").trimEnd();
+			} else {
+				const lastCalls: { q: number; call: ToolCall }[] = [];
+				for (let i = 0; i < details.runs.length; i++) {
+					const r = details.runs[i];
+					for (const c of r.toolCalls.slice(-3)) lastCalls.push({ q: i + 1, call: c });
+				}
+				const callsToShow = lastCalls.slice(-6);
+				if (callsToShow.length > 0) {
+					toolsText += theme.fg("muted", "\n\nTools (latest):\n");
+					for (const item of callsToShow) {
+						const c = item.call;
+						const callIcon = c.isError ? theme.fg("error", "✗") : theme.fg("dim", "→");
+						toolsText += `${callIcon} ${theme.fg("dim", `Q${item.q}`)} ${theme.fg("toolOutput", formatToolCall(c))}\n`;
+					}
+					toolsText = toolsText.trimEnd();
+					if (totalToolCalls > 6) toolsText += `\n${theme.fg("muted", "(Ctrl+O to expand)")}`;
 				}
 			}
 
-			if (details.status === "running" || isPartial) {
+			if (status === "running") {
 				const body = `\n\n${theme.fg("muted", "Searching…")}`;
-				return new Text((header + callsText + body).trimEnd(), 0, 0);
+				return new Text((header + "\n\n" + runLines + toolsText + body).trimEnd(), 0, 0);
 			}
 
 			const mdTheme = getMarkdownTheme();
-			const summary = (details.summaryText ?? (result.content[0]?.type === "text" ? result.content[0].text : ""))
+			const combined = (result.content[0]?.type === "text" ? result.content[0].text : renderCombinedMarkdown(details.runs))
 				.trim()
 				.slice(0, expanded ? 20000 : 4000);
 
 			if (!expanded) {
-				const preview = summary ? summary.split("\n").slice(0, 12).join("\n") : "(no output)";
-				let text = `${header}\n\n${theme.fg("toolOutput", preview)}`;
-				if (summary.split("\n").length > 12) text += `\n${theme.fg("muted", "(Ctrl+O to expand)")}`;
+				const preview = combined ? combined.split("\n").slice(0, 16).join("\n") : "(no output)";
+				let text = `${header}\n\n${runLines}\n\n${theme.fg("toolOutput", preview)}`;
+				if (combined.split("\n").length > 16) text += `\n${theme.fg("muted", "(Ctrl+O to expand)")}`;
 				return new Text(text, 0, 0);
 			}
 
 			const container = new Container();
 			container.addChild(new Text(header, 0, 0));
-			if (callsText) {
+			container.addChild(new Spacer(1));
+			container.addChild(new Text(runLines, 0, 0));
+			if (toolsText) {
 				container.addChild(new Spacer(1));
-				container.addChild(new Text(callsText.trim(), 0, 0));
+				container.addChild(new Text(toolsText, 0, 0));
 			}
 			container.addChild(new Spacer(1));
-			container.addChild(new Markdown(summary || "(no output)", 0, 0, mdTheme));
+			container.addChild(new Markdown(combined || "(no output)", 0, 0, mdTheme));
 			return container;
 		},
 	});
