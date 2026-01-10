@@ -1,5 +1,5 @@
 pi() {
-  local MODELS="gpt-5.1-codex-max,gpt-5.2,gpt-5.2-codex,gemini-3-flash-preview,gemini-3-pro-preview,deepseek-reasoner,deepseek-chat"
+  local MODELS="gpt-5.2,gpt-5.2-codex,gemini-3-flash-preview,gemini-3-pro-preview,deepseek-reasoner,deepseek-chat"
   # local PI="npx --prefix $HOME/code/pi-mono/packages/coding-agent tsx $HOME/code/pi-mono/packages/coding-agent/src/cli.ts"
   local PI="command pi"
 
