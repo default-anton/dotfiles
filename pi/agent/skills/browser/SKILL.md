@@ -1,6 +1,6 @@
 ---
 name: browser
-description: Minimal Chrome DevTools Protocol tools for browser automation and scraping. Use when you need to start Chrome, navigate pages, execute JavaScript, take screenshots, or interactively pick DOM elements.
+description: Minimal Chrome DevTools Protocol tools for browser automation and scraping. Use when you need to start Chrome, navigate pages, execute JavaScript, or take screenshots.
 ---
 
 # Browser Tools
@@ -61,19 +61,6 @@ Execute JavaScript in active tab. Code is wrapped in `return (${code})` — expr
 ```
 
 Screenshot current viewport, returns temp file path.
-
-## Pick Elements
-
-```bash
-~/.codex/skills/browser/scripts/pick.js "Click the submit button"
-```
-
-**IMPORTANT**: Use this tool when the user wants to select specific DOM elements on the page. This launches an interactive picker that lets the user click elements to select them. The user can select multiple elements (Cmd/Ctrl+Click) and press Enter when done. The tool returns CSS selectors for the selected elements.
-
-Common use cases:
-- User says "I want to click that button" → Use this tool to let them select it
-- User says "extract data from these items" → Use this tool to let them select the elements
-- When you need specific selectors but the page structure is complex or ambiguous
 
 ## Cookies
 
