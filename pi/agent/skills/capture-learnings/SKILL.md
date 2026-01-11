@@ -35,16 +35,16 @@ Prefer changing reality over documenting it:
    - `AGENTS.md` is canonical + portable for all agents (not just Claude).
    - **Mandatory for Claude Code** (loads `CLAUDE.md`, not `AGENTS.md`): same-dir `CLAUDE.md` containing `@AGENTS.md`.
    - Style: telegraph; noun-phrases ok; drop filler/grammar; min tokens.
-   - Do **not** dump subtree rules into the repo root.
+   - Do **not** dump subtree rules into the project root.
    - If unsure where a rule belongs:
      - Run `fd AGENTS.md <subtree-root>` (or `fd AGENTS.md` if unsure) and pick the closest governing file.
-     - If the repo has multiple `AGENTS.md` files: update the **closest one that governs the files you touched**.
+     - If the project has multiple `AGENTS.md` files: update the **closest one that governs the files you touched**.
      - If none exists in the relevant subtree: create both `AGENTS.md` (rules) + `CLAUDE.md` (`@AGENTS.md`) in that subtree.
-     - Repo root `AGENTS.md`: last resort; only repo-wide invariants.
-     - Scope test: would this be wrong/irrelevant for >50% of edits in the repo? If yes, it does not belong in root.
+     - Project root `AGENTS.md`: last resort; only project-wide invariants.
+     - Scope test: would this be wrong/irrelevant for >50% of edits in the project? If yes, it does not belong in root.
    - Prefer pointing to an existing “good example” file/path over describing abstract patterns.
 
-3) Project-local skill (`$REPO/.pi/skills/<name>/SKILL.md`): a repeatable agent workflow.
+3) Project-local skill (`<project>/.pi/skills/<name>/SKILL.md`): a repeatable agent workflow.
    - Use when it’s **3+ steps**, easy to mess up, and has clear **verification**.
    - Do **not** create a skill for a single rule (that belongs in `AGENTS.md`).
 
@@ -75,8 +75,8 @@ If you do write/update `docs/`:
 Skills are often misunderstood; keep them concrete and procedural.
 
 **Local-first rule:**
-- Default to **project-local** skills in `$REPO/.pi/skills/`.
-- Only create a global skill if it is truly cross-repo and contains no repo-specific paths/commands.
+- Default to **project-local** skills in `<project>/.pi/skills/`.
+- Only create a global skill if it is truly cross-project and contains no project-specific paths/commands.
 
 **Before creating/updating a skill (or hooks/tools/providers/themes):**
 - Read the pi docs and follow cross-references:
@@ -85,11 +85,11 @@ Skills are often misunderstood; keep them concrete and procedural.
 
 ## Scope (where it lives)
 
-- Project-specific workflow → `$REPO/.pi/skills/<name>/`
-- Cross-repo/personal habit → `~/.pi/agent/skills/<name>/`
-- Cross-repo agent rules/workflow → `~/.pi/agent/AGENTS.md` (don't create `CLAUDE.md` here)
+- Project-specific workflow → `<project>/.pi/skills/<name>/`
+- Cross-project/personal habit → `~/.pi/agent/skills/<name>/`
+- Cross-project agent rules/workflow → `~/.pi/agent/AGENTS.md` (don't create `CLAUDE.md` here)
 - Subtree-specific rules/workflow → nearest relevant `AGENTS.md` (+ same-dir `CLAUDE.md` with `@AGENTS.md`)
-- Repo-wide rules/workflow → repo root `AGENTS.md` (+ same-dir `CLAUDE.md` with `@AGENTS.md`)
+- Project-wide rules/workflow → project root `AGENTS.md` (+ same-dir `CLAUDE.md` with `@AGENTS.md`)
 
 Prefer updating an existing artifact over creating a new one; avoid duplicates.
 
