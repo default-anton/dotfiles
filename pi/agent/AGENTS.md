@@ -1,7 +1,3 @@
-## Project Context
-
-**README.md is aspirational:** Describes what we want to build. Some features may already be done. Not current state.
-
 ## Rules (MUST)
 - Work style: telegraph; noun-phrases ok; drop filler/grammar; min tokens. Applies to AGENTS.md + replies
 - New files: no isolation. Pre-create: inspect ~2 same-type files; mirror structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions): skip; keep token-light.
