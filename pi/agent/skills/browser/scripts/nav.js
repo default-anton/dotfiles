@@ -25,12 +25,45 @@ const b = await Promise.race([
 	process.exit(1);
 });
 
+// Console capture code to inject
+const consoleCapture = () => {
+	if (window.__consoleCaptureInstalled) return;
+	window.__consoleCaptureInstalled = true;
+	window.__consoleBuffer = [];
+
+	const methods = ["log", "warn", "error", "info", "debug"];
+	const originals = {};
+
+	for (const method of methods) {
+		originals[method] = console[method];
+		console[method] = (...args) => {
+			window.__consoleBuffer.push({
+				type: method,
+				args: args.map((a) => {
+					if (typeof a === "object") {
+						try {
+							return JSON.stringify(a);
+						} catch {
+							return String(a);
+						}
+					}
+					return String(a);
+				}),
+				timestamp: Date.now(),
+			});
+			originals[method](...args);
+		};
+	}
+};
+
 if (newTab) {
 	const p = await b.newPage();
+	await p.evaluateOnNewDocument(consoleCapture);
 	await p.goto(url, { waitUntil: "domcontentloaded" });
 	console.log("✓ Opened:", url);
 } else {
 	const p = (await b.pages()).at(-1);
+	await p.evaluateOnNewDocument(consoleCapture);
 	await p.goto(url, { waitUntil: "domcontentloaded" });
 	console.log("✓ Navigated to:", url);
 }

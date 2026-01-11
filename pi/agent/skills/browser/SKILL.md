@@ -34,7 +34,7 @@ Start Chrome on `:9222` with remote debugging.
 ~/.codex/skills/browser/scripts/nav.js https://example.com --new
 ```
 
-Navigate current tab or open new tab.
+Navigate current tab or open new tab. Console capture is automatically injected to retain logs for later retrieval.
 
 ## Evaluate JavaScript
 
@@ -61,6 +61,14 @@ Execute JavaScript in active tab. Code is wrapped in `return (${code})` — expr
 ```
 
 Screenshot current viewport, returns temp file path.
+
+## Console Logs
+
+```bash
+~/.codex/skills/browser/scripts/console.js
+```
+
+Display console messages from the current tab. Shows all logs captured since navigation (via `nav.js`).
 
 ## Cookies
 
