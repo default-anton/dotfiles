@@ -1,1 +1,1 @@
-- Run `./install --no-brew` after modifying `pi/agent/skills/*.md`
+- Run `./install --no-brew` in `~/.dotfiles` after modifying skills
