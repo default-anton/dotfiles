@@ -257,8 +257,6 @@ export default function visionExtension(pi: ExtensionAPI) {
 
 	// Tool must be registered eagerly (cannot be registered on-demand later).
 	registerTool();
-	// Ensure inactive by default (in case registering auto-activates it).
-	setActive(false);
 
 	pi.on("session_start", async (_event, ctx) => {
 		maybeUpdate(ctx);
