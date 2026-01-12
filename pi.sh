@@ -12,6 +12,11 @@ pi() {
   elif [ "${1:-}" = "codex" ]; then
     shift
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2-codex --thinking medium "$@")
+  elif [ "${1:-}" = "flash" ]; then
+    shift
+    export PI_SMALL_PROVIDER="google-vertex"
+    export PI_SMALL_MODEL="gemini-3-flash-preview"
+    (command pi --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider google-vertex --model gemini-3-flash-preview --thinking high "$@")
   else
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
