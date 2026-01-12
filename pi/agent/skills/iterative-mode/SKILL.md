@@ -34,4 +34,4 @@ description: Long-horizon workflow (multi-step, multi-session) with explicit use
 - Verification: run applicable checks (tests/lint/typecheck/build/etc). If blocked: record why + what you did instead.
 - Update todo after each completed step and when context changes.
 - After milestone done + todo updated: STOP; expect rerun for next milestone.
-- Only say "ALL DONE" once entire spec done.
+- Only say "ALL DONE" in a reply when the user's full task/spec is complete and verified.
