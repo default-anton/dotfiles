@@ -15,13 +15,18 @@ description: Long-horizon workflow (multi-step, multi-session) with explicit use
 ## Todo log
 
 - Create/maintain todo log: `docs/todos/<spec>.md`.
+  - `<spec>`: short slug from spec doc name/link.
+  - No spec doc/link: use task-derived slug (e.g. `task-<short-slug>`).
   - If `docs/todos/` missing: create it.
   - If todo exists: continue where left off.
 - Todo: enough resume context to continue w/o repo archaeology; tight.
 
 ### Todo sections (short bullets)
 
-- Context: spec link/name, goal (1–2 bullets), key constraints/assumptions.
+- Context:
+  - Spec link/name (or "no spec").
+  - Task statement (copy user request into todo when no spec exists).
+  - Goal (1–2 bullets), key constraints/assumptions.
 - Progress: done items.
 - Changes: files touched (paths), key diffs/decisions, commands/tests run (pass/fail), skipped checks + why.
 - Open: blockers/questions/unknowns.
