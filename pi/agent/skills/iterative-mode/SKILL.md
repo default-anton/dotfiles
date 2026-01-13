@@ -20,6 +20,7 @@ description: Long-horizon workflow (multi-step, multi-session) with explicit use
   - If `docs/todos/` missing: create it.
   - If todo exists: continue where left off.
 - Todo: enough resume context to continue w/o repo archaeology; tight.
+- Todo should reflect current truth; OK to rewrite/condense, but keep each completed milestone’s Progress/Changes.
 
 ### Todo sections (short bullets)
 
