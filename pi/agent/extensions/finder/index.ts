@@ -1,3 +1,5 @@
+import events from "node:events";
+
 import { getModel } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionFactory } from "@mariozechner/pi-coding-agent";
 import {
@@ -16,6 +18,39 @@ import { Type } from "@sinclair/typebox";
 import autoloadSubdirAgents from "../autoload-subdir-agents";
 
 const MAX_TURNS = 10;
+
+const DEFAULT_EVENTTARGET_MAX_LISTENERS = 100;
+const EVENTTARGET_MAX_LISTENERS_STATE_KEY = Symbol.for("pi.eventTargetMaxListenersState");
+
+type EventTargetMaxListenersState = { depth: number; savedDefault?: number };
+
+function getEventTargetMaxListenersState(): EventTargetMaxListenersState {
+  const g = globalThis as any;
+  if (!g[EVENTTARGET_MAX_LISTENERS_STATE_KEY]) g[EVENTTARGET_MAX_LISTENERS_STATE_KEY] = { depth: 0 };
+  return g[EVENTTARGET_MAX_LISTENERS_STATE_KEY] as EventTargetMaxListenersState;
+}
+
+function bumpDefaultEventTargetMaxListeners(): () => void {
+  const state = getEventTargetMaxListenersState();
+
+  const raw = process.env.PI_EVENTTARGET_MAX_LISTENERS ?? process.env.PI_ABORT_MAX_LISTENERS;
+  const desired = raw !== undefined ? Number(raw) : DEFAULT_EVENTTARGET_MAX_LISTENERS;
+  if (!Number.isFinite(desired) || desired < 0) return () => {};
+
+  if (state.depth === 0) state.savedDefault = events.defaultMaxListeners;
+  state.depth += 1;
+
+  if (events.defaultMaxListeners < desired) events.setMaxListeners(desired);
+
+  return () => {
+    state.depth = Math.max(0, state.depth - 1);
+    if (state.depth !== 0) return;
+    if (state.savedDefault === undefined) return;
+
+    events.setMaxListeners(state.savedDefault);
+    state.savedDefault = undefined;
+  };
+}
 
 const FinderParams = Type.Object({
   queries: Type.Array(
@@ -244,11 +279,13 @@ export default function finderExtension(pi: ExtensionAPI) {
     parameters: FinderParams,
 
     async execute(_toolCallId, params, onUpdate, ctx, signal) {
-      const startedAt = Date.now();
-      const maxTurns = MAX_TURNS;
-      const queries = Array.isArray((params as any).queries) ? ((params as any).queries as string[]) : [];
+      const restoreMaxListeners = bumpDefaultEventTargetMaxListeners();
+      try {
+        const startedAt = Date.now();
+        const maxTurns = MAX_TURNS;
+        const queries = Array.isArray((params as any).queries) ? ((params as any).queries as string[]) : [];
 
-      if (queries.length < 1 || queries.length > 4 || queries.some((q) => typeof q !== "string" || !q.trim())) {
+        if (queries.length < 1 || queries.length > 4 || queries.some((q) => typeof q !== "string" || !q.trim())) {
         const error = "Invalid parameters: expected `queries` to be an array of 1–4 non-empty strings.";
         return {
           content: [{ type: "text", text: error }],
@@ -498,6 +535,9 @@ export default function finderExtension(pi: ExtensionAPI) {
         };
       } finally {
         if (signal && abortListenerAdded) signal.removeEventListener("abort", onAbort);
+      }
+      } finally {
+        restoreMaxListeners();
       }
     },
 

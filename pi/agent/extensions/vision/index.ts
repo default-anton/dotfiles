@@ -1,3 +1,4 @@
+import events from "node:events";
 import fs from "node:fs";
 import nodePath from "node:path";
 
@@ -18,6 +19,39 @@ import { Type } from "@sinclair/typebox";
 import autoloadSubdirAgents from "../autoload-subdir-agents";
 
 const VISION_MAX_TURNS = 50;
+
+const DEFAULT_EVENTTARGET_MAX_LISTENERS = 100;
+const EVENTTARGET_MAX_LISTENERS_STATE_KEY = Symbol.for("pi.eventTargetMaxListenersState");
+
+type EventTargetMaxListenersState = { depth: number; savedDefault?: number };
+
+function getEventTargetMaxListenersState(): EventTargetMaxListenersState {
+	const g = globalThis as any;
+	if (!g[EVENTTARGET_MAX_LISTENERS_STATE_KEY]) g[EVENTTARGET_MAX_LISTENERS_STATE_KEY] = { depth: 0 };
+	return g[EVENTTARGET_MAX_LISTENERS_STATE_KEY] as EventTargetMaxListenersState;
+}
+
+function bumpDefaultEventTargetMaxListeners(): () => void {
+	const state = getEventTargetMaxListenersState();
+
+	const raw = process.env.PI_EVENTTARGET_MAX_LISTENERS ?? process.env.PI_ABORT_MAX_LISTENERS;
+	const desired = raw !== undefined ? Number(raw) : DEFAULT_EVENTTARGET_MAX_LISTENERS;
+	if (!Number.isFinite(desired) || desired < 0) return () => {};
+
+	if (state.depth === 0) state.savedDefault = events.defaultMaxListeners;
+	state.depth += 1;
+
+	if (events.defaultMaxListeners < desired) events.setMaxListeners(desired);
+
+	return () => {
+		state.depth = Math.max(0, state.depth - 1);
+		if (state.depth !== 0) return;
+		if (state.savedDefault === undefined) return;
+
+		events.setMaxListeners(state.savedDefault);
+		state.savedDefault = undefined;
+	};
+}
 
 const VisionParams = Type.Object({
 	images: Type.Array(Type.String(), {
@@ -286,16 +320,18 @@ export default function visionExtension(pi: ExtensionAPI) {
 			parameters: VisionParams,
 
 			async execute(_toolCallId, params, onUpdate, ctx, signal) {
-				const startedAt = Date.now();
-				const toolCalls: ToolCall[] = [];
-				let turns = 0;
-				let summaryText = "";
+				const restoreMaxListeners = bumpDefaultEventTargetMaxListeners();
+				try {
+					const startedAt = Date.now();
+					const toolCalls: ToolCall[] = [];
+					let turns = 0;
+					let summaryText = "";
 
-				const authStorage = discoverAuthStorage();
-				const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
+					const authStorage = discoverAuthStorage();
+					const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
 
-				const availableModels = await modelRegistry.getAvailable();
-				const preferredModel = selectVisionModel(availableModels);
+					const availableModels = await modelRegistry.getAvailable();
+					const preferredModel = selectVisionModel(availableModels);
 				if (!preferredModel) {
 					const error =
 						"No vision-capable models available. Configure credentials (e.g. /login or auth.json) and try again.";
@@ -482,6 +518,9 @@ export default function visionExtension(pi: ExtensionAPI) {
 					unsubscribe();
 					session.dispose();
 				}
+			} finally {
+				restoreMaxListeners();
+			}
 			},
 
 			renderCall(args, theme) {
