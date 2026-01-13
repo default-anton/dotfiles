@@ -376,9 +376,15 @@ export default function visionExtension(pi: ExtensionAPI) {
 					}
 				};
 
+				let abortListenerAdded = false;
+				const onAbort = () => void abort();
+
 				if (signal) {
 					if (signal.aborted) await abort();
-					else signal.addEventListener("abort", () => void abort(), { once: true });
+					else {
+						signal.addEventListener("abort", onAbort);
+						abortListenerAdded = true;
+					}
 				}
 
 				let lastUpdate = 0;
@@ -472,6 +478,7 @@ export default function visionExtension(pi: ExtensionAPI) {
 						isError: !aborted,
 					};
 				} finally {
+					if (signal && abortListenerAdded) signal.removeEventListener("abort", onAbort);
 					unsubscribe();
 					session.dispose();
 				}

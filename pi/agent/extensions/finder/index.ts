@@ -334,8 +334,52 @@ export default function finderExtension(pi: ExtensionAPI) {
       const contextFiles = discoverContextFiles(ctx.cwd);
       const systemPrompt = buildFinderSystemPrompt(maxTurns);
 
+      let toolAborted = false;
+      const activeSessions = new Set<{ abort: () => Promise<void> }>();
+
+      const markAllAborted = () => {
+        for (const r of runs) {
+          if (r.status !== "running") continue;
+          r.status = "aborted";
+          r.summaryText = r.summaryText ?? "Aborted";
+          r.endedAt = Date.now();
+        }
+      };
+
+      const abortAll = async () => {
+        if (toolAborted) return;
+        toolAborted = true;
+        markAllAborted();
+        emitAll(true);
+        await Promise.allSettled([...activeSessions].map((s) => s.abort()));
+      };
+
+      let abortListenerAdded = false;
+      const onAbort = () => void abortAll();
+
+      if (signal) {
+        if (signal.aborted) await abortAll();
+        else {
+          signal.addEventListener("abort", onAbort);
+          abortListenerAdded = true;
+        }
+      }
+
       const runQuery = async (index: number) => {
         const run = runs[index];
+
+        if (toolAborted || signal?.aborted) {
+          run.status = "aborted";
+          run.turns = 0;
+          run.toolCalls = [];
+          run.startedAt = Date.now();
+          run.endedAt = Date.now();
+          run.error = undefined;
+          run.summaryText = "Aborted";
+          emitAll(true);
+          return;
+        }
+
         run.status = "running";
         run.turns = 0;
         run.toolCalls = [];
@@ -359,24 +403,8 @@ export default function finderExtension(pi: ExtensionAPI) {
           systemPrompt,
         });
 
-        let aborted = false;
-        const abort = async () => {
-          aborted = true;
-          run.status = "aborted";
-          run.summaryText = run.summaryText ?? "Aborted";
-          run.endedAt = Date.now();
-          emitAll(true);
-          try {
-            await session.abort();
-          } catch {
-            // ignore
-          }
-        };
-
-        if (signal) {
-          if (signal.aborted) await abort();
-          else signal.addEventListener("abort", () => void abort(), { once: true });
-        }
+        activeSessions.add(session as any);
+        const wasAborted = () => toolAborted || signal?.aborted;
 
         const unsubscribe = session.subscribe((event) => {
           switch (event.type) {
@@ -411,19 +439,20 @@ export default function finderExtension(pi: ExtensionAPI) {
         try {
           await session.prompt(buildFinderUserPrompt(run.query, maxTurns), { expandPromptTemplates: false });
           run.summaryText = getLastAssistantText(session.state.messages as any[]).trim();
-          if (!run.summaryText) run.summaryText = aborted ? "Aborted" : "(no output)";
+          if (!run.summaryText) run.summaryText = wasAborted() ? "Aborted" : "(no output)";
 
-          run.status = aborted ? "aborted" : "done";
+          run.status = wasAborted() ? "aborted" : "done";
           run.endedAt = Date.now();
           emitAll(true);
         } catch (e) {
-          const error = aborted ? "Aborted" : e instanceof Error ? e.message : String(e);
-          run.status = aborted ? "aborted" : "error";
-          run.error = aborted ? undefined : error;
+          const error = wasAborted() ? "Aborted" : e instanceof Error ? e.message : String(e);
+          run.status = wasAborted() ? "aborted" : "error";
+          run.error = wasAborted() ? undefined : error;
           run.summaryText = error;
           run.endedAt = Date.now();
           emitAll(true);
         } finally {
+          activeSessions.delete(session as any);
           unsubscribe();
           session.dispose();
         }
@@ -467,6 +496,8 @@ export default function finderExtension(pi: ExtensionAPI) {
           } satisfies FinderDetails,
           isError: true,
         };
+      } finally {
+        if (signal && abortListenerAdded) signal.removeEventListener("abort", onAbort);
       }
     },
 
