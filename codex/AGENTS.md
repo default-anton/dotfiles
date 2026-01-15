@@ -9,3 +9,10 @@
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
 - Keep files <~500 LOC; split/refactor as needed.
+
+## Coding Loop You Must Follow
+**When to use:** always any file change (code/config/docs/scripts). Exception: trivial single-line typo; impact clearly zero.
+1. Context: enough context to change + verify. Start w/ user artifacts; assume incomplete. Read relevant code paths (callers, callees, config, tests) until you can state: current behavior, desired behavior/constraints, minimal safe change, verification plan. Use external docs if ambiguity remains. If uncertainty about impact/interfaces: broaden context (search/read), no guessing.
+2. Plan: high-level approach + verification plan.
+3. Implement.
+4. Verify: mandatory after any file change. Test/run/lint/UI verify; iterate until works.
