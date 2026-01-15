@@ -16,7 +16,7 @@
     "@hono/node-server": "^1.19.7",
     "@hono/node-ws": "^1.2.0",
     "express": "^4.21.0",
-    "hono": "^4.11.1",
+    "hono": "^4.11.4",
     "playwright": "^1.49.0"
   },
   "devDependencies": {
