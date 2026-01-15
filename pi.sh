@@ -9,6 +9,9 @@ pi() {
   if [ "${1:-}" = "glm" ]; then
     shift
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --thinking high "$@")
+  elif [ "${1:-}" = "chat-codex" ]; then
+    shift
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2 --thinking medium "$@")
   elif [ "${1:-}" = "codex" ]; then
     shift
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2-codex --thinking medium "$@")
@@ -17,6 +20,10 @@ pi() {
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
     (command pi --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider google-vertex --model gemini-3-flash-preview --thinking high "$@")
+  elif [ "${1:-}" = "chat" ]; then
+    export PI_SMALL_PROVIDER="google-vertex"
+    export PI_SMALL_MODEL="gemini-3-flash-preview"
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium "$@")
   else
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
