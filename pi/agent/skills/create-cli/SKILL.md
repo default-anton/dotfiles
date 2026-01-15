@@ -1,11 +1,6 @@
 ---
 name: create-cli
-description: >
-  Design command-line interface parameters and UX: arguments, flags, subcommands,
-  help text, output formats, error messages, exit codes, prompts, config/env
-  precedence, and safe/dry-run behavior. Use when you’re designing a CLI spec
-  (before implementation) or refactoring an existing CLI’s surface area for
-  consistency, composability, and discoverability.
+description: "Design command-line interface parameters and UX: arguments, flags, subcommands, help text, output formats, error messages, exit codes, prompts, config/env precedence, and safe/dry-run behavior. Use when you’re designing a CLI spec (before implementation) or refactoring an existing CLI’s surface area for consistency, composability, and discoverability."
 ---
 
 # Create CLI

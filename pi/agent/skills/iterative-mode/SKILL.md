@@ -1,6 +1,6 @@
 ---
 name: iterative-mode
-description: Long-horizon workflow (multi-step, multi-session) with explicit user confirmation and a persistent todo log. Use when user explicitly requests "iterative mode" (e.g. "enable iterative mode", "run this in iterative mode", "iterative mode: on"). Agent (you) may recommend when task seems big/long-horizon; if recommending, ask "Enable iterative mode?" and wait for yes/no.
+description: 'Long-horizon workflow (multi-step, multi-session) with explicit user confirmation and a persistent todo log. Use when user explicitly requests "iterative mode" (e.g. "enable iterative mode", "run this in iterative mode", "iterative mode: on"). Agent (you) may recommend when task seems big/long-horizon; if recommending, ask "Enable iterative mode?" and wait for yes/no.'
 ---
 
 # Iterative mode (opt-in; long-horizon)
