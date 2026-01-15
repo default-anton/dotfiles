@@ -1,5 +1,5 @@
 pi() {
-  local MODELS="gpt-5.2,gpt-5.2-codex,glm-4.7,gemini-3-flash-preview,gemini-3-flash,gemini-3-pro-preview,deepseek-reasoner,deepseek-chat"
+  local MODELS="openai-codex/gpt-5.2,openai-codex/gpt-5.2-codex,openai/gpt-5.2,openai/gpt-5.2-codex,glm-4.7,google-vertex/gemini-3-flash-preview,google-vertex/gemini-3-pro-preview,google-antigravity/gemini-3-flash-preview,google-antigravity/gemini-3-flash-preview,gemini-3-flash,deepseek-reasoner,deepseek-chat"
   # local PI="npx --prefix $HOME/code/pi-mono/packages/coding-agent tsx $HOME/code/pi-mono/packages/coding-agent/src/cli.ts"
   local PI="command pi --models $MODELS"
 
@@ -20,6 +20,6 @@ pi() {
   else
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium "$@")
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2-codex --thinking medium "$@")
   fi
 }
