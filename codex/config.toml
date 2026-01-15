@@ -11,6 +11,7 @@ model_reasoning_summary = "auto"
 web_search_request = true
 apply_patch_freeform = true
 shell_snapshot = true
+steer = true
 
 [notice]
 hide_gpt5_1_migration_prompt = true
