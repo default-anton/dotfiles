@@ -1,5 +1,5 @@
 pi() {
-  local MODELS="openai-codex/gpt-5.2,openai-codex/gpt-5.2-codex,openai/gpt-5.2,openai/gpt-5.2-codex,glm-4.7,google-vertex/gemini-3-flash-preview,google-vertex/gemini-3-pro-preview,google-antigravity/gemini-3-flash-preview,google-antigravity/gemini-3-flash-preview,gemini-3-flash,deepseek-reasoner,deepseek-chat"
+  local MODELS="openai-codex/gpt-5.2,openai-codex/gpt-5.2-codex,openai/gpt-5.2,openai/gpt-5.2-codex,glm-4.7,google-vertex/gemini-3-flash-preview,google-vertex/gemini-3-pro-preview,google-antigravity/gemini-3-flash,google-antigravity/gemini-3-pro-high,deepseek-reasoner,deepseek-chat"
   # local PI="npx --prefix $HOME/code/pi-mono/packages/coding-agent tsx $HOME/code/pi-mono/packages/coding-agent/src/cli.ts"
   local PI="command pi --models $MODELS"
 
