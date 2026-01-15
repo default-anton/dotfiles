@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+brew update && brew upgrade claude-code
+mise use --global npm:@mariozechner/pi-coding-agent@latest
+mise use --global npm:@openai/codex@latest
