@@ -312,10 +312,7 @@ export default function finderExtension(pi: ExtensionAPI) {
       const authStorage = discoverAuthStorage();
       const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
 
-      const subModel = getModel(
-        process.env.PI_SMALL_PROVIDER ?? "zai",
-        process.env.PI_SMALL_MODEL ?? "glm-4.7"
-      );
+      const subModel = getModel(process.env.PI_SMALL_PROVIDER, process.env.PI_SMALL_MODEL);
 
       if (!subModel) {
         const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
