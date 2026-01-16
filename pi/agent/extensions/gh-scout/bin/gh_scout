@@ -84,6 +84,25 @@ cache_path() {
 	printf '%s/%s/%s/%s/%s' "$CACHE_ROOT" "$OWNER" "$REPO" "$safe_ref" "$clean_path"
 }
 
+cache_listing_path() {
+	local repo="$1"
+	local ref="$2"
+	local path="${3:-}"
+	split_repo "$repo"
+	local safe_ref="${ref//\//__}"
+	local clean_path="${path#/}"
+	if [[ "$clean_path" == "." ]]; then
+		clean_path=""
+	fi
+	[[ "$clean_path" != *".."* ]] || die "path traversal not allowed"
+	local base="$CACHE_ROOT/$OWNER/$REPO/$safe_ref/.listings"
+	if [[ -n "$clean_path" ]]; then
+		printf '%s/%s.listing' "$base" "$clean_path"
+	else
+		printf '%s/__root__.listing' "$base"
+	fi
+}
+
 repo_info() {
 	require_jq
 	split_repo "$1"
@@ -99,6 +118,9 @@ ls_dir() {
 	resolved=$(resolve_ref "$repo" "$ref")
 	split_repo "$repo"
 	local clean_path="${path#/}"
+	if [[ "$clean_path" == "." ]]; then
+		clean_path=""
+	fi
 	local encoded_path=""
 	if [[ -n "$clean_path" ]]; then
 		encoded_path="/$(urlencode_path "$clean_path")"
@@ -106,7 +128,16 @@ ls_dir() {
 		encoded_path="/"
 	fi
 	local url="https://api.github.com/repos/$OWNER/$REPO/contents${encoded_path}?ref=$(urlencode "$resolved")"
-	api_get "$url" | jq -r 'if type == "array" then .[] | "\(.type)\t\(.path)" else "\(.type)\t\(.path)" end' | head -n "$MAX_LIST"
+	local listing
+	listing=$(api_get "$url" | jq -r 'if type == "array" then .[] | "\(.type)\t\(.path)" else "\(.type)\t\(.path)" end' | head -n "$MAX_LIST")
+	local listing_path
+	listing_path=$(cache_listing_path "$repo" "$resolved" "$clean_path")
+	mkdir -p "$(dirname "$listing_path")"
+	printf '%s\n' "$listing" > "$listing_path"
+	printf 'cached: %s\n' "$listing_path"
+	if [[ -n "$listing" ]]; then
+		printf '%s\n' "$listing"
+	fi
 }
 
 cat_file() {
