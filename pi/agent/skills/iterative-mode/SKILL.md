@@ -7,10 +7,18 @@ description: 'Long-horizon workflow (multi-step, multi-session) with explicit us
 
 ## Trigger
 
-- User explicitly requests iterative mode (imperative phrasing; loose ok). Mentioning phrase in passing ≠ trigger.
+- Enable: user explicitly requests iterative mode (imperative phrasing; loose ok).
   - Examples: "enable iterative mode", "run this in iterative mode", "iterative mode: on".
+- Variant: user can request **step-by-step** mode (stop after each milestone).
+  - Examples: "iterative mode: step-by-step", "iterative mode: step by step", "iterative mode: stop after milestone", "iterative mode: stepwise".
+- Mentioning phrase in passing ≠ trigger.
 - Agent (you) may recommend iterative mode when task seems big/long-horizon; do not start until user confirms.
-  - If recommending: ask "Enable iterative mode?" and wait for yes/no.
+  - Ask: "Enable iterative mode? (default: continuous; reply 'step-by-step' to stop after each milestone)" and wait for yes/no.
+
+## Modes
+
+- **Continuous (default):** maintain todo log; keep executing milestones until full task/spec implemented + verified.
+- **Step-by-step (opt-in):** after each milestone + todo update: STOP; wait for user to continue.
 
 ## Todo log
 
@@ -36,8 +44,10 @@ description: 'Long-horizon workflow (multi-step, multi-session) with explicit us
 ## Execution loop
 
 - Break work into clear milestones; each independently implementable + verifiable.
-- Pick ONE milestone; implement fully; verify.
-- Verification: run applicable checks (tests/lint/typecheck/build/etc). If blocked: record why + what you did instead.
-- Update todo after each completed step and when context changes.
-- After milestone done + todo updated: STOP; expect rerun for next milestone.
-- Only say "ALL DONE" in a reply when the user's full task/spec is complete and verified.
+- For each milestone:
+  - Implement fully.
+  - Verify (tests/lint/typecheck/build/etc). If blocked: record why + what you did instead.
+  - Update todo.
+  - If mode=step-by-step: STOP; expect rerun / "continue" for next milestone.
+- If mode=continuous: keep going until the user’s full task/spec is complete and verified.
+- Only say "ALL DONE" when the user’s full task/spec is complete and verified.
