@@ -8,16 +8,12 @@ pi() {
   export PI_SMALL_PROVIDER="google-antigravity"
   export PI_SMALL_MODEL="gemini-3-flash"
 
-  if [ "$selection" = "glm" ]; then
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --thinking high "$@")
-  elif [ "$selection" = "chat-codex" ]; then
+  if [ "$selection" = "chat-codex" ]; then
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2 --thinking medium "$@")
   elif [ "$selection" = "codex" ]; then
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2-codex --thinking medium "$@")
   elif [ "$selection" = "flash" ]; then
-    export PI_SMALL_PROVIDER="google-vertex"
-    export PI_SMALL_MODEL="gemini-3-flash-preview"
-    (command pi --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider google-vertex --model gemini-3-flash-preview --thinking high "$@")
+    (command pi --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider "$PI_SMALL_PROVIDER" --model "$PI_SMALL_MODEL" --thinking high "$@")
   elif [ "$selection" = "chat" ]; then
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
