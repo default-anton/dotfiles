@@ -1,0 +1,4 @@
+- To update agent-browser:
+    - run `mise use --global npm:agent-browser@latest`
+    - refresh SKILL.md: `curl -L https://raw.githubusercontent.com/vercel-labs/agent-browser/refs/heads/main/skills/agent-browser/SKILL.md > SKILL.md`
+    - after refresh, add: "Assume `agent-browser` is installed. If not, run `mise use --global npm:agent-browser@latest`." to the updated SKILL.md
