@@ -18,6 +18,10 @@ pi() {
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium "$@")
+  elif [ "$selection" = "glm" ]; then
+    export PI_SMALL_PROVIDER="google-vertex"
+    export PI_SMALL_MODEL="gemini-3-flash-preview"
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --thinking high "$@")
   else
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
