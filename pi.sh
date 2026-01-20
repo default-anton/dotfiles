@@ -3,7 +3,7 @@ pi() {
   # local PI="npx --prefix $HOME/code/pi-mono/packages/coding-agent tsx $HOME/code/pi-mono/packages/coding-agent/src/cli.ts --models $MODELS"
   local PI="command pi --models $MODELS"
   local selection
-  selection=$(printf "%s\n" default glm chat-codex codex flash chat | fzf --prompt="model> " --height=40% --reverse)
+  selection=$(printf "%s\n" default glm chat-codex codex flash-vertex flash-antigravity chat | fzf --prompt="model> " --height=40% --reverse)
 
   export PI_SMALL_PROVIDER="google-antigravity"
   export PI_SMALL_MODEL="gemini-3-flash"
@@ -12,16 +12,18 @@ pi() {
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2 --thinking medium "$@")
   elif [ "$selection" = "codex" ]; then
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2-codex --thinking medium "$@")
-  elif [ "$selection" = "flash" ]; then
+  elif [ "$selection" = "flash-antigravity" ]; then
     (command pi --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider "$PI_SMALL_PROVIDER" --model "$PI_SMALL_MODEL" --thinking high "$@")
+  elif [ "$selection" = "glm" ]; then
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --thinking high "$@")
+  elif [ "$selection" = "flash-vertex" ]; then
+    export PI_SMALL_PROVIDER="google-vertex"
+    export PI_SMALL_MODEL="gemini-3-flash-preview"
+    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider "$PI_SMALL_PROVIDER" --model "$PI_SMALL_MODEL" --thinking high "$@")
   elif [ "$selection" = "chat" ]; then
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
     ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium "$@")
-  elif [ "$selection" = "glm" ]; then
-    export PI_SMALL_PROVIDER="google-vertex"
-    export PI_SMALL_MODEL="gemini-3-flash-preview"
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --thinking high "$@")
   else
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
