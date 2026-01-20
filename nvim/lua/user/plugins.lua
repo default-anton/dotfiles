@@ -63,32 +63,6 @@ require("lazy").setup({
     opts = {},
   },
   "nvim-telescope/telescope-ui-select.nvim",
-  {
-    dir = "~/code/llm-sidekick.nvim",
-    config = function()
-      require('llm-sidekick').setup({
-        aliases = {
-          pro = "vertex_ai/gemini-2.5-pro",
-          -- sonnet = "anthropic.claude-sonnet-4",
-          opus = "vertex_ai/claude-opus-4",
-          sonnet = "vertex_ai/claude-sonnet-4",
-        },
-        yolo_mode = {
-          file_operations = false,          -- Automatically accept file operations
-          terminal_commands = false,        -- Automatically accept terminal commands
-          auto_commit_changes = false,      -- Enable auto-commit
-        },
-        auto_commit_model = "gpt-4.1-mini", -- Use a specific model for commit messages
-        default = "opus",
-        safe_terminal_commands = {
-          "bin/bundle", "bundle", "bin/rspec", "rspec", "bin/rails", "rails", "bin/rake", "rake",
-          "git commit", "mkdir", "touch",
-        },
-        guidelines = [[
-Feel free to use any terminal tools - I have `fd`, `rg`, `gh`, `jq`, `aws` installed and ready to use.]],
-      })
-    end,
-  },
   "Marskey/telescope-sg",
   -- {
   --   'MeanderingProgrammer/render-markdown.nvim',
