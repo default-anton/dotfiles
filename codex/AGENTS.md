@@ -9,6 +9,9 @@
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
 - Keep files <~500 LOC; split/refactor as needed.
+- `~/.codex/{skills,prompts}/**` copied from `~/.dotfiles/pi/agent/{skills,prompts}/**` (source of truth)
+- `~/.codex/AGENTS.md` symlink → `~/.dotfiles/codex/AGENTS.md` (source of truth)
+- Modify global `AGENTS.md` in `~/.dotfiles/codex/`, global skills and prompts in `~/.dotfiles/pi/agent/` (not under `~/.codex/`)
 
 ## Coding Loop You Must Follow
 **When to use:** always any file change (code/config/docs/scripts). Exception: trivial single-line typo; impact clearly zero.
