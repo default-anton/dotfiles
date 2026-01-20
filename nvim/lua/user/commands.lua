@@ -61,6 +61,8 @@ vim.api.nvim_create_user_command("Commit", function(opts)
 
   local system_prompt = [[Git-commit agent. Only use bash. Always inspect git status + diff for requested scope. If staged: read staged diff. If unstaged/paths: read those diffs. Read recent commit messages by current Git user to match style. Then craft commit message + perform commits per instructions. No code edits, no push. If scope unclear, refuse.]]
 
+  local exit_extension = vim.fn.stdpath("config") .. "/lua/user/exit-after-turn.ts"
+
   local args = {
     "--provider",
     "google-vertex",
@@ -73,6 +75,8 @@ vim.api.nvim_create_user_command("Commit", function(opts)
     "--no-skills",
     "--tools",
     "bash",
+    "--extension",
+    exit_extension,
     "--system-prompt",
     system_prompt,
     instructions,
