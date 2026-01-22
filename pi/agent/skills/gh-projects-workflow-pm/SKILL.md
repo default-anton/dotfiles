@@ -7,11 +7,7 @@ description: "Role overlay for `gh-projects-workflow`. Use together with the cor
 
 Prereq: load `gh-projects-workflow` (core) first.
 
-Run commands from the core skill dir:
-
-```bash
-cd ~/.dotfiles/pi/agent/skills/gh-projects-workflow
-```
+Use `gpw` from PATH (`~/.dotfiles/bin`).
 
 ## Scope
 
@@ -31,7 +27,7 @@ You may:
 - Prefer **draft item** in `Global` for new work.
 
 ```bash
-./scripts/gpw draft create --title "..." --body "..."
+gpw draft create --title "..." --body "..."
 ```
 
 2) Refine
@@ -43,7 +39,7 @@ You may:
 - If draft started in `Global`, also add to per-repo project and remove from `Global` (when appropriate).
 
 ```bash
-./scripts/gpw draft convert --project "Global" --item ITEM_ID --repo OWNER/REPO \
+gpw draft convert --project "Global" --item ITEM_ID --repo OWNER/REPO \
   --to-project "repo-project-title" --delete-from-project
 ```
 
@@ -57,9 +53,9 @@ You may:
 Prefer explicit status updates:
 
 ```bash
-./scripts/gpw task set-status --repo OWNER/REPO --issue 123 --status "In Progress"
-./scripts/gpw task set-status --repo OWNER/REPO --issue 123 --status "In Review"
-./scripts/gpw task set-status --repo OWNER/REPO --issue 123 --status "Done"
+gpw task set-status --repo OWNER/REPO --issue 123 --status "In Progress"
+gpw task set-status --repo OWNER/REPO --issue 123 --status "In Review"
+gpw task set-status --repo OWNER/REPO --issue 123 --status "Done"
 ```
 
 ## Verification discipline (spec hygiene)

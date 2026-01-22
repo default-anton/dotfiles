@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Shared lib for ./scripts/gpw
+# Shared lib for gpw
 
 skill_dir() {
   cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1

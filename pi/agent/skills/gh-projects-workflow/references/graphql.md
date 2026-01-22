@@ -1,6 +1,6 @@
 # GitHub Projects v2 GraphQL (notes)
 
-Used by `./scripts/gpw` via `gh api graphql`.
+Used by `gpw` via `gh api graphql`.
 
 ## Viewer id
 

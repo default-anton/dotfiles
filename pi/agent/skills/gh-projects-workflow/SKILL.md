@@ -39,30 +39,26 @@ Rules:
 - `gh` authenticated to your **user** account
 - `jq`
 
-## Scripts
+## CLI
 
-Run commands from this dir:
-
-```bash
-cd ~/.dotfiles/pi/agent/skills/gh-projects-workflow
-```
+`gpw` lives in `~/.dotfiles/bin` (PATH).
 
 Help:
 
 ```bash
-./scripts/gpw help
+gpw help
 ```
 
 ## Command index (what exists)
 
 - Projects / repos
-  - `./scripts/gpw projects list`
-  - `./scripts/gpw repos list [--limit N]`
-  - `./scripts/gpw global ensure` (ensures the `Global` project exists)
-  - `./scripts/gpw project ensure --title TITLE`
+  - `gpw projects list`
+  - `gpw repos list [--limit N]`
+  - `gpw global ensure` (ensures the `Global` project exists)
+  - `gpw project ensure --title TITLE`
 
 - Project items (list)
-  - `./scripts/gpw project items --title TITLE [--status STATUS] [--drafts|--issues|--all] [--json]`
+  - `gpw project items --title TITLE [--status STATUS] [--drafts|--issues|--all] [--json]`
     - default mode: `--all`
     - text output: TSV
       - drafts: `draft<TAB>Status<TAB>ITEM_ID<TAB>Title`
@@ -70,26 +66,26 @@ Help:
       - prs: `pr<TAB>Status<TAB>OWNER/REPO#N<TAB>Title<TAB>URL`
 
 - Read item content by `ITEM_ID`
-  - `./scripts/gpw item view --item ITEM_ID` (prints title/body for drafts; url/body for issues/PRs)
-  - `./scripts/gpw item view --item ITEM_ID --json`
+  - `gpw item view --item ITEM_ID` (prints title/body for drafts; url/body for issues/PRs)
+  - `gpw item view --item ITEM_ID --json`
 
 - Draft items
-  - `./scripts/gpw draft create  --title TITLE [--body TEXT] [--project TITLE]`
-  - `./scripts/gpw draft convert --item ITEM_ID --repo OWNER/REPO [--project TITLE] [--to-project TITLE] [--delete-from-project]`
+  - `gpw draft create  --title TITLE [--body TEXT] [--project TITLE]`
+  - `gpw draft convert --item ITEM_ID --repo OWNER/REPO [--project TITLE] [--to-project TITLE] [--delete-from-project]`
 
 - Issues (“tasks”)
-  - `./scripts/gpw task create     --repo OWNER/REPO --title TITLE [--body TEXT] [--project TITLE]`
-  - `./scripts/gpw task view       --repo OWNER/REPO --issue N [--json]` (prints issue body)
-  - `./scripts/gpw task comment    --repo OWNER/REPO --issue N --body TEXT`
-  - `./scripts/gpw task set-status --repo OWNER/REPO --issue N --status "Todo|In Progress|In Review|Done" [--project TITLE]`
+  - `gpw task create     --repo OWNER/REPO --title TITLE [--body TEXT] [--project TITLE]`
+  - `gpw task view       --repo OWNER/REPO --issue N [--json]` (prints issue body)
+  - `gpw task comment    --repo OWNER/REPO --issue N --body TEXT`
+  - `gpw task set-status --repo OWNER/REPO --issue N --status "Todo|In Progress|In Review|Done" [--project TITLE]`
 
 - Repo bootstrap
-  - `./scripts/gpw repo create --name NAME [--private|--public] [--with-project|--no-project] [--no-protect]`
+  - `gpw repo create --name NAME [--private|--public] [--with-project|--no-project] [--no-protect]`
 
 - PRs
-  - `./scripts/gpw pr add        --repo OWNER/REPO --pr N [--project TITLE]` (adds existing PR #N to project; does not create PR)
-  - `./scripts/gpw pr view       --repo OWNER/REPO --pr N [--json]` (N = PR number)
-  - `./scripts/gpw pr set-status --repo OWNER/REPO --pr N --status "Todo|In Review|Done" [--project TITLE]` (N = PR number)
+  - `gpw pr add        --repo OWNER/REPO --pr N [--project TITLE]` (adds existing PR #N to project; does not create PR)
+  - `gpw pr view       --repo OWNER/REPO --pr N [--json]` (N = PR number)
+  - `gpw pr set-status --repo OWNER/REPO --pr N --status "Todo|In Review|Done" [--project TITLE]` (N = PR number)
 
 ## Defaults
 

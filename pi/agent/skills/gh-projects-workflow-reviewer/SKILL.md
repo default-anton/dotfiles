@@ -7,11 +7,7 @@ description: "Role overlay for `gh-projects-workflow`. Use together with the cor
 
 Prereq: load `gh-projects-workflow` (core) first.
 
-Run commands from the core skill dir:
-
-```bash
-cd ~/.dotfiles/pi/agent/skills/gh-projects-workflow
-```
+Use `gpw` from PATH (`~/.dotfiles/bin`).
 
 ## Scope
 
@@ -32,13 +28,13 @@ Default allowed ops:
 1) Pull review queue
 
 ```bash
-./scripts/gpw project items --title "<project>" --issues --status "In Review"
+gpw project items --title "<project>" --issues --status "In Review"
 ```
 
 Read task:
 
 ```bash
-./scripts/gpw task view --repo OWNER/REPO --issue 123
+gpw task view --repo OWNER/REPO --issue 123
 ```
 
 2) Review PR + verify
@@ -50,7 +46,7 @@ Read task:
 Changes requested / back to author:
 
 ```bash
-./scripts/gpw task set-status --repo OWNER/REPO --issue 123 --status "In Progress"
+gpw task set-status --repo OWNER/REPO --issue 123 --status "In Progress"
 ```
 
 Approved / waiting on merge: keep `In Review`.
@@ -58,5 +54,5 @@ Approved / waiting on merge: keep `In Review`.
 Merged:
 
 ```bash
-./scripts/gpw task set-status --repo OWNER/REPO --issue 123 --status "Done"
+gpw task set-status --repo OWNER/REPO --issue 123 --status "Done"
 ```
