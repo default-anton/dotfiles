@@ -1,0 +1,3 @@
+#/usr/bin/env bash
+
+/Applications/Tailscale.app/Contents/MacOS/Tailscale "$@"
