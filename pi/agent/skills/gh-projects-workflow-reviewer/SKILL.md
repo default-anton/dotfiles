@@ -1,6 +1,6 @@
 ---
 name: gh-projects-workflow-reviewer
-description: "Role overlay for `gh-projects-workflow`. Use together with the core skill when acting as a reviewer/verifier: review PRs for an issue, validate the issue’s Verification plan/results, leave actionable feedback, and update status (keep In Review; move back to In Progress if changes requested; mark Done only when merged)."
+description: "Role overlay for `gh-projects-workflow`. Use together with the core skill for any GitHub Projects request; pick this overlay when acting as a reviewer/verifier: review PRs for an issue, validate the issue’s Verification plan/results, leave actionable feedback, and update status (keep In Review; move back to In Progress if changes requested; mark Done only when merged)."
 ---
 
 # GitHub Projects workflow (reviewer)

@@ -1,6 +1,6 @@
 ---
 name: gh-projects-workflow-coder
-description: "Role overlay for `gh-projects-workflow`. Use together with the core skill when acting as a coding/implementation agent: pick up an existing issue, implement it, link PRs, add brief progress notes, and advance status (Todo → In Progress → In Review → Done). Avoid backlog shaping (creating/splitting tasks) unless explicitly asked."
+description: "Role overlay for `gh-projects-workflow`. Use together with the core skill for any GitHub Projects request; pick this overlay when acting as a coding/implementation agent: pick up an existing issue, implement it, link PRs, add brief progress notes, and advance status (Todo → In Progress → In Review → Done). Avoid backlog shaping (creating/splitting tasks) unless explicitly asked."
 ---
 
 # GitHub Projects workflow (coder)

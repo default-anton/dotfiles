@@ -1,6 +1,6 @@
 ---
 name: gh-projects-workflow-pm
-description: "Role overlay for `gh-projects-workflow`. Use together with the core skill when acting as a backlog/project manager: capture ideas as draft items, refine/split, convert drafts to issues in the right repo/project, manage priorities, and keep project status accurate."
+description: "Role overlay for `gh-projects-workflow`. Use together with the core skill for any GitHub Projects request; pick this overlay when acting as a backlog/project manager: capture ideas as draft items, refine/split, convert drafts to issues in the right repo/project, manage priorities, and keep project status accurate."
 ---
 
 # GitHub Projects workflow (PM / backlog manager)

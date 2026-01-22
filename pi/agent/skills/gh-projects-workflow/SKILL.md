@@ -1,6 +1,6 @@
 ---
 name: gh-projects-workflow
-description: "GitHub Projects v2 workflow (personal account) + `gpw` helper CLI for listing/creating/moving draft issues, issues, and statuses across projects. Use for any project/issue/status automation. ALWAYS load this core skill together with exactly one role overlay: `gh-projects-workflow-pm` (backlog mgmt), `gh-projects-workflow-coder` (implementation), or `gh-projects-workflow-reviewer` (review/verification)."
+description: "GitHub Projects v2 workflow (personal account) + `gpw` helper CLI for listing/creating/moving draft issues, issues, and statuses across projects. Use for any GitHub Projects request (ex: list projects, list project items, set status). ALWAYS load this core skill together with exactly one role overlay: `gh-projects-workflow-pm` (backlog mgmt), `gh-projects-workflow-coder` (implementation), or `gh-projects-workflow-reviewer` (review/verification)."
 ---
 
 # GitHub Projects workflow (core; Projects v2)
