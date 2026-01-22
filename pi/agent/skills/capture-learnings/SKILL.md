@@ -1,7 +1,7 @@
 ---
 name: capture-learnings
 description: >
-  Turn non-obvious discoveries and repository conventions into durable artifacts (code/config/tests/skills/AGENTS.md/docs). Use: (1) at the end of every task (mandatory gate), OR (2) when explicitly asked to "capture," "record," "document," or "note" a convention/pattern for future reference.
+  Turn discoveries and repository conventions into durable artifacts (code/config/tests/skills/AGENTS.md/docs). Use: (1) at the end of every task (mandatory gate for non-obvious discoveries), OR (2) when explicitly asked to "capture," "record," "document," or "note" a convention/pattern for future reference.
 ---
 
 # Capture Learnings
