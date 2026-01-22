@@ -1,18 +1,26 @@
 ---
 name: capture-learnings
-description: End-of-task gate/checklist to turn non-obvious discoveries into durable artifacts (code/config/tests/skills/AGENTS.md/docs) and avoid rediscovery. Use at the end of every task (mandatory).
+description: >
+  Turn non-obvious discoveries and repository conventions into durable artifacts (code/config/tests/skills/AGENTS.md/docs). Use: (1) at the end of every task (mandatory gate), OR (2) when explicitly asked to "capture," "record," "document," or "note" a convention/pattern for future reference.
 ---
 
 # Capture Learnings
 
 Turn non-obvious discoveries into the **smallest durable artifact** so future work is faster and safer.
 
-## Do this at the end of every task (mandatory)
+## When to use this skill
 
-At the end of every task:
-- Apply **Gate**
-- If it matches: persist/update the highest-leverage artifact(s) and say what you changed
-- If it doesn’t: output `Capture Learnings: skipped (<reason>)`
+**Two triggers:**
+
+1) **At the end of every task (automatic gate)**
+   - Apply **Gate**
+   - If it matches: persist/update the highest-leverage artifact(s) and say what you changed
+   - If it doesn't: output `Capture Learnings: skipped (<reason>)`
+
+2) **When explicitly asked (direct capture)**
+   - User says "capture," "record," "document," "note" a convention/pattern in the repo
+   - Skip the gate—persist what was requested directly
+   - Examples: "capture that we always commit to main," "record this workflow," "document this convention"
 
 ## Gate (persist only if ≥1 is true)
 
