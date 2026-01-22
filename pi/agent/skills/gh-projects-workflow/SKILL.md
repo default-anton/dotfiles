@@ -27,7 +27,7 @@ Status field:
 - `Done`
 
 Rules:
-- Only **issues** (not draft issues) may be `In Progress`.
+- Only **issues** (not draft issues or PRs) may be `In Progress`.
 - Every actionable issue body must include spec sections:
   - `## What`
   - `## Why`
@@ -84,7 +84,12 @@ Help:
   - `./scripts/gpw task set-status --repo OWNER/REPO --issue N --status "Todo|In Progress|In Review|Done" [--project TITLE]`
 
 - Repo bootstrap
-  - `./scripts/gpw repo create --name NAME [--private|--public] [--with-project|--no-project]`
+  - `./scripts/gpw repo create --name NAME [--private|--public] [--with-project|--no-project] [--no-protect]`
+
+- PRs
+  - `./scripts/gpw pr add        --repo OWNER/REPO --pr N [--project TITLE]` (adds existing PR #N to project; does not create PR)
+  - `./scripts/gpw pr view       --repo OWNER/REPO --pr N [--json]` (N = PR number)
+  - `./scripts/gpw pr set-status --repo OWNER/REPO --pr N --status "Todo|In Review|Done" [--project TITLE]` (N = PR number)
 
 ## Defaults
 

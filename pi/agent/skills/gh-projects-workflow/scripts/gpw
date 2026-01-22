@@ -26,12 +26,16 @@ Usage:
   gpw draft create  --title TITLE [--body TEXT] [--project TITLE]
   gpw draft convert --item ITEM_ID --repo OWNER/REPO [--project TITLE] [--to-project TITLE] [--delete-from-project]
 
-  gpw repo create --name NAME [--private|--public] [--with-project|--no-project]
+  gpw repo create --name NAME [--private|--public] [--with-project|--no-project] [--no-protect]
 
   gpw task create      --repo OWNER/REPO --title TITLE [--body TEXT] [--project TITLE]
   gpw task view        --repo OWNER/REPO --issue N [--json]
   gpw task comment     --repo OWNER/REPO --issue N --body TEXT
   gpw task set-status  --repo OWNER/REPO --issue N --status STATUS [--project TITLE]
+
+  gpw pr add           --repo OWNER/REPO --pr N [--project TITLE]
+  gpw pr view          --repo OWNER/REPO --pr N [--json]
+  gpw pr set-status    --repo OWNER/REPO --pr N --status STATUS [--project TITLE]
 EOF
 }
 
@@ -297,6 +301,7 @@ case "$cmd" in
         name=""
         visibility="--private"
         with_project=1
+        protect=1
 
         while [[ $# -gt 0 ]]; do
           case "$1" in
@@ -305,6 +310,7 @@ case "$cmd" in
             --public) visibility="--public"; shift ;;
             --with-project) with_project=1; shift ;;
             --no-project) with_project=0; shift ;;
+            --no-protect) protect=0; shift ;;
             *) die "unknown flag: $1" ;;
           esac
         done
@@ -313,8 +319,10 @@ case "$cmd" in
         owner="$(gpw_user_login)"
         repo="$owner/$name"
 
-        gh repo create "$repo" "$visibility" --add-readme --confirm >/dev/null
-        gpw_repo_default_branch_protect "$repo"
+        gh repo create "$repo" "$visibility" --add-readme >/dev/null
+        if [[ "$protect" -eq 1 ]]; then
+          gpw_repo_default_branch_protect "$repo"
+        fi
 
         if [[ "$with_project" -eq 1 ]]; then
           project_id="$(gpw_project_ensure "$name")"
@@ -445,6 +453,101 @@ case "$cmd" in
         ;;
 
       *) die "unknown task subcommand: $sub" ;;
+    esac
+    ;;
+
+  pr)
+    sub=${1:-}
+    shift || true
+
+    case "$sub" in
+      add)
+        repo=""
+        pr=""
+        project_title=""
+
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --repo) repo=$2; shift 2 ;;
+            --pr) pr=$2; shift 2 ;;
+            --project) project_title=$2; shift 2 ;;
+            *) die "unknown flag: $1" ;;
+          esac
+        done
+        [[ -n "$repo" ]] || die "missing --repo"
+        [[ -n "$pr" ]] || die "missing --pr"
+
+        if [[ -z "$project_title" ]]; then
+          project_title="$(gpw_repo_default_project_title "$repo")"
+        fi
+
+        project_id="$(gpw_project_ensure "$project_title")"
+        gpw_project_status_ensure_defaults "$project_id"
+
+        item_id="$(gpw_project_item_ensure_pr "$project_id" "$repo" "$pr")"
+        say "$item_id"
+        ;;
+
+      view)
+        repo=""
+        pr=""
+        as_json=0
+
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --repo) repo=$2; shift 2 ;;
+            --pr) pr=$2; shift 2 ;;
+            --json) as_json=1; shift ;;
+            *) die "unknown flag: $1" ;;
+          esac
+        done
+        [[ -n "$repo" ]] || die "missing --repo"
+        [[ -n "$pr" ]] || die "missing --pr"
+
+        if [[ "$as_json" -eq 1 ]]; then
+          gh pr view "$pr" -R "$repo" --json number,title,url,body,state,author,assignees,labels
+          exit 0
+        fi
+
+        gh pr view "$pr" -R "$repo" --json number,title,url,body --jq '(.number|tostring)+" "+.title+"\n"+.url+"\n\n"+.body'
+        ;;
+
+      set-status)
+        repo=""
+        pr=""
+        project_title=""
+        status_name=""
+
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --repo) repo=$2; shift 2 ;;
+            --pr) pr=$2; shift 2 ;;
+            --project) project_title=$2; shift 2 ;;
+            --status) status_name=$2; shift 2 ;;
+            *) die "unknown flag: $1" ;;
+          esac
+        done
+        [[ -n "$repo" ]] || die "missing --repo"
+        [[ -n "$pr" ]] || die "missing --pr"
+
+        if [[ -z "$project_title" ]]; then
+          project_title="$(gpw_repo_default_project_title "$repo")"
+        fi
+
+        [[ -n "$status_name" ]] || die "missing --status"
+        if [[ "$status_name" == "In Progress" ]]; then
+          die "status In Progress only valid for issues"
+        fi
+
+        project_id="$(gpw_project_ensure "$project_title")"
+        gpw_project_status_ensure_defaults "$project_id"
+
+        item_id="$(gpw_project_item_ensure_pr "$project_id" "$repo" "$pr")"
+        gpw_project_item_set_status "$project_id" "$item_id" "$status_name"
+        say "$item_id"
+        ;;
+
+      *) die "unknown pr subcommand: $sub" ;;
     esac
     ;;
 

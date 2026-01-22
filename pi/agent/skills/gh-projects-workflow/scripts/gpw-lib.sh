@@ -112,8 +112,10 @@ gpw_repo_default_branch_protect() {
     required_conversation_resolution: true
   }')"
 
-  if ! gh api --method PUT "repos/${repo}/branches/${branch}/protection" --input - <<<"$payload" >/dev/null 2>&1; then
-    say "gpw: warn: failed to protect default branch (repo=${repo} branch=${branch}); continue"
+  local err
+  if ! err="$(gh api --method PUT "repos/${repo}/branches/${branch}/protection" --input - <<<"$payload" 2>&1)"; then
+    err="$(tr '\n' ' ' <<<"$err")"
+    say "gpw: warn: failed to protect default branch (repo=${repo} branch=${branch}): ${err:-unknown}; continue"
   fi
 }
 
@@ -145,7 +147,7 @@ gpw_project_status_field_json() {
   local project_id=$1
 
   gh api graphql \
-    -f query='query($projectId:ID!){node(id:$projectId){... on ProjectV2{fields(first:50){nodes{... on ProjectV2SingleSelectField{id name options{id name}}}}}}}' \
+    -f query='query($projectId:ID!){node(id:$projectId){... on ProjectV2{fields(first:50){nodes{... on ProjectV2SingleSelectField{id name options{id name color description}}}}}}}' \
     -F projectId="$project_id" \
     --jq '.data.node.fields.nodes[]? | select(.name=="Status")'
 }
@@ -170,21 +172,32 @@ gpw_project_status_ensure_option() {
   local project_id=$1
   local name=$2
 
+  local field_json
+  field_json="$(gpw_project_status_field_json "$project_id")"
+
   local field_id
-  field_id="$(gpw_project_status_field_id "$project_id")"
+  field_id="$(jq -r '.id' <<<"$field_json")"
 
   local option_id
-  option_id="$(gpw_project_status_option_id "$project_id" "$name")"
+  option_id="$(jq -r --arg name "$name" '.options[]? | select(.name==$name) | .id' <<<"$field_json" | head -n 1)"
   if [[ -n "$option_id" && "$option_id" != "null" ]]; then
     printf '%s' "$option_id"
     return 0
   fi
 
+  local options_json
+  options_json="$(jq -c --arg name "$name" '(.options // []) | map({name, color, description}) + [{name:$name, color:"GRAY", description:""}]' <<<"$field_json")"
+
+  local payload
+  payload="$(jq -n --arg query 'mutation($fieldId:ID!,$options:[ProjectV2SingleSelectFieldOptionInput!]!){updateProjectV2Field(input:{fieldId:$fieldId,singleSelectOptions:$options}){projectV2Field{... on ProjectV2SingleSelectField{id}}}}' --arg fieldId "$field_id" --argjson options "$options_json" '{query:$query, variables:{fieldId:$fieldId, options:$options}}')"
+
   gh api graphql \
-    -f query='mutation($fieldId:ID!,$name:String!){createProjectV2SingleSelectFieldOption(input:{fieldId:$fieldId,name:$name}){option{id name}}}' \
-    -F fieldId="$field_id" \
-    -F name="$name" \
-    --jq .data.createProjectV2SingleSelectFieldOption.option.id
+    --input - \
+    --jq .data.updateProjectV2Field.projectV2Field.id \
+    <<<"$payload" \
+    >/dev/null
+
+  gpw_project_status_option_id "$project_id" "$name"
 }
 
 gpw_project_status_ensure_defaults() {
@@ -270,7 +283,14 @@ gpw_issue_graphql_id() {
   gh issue view "$issue" -R "$repo" --json id --jq .id
 }
 
-gpw_project_item_add_issue() {
+gpw_pr_graphql_id() {
+  local repo=$1
+  local pr=$2
+
+  gh pr view "$pr" -R "$repo" --json id --jq .id
+}
+
+gpw_project_item_add_content() {
   local project_id=$1
   local content_id=$2
 
@@ -287,7 +307,7 @@ gpw_project_item_find_by_content_id() {
   local after=""
 
   while :; do
-    local args=( -f query='query($projectId:ID!,$after:String){node(id:$projectId){... on ProjectV2{items(first:100,after:$after){nodes{id content{... on Issue{id}}} pageInfo{hasNextPage endCursor}}}}}' -F projectId="$project_id" )
+    local args=( -f query='query($projectId:ID!,$after:String){node(id:$projectId){... on ProjectV2{items(first:100,after:$after){nodes{id content{... on Issue{id} ... on PullRequest{id}}} pageInfo{hasNextPage endCursor}}}}}' -F projectId="$project_id" )
     if [[ -n "$after" ]]; then
       args+=( -F after="$after" )
     fi
@@ -325,7 +345,24 @@ gpw_project_item_ensure_issue() {
     return 0
   fi
 
-  gpw_project_item_add_issue "$project_id" "$content_id"
+  gpw_project_item_add_content "$project_id" "$content_id"
+}
+
+gpw_project_item_ensure_pr() {
+  local project_id=$1
+  local repo=$2
+  local pr=$3
+
+  local content_id
+  content_id="$(gpw_pr_graphql_id "$repo" "$pr")"
+
+  local item_id
+  if item_id="$(gpw_project_item_find_by_content_id "$project_id" "$content_id")"; then
+    printf '%s' "$item_id"
+    return 0
+  fi
+
+  gpw_project_item_add_content "$project_id" "$content_id"
 }
 
 gpw_project_item_set_status() {
