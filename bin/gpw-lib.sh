@@ -419,6 +419,11 @@ gpw_body_with_template() {
     return 0
   fi
 
+  if [[ "$extra" == *"## What"* ]]; then
+    printf '%s\n' "$extra"
+    return 0
+  fi
+
   gpw_template
   printf '\n%s\n' "$extra"
 }
