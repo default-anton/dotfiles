@@ -11,6 +11,10 @@ NODE = "22"
 RUBY = "3.4"
 LUA = "5.1"
 
+CODEX_EXCLUDE_SKILLS: Final[set[str]] = {
+    "brave-search",
+}
+
 SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
     ("~/.gitconfig", "gitconfig"),
@@ -153,7 +157,7 @@ def main():
     skills_dir = DOTFILES.joinpath("pi/agent/skills")
     if skills_dir.exists():
         for skill_dir in skills_dir.iterdir():
-            if skill_dir.name == "brave-search":
+            if skill_dir.name in CODEX_EXCLUDE_SKILLS:
                 continue
 
             dst = Path("~/.codex/skills").expanduser().joinpath(skill_dir.name)
