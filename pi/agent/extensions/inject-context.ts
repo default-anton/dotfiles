@@ -74,7 +74,6 @@ function formatAgentFilesForPrompt(agentFiles: Array<{ path: string; content: st
 export default function(pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx: ExtensionContext) => {
     const agentDir = getAgentDir();
-    const cwd = process.cwd();
 
     const now = new Date();
     const dateTime = now.toLocaleString("en-CA", {
@@ -85,11 +84,11 @@ export default function(pi: ExtensionAPI) {
       timeZoneName: "short",
     });
 
-    const { skills } = discoverSkills(cwd, agentDir, {
+    const { skills } = discoverSkills(ctx.cwd, agentDir, {
       enableCodexUser: false,
       enableClaudeUser: false,
     });
-    const agentFiles = discoverContextFiles(cwd, agentDir);
+    const agentFiles = discoverContextFiles(ctx.cwd, agentDir);
 
     if (skills.length === 0 && agentFiles.length === 0) {
       return;
@@ -99,7 +98,7 @@ export default function(pi: ExtensionAPI) {
       formatSkillsForPrompt(skills),
       formatAgentFilesForPrompt(agentFiles),
       `\n\nCurrent date: ${dateTime}`,
-      `\nCurrent working directory: ${cwd}`,
+      `\nCurrent working directory: ${ctx.cwd}`,
     ].join("");
 
     return {
