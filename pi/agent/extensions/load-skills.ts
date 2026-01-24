@@ -23,7 +23,7 @@ export default function(pi: ExtensionAPI) {
       const skillsXml = formatSkillsForPrompt(skills);
 
       return {
-        systemPrompt: event.systemPrompt + "\n\n" + skillsXml
+        systemPrompt: event.systemPrompt + skillsXml
       };
     } catch (err) {
       if (ctx.hasUI) {
