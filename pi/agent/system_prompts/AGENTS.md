@@ -1,1 +1,0 @@
-- When updating pi/agent/system_prompts/*.md, always regenerate the combined prompts: `./pi/agent/scripts/generate_prompts.sh`
