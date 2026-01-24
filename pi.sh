@@ -9,24 +9,24 @@ pi() {
   export PI_SMALL_MODEL="gemini-3-flash"
 
   if [ "$selection" = "chat-codex" ]; then
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2 --thinking medium "$@")
+    ($PI --provider openai-codex --model gpt-5.2 --thinking medium "$@")
   elif [ "$selection" = "codex" ]; then
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai-codex --model gpt-5.2-codex --thinking medium "$@")
+    ($PI --provider openai-codex --model gpt-5.2-codex --thinking medium "$@")
   elif [ "$selection" = "flash-antigravity" ]; then
-    (command pi --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider "$PI_SMALL_PROVIDER" --model "$PI_SMALL_MODEL" --thinking high "$@")
+    (command pi --provider "$PI_SMALL_PROVIDER" --model "$PI_SMALL_MODEL" --thinking high "$@")
   elif [ "$selection" = "glm" ]; then
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/no_vision_system_prompt.md --provider zai --model glm-4.7 --thinking high "$@")
+    ($PI --provider zai --model glm-4.7 --thinking high "$@")
   elif [ "$selection" = "flash-vertex" ]; then
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider "$PI_SMALL_PROVIDER" --model "$PI_SMALL_MODEL" --thinking high "$@")
+    ($PI --provider "$PI_SMALL_PROVIDER" --model "$PI_SMALL_MODEL" --thinking high "$@")
   elif [ "$selection" = "chat" ]; then
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2 --thinking medium "$@")
+    ($PI --provider openai --model gpt-5.2 --thinking medium "$@")
   else
     export PI_SMALL_PROVIDER="google-vertex"
     export PI_SMALL_MODEL="gemini-3-flash-preview"
-    ($PI --append-system-prompt ~/.dotfiles/pi/agent/system_prompt.md --provider openai --model gpt-5.2-codex --thinking medium "$@")
+    ($PI --provider openai --model gpt-5.2-codex --thinking medium "$@")
   fi
 }
