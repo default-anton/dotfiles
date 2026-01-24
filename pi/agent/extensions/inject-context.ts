@@ -95,10 +95,15 @@ export default function(pi: ExtensionAPI) {
     }
 
     const prompt = [
-      formatSkillsForPrompt(skills),
       formatAgentFilesForPrompt(agentFiles),
+      formatSkillsForPrompt(skills),
       `\n\nCurrent date: ${dateTime}`,
       `\nCurrent working directory: ${ctx.cwd}`,
+      `\n\nSkill locations: ${agentDir}/skills/`,
+      `\nExtension locations: ${agentDir}/extensions/`,
+      `\nGlobal AGENTS.md: ${agentDir}/AGENTS.md (applies to all projects)`,
+      `\npi Extension API: https://raw.githubusercontent.com/badlogic/pi-mono/refs/heads/main/packages/coding-agent/docs/extensions.md`,
+      `\n\nSkills and extensions are for you. Read the pi Extension API documentation when creating or modifying extensions. It covers events (session_start, tool_call, before_agent_start, etc.), registering custom tools/commands/shortcuts/flags, UI interactions (dialogs, widgets, custom rendering), state management, and overriding built-in tools.`,
     ].join("");
 
     return {
