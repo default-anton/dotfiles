@@ -76,6 +76,15 @@ export default function(pi: ExtensionAPI) {
     const agentDir = getAgentDir();
     const cwd = process.cwd();
 
+    const now = new Date();
+    const dateTime = now.toLocaleString("en-CA", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZoneName: "short",
+    });
+
     const { skills } = discoverSkills(cwd, agentDir, {
       enableCodexUser: false,
       enableClaudeUser: false,
@@ -86,10 +95,15 @@ export default function(pi: ExtensionAPI) {
       return;
     }
 
-    const prompt = formatSkillsForPrompt(skills) + formatAgentFilesForPrompt(agentFiles);
+    const prompt = [
+      formatSkillsForPrompt(skills),
+      formatAgentFilesForPrompt(agentFiles),
+      `\n\nCurrent date: ${dateTime}`,
+      `\nCurrent working directory: ${cwd}`,
+    ].join("");
 
     return {
-      systemPrompt: event.systemPrompt.trim() + prompt
+      systemPrompt: event.systemPrompt.trim() + prompt,
     };
   });
 }
