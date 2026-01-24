@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.49.3",
-  "defaultThinkingLevel": "medium",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.2-codex",
+  "defaultThinkingLevel": "high",
+  "defaultProvider": "zai",
+  "defaultModel": "glm-4.7",
   "compaction": {
     "enabled": true
   },
