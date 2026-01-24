@@ -103,7 +103,8 @@ export default function(pi: ExtensionAPI) {
       `\nExtension locations: ${agentDir}/extensions/`,
       `\nGlobal AGENTS.md: ${agentDir}/AGENTS.md (applies to all projects)`,
       `\npi Extension API: https://raw.githubusercontent.com/badlogic/pi-mono/refs/heads/main/packages/coding-agent/docs/extensions.md`,
-      `\n\nSkills and extensions are for you. Read the pi Extension API documentation when creating or modifying extensions. It covers events (session_start, tool_call, before_agent_start, etc.), registering custom tools/commands/shortcuts/flags, UI interactions (dialogs, widgets, custom rendering), state management, and overriding built-in tools.`,
+      `\npi Skills: https://raw.githubusercontent.com/badlogic/pi-mono/refs/heads/main/packages/coding-agent/docs/skills.md`,
+      `\n\nSkills and extensions are for you. Read the pi Extension API documentation when creating or modifying extensions. It covers events (session_start, tool_call, before_agent_start, etc.), registering custom tools/commands/shortcuts/flags, UI interactions (dialogs, widgets, custom rendering), state management, and overriding built-in tools. Read the pi Skills documentation when creating or modifying skills. It covers SKILL.md format (frontmatter: name, description), when to use skills vs AGENTS.md vs prompt templates vs custom tools, skill structure, configuration, and skill commands (/skill:name).`,
     ].join("");
 
     return {
