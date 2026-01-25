@@ -21,32 +21,33 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 		handler: async (instructions, ctx) => {
 			await ctx.waitForIdle();
 
-			if (!ctx.hasUI) {
-				return;
+			if (ctx.hasUI) {
+        ctx.ui.notify("Extracting task and preparing review...", "info");
+        ctx.ui.setStatus("review", "Preparing review...");
 			}
-
-			ctx.ui.notify("Extracting task and preparing review...", "info");
-			ctx.ui.setStatus("review", "Preparing review...");
 
 			try {
 				const entries = ctx.sessionManager.getEntries();
-
-				ctx.ui.setStatus("review", "Extracting task...");
+        if (ctx.hasUI) ctx.ui.setStatus("review", "Extracting task...");
 				const task = await extractTaskFromConversation(entries, ctx);
 
 				if (!task) {
-					ctx.ui.notify("Failed to extract task from conversation", "error");
-					ctx.ui.setStatus("review", undefined);
+          if (ctx.hasUI) {
+            ctx.ui.notify("Failed to extract task from conversation", "error");
+            ctx.ui.setStatus("review", undefined);
+          }
 					return;
 				}
 
 				// Extract assistant summary
-				ctx.ui.setStatus("review", "Extracting summary...");
+				if (ctx.hasUI) ctx.ui.setStatus("review", "Extracting summary...");
 				const summary = extractAssistantSummary(entries);
 
 				if (!summary) {
-					ctx.ui.notify("No assistant messages found in conversation", "error");
-					ctx.ui.setStatus("review", undefined);
+          if (ctx.hasUI) {
+            ctx.ui.notify("No assistant messages found in conversation", "error");
+            ctx.ui.setStatus("review", undefined);
+          }
 					return;
 				}
 
@@ -67,14 +68,16 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 				const reviewPrompt = buildReviewPrompt(task, summary, instructions || undefined);
 
 				// Create new session
-				ctx.ui.setStatus("review", "Creating review session...");
+        if (ctx.hasUI) ctx.ui.setStatus("review", "Creating review session...");
 				const result = await ctx.newSession({
 					parentSession: ctx.sessionManager.getSessionFile(),
 				});
 
 				if (result.cancelled) {
-					ctx.ui.notify("Review session creation cancelled", "warning");
-					ctx.ui.setStatus("review", undefined);
+          if (ctx.hasUI) {
+            ctx.ui.notify("Review session creation cancelled", "warning");
+            ctx.ui.setStatus("review", undefined);
+          }
 					return;
 				}
 
@@ -85,12 +88,16 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 				// Send the review prompt which triggers the agent turn
 				pi.sendUserMessage(reviewPrompt);
 
-				ctx.ui.notify(`Started review: ${sessionName}`, "success");
-				ctx.ui.setStatus("review", undefined);
+        if (ctx.hasUI) {
+          ctx.ui.notify(`Started review: ${sessionName}`, "success");
+          ctx.ui.setStatus("review", undefined);
+        }
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(`Review failed: ${message}`, "error");
-				ctx.ui.setStatus("review", undefined);
+        if (ctx.hasUI) {
+          ctx.ui.notify(`Review failed: ${message}`, "error");
+          ctx.ui.setStatus("review", undefined);
+        }
 			}
 		},
 	});
@@ -102,10 +109,6 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 			// Wait for agent to finish
 			await ctx.waitForIdle();
 
-			if (!ctx.hasUI) {
-				return;
-			}
-
 			// Retrieve review state
 			const reviewStateEntry = ctx.sessionManager
 				.getEntries()
@@ -114,10 +117,12 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 				);
 
 			if (!reviewStateEntry || !reviewStateEntry.data) {
-				ctx.ui.notify(
-					"No review state found. Run /review first to generate review suggestions.",
-					"error",
-				);
+        if (ctx.hasUI) {
+          ctx.ui.notify(
+            "No review state found. Run /review first to generate review suggestions.",
+            "error",
+          );
+        }
 				return;
 			}
 
@@ -128,15 +133,19 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 			const review = extractAssistantSummary(entries);
 
 			if (!review) {
-				ctx.ui.notify(
-					"No review content found. Please run /review and complete the review first.",
-					"error",
-				);
+        if (ctx.hasUI) {
+          ctx.ui.notify(
+            "No review content found. Please run /review and complete the review first.",
+            "error",
+          );
+        }
 				return;
 			}
 
-			ctx.ui.notify("Preparing implementation session...", "info");
-			ctx.ui.setStatus("implement", "Preparing implementation...");
+      if (ctx.hasUI) {
+        ctx.ui.notify("Preparing implementation session...", "info");
+        ctx.ui.setStatus("implement", "Preparing implementation...");
+      }
 
 			try {
 				// Update review state with the review text
@@ -159,14 +168,16 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 				);
 
 				// Create new session
-				ctx.ui.setStatus("implement", "Creating implementation session...");
+        if (ctx.hasUI) ctx.ui.setStatus("implement", "Creating implementation session...");
 				const result = await ctx.newSession({
 					parentSession: ctx.sessionManager.getSessionFile(),
 				});
 
 				if (result.cancelled) {
-					ctx.ui.notify("Implementation session creation cancelled", "warning");
-					ctx.ui.setStatus("implement", undefined);
+          if (ctx.hasUI) {
+            ctx.ui.notify("Implementation session creation cancelled", "warning");
+            ctx.ui.setStatus("implement", undefined);
+          }
 					return;
 				}
 
@@ -179,12 +190,16 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 				// Send the implementation prompt which triggers the agent turn
 				pi.sendUserMessage(implementPrompt);
 
-				ctx.ui.notify(`Started implementation: ${sessionName}`, "success");
-				ctx.ui.setStatus("implement", undefined);
+        if (ctx.hasUI) {
+          ctx.ui.notify(`Started implementation: ${sessionName}`, "success");
+          ctx.ui.setStatus("implement", undefined);
+        }
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(`Implementation failed: ${message}`, "error");
-				ctx.ui.setStatus("implement", undefined);
+        if (ctx.hasUI) {
+          ctx.ui.notify(`Implementation failed: ${message}`, "error");
+          ctx.ui.setStatus("implement", undefined);
+        }
 			}
 		},
 	});
