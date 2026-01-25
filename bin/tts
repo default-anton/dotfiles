@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -eo pipefail
 
 PORT=9876
 MODEL="mlx-community/Kokoro-82M-bf16"
@@ -51,41 +51,49 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# If no text or input file, try to read from stdin
-if [[ -z "$TEXT" && -z "$INPUT_FILE" ]]; then
+# Resolve input text (Precedence: --input > positional > stdin)
+if [[ -n "$INPUT_FILE" ]]; then
+    if [[ ! -f "$INPUT_FILE" ]]; then
+        echo "Error: Input file '$INPUT_FILE' not found."
+        exit 1
+    fi
+    TEXT=$(cat "$INPUT_FILE")
+elif [[ -z "$TEXT" ]]; then
     if [[ ! -t 0 ]]; then
         TEXT=$(cat)
-    else
-        usage
     fi
-fi
-
-# If input file is provided, read it
-if [[ -n "$INPUT_FILE" ]]; then
-    TEXT=$(cat "$INPUT_FILE")
 fi
 
 if [[ -z "$TEXT" ]]; then
     echo "Error: No text provided."
-    exit 1
+    usage
 fi
 
-# Ensure server is running
-if ! lsof -i :$PORT > /dev/null; then
+# Ensure server is running and responsive
+check_server() {
+    curl -s -f "http://localhost:$PORT/v1/models" > /dev/null 2>&1
+}
+
+if ! check_server; then
+    # If something is on the port but it's not our server, fail
+    if lsof -i :$PORT > /dev/null; then
+        echo "Error: Port $PORT is occupied by another process."
+        exit 1
+    fi
+
     echo "Starting mlx_audio.server on port $PORT..."
-    # Using nohup and setsid-like behavior with disown to ensure it survives terminal exit
     nohup mlx_audio.server --port $PORT > /tmp/mlx_audio_server.log 2>&1 &
     disown
     
     # Wait for server to be ready
     MAX_RETRIES=30
     COUNT=0
-    while ! curl -s http://localhost:$PORT/v1/models > /dev/null; do
+    while ! check_server; do
         sleep 1
         COUNT=$((COUNT + 1))
         if [[ $COUNT -ge $MAX_RETRIES ]]; then
-            echo "Error: mlx_audio.server failed to start."
-            cat /tmp/mlx_audio_server.log
+            echo "Error: mlx_audio.server failed to start on port $PORT."
+            [[ -f /tmp/mlx_audio_server.log ]] && tail -n 20 /tmp/mlx_audio_server.log
             exit 1
         fi
     done
@@ -103,7 +111,7 @@ trap cleanup EXIT
 
 # Send request to server
 echo "Generating speech..."
-curl -s -X POST "http://localhost:$PORT/v1/audio/speech" \
+if ! curl -s -f -X POST "http://localhost:$PORT/v1/audio/speech" \
   -H "Content-Type: application/json" \
   -d "$(jq -n \
     --arg model "$MODEL" \
@@ -111,14 +119,14 @@ curl -s -X POST "http://localhost:$PORT/v1/audio/speech" \
     --arg voice "$VOICE" \
     --argjson speed "$SPEED" \
     '{model: $model, input: $input, voice: $voice, speed: $speed}')" \
-  --output "$TEMP_WAV"
+  --output "$TEMP_WAV"; then
+    echo "Error: Failed to generate speech from server."
+    exit 1
+fi
 
 # Convert to MP3
-# Requirements: mono, 16k, 128k
+# Requirements: mono (-ac 1), 16k (-ar 16000), 128k (-ab 128k)
 echo "Converting to MP3: $OUTPUT"
-ffmpeg -y -i "$TEMP_WAV" -ac 1 -ar 16000 -ab 128k "$OUTPUT" > /dev/null 2>&1
-
-# Cleanup
-# rm "$TEMP_WAV" is handled by trap
+ffmpeg -y -loglevel error -i "$TEMP_WAV" -ac 1 -ar 16000 -ab 128k "$OUTPUT"
 
 echo "Done: $OUTPUT"
