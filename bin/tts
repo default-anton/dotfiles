@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+set -e
+
+PORT=9876
+MODEL="mlx-community/Kokoro-82M-bf16"
+VOICE="af_heart"
+SPEED=1.0
+OUTPUT="speech.mp3"
+INPUT_FILE=""
+TEXT=""
+
+usage() {
+    echo "Usage: $0 [TEXT] [--input FILE] [--output FILE] [--speed SPEED]"
+    echo ""
+    echo "Arguments:"
+    echo "  TEXT            Text to speak (optional if --input or stdin is used)"
+    echo "  --input FILE    Read text from FILE"
+    echo "  --output FILE   Output MP3 file (default: speech.mp3)"
+    echo "  --speed SPEED   Speech speed (default: 1.0)"
+    exit 1
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --input)
+            INPUT_FILE="$2"
+            shift 2
+            ;;
+        --output)
+            OUTPUT="$2"
+            shift 2
+            ;;
+        --speed)
+            SPEED="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            if [[ -z "$TEXT" ]]; then
+                TEXT="$1"
+                shift
+            else
+                echo "Unknown argument: $1"
+                usage
+            fi
+            ;;
+    esac
+done
+
+# If no text or input file, try to read from stdin
+if [[ -z "$TEXT" && -z "$INPUT_FILE" ]]; then
+    if [[ ! -t 0 ]]; then
+        TEXT=$(cat)
+    else
+        usage
+    fi
+fi
+
+# If input file is provided, read it
+if [[ -n "$INPUT_FILE" ]]; then
+    TEXT=$(cat "$INPUT_FILE")
+fi
+
+if [[ -z "$TEXT" ]]; then
+    echo "Error: No text provided."
+    exit 1
+fi
+
+# Ensure server is running
+if ! lsof -i :$PORT > /dev/null; then
+    echo "Starting mlx_audio.server on port $PORT..."
+    # Using nohup and setsid-like behavior with disown to ensure it survives terminal exit
+    nohup mlx_audio.server --port $PORT > /tmp/mlx_audio_server.log 2>&1 &
+    disown
+    
+    # Wait for server to be ready
+    MAX_RETRIES=30
+    COUNT=0
+    while ! curl -s http://localhost:$PORT/v1/models > /dev/null; do
+        sleep 1
+        COUNT=$((COUNT + 1))
+        if [[ $COUNT -ge $MAX_RETRIES ]]; then
+            echo "Error: mlx_audio.server failed to start."
+            cat /tmp/mlx_audio_server.log
+            exit 1
+        fi
+    done
+    echo "Server is ready."
+fi
+
+# Prepare temp wav file
+TEMP_WAV=$(mktemp /tmp/tts_XXXXXX.wav)
+
+# Ensure cleanup of temp file on exit
+cleanup() {
+    rm -f "$TEMP_WAV"
+}
+trap cleanup EXIT
+
+# Send request to server
+echo "Generating speech..."
+curl -s -X POST "http://localhost:$PORT/v1/audio/speech" \
+  -H "Content-Type: application/json" \
+  -d "$(jq -n \
+    --arg model "$MODEL" \
+    --arg input "$TEXT" \
+    --arg voice "$VOICE" \
+    --argjson speed "$SPEED" \
+    '{model: $model, input: $input, voice: $voice, speed: $speed}')" \
+  --output "$TEMP_WAV"
+
+# Convert to MP3
+# Requirements: mono, 16k, 128k
+echo "Converting to MP3: $OUTPUT"
+ffmpeg -y -i "$TEMP_WAV" -ac 1 -ar 16000 -ab 128k "$OUTPUT" > /dev/null 2>&1
+
+# Cleanup
+# rm "$TEMP_WAV" is handled by trap
+
+echo "Done: $OUTPUT"
