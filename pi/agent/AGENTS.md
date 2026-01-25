@@ -11,3 +11,4 @@
 
 ## CLI Tools
 - `bin/update {mlx-audio|claude|pi|codex}`: Update specific dev tools.
+  - `mlx-audio` requires specific pins (`numpy<2`, `spacy<4`) and `pip` in the environment to work with Kokoro models. Always use `bin/update mlx-audio` instead of manual `uv tool install`.
