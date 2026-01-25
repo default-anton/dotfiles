@@ -118,7 +118,7 @@ if ! curl -s -f -X POST "http://localhost:$PORT/v1/audio/speech" \
     --arg input "$TEXT" \
     --arg voice "$VOICE" \
     --argjson speed "$SPEED" \
-    '{model: $model, input: $input, voice: $voice, speed: $speed}')" \
+    '{model: $model, input: $input, voice: $voice, speed: $speed, response_format: "wav"}')" \
   --output "$TEMP_WAV"; then
     echo "Error: Failed to generate speech from server."
     exit 1
