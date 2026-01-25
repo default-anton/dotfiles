@@ -21,25 +21,25 @@ export function buildReviewPrompt(
 	instructions?: string,
 ): string {
 	const parts = [
-		`Another AI coding agent has just coded this task:`,
+		"Another AI coding agent has just coded this task:",
 		"<task>",
 		task,
     "</task>",
 		"",
-		`The summary of changes as per that AI coding agent:`,
+		"The summary of changes as per that AI coding agent:",
     "<summary>",
 		summary,
     "</summary>"
 	];
 
 	if (instructions) {
-		parts.push("", `Instructions:`, instructions);
+		parts.push("", "Instructions:", instructions);
 	}
 
 	parts.push(
 		"",
-		`Review the diff like a maintainer + is there anything we could improve?`,
-		`You are in review mode. Do not make any changes yourself.`,
+		"Review the diff like a maintainer + is there anything we could improve?",
+		"You are in review mode. Do not make any changes yourself.",
 	);
 
 	return parts.join("\n");
@@ -52,27 +52,27 @@ export function buildImplementPrompt(
 	instructions?: string,
 ): string {
 	const parts = [
-		`Another AI coding agent has just coded this task:`,
+		"Another AI coding agent has just coded this task:",
     "<task>",
 		task,
     "</task>",
 		"",
-		`The summary of changes as per that AI coding agent:`,
+		"The summary of changes as per that AI coding agent:",
     "<summary>",
 		summary,
     "</summary>",
 		"",
-		`Earlier, you gave this review + suggestions:`,
+		"Earlier, you gave this review + suggestions:",
     "<review>",
 		review,
     "</review>"
 	];
 
 	if (instructions) {
-		parts.push("", `Instructions:`, instructions);
+		parts.push("", "Instructions:", instructions);
 	}
 
-	parts.push("", `Implement the suggested improvements.`);
+	parts.push("", "Implement the suggested improvements.");
 
 	return parts.join("\n");
 }

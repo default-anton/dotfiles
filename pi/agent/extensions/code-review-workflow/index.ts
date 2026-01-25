@@ -55,14 +55,13 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 				const taskSnippet = task.slice(0, 50).replace(/\n/g, " ");
 				const sessionName = `Review: ${taskSnippet}...`;
 
-				// Store review state (without review yet)
+				// Prepare review state
 				const reviewState: ReviewState = {
 					timestamp: Date.now(),
 					task,
 					summary,
 					originalSessionFile: ctx.sessionManager.getSessionFile() ?? undefined,
 				};
-				pi.appendEntry(REVIEW_STATE_KEY, reviewState);
 
 				// Build review prompt
 				const reviewPrompt = buildReviewPrompt(task, summary, instructions || undefined);
@@ -80,6 +79,9 @@ export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
           }
 					return;
 				}
+
+				// Store review state in the NEW session
+				pi.appendEntry(REVIEW_STATE_KEY, reviewState);
 
 				// Set session name and read-only mode
 				pi.setSessionName(sessionName);
