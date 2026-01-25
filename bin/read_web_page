@@ -13,4 +13,4 @@ fi
 BROWSER_SETTINGS="headless=true,viewport_width=1280,user_agent_mode=random"
 CRAWLER_SETTINGS="wait_until=networkidle,process_iframes=false,magic=true"
 
-uvx --from crawl4ai crwl "$URL" -o markdown-fit -b "$BROWSER_SETTINGS" -c "$CRAWLER_SETTINGS"
+uvx --from crawl4ai crwl "$URL" -o md-fit -b "$BROWSER_SETTINGS" -c "$CRAWLER_SETTINGS"
