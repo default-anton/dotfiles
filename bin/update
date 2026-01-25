@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+
+case "$1" in
+  mlx-audio)
+    uv tool install --force mlx-audio --prerelease=allow
+    ;;
+  claude)
+    brew update && brew upgrade claude-code
+    ;;
+  pi)
+    mise use --global npm:@mariozechner/pi-coding-agent@latest
+    ;;
+  codex)
+    mise use --global npm:@openai/codex@latest
+    ;;
+  *)
+    echo "Usage: update {mlx-audio|claude|pi|codex}"
+    exit 1
+    ;;
+esac
