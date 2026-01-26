@@ -1,7 +1,6 @@
 import events from "node:events";
 
-import { getModel } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, ExtensionFactory } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionFactory, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import {
   SessionManager,
   createAgentSession,
@@ -22,6 +21,21 @@ const MAX_TURNS = 10;
 const DEFAULT_EVENTTARGET_MAX_LISTENERS = 100;
 const EVENTTARGET_MAX_LISTENERS_STATE_KEY = Symbol.for("pi.eventTargetMaxListenersState");
 
+type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
+type ModelInfo = { provider: string; id: string, thinkingLevel: ThinkingLevel };
+
+const VERTEXAI_GEMINI_FLASH: ModelInfo = { provider: "google-vertex", id: "gemini-3-flash-preview", thinkingLevel: "low" };
+const ZAI_GLM: ModelInfo = { provider: "zai", id: "glm-4.7", thinkingLevel: "high" };
+const DEEPSEEK_CHAT: ModelInfo = { provider: "deepseek", id: "deepseek-chat", thinkingLevel: "off" };
+
+const SMALL_MODELS_FOR_PROVIDER: Record<string, ModelInfo> = {
+  "openai": VERTEXAI_GEMINI_FLASH,
+  "google-vertex": VERTEXAI_GEMINI_FLASH,
+  "google-antigravity": DEEPSEEK_CHAT,
+  "zai": DEEPSEEK_CHAT,
+  "deepseek": DEEPSEEK_CHAT,
+};
+
 type EventTargetMaxListenersState = { depth: number; savedDefault?: number };
 
 function getEventTargetMaxListenersState(): EventTargetMaxListenersState {
@@ -35,7 +49,7 @@ function bumpDefaultEventTargetMaxListeners(): () => void {
 
   const raw = process.env.PI_EVENTTARGET_MAX_LISTENERS ?? process.env.PI_ABORT_MAX_LISTENERS;
   const desired = raw !== undefined ? Number(raw) : DEFAULT_EVENTTARGET_MAX_LISTENERS;
-  if (!Number.isFinite(desired) || desired < 0) return () => {};
+  if (!Number.isFinite(desired) || desired < 0) return () => { };
 
   if (state.depth === 0) state.savedDefault = events.defaultMaxListeners;
   state.depth += 1;
@@ -92,13 +106,9 @@ interface FinderRunDetails {
 
 interface FinderDetails {
   status: FinderStatus;
-  queries: string[];
   subagentProvider?: string;
   subagentModelId?: string;
-  maxTurns: number;
   runs: FinderRunDetails[];
-  startedAt: number;
-  endedAt?: number;
 }
 
 function shorten(text: string, max: number): string {
@@ -278,261 +288,257 @@ export default function finderExtension(pi: ExtensionAPI) {
       "Read-only codebase scout: spawns isolated subagents that search with bash/read (e.g., rg/fd/ls + read) and return evidence-backed Markdown summaries with citations (path:lineStart-lineEnd).",
     parameters: FinderParams,
 
-    async execute(_toolCallId, params, onUpdate, ctx, signal) {
+    async execute(_toolCallId, params, onUpdate, ctx: ExtensionContext, signal) {
       const restoreMaxListeners = bumpDefaultEventTargetMaxListeners();
       try {
-        const startedAt = Date.now();
         const maxTurns = MAX_TURNS;
         const queries = Array.isArray((params as any).queries) ? ((params as any).queries as string[]) : [];
 
         if (queries.length < 1 || queries.length > 4 || queries.some((q) => typeof q !== "string" || !q.trim())) {
-        const error = "Invalid parameters: expected `queries` to be an array of 1–4 non-empty strings.";
-        return {
-          content: [{ type: "text", text: error }],
-          details: {
-            status: "error",
-            queries,
-            maxTurns,
-            runs: [],
-            startedAt,
-            endedAt: Date.now(),
-          } satisfies FinderDetails,
-          isError: true,
-        };
-      }
-
-      const runs: FinderRunDetails[] = queries.map((query) => ({
-        status: "running",
-        query,
-        turns: 0,
-        toolCalls: [],
-        startedAt: Date.now(),
-      }));
-
-      const authStorage = discoverAuthStorage();
-      const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
-
-      const subModel = getModel(process.env.PI_SMALL_PROVIDER, process.env.PI_SMALL_MODEL);
-
-      if (!subModel) {
-        const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
-        for (const r of runs) {
-          r.status = "error";
-          r.error = error;
-          r.summaryText = error;
-          r.endedAt = Date.now();
+          const error = "Invalid parameters: expected `queries` to be an array of 1–4 non-empty strings.";
+          return {
+            content: [{ type: "text", text: error }],
+            details: {
+              status: "error",
+              runs: [],
+            } satisfies FinderDetails,
+            isError: true,
+          };
         }
-        const text = renderCombinedMarkdown(runs);
-        return {
-          content: [{ type: "text", text }],
-          details: {
-            status: "error",
-            queries,
-            maxTurns,
-            runs,
-            startedAt,
-            endedAt: Date.now(),
-          } satisfies FinderDetails,
-          isError: true,
-        };
-      }
 
-      const subagentProvider = subModel.provider;
-      const subagentModelId = subModel.id;
+        const runs: FinderRunDetails[] = queries.map((query) => ({
+          status: "running",
+          query,
+          turns: 0,
+          toolCalls: [],
+          startedAt: Date.now(),
+        }));
 
-      let lastUpdate = 0;
-      const emitAll = (force = false) => {
-        const now = Date.now();
-        if (!force && now - lastUpdate < 150) return;
-        lastUpdate = now;
+        const authStorage = discoverAuthStorage();
+        const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
+        const currentProvider = ctx.model?.provider;
 
-        const status = computeOverallStatus(runs);
-        const text = renderCombinedMarkdown(runs);
-
-        onUpdate?.({
-          content: [{ type: "text", text }],
-          details: {
-            status,
-            queries,
-            subagentProvider,
-            subagentModelId,
-            maxTurns,
-            runs,
-            startedAt,
-          } satisfies FinderDetails,
-        });
-      };
-
-      emitAll(true);
-
-      const contextFiles = discoverContextFiles(ctx.cwd);
-      const systemPrompt = buildFinderSystemPrompt(maxTurns);
-
-      let toolAborted = false;
-      const activeSessions = new Set<{ abort: () => Promise<void> }>();
-
-      const markAllAborted = () => {
-        for (const r of runs) {
-          if (r.status !== "running") continue;
-          r.status = "aborted";
-          r.summaryText = r.summaryText ?? "Aborted";
-          r.endedAt = Date.now();
+        if (!currentProvider) {
+          const error = "No model provider available. Configure credentials (e.g. /login or auth.json) and try again.";
+          for (const r of runs) {
+            r.status = "error";
+            r.error = error;
+            r.summaryText = error;
+            r.endedAt = Date.now();
+          }
+          const text = renderCombinedMarkdown(runs);
+          return {
+            content: [{ type: "text", text }],
+            details: {
+              status: "error",
+              runs,
+            } satisfies FinderDetails,
+            isError: true,
+          };
         }
-      };
 
-      const abortAll = async () => {
-        if (toolAborted) return;
-        toolAborted = true;
-        markAllAborted();
+        const smallModel = SMALL_MODELS_FOR_PROVIDER[currentProvider] ?? DEEPSEEK_CHAT;
+        const subModel = modelRegistry.getAvailable().find(m => m.provider === smallModel.provider && m.id === smallModel.id);
+
+        if (!subModel) {
+          const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
+          for (const r of runs) {
+            r.status = "error";
+            r.error = error;
+            r.summaryText = error;
+            r.endedAt = Date.now();
+          }
+          const text = renderCombinedMarkdown(runs);
+          return {
+            content: [{ type: "text", text }],
+            details: {
+              status: "error",
+              runs,
+            } satisfies FinderDetails,
+            isError: true,
+          };
+        }
+
+        let lastUpdate = 0;
+        const emitAll = (force = false) => {
+          const now = Date.now();
+          if (!force && now - lastUpdate < 150) return;
+          lastUpdate = now;
+
+          const status = computeOverallStatus(runs);
+          const text = renderCombinedMarkdown(runs);
+
+          onUpdate?.({
+            content: [{ type: "text", text }],
+            details: {
+              status,
+              subagentProvider: subModel.provider,
+              subagentModelId: subModel.id,
+              runs,
+            } satisfies FinderDetails,
+          });
+        };
+
         emitAll(true);
-        await Promise.allSettled([...activeSessions].map((s) => s.abort()));
-      };
 
-      let abortListenerAdded = false;
-      const onAbort = () => void abortAll();
+        const contextFiles = discoverContextFiles(ctx.cwd);
+        const systemPrompt = buildFinderSystemPrompt(maxTurns);
 
-      if (signal) {
-        if (signal.aborted) await abortAll();
-        else {
-          signal.addEventListener("abort", onAbort);
-          abortListenerAdded = true;
+        let toolAborted = false;
+        const activeSessions = new Set<{ abort: () => Promise<void> }>();
+
+        const markAllAborted = () => {
+          for (const r of runs) {
+            if (r.status !== "running") continue;
+            r.status = "aborted";
+            r.summaryText = r.summaryText ?? "Aborted";
+            r.endedAt = Date.now();
+          }
+        };
+
+        const abortAll = async () => {
+          if (toolAborted) return;
+          toolAborted = true;
+          markAllAborted();
+          emitAll(true);
+          await Promise.allSettled([...activeSessions].map((s) => s.abort()));
+        };
+
+        let abortListenerAdded = false;
+        const onAbort = () => void abortAll();
+
+        if (signal) {
+          if (signal.aborted) await abortAll();
+          else {
+            signal.addEventListener("abort", onAbort);
+            abortListenerAdded = true;
+          }
         }
-      }
 
-      const runQuery = async (index: number) => {
-        const run = runs[index];
+        const runQuery = async (index: number) => {
+          const run = runs[index];
 
-        if (toolAborted || signal?.aborted) {
-          run.status = "aborted";
+          if (toolAborted || signal?.aborted) {
+            run.status = "aborted";
+            run.turns = 0;
+            run.toolCalls = [];
+            run.startedAt = Date.now();
+            run.endedAt = Date.now();
+            run.error = undefined;
+            run.summaryText = "Aborted";
+            emitAll(true);
+            return;
+          }
+
+          run.status = "running";
           run.turns = 0;
           run.toolCalls = [];
           run.startedAt = Date.now();
-          run.endedAt = Date.now();
+          run.endedAt = undefined;
           run.error = undefined;
-          run.summaryText = "Aborted";
-          emitAll(true);
-          return;
-        }
+          run.summaryText = undefined;
 
-        run.status = "running";
-        run.turns = 0;
-        run.toolCalls = [];
-        run.startedAt = Date.now();
-        run.endedAt = undefined;
-        run.error = undefined;
-        run.summaryText = undefined;
+          const { session } = await createAgentSession({
+            cwd: ctx.cwd,
+            authStorage,
+            modelRegistry,
+            sessionManager: SessionManager.inMemory(ctx.cwd),
+            model: subModel,
+            thinkingLevel: "off",
+            tools: [createReadTool(ctx.cwd), createBashTool(ctx.cwd)],
+            customTools: [],
+            extensions: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
+            skills: [],
+            contextFiles,
+            systemPrompt,
+          });
 
-        const { session } = await createAgentSession({
-          cwd: ctx.cwd,
-          authStorage,
-          modelRegistry,
-          sessionManager: SessionManager.inMemory(ctx.cwd),
-          model: subModel,
-          thinkingLevel: "off",
-          tools: [createReadTool(ctx.cwd), createBashTool(ctx.cwd)],
-          customTools: [],
-          extensions: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
-          skills: [],
-          contextFiles,
-          systemPrompt,
-        });
+          activeSessions.add(session as any);
+          const wasAborted = () => toolAborted || signal?.aborted;
 
-        activeSessions.add(session as any);
-        const wasAborted = () => toolAborted || signal?.aborted;
-
-        const unsubscribe = session.subscribe((event) => {
-          switch (event.type) {
-            case "turn_end": {
-              run.turns += 1;
-              emitAll();
-              break;
-            }
-            case "tool_execution_start": {
-              run.toolCalls.push({
-                id: event.toolCallId,
-                name: event.toolName,
-                args: event.args,
-                startedAt: Date.now(),
-              });
-              if (run.toolCalls.length > 50) run.toolCalls.splice(0, run.toolCalls.length - 50);
-              emitAll(true);
-              break;
-            }
-            case "tool_execution_end": {
-              const call = run.toolCalls.find((c) => c.id === event.toolCallId);
-              if (call) {
-                call.endedAt = Date.now();
-                call.isError = event.isError;
+          const unsubscribe = session.subscribe((event) => {
+            switch (event.type) {
+              case "turn_end": {
+                run.turns += 1;
+                emitAll();
+                break;
               }
-              emitAll(true);
-              break;
+              case "tool_execution_start": {
+                run.toolCalls.push({
+                  id: event.toolCallId,
+                  name: event.toolName,
+                  args: event.args,
+                  startedAt: Date.now(),
+                });
+                if (run.toolCalls.length > 50) run.toolCalls.splice(0, run.toolCalls.length - 50);
+                emitAll(true);
+                break;
+              }
+              case "tool_execution_end": {
+                const call = run.toolCalls.find((c) => c.id === event.toolCallId);
+                if (call) {
+                  call.endedAt = Date.now();
+                  call.isError = event.isError;
+                }
+                emitAll(true);
+                break;
+              }
             }
+          });
+
+          try {
+            await session.prompt(buildFinderUserPrompt(run.query, maxTurns), { expandPromptTemplates: false });
+            run.summaryText = getLastAssistantText(session.state.messages as any[]).trim();
+            if (!run.summaryText) run.summaryText = wasAborted() ? "Aborted" : "(no output)";
+
+            run.status = wasAborted() ? "aborted" : "done";
+            run.endedAt = Date.now();
+            emitAll(true);
+          } catch (e) {
+            const error = wasAborted() ? "Aborted" : e instanceof Error ? e.message : String(e);
+            run.status = wasAborted() ? "aborted" : "error";
+            run.error = wasAborted() ? undefined : error;
+            run.summaryText = error;
+            run.endedAt = Date.now();
+            emitAll(true);
+          } finally {
+            activeSessions.delete(session as any);
+            unsubscribe();
+            session.dispose();
           }
-        });
+        };
 
         try {
-          await session.prompt(buildFinderUserPrompt(run.query, maxTurns), { expandPromptTemplates: false });
-          run.summaryText = getLastAssistantText(session.state.messages as any[]).trim();
-          if (!run.summaryText) run.summaryText = wasAborted() ? "Aborted" : "(no output)";
+          await Promise.all(queries.map((_, i) => runQuery(i)));
+          const status = computeOverallStatus(runs);
+          const text = renderCombinedMarkdown(runs);
 
-          run.status = wasAborted() ? "aborted" : "done";
-          run.endedAt = Date.now();
-          emitAll(true);
+          return {
+            content: [{ type: "text", text }],
+            details: {
+              status,
+              runs,
+              subagentProvider: subModel.provider,
+              subagentModelId: subModel.id,
+            } satisfies FinderDetails,
+            isError: status === "error",
+          };
         } catch (e) {
-          const error = wasAborted() ? "Aborted" : e instanceof Error ? e.message : String(e);
-          run.status = wasAborted() ? "aborted" : "error";
-          run.error = wasAborted() ? undefined : error;
-          run.summaryText = error;
-          run.endedAt = Date.now();
-          emitAll(true);
+          const error = e instanceof Error ? e.message : String(e);
+          const text = `Finder failed: ${error}`;
+          return {
+            content: [{ type: "text", text }],
+            details: {
+              status: "error",
+              runs,
+              subagentProvider: subModel.provider,
+              subagentModelId: subModel.id,
+            } satisfies FinderDetails,
+            isError: true,
+          };
         } finally {
-          activeSessions.delete(session as any);
-          unsubscribe();
-          session.dispose();
+          if (signal && abortListenerAdded) signal.removeEventListener("abort", onAbort);
         }
-      };
-
-      try {
-        await Promise.all(queries.map((_, i) => runQuery(i)));
-        const endedAt = Date.now();
-        const status = computeOverallStatus(runs);
-        const text = renderCombinedMarkdown(runs);
-
-        return {
-          content: [{ type: "text", text }],
-          details: {
-            status,
-            queries,
-            subagentProvider,
-            subagentModelId,
-            maxTurns,
-            runs,
-            startedAt,
-            endedAt,
-          } satisfies FinderDetails,
-          isError: status === "error",
-        };
-      } catch (e) {
-        const endedAt = Date.now();
-        const error = e instanceof Error ? e.message : String(e);
-        const text = `Finder failed: ${error}`;
-        return {
-          content: [{ type: "text", text }],
-          details: {
-            status: "error",
-            queries,
-            subagentProvider,
-            subagentModelId,
-            maxTurns,
-            runs,
-            startedAt,
-            endedAt,
-          } satisfies FinderDetails,
-          isError: true,
-        };
-      } finally {
-        if (signal && abortListenerAdded) signal.removeEventListener("abort", onAbort);
-      }
       } finally {
         restoreMaxListeners();
       }
