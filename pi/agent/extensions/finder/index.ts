@@ -15,26 +15,12 @@ import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
 import autoloadSubdirAgents from "../autoload-subdir-agents";
+import { getSmallModelFromProvider } from "../shared/model-selection";
 
 const MAX_TURNS = 10;
 
 const DEFAULT_EVENTTARGET_MAX_LISTENERS = 100;
 const EVENTTARGET_MAX_LISTENERS_STATE_KEY = Symbol.for("pi.eventTargetMaxListenersState");
-
-type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-type ModelInfo = { provider: string; id: string, thinkingLevel: ThinkingLevel };
-
-const VERTEXAI_GEMINI_FLASH: ModelInfo = { provider: "google-vertex", id: "gemini-3-flash-preview", thinkingLevel: "low" };
-const ZAI_GLM: ModelInfo = { provider: "zai", id: "glm-4.7", thinkingLevel: "high" };
-const DEEPSEEK_CHAT: ModelInfo = { provider: "deepseek", id: "deepseek-chat", thinkingLevel: "off" };
-
-const SMALL_MODELS_FOR_PROVIDER: Record<string, ModelInfo> = {
-  "openai": VERTEXAI_GEMINI_FLASH,
-  "google-vertex": VERTEXAI_GEMINI_FLASH,
-  "google-antigravity": DEEPSEEK_CHAT,
-  "zai": DEEPSEEK_CHAT,
-  "deepseek": DEEPSEEK_CHAT,
-};
 
 type EventTargetMaxListenersState = { depth: number; savedDefault?: number };
 
@@ -337,8 +323,7 @@ export default function finderExtension(pi: ExtensionAPI) {
           };
         }
 
-        const smallModel = SMALL_MODELS_FOR_PROVIDER[currentProvider] ?? DEEPSEEK_CHAT;
-        const subModel = modelRegistry.getAvailable().find(m => m.provider === smallModel.provider && m.id === smallModel.id);
+        const subModel = getSmallModelFromProvider(currentProvider, modelRegistry);
 
         if (!subModel) {
           const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";

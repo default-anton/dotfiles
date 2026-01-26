@@ -1,7 +1,6 @@
 import events from "node:events";
 import nodePath from "node:path";
 
-import { getModel } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionFactory } from "@mariozechner/pi-coding-agent";
 import {
 	SessionManager,
@@ -17,6 +16,7 @@ import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
 import autoloadSubdirAgents from "../autoload-subdir-agents";
+import { getSmallModelFromProvider } from "../shared/model-selection";
 
 const GH_SCOUT_MAX_TURNS = 10;
 const GH_SCOUT_CACHE_ROOT = process.env.GH_SCOUT_CACHE_ROOT ?? "/tmp/gh_scout";
@@ -268,7 +268,29 @@ export default function ghScoutExtension(pi: ExtensionAPI) {
 
 				const authStorage = discoverAuthStorage();
 				const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
-				const subModel = getModel(process.env.PI_SMALL_PROVIDER, process.env.PI_SMALL_MODEL);
+				const currentProvider = ctx.model?.provider;
+
+				if (!currentProvider) {
+					const error = "No model provider available. Configure credentials (e.g. /login or auth.json) and try again.";
+					return {
+						content: [{ type: "text", text: error }],
+						details: {
+							status: "error",
+							repo,
+							ref,
+							query,
+							turns: 0,
+							maxTurns: GH_SCOUT_MAX_TURNS,
+							toolCalls: [],
+							error,
+							startedAt,
+							endedAt: Date.now(),
+						} satisfies GhScoutDetails,
+						isError: true,
+					};
+				}
+
+				const subModel = getSmallModelFromProvider(currentProvider, modelRegistry);
 
 				if (!subModel) {
 					const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";

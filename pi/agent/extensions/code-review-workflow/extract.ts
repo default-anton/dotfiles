@@ -7,9 +7,9 @@ import {
   discoverContextFiles,
   discoverModels,
 } from "@mariozechner/pi-coding-agent";
-import { getModel } from "@mariozechner/pi-ai";
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
 import autoloadSubdirAgents from "../autoload-subdir-agents";
+import { getSmallModelFromProvider } from "../shared/model-selection";
 import { TASK_EXTRACTOR_USER_PROMPT, TASK_EXTRACTOR_SYSTEM_PROMPT } from "./prompts";
 import { formatConversationForExtraction } from "./summary";
 
@@ -21,9 +21,14 @@ export async function extractTaskFromConversation(
   const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
   const contextFiles = discoverContextFiles(ctx.cwd);
 
-  const subModel = getModel(process.env.PI_SMALL_PROVIDER, process.env.PI_SMALL_MODEL);
+  const currentProvider = ctx.model?.provider;
+  if (!currentProvider) {
+    throw new Error("No model provider available. Configure credentials (e.g. /login or auth.json) and try again.");
+  }
+
+  const subModel = getSmallModelFromProvider(currentProvider, modelRegistry);
   if (!subModel) {
-    throw new Error("Failed to get model for task extraction");
+    throw new Error("No models available. Configure credentials (e.g. /login or auth.json) and try again.");
   }
 
   const conversation = formatConversationForExtraction(entries);
