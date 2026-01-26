@@ -11,14 +11,18 @@ INPUT_FILE=""
 TEXT=""
 
 usage() {
+    local exit_code="${1:-1}"
     echo "Usage: $0 [TEXT] [--input FILE] [--output FILE] [--speed SPEED]"
     echo ""
     echo "Arguments:"
     echo "  TEXT            Text to speak (optional if --input or stdin is used)"
     echo "  --input FILE    Read text from FILE"
-    echo "  --output FILE   Output MP3 file (default: speech.mp3)"
+    echo "  --output FILE   Output mono MP3 file (default: speech.mp3)"
     echo "  --speed SPEED   Speech speed (default: 1.0)"
-    exit 1
+    echo ""
+    echo "Input text must be plain text with no formatting (no HTML, no Markdown)."
+    echo "Minimal formatting like bullet lists is fine. Output is always a mono MP3 file."
+    exit "$exit_code"
 }
 
 # Parse arguments
@@ -37,7 +41,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -h|--help)
-            usage
+            usage 0
             ;;
         *)
             if [[ -z "$TEXT" ]]; then
@@ -45,7 +49,7 @@ while [[ $# -gt 0 ]]; do
                 shift
             else
                 echo "Unknown argument: $1"
-                usage
+                usage 1
             fi
             ;;
     esac
