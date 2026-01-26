@@ -1,0 +1,5 @@
+type: "pruning"
+# CLI wants a "query" field even for pruning; keep it generic.
+query: "main article content"
+# Start near Crawl4AI’s documented anchor and adjust:
+threshold: 0.48

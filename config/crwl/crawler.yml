@@ -1,0 +1,13 @@
+cache_mode: "bypass"
+wait_until: "networkidle"
+magic: true
+process_iframes: false
+excluded_tags:
+  - "nav"
+  - "footer"
+  - "header"
+  - "aside"
+
+# For pages that append content as you scroll (common on media sites)
+scan_full_page: true
+scroll_delay: 0.3

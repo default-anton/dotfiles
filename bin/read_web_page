@@ -10,7 +10,8 @@ if [[ "$URL" =~ ^https://raw\.githubusercontent\.com/.+\.md$ ]] || [[ "$URL" =~ 
   exit $?
 fi
 
-BROWSER_SETTINGS="headless=true,viewport_width=1280,user_agent_mode=random"
-CRAWLER_SETTINGS="wait_until=networkidle,process_iframes=false,magic=true"
-
-uvx --from crawl4ai crwl "$URL" -o md-fit -b "$BROWSER_SETTINGS" -c "$CRAWLER_SETTINGS"
+uvx --from crawl4ai crwl "$URL" \
+  -o md-fit \
+  -B ~/.dotfiles/config/crwl/browser.yml \
+  -C ~/.dotfiles/config/crwl/crawler.yml \
+  -f ~/.dotfiles/config/crwl/filter_pruning.yml \
