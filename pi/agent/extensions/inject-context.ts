@@ -1,67 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext, Skill } from "@mariozechner/pi-coding-agent";
-import { getAgentDir, loadSkills } from "@mariozechner/pi-coding-agent";
-
-/**
- * Load a context file (AGENTS.md or CLAUDE.md) from a directory.
- */
-function loadContextFileFromDir(dir: string): { path: string; content: string } | null {
-  const candidates = ["AGENTS.md", "CLAUDE.md"];
-  for (const filename of candidates) {
-    const filePath = path.join(dir, filename);
-    if (fs.existsSync(filePath)) {
-      try {
-        return {
-          path: filePath,
-          content: fs.readFileSync(filePath, "utf-8"),
-        };
-      } catch {
-        // Ignore read errors
-      }
-    }
-  }
-  return null;
-}
-
-/**
- * Load context files from global agent dir and project ancestry.
- */
-function loadContextFiles(cwd: string, agentDir: string): Array<{ path: string; content: string }> {
-  const contextFiles: Array<{ path: string; content: string }> = [];
-  const seenPaths = new Set<string>();
-
-  // Load global context file
-  const globalContext = loadContextFileFromDir(agentDir);
-  if (globalContext) {
-    contextFiles.push(globalContext);
-    seenPaths.add(globalContext.path);
-  }
-
-  // Walk up the directory tree to find project context files
-  const ancestorContextFiles: Array<{ path: string; content: string }> = [];
-
-  let currentDir = cwd;
-  const root = path.resolve("/");
-
-  while (true) {
-    const contextFile = loadContextFileFromDir(currentDir);
-    if (contextFile && !seenPaths.has(contextFile.path)) {
-      ancestorContextFiles.unshift(contextFile);
-      seenPaths.add(contextFile.path);
-    }
-
-    if (currentDir === root) break;
-
-    const parentDir = path.resolve(currentDir, "..");
-    if (parentDir === currentDir) break;
-    currentDir = parentDir;
-  }
-
-  contextFiles.push(...ancestorContextFiles);
-
-  return contextFiles;
-}
+import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@mariozechner/pi-coding-agent";
 
 function escapeXml(str: string): string {
   return str
@@ -123,6 +63,15 @@ function formatAgentFilesForPrompt(agentFiles: Array<{ path: string; content: st
 export default function(pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx: ExtensionContext) => {
     const agentDir = getAgentDir();
+    const settingsManager = SettingsManager.create(ctx.cwd, agentDir);
+
+    const resourceLoader = new DefaultResourceLoader({
+      cwd: ctx.cwd,
+      agentDir,
+      settingsManager,
+    });
+    await resourceLoader.reload();
+
     let systemPrompt: string = event.systemPrompt;
 
     if (fs.existsSync(path.join(agentDir, "SYSTEM.md"))) {
@@ -138,25 +87,21 @@ export default function(pi: ExtensionAPI) {
       timeZoneName: "short",
     });
 
-    const skillsResult = loadSkills({
-      cwd: ctx.cwd,
-      agentDir,
-      includeDefaults: true,
-    });
+    const { skills } = resourceLoader.getSkills();
 
     // Filter out skills with disableModelInvocation (they shouldn't be in the prompt)
-    const skills = skillsResult.skills.filter(skill => !skill.disableModelInvocation);
+    const filteredSkills = skills.filter(skill => !skill.disableModelInvocation);
 
-    const agentFiles = loadContextFiles(ctx.cwd, agentDir);
+    const { agentsFiles } = resourceLoader.getAgentsFiles();
 
-    if (skills.length === 0 && agentFiles.length === 0) {
+    if (filteredSkills.length === 0 && agentsFiles.length === 0) {
       return;
     }
 
     const prompt = [
       "\n\n---",
-      formatAgentFilesForPrompt(agentFiles),
-      formatSkillsForPrompt(skills),
+      formatAgentFilesForPrompt(agentsFiles),
+      formatSkillsForPrompt(filteredSkills),
       `\n\nCurrent date: ${dateTime}`,
       `\nCurrent working directory: ${ctx.cwd}`,
       `\n\nYour skills are located in: ${agentDir}/skills/`,
