@@ -51,19 +51,12 @@ function bumpDefaultEventTargetMaxListeners(): () => void {
 }
 
 const FinderParams = Type.Object({
-  queries: Type.Array(
-    Type.String({
-      description: [
-        "A self-contained codebase search request for the Finder subagent.",
-        "Include: (1) goal, (2) expected keywords/identifiers, (3) desired output (paths + line ranges), (4) success criteria.",
-      ].join(" "),
-    }),
-    {
-      minItems: 1,
-      maxItems: 4,
-      description: "One to four independent Finder queries. They will run concurrently.",
-    },
-  ),
+  query: Type.String({
+    description: [
+      "A self-contained codebase search request for the Finder subagent.",
+      "Include: (1) goal, (2) expected keywords/identifiers, (3) desired output (paths + line ranges), (4) success criteria.",
+    ].join(" "),
+  }),
 });
 
 type FinderStatus = "running" | "done" | "error" | "aborted";
@@ -165,14 +158,9 @@ function computeOverallStatus(runs: FinderRunDetails[]): FinderStatus {
 }
 
 function renderCombinedMarkdown(runs: FinderRunDetails[]): string {
-  const blocks: string[] = [];
-  for (let i = 0; i < runs.length; i++) {
-    const r = runs[i];
-    const header = `### Query ${i + 1}\n\n${r.query.trim()}`;
-    const body = (r.summaryText ?? (r.status === "running" ? "(searching...)" : "(no output)")).trim();
-    blocks.push([header, "", body].join("\n"));
-  }
-  return blocks.join("\n\n---\n\n");
+  const r = runs[0];
+  const body = (r.summaryText ?? (r.status === "running" ? "(searching...)" : "(no output)")).trim();
+  return body;
 }
 
 function buildFinderSystemPrompt(maxTurns: number): string {
@@ -269,17 +257,17 @@ export default function finderExtension(pi: ExtensionAPI) {
     name: "finder",
     label: "Finder",
     description:
-      "Read-only codebase scout: spawns isolated subagents that search with bash/read (e.g., rg/fd/ls + read) and return evidence-backed Markdown summaries with citations (path:lineStart-lineEnd).",
+      "Read-only codebase scout: spawns an isolated subagent that searches with bash/read (e.g., rg/fd/ls + read) and returns an evidence-backed Markdown summary with citations (path:lineStart-lineEnd).",
     parameters: FinderParams,
 
     async execute(_toolCallId, params, onUpdate, ctx: ExtensionContext, signal) {
       const restoreMaxListeners = bumpDefaultEventTargetMaxListeners();
       try {
         const maxTurns = MAX_TURNS;
-        const queries = Array.isArray((params as any).queries) ? ((params as any).queries as string[]) : [];
+        const query = typeof (params as any).query === "string" ? ((params as any).query as string).trim() : "";
 
-        if (queries.length < 1 || queries.length > 4 || queries.some((q) => typeof q !== "string" || !q.trim())) {
-          const error = "Invalid parameters: expected `queries` to be an array of 1–4 non-empty strings.";
+        if (!query) {
+          const error = "Invalid parameters: expected `query` to be a non-empty string.";
           return {
             content: [{ type: "text", text: error }],
             details: {
@@ -290,13 +278,15 @@ export default function finderExtension(pi: ExtensionAPI) {
           };
         }
 
-        const runs: FinderRunDetails[] = queries.map((query) => ({
-          status: "running",
-          query,
-          turns: 0,
-          toolCalls: [],
-          startedAt: Date.now(),
-        }));
+        const runs: FinderRunDetails[] = [
+          {
+            status: "running",
+            query,
+            turns: 0,
+            toolCalls: [],
+            startedAt: Date.now(),
+          },
+        ];
 
         const modelRegistry = ctx.modelRegistry;
         const currentProvider = ctx.model?.provider;
@@ -492,7 +482,7 @@ export default function finderExtension(pi: ExtensionAPI) {
         };
 
         try {
-          await Promise.all(queries.map((_, i) => runQuery(i)));
+          await runQuery(0);
           const status = computeOverallStatus(runs);
           const text = renderCombinedMarkdown(runs);
 
@@ -528,14 +518,11 @@ export default function finderExtension(pi: ExtensionAPI) {
     },
 
     renderCall(args, theme) {
-      const queries = Array.isArray((args as any)?.queries) ? (((args as any).queries as any[]) ?? []) : [];
-      const previews = queries
-        .filter((q) => typeof q === "string")
-        .slice(0, 4)
-        .map((q) => shorten(String(q).replace(/\s+/g, " ").trim(), 70));
+      const query = typeof (args as any)?.query === "string" ? ((args as any).query as string).trim() : "";
+      const preview = shorten(query.replace(/\s+/g, " ").trim(), 70);
 
-      const title = theme.fg("toolTitle", theme.bold("finder")) + theme.fg("dim", ` (${previews.length} quer${previews.length === 1 ? "y" : "ies"})`);
-      const text = title + (previews.length ? "\n" + theme.fg("muted", previews.join("\n")) : "");
+      const title = theme.fg("toolTitle", theme.bold("finder"));
+      const text = title + (preview ? "\n" + theme.fg("muted", preview) : "");
       return new Text(text, 0, 0);
     },
 
@@ -556,9 +543,6 @@ export default function finderExtension(pi: ExtensionAPI) {
               ? theme.fg("warning", "◼")
               : theme.fg("warning", "⏳");
 
-      const doneCount = details.runs.filter((r) => r.status === "done").length;
-      const errorCount = details.runs.filter((r) => r.status === "error").length;
-      const abortedCount = details.runs.filter((r) => r.status === "aborted").length;
       const totalToolCalls = details.runs.reduce((acc, r) => acc + r.toolCalls.length, 0);
       const totalTurns = details.runs.reduce((acc, r) => acc + r.turns, 0);
 
@@ -568,11 +552,11 @@ export default function finderExtension(pi: ExtensionAPI) {
         theme.fg("toolTitle", theme.bold("finder ")) +
         theme.fg(
           "dim",
-          `${details.subagentProvider ?? "?"}/${details.subagentModelId ?? "?"} • ${doneCount}/${details.runs.length} done • ${errorCount} error • ${abortedCount} aborted • ${totalTurns} turns • ${totalToolCalls} tool call${totalToolCalls === 1 ? "" : "s"}`,
+          `${details.subagentProvider ?? "?"}/${details.subagentModelId ?? "?"} • ${totalTurns} turns • ${totalToolCalls} tool call${totalToolCalls === 1 ? "" : "s"}`,
         );
 
       const runLines = details.runs
-        .map((r, i) => {
+        .map((r) => {
           const runIcon =
             r.status === "done"
               ? theme.fg("success", "✓")
@@ -582,18 +566,17 @@ export default function finderExtension(pi: ExtensionAPI) {
                   ? theme.fg("warning", "◼")
                   : theme.fg("warning", "⏳");
           const preview = shorten((r.query ?? "").replace(/\s+/g, " ").trim(), 90);
-          return `${runIcon} ${theme.fg("dim", `Q${i + 1}`)} ${theme.fg("muted", preview)}`;
+          return `${runIcon} ${theme.fg("muted", preview)}`;
         })
         .join("\n");
 
       let toolsText = "";
       if (expanded) {
         const blocks: string[] = [];
-        for (let i = 0; i < details.runs.length; i++) {
-          const r = details.runs[i];
-          const calls = r.toolCalls;
-          if (calls.length === 0) continue;
-          blocks.push(theme.fg("muted", `\n\nTools (Q${i + 1}):`));
+        const r = details.runs[0];
+        const calls = r.toolCalls;
+        if (calls.length > 0) {
+          blocks.push(theme.fg("muted", "\n\nTools:"));
           for (const c of calls) {
             const callIcon = c.isError ? theme.fg("error", "✗") : theme.fg("dim", "→");
             blocks.push(`${callIcon} ${theme.fg("toolOutput", formatToolCall(c))}`);
@@ -601,18 +584,12 @@ export default function finderExtension(pi: ExtensionAPI) {
         }
         toolsText = blocks.join("\n").trimEnd();
       } else {
-        const lastCalls: { q: number; call: ToolCall }[] = [];
-        for (let i = 0; i < details.runs.length; i++) {
-          const r = details.runs[i];
-          for (const c of r.toolCalls.slice(-3)) lastCalls.push({ q: i + 1, call: c });
-        }
-        const callsToShow = lastCalls.slice(-6);
+        const callsToShow = details.runs[0].toolCalls.slice(-6);
         if (callsToShow.length > 0) {
           toolsText += theme.fg("muted", "\n\nTools (latest):\n");
-          for (const item of callsToShow) {
-            const c = item.call;
+          for (const c of callsToShow) {
             const callIcon = c.isError ? theme.fg("error", "✗") : theme.fg("dim", "→");
-            toolsText += `${callIcon} ${theme.fg("dim", `Q${item.q}`)} ${theme.fg("toolOutput", formatToolCall(c))}\n`;
+            toolsText += `${callIcon} ${theme.fg("toolOutput", formatToolCall(c))}\n`;
           }
           toolsText = toolsText.trimEnd();
           if (totalToolCalls > 6) toolsText += `\n${theme.fg("muted", "(Ctrl+O to expand)")}`;
