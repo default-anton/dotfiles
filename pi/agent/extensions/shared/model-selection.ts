@@ -15,6 +15,7 @@ export const SMALL_MODELS_FOR_PROVIDER: Record<string, SmallModelInfo> = {
   "google-vertex": VERTEX_GEMINI_FLASH,
   zai: GOOGLE_GEMINI_FLASH,
   deepseek: GOOGLE_GEMINI_FLASH,
+  moonshot: GOOGLE_GEMINI_FLASH,
 };
 
 export function getSmallModelFromProvider(
