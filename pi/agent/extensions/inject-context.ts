@@ -69,6 +69,9 @@ export default function(pi: ExtensionAPI) {
       cwd: ctx.cwd,
       agentDir,
       settingsManager,
+      noExtensions: true,
+      noPromptTemplates: true,
+      noThemes: true,
     });
     await resourceLoader.reload();
 

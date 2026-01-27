@@ -388,6 +388,10 @@ export default function finderExtension(pi: ExtensionAPI) {
         }
 
         const resourceLoader = new DefaultResourceLoader({
+          noExtensions: true,
+          noSkills: true,
+          noPromptTemplates: true,
+          noThemes: true,
           extensionFactories: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
           systemPromptOverride: () => systemPrompt,
           skillsOverride: () => ({ skills: [], diagnostics: [] }),

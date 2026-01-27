@@ -384,6 +384,10 @@ export default function visionExtension(pi: ExtensionAPI) {
 				const systemPrompt = buildVisionSystemPrompt();
 
 				const resourceLoader = new DefaultResourceLoader({
+					noExtensions: true,
+					noSkills: true,
+					noPromptTemplates: true,
+					noThemes: true,
 					extensionFactories: [autoloadSubdirAgents, createTurnBudgetExtension(VISION_MAX_TURNS)],
 					systemPromptOverride: () => systemPrompt,
 					skillsOverride: () => ({ skills: [], diagnostics: [] }),

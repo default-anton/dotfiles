@@ -31,6 +31,10 @@ export async function extractTaskFromConversation(
   const userPrompt = TASK_EXTRACTOR_USER_PROMPT.replace("{conversation}", conversation);
 
   const resourceLoader = new DefaultResourceLoader({
+    noExtensions: true,
+    noSkills: true,
+    noPromptTemplates: true,
+    noThemes: true,
     extensionFactories: [autoloadSubdirAgents],
     systemPromptOverride: () => TASK_EXTRACTOR_SYSTEM_PROMPT,
     skillsOverride: () => ({ skills: [], diagnostics: [] }),
