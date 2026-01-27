@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.50.1",
   "defaultThinkingLevel": "high",
-  "defaultProvider": "moonshot",
-  "defaultModel": "kimi-k2.5",
+  "defaultProvider": "google-antigravity",
+  "defaultModel": "gemini-3-flash",
   "compaction": {
     "enabled": true
   },
@@ -21,6 +21,7 @@
     "deepseek/deepseek-chat"
   ],
   "packages": [
-    "npm:pi-moonshot"
+    "npm:pi-moonshot",
+    "npm:pi-subdir-context"
   ]
 }

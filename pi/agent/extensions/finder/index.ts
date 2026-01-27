@@ -12,7 +12,6 @@ import {
 import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
-import autoloadSubdirAgents from "../autoload-subdir-agents";
 import { getSmallModelFromProvider } from "../shared/model-selection";
 
 const MAX_TURNS = 10;
@@ -389,10 +388,11 @@ export default function finderExtension(pi: ExtensionAPI) {
 
         const resourceLoader = new DefaultResourceLoader({
           noExtensions: true,
+          additionalExtensionPaths: ["npm:pi-subdir-context"],
           noSkills: true,
           noPromptTemplates: true,
           noThemes: true,
-          extensionFactories: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
+          extensionFactories: [createTurnBudgetExtension(maxTurns)],
           systemPromptOverride: () => systemPrompt,
           skillsOverride: () => ({ skills: [], diagnostics: [] }),
         });

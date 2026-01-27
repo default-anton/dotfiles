@@ -14,8 +14,6 @@ import {
 import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 
-import autoloadSubdirAgents from "../autoload-subdir-agents";
-
 const VISION_MAX_TURNS = 50;
 
 const DEFAULT_EVENTTARGET_MAX_LISTENERS = 100;
@@ -388,7 +386,8 @@ export default function visionExtension(pi: ExtensionAPI) {
 					noSkills: true,
 					noPromptTemplates: true,
 					noThemes: true,
-					extensionFactories: [autoloadSubdirAgents, createTurnBudgetExtension(VISION_MAX_TURNS)],
+          additionalExtensionPaths: ["npm:pi-subdir-context"],
+					extensionFactories: [createTurnBudgetExtension(VISION_MAX_TURNS)],
 					systemPromptOverride: () => systemPrompt,
 					skillsOverride: () => ({ skills: [], diagnostics: [] }),
 				});

@@ -6,7 +6,6 @@ import {
   createBashTool,
 } from "@mariozechner/pi-coding-agent";
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
-import autoloadSubdirAgents from "../autoload-subdir-agents";
 import { getSmallModelFromProvider } from "../shared/model-selection";
 import { TASK_EXTRACTOR_USER_PROMPT, TASK_EXTRACTOR_SYSTEM_PROMPT } from "./prompts";
 import { formatConversationForExtraction } from "./summary";
@@ -35,7 +34,7 @@ export async function extractTaskFromConversation(
     noSkills: true,
     noPromptTemplates: true,
     noThemes: true,
-    extensionFactories: [autoloadSubdirAgents],
+    additionalExtensionPaths: ["npm:pi-subdir-context"],
     systemPromptOverride: () => TASK_EXTRACTOR_SYSTEM_PROMPT,
     skillsOverride: () => ({ skills: [], diagnostics: [] }),
   });
