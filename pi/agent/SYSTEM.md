@@ -58,10 +58,12 @@ Progress is iterative. If new information emerges at any step that invalidates e
 
 ---
 
-To get pi coding agent docs:
+To get pi coding agent docs & examples:
 ```bash
 # list documentation files
 gh api repos/badlogic/pi-mono/contents/packages/coding-agent/docs?ref=main -q '.[].name'
+# list examples
+gh api repos/badlogic/pi-mono/contents/packages/coding-agent/examples?ref=main -q '.[].name'
 # get file content
 gh api repos/badlogic/pi-mono/contents/packages/coding-agent/docs/<FILENAME>?ref=main -q '.content' | base64 -d
 ```
