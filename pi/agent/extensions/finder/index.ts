@@ -53,9 +53,10 @@ function bumpDefaultEventTargetMaxListeners(): () => void {
 const FinderParams = Type.Object({
   query: Type.String({
     description: [
-      "A self-contained codebase search request for the Finder subagent.",
-      "Include: (1) goal, (2) expected keywords/identifiers, (3) desired output (paths + line ranges), (4) success criteria.",
-    ].join(" "),
+      "Describe what to find in the codebase. Include: (1) specific goal, (2) keywords/identifiers to search, (3) desired output type (paths, line ranges, directory structure), (4) what counts as 'found'.",
+      "Finder uses rg/fd/ls and read — do not request grep or find.",
+      "Example: 'Find where user authentication is implemented. Look for functions named login, auth, or authenticate. Return paths with line ranges for the main entry point and token handling. Search in src/auth and src/api directories.'",
+    ].join("\n"),
   }),
 });
 
@@ -257,7 +258,7 @@ export default function finderExtension(pi: ExtensionAPI) {
     name: "finder",
     label: "Finder",
     description:
-      "Read-only codebase scout: spawns an isolated subagent that searches with bash/read (e.g., rg/fd/ls + read) and returns an evidence-backed Markdown summary with citations (path:lineStart-lineEnd).",
+      "Read-only codebase scout: searches repositories using rg/fd/ls and read, returns structured Markdown with Summary, Locations (path:lineStart-lineEnd), Evidence, and Searched sections.",
     parameters: FinderParams,
 
     async execute(_toolCallId, params, onUpdate, ctx: ExtensionContext, signal) {
