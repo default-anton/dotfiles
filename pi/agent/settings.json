@@ -1,16 +1,12 @@
 {
-  "lastChangelogVersion": "0.49.3",
+  "lastChangelogVersion": "0.50.0",
   "defaultThinkingLevel": "high",
   "defaultProvider": "zai",
-  "defaultModel": "glm-4.7",
+  "defaultModel": "glm-4.6v",
   "compaction": {
     "enabled": true
   },
   "hideThinkingBlock": true,
   "steeringMode": "one-at-a-time",
-  "skills": {
-    "enabled": true,
-    "enableCodexUser": false
-  },
   "doubleEscapeAction": "branch"
 }
