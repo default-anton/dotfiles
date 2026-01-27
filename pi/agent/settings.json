@@ -6,7 +6,7 @@
   "compaction": {
     "enabled": true
   },
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "steeringMode": "one-at-a-time",
   "doubleEscapeAction": "branch",
   "enabledModels": [
