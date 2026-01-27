@@ -2,13 +2,11 @@ import events from "node:events";
 
 import type { ExtensionAPI, ExtensionFactory, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import {
+  DefaultResourceLoader,
   SessionManager,
   createAgentSession,
   createBashTool,
   createReadTool,
-  discoverAuthStorage,
-  discoverContextFiles,
-  discoverModels,
   getMarkdownTheme,
 } from "@mariozechner/pi-coding-agent";
 import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
@@ -300,8 +298,7 @@ export default function finderExtension(pi: ExtensionAPI) {
           startedAt: Date.now(),
         }));
 
-        const authStorage = discoverAuthStorage();
-        const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
+        const modelRegistry = ctx.modelRegistry;
         const currentProvider = ctx.model?.provider;
 
         if (!currentProvider) {
@@ -366,7 +363,6 @@ export default function finderExtension(pi: ExtensionAPI) {
 
         emitAll(true);
 
-        const contextFiles = discoverContextFiles(ctx.cwd);
         const systemPrompt = buildFinderSystemPrompt(maxTurns);
 
         let toolAborted = false;
@@ -400,6 +396,13 @@ export default function finderExtension(pi: ExtensionAPI) {
           }
         }
 
+        const resourceLoader = new DefaultResourceLoader({
+          extensionFactories: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
+          systemPromptOverride: () => systemPrompt,
+          skillsOverride: () => ({ skills: [], diagnostics: [] }),
+        });
+        await resourceLoader.reload();
+
         const runQuery = async (index: number) => {
           const run = runs[index];
 
@@ -425,17 +428,12 @@ export default function finderExtension(pi: ExtensionAPI) {
 
           const { session } = await createAgentSession({
             cwd: ctx.cwd,
-            authStorage,
             modelRegistry,
+            resourceLoader,
             sessionManager: SessionManager.inMemory(ctx.cwd),
             model: subModel,
             thinkingLevel: "off",
             tools: [createReadTool(ctx.cwd), createBashTool(ctx.cwd)],
-            customTools: [],
-            extensions: [autoloadSubdirAgents, createTurnBudgetExtension(maxTurns)],
-            skills: [],
-            contextFiles,
-            systemPrompt,
           });
 
           activeSessions.add(session as any);

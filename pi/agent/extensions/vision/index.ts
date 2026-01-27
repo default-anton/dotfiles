@@ -5,12 +5,10 @@ import nodePath from "node:path";
 import type { ImageContent } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionFactory } from "@mariozechner/pi-coding-agent";
 import {
+	DefaultResourceLoader,
 	SessionManager,
 	createAgentSession,
 	createCodingTools,
-	discoverAuthStorage,
-	discoverContextFiles,
-	discoverModels,
 	getMarkdownTheme,
 } from "@mariozechner/pi-coding-agent";
 import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
@@ -327,8 +325,7 @@ export default function visionExtension(pi: ExtensionAPI) {
 					let turns = 0;
 					let summaryText = "";
 
-					const authStorage = discoverAuthStorage();
-					const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
+					const modelRegistry = ctx.modelRegistry;
 
 					const availableModels = await modelRegistry.getAvailable();
 					const preferredModel = selectVisionModel(availableModels);
@@ -384,22 +381,23 @@ export default function visionExtension(pi: ExtensionAPI) {
 				emit({ status: "running" });
 
 				const tools = createCodingTools(ctx.cwd);
-				const contextFiles = discoverContextFiles(ctx.cwd);
 				const systemPrompt = buildVisionSystemPrompt();
+
+				const resourceLoader = new DefaultResourceLoader({
+					extensionFactories: [autoloadSubdirAgents, createTurnBudgetExtension(VISION_MAX_TURNS)],
+					systemPromptOverride: () => systemPrompt,
+					skillsOverride: () => ({ skills: [], diagnostics: [] }),
+				});
+				await resourceLoader.reload();
 
 				const { session } = await createAgentSession({
 					cwd: ctx.cwd,
-					authStorage,
 					modelRegistry,
+					resourceLoader,
 					sessionManager: SessionManager.inMemory(ctx.cwd),
 					model: subModel,
 					thinkingLevel: "high",
 					tools,
-					customTools: [],
-					extensions: [autoloadSubdirAgents, createTurnBudgetExtension(VISION_MAX_TURNS)],
-					skills: [],
-					contextFiles,
-					systemPrompt,
 				});
 
 				let aborted = false;

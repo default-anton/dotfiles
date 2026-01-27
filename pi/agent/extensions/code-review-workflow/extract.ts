@@ -1,11 +1,9 @@
 import {
+  DefaultResourceLoader,
   SessionManager,
   createAgentSession,
   createReadTool,
   createBashTool,
-  discoverAuthStorage,
-  discoverContextFiles,
-  discoverModels,
 } from "@mariozechner/pi-coding-agent";
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent";
 import autoloadSubdirAgents from "../autoload-subdir-agents";
@@ -17,9 +15,7 @@ export async function extractTaskFromConversation(
   entries: any[],
   ctx: ExtensionContext,
 ): Promise<string> {
-  const authStorage = discoverAuthStorage();
-  const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
-  const contextFiles = discoverContextFiles(ctx.cwd);
+  const modelRegistry = ctx.modelRegistry;
 
   const currentProvider = ctx.model?.provider;
   if (!currentProvider) {
@@ -34,19 +30,21 @@ export async function extractTaskFromConversation(
   const conversation = formatConversationForExtraction(entries);
   const userPrompt = TASK_EXTRACTOR_USER_PROMPT.replace("{conversation}", conversation);
 
+  const resourceLoader = new DefaultResourceLoader({
+    extensionFactories: [autoloadSubdirAgents],
+    systemPromptOverride: () => TASK_EXTRACTOR_SYSTEM_PROMPT,
+    skillsOverride: () => ({ skills: [], diagnostics: [] }),
+  });
+  await resourceLoader.reload();
+
   const { session } = await createAgentSession({
     cwd: ctx.cwd,
-    authStorage,
     modelRegistry,
+    resourceLoader,
     sessionManager: SessionManager.inMemory(ctx.cwd),
     model: subModel,
     thinkingLevel: "low",
     tools: [createReadTool(ctx.cwd), createBashTool(ctx.cwd)],
-    customTools: [],
-    extensions: [autoloadSubdirAgents],
-    skills: [],
-    contextFiles,
-    systemPrompt: TASK_EXTRACTOR_SYSTEM_PROMPT,
   });
 
   try {

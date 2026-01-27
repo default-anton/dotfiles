@@ -3,13 +3,11 @@ import nodePath from "node:path";
 
 import type { ExtensionAPI, ExtensionFactory } from "@mariozechner/pi-coding-agent";
 import {
+	DefaultResourceLoader,
 	SessionManager,
 	createAgentSession,
 	createBashTool,
 	createReadTool,
-	discoverAuthStorage,
-	discoverContextFiles,
-	discoverModels,
 	getMarkdownTheme,
 } from "@mariozechner/pi-coding-agent";
 import { Container, Markdown, Spacer, Text } from "@mariozechner/pi-tui";
@@ -266,8 +264,7 @@ export default function ghScoutExtension(pi: ExtensionAPI) {
 					};
 				}
 
-				const authStorage = discoverAuthStorage();
-				const modelRegistry = ctx.modelRegistry ?? discoverModels(authStorage);
+				const modelRegistry = ctx.modelRegistry;
 				const currentProvider = ctx.model?.provider;
 
 				if (!currentProvider) {
@@ -314,7 +311,6 @@ export default function ghScoutExtension(pi: ExtensionAPI) {
 
 				const subagentProvider = subModel.provider;
 				const subagentModelId = subModel.id;
-				const contextFiles = discoverContextFiles(ctx.cwd);
 				const scriptPath = nodePath.resolve(__dirname, "bin/gh_scout");
 				const systemPrompt = buildGhScoutSystemPrompt(scriptPath, GH_SCOUT_CACHE_ROOT, GH_SCOUT_MAX_TURNS);
 
@@ -351,19 +347,21 @@ export default function ghScoutExtension(pi: ExtensionAPI) {
 
 				emit({ status: "running" });
 
+				const resourceLoader = new DefaultResourceLoader({
+					extensionFactories: [autoloadSubdirAgents, createTurnBudgetExtension(GH_SCOUT_MAX_TURNS)],
+					systemPromptOverride: () => systemPrompt,
+					skillsOverride: () => ({ skills: [], diagnostics: [] }),
+				});
+				await resourceLoader.reload();
+
 				const { session } = await createAgentSession({
 					cwd: ctx.cwd,
-					authStorage,
 					modelRegistry,
+					resourceLoader,
 					sessionManager: SessionManager.inMemory(ctx.cwd),
 					model: subModel,
 					thinkingLevel: "off",
 					tools: [createReadTool(ctx.cwd), createBashTool(ctx.cwd)],
-					customTools: [],
-					extensions: [autoloadSubdirAgents, createTurnBudgetExtension(GH_SCOUT_MAX_TURNS)],
-					skills: [],
-					contextFiles,
-					systemPrompt,
 				});
 
 				let aborted = false;
