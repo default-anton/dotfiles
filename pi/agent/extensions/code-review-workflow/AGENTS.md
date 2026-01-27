@@ -17,7 +17,7 @@ The extension:
 2. Uses an LLM to extract the task from the conversation
 3. Extracts the summary from all assistant messages (excluding tool calls)
 4. Creates a new session with a review prompt
-5. Sets the session to read-only mode (bash, read, finder, gh_scout only)
+5. Sets the session to read-only mode (bash, read, finder only)
 
 ### `/implement [instructions]`
 
@@ -51,6 +51,5 @@ In review mode, only these tools are available:
 - `bash` - for running verification scripts
 - `read` - for reading files
 - `finder` - for codebase exploration
-- `gh_scout` - for GitHub repository inspection
 
 Write/edit operations are blocked to prevent accidental changes during review.

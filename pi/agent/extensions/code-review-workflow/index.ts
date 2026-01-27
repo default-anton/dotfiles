@@ -12,7 +12,7 @@ interface ReviewState {
 }
 
 const REVIEW_STATE_KEY = "crw:review-state";
-const REVIEW_MODE_TOOLS = ["bash", "read", "finder", "gh_scout"];
+const REVIEW_MODE_TOOLS = ["bash", "read", "finder"];
 
 export default function codeReviewWorkflowExtension(pi: ExtensionAPI) {
 	// Register /review command
