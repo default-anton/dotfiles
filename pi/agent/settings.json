@@ -19,5 +19,8 @@
     "google-vertex/gemini-3-pro-preview",
     "deepseek/deepseek-reasoner",
     "deepseek/deepseek-chat"
+  ],
+  "packages": [
+    "npm:pi-moonshot"
   ]
 }
