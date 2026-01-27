@@ -16,63 +16,31 @@ Extract the coding task from the conversation above.
 Output ONLY the task description, nothing else.`;
 
 export function buildReviewPrompt(
-	task: string,
-	summary: string,
-	instructions?: string,
+  task: string,
+  summary: string,
+  instructions?: string,
 ): string {
-	const parts = [
-		"Another AI coding agent has just coded this task:",
-		"<task>",
-		task,
-    "</task>",
-		"",
-		"The summary of changes as per that AI coding agent:",
-    "<summary>",
-		summary,
-    "</summary>"
-	];
-
-	if (instructions) {
-		parts.push("", "Instructions:", instructions);
-	}
-
-	parts.push(
-		"",
-		"Review the diff like a maintainer + is there anything we could improve?",
-		"You are in review mode. Do not make any changes yourself.",
-	);
-
-	return parts.join("\n");
-}
-
-export function buildImplementPrompt(
-	task: string,
-	summary: string,
-	review: string,
-	instructions?: string,
-): string {
-	const parts = [
-		"Another AI coding agent has just coded this task:",
+  const parts = [
+    "Another AI coding agent has just coded this task:",
     "<task>",
-		task,
+    task,
     "</task>",
-		"",
-		"The summary of changes as per that AI coding agent:",
+    "",
+    "The summary of changes as per that AI coding agent:",
     "<summary>",
-		summary,
-    "</summary>",
-		"",
-		"Earlier, you gave this review + suggestions:",
-    "<review>",
-		review,
-    "</review>"
-	];
+    summary,
+    "</summary>"
+  ];
 
-	if (instructions) {
-		parts.push("", "Instructions:", instructions);
-	}
+  if (instructions) {
+    parts.push("", "Instructions:", instructions);
+  }
 
-	parts.push("", "Implement the suggested improvements.");
+  parts.push(
+    "",
+    "Review the diff like a maintainer. Provide feedback and suggestions.",
+    "Do not implement any changes yet. Let me choose which suggestions to implement.",
+  );
 
-	return parts.join("\n");
+  return parts.join("\n");
 }
