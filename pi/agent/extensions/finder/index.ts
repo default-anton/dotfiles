@@ -175,8 +175,12 @@ function buildFinderSystemPrompt(maxTurns: number): string {
     "Finish as soon as you can answer with high confidence — do NOT try to use all available turns (it's fine to answer in 2–3 turns).",
     "Tool use is disabled on the last allowed turn; once you have enough evidence, produce your final answer immediately.",
     "",
+    "Stop condition:",
+    "- As soon as you can fill the Locations section with correct citations that answer the query, STOP searching and write your final answer.",
+    "",
     "Non-negotiable constraints:",
     "- Do not modify files, propose patches, or refactor.",
+    "- No side effects: do not run commands that modify files or repository state (no writes, installs, or git mutations).",
     "- Never use `grep` (use `rg`). Never use `find` (use `fd`).",
     "- Do not guess: every claim must be supported by evidence you actually read.",
     "- Avoid large dumps: only include minimal snippets (≈5–15 lines) when needed.",
@@ -207,15 +211,10 @@ function buildFinderSystemPrompt(maxTurns: number): string {
   ].join("\n");
 }
 
-function buildFinderUserPrompt(query: string, maxTurns: number): string {
+function buildFinderUserPrompt(query: string, _maxTurns: number): string {
   return [
     "Task: locate and cite the exact code locations that answer the query.",
-    "Return Markdown in the required section order (Summary, Locations, Evidence?, Searched?, Next steps?).",
-    "For claims about file contents, citations must be in the form `path:lineStart-lineEnd` based on the read ranges you opened.",
-    "For path-only results (e.g., list files in a directory), you may cite just `path` based on bash output (`ls`, `fd`, `rg`).",
-    "Never use `grep` (use `rg`) and never use `find` (use `fd`).",
-    `Turn budget: at most ${maxTurns} turns total (hard cap, not a target). If you can answer in 2–3 turns, do so.`,
-    "Optimize for fewer turns by batching tool calls.",
+    "Follow the system instructions for tools, citations, and output format.",
     "",
     "Query:",
     query.trim(),
