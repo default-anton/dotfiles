@@ -10,6 +10,7 @@
 - Keep files <~500 LOC; split/refactor as needed.
 - `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
 - Modify skills/extensions/prompts/global `AGENTS.md` in `~/.dotfiles/pi/agent/` (not under `~/.pi/agent/`)
+- Run `cd ~/.dotfiles && ./install --no-brew` after modifying skills or prompts.
 
 ## Special CLI Tools
 - `update {mlx-audio|pi|codex}`: Update specific dev tools.

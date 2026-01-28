@@ -1,1 +1,0 @@
-- Run `./install --no-brew` in `~/.dotfiles` after modifying skills
