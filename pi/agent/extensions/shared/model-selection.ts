@@ -22,7 +22,7 @@ export function getSmallModelFromProvider(
   currentProvider: string,
   modelRegistry: { getAvailable(): ModelInfo[] },
 ): ModelInfo | null {
-  const smallModel = SMALL_MODELS_FOR_PROVIDER[currentProvider] ?? ZAI_GLM;
+  const smallModel = SMALL_MODELS_FOR_PROVIDER[currentProvider] ?? GOOGLE_GEMINI_FLASH;
   const subModel = modelRegistry.getAvailable().find(
     (m) => m.provider === smallModel.provider && m.id === smallModel.id,
   );
