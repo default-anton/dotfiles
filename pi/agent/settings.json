@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.50.1",
-  "defaultThinkingLevel": "high",
-  "defaultProvider": "google-antigravity",
-  "defaultModel": "gemini-3-flash",
+  "defaultThinkingLevel": "medium",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.2",
   "compaction": {
     "enabled": true
   },
