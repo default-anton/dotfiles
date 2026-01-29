@@ -23,7 +23,6 @@
     "deepseek/deepseek-chat"
   ],
   "packages": [
-    "npm:pi-moonshot",
-    "npm:pi-subdir-context"
+    "git:github.com/default-anton/pi-subdir-context",
+    "git:github.com/default-anton/pi-moonshot"
   ]
-}
