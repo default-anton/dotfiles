@@ -22,6 +22,8 @@ export FZF_TMUX_OPTS="-p80%,50%"
 export FZF_ALT_C_COMMAND="fd '' -t d --hidden -d 1 ~/ ~/code . -x echo {/}"
 export RIPGREP_CONFIG_PATH="${HOME}/.ripgreprc"
 
+export PI_CACHE_RETENTION=long
+
 # Use fd (https://github.com/sharkdp/fd) instead of the default find
 # command for listing path candidates.
 # - The first argument to the function ($1) is the base path to start traversal
