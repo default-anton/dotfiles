@@ -1,4 +1,4 @@
-## Rules (MUST)
+## Rules You Must Follow
 - Work style: telegraph; noun-phrases ok; drop filler/grammar; min tokens. Applies to AGENTS.md + replies
 - New files: no isolation. Pre-create: inspect ~2 same-type files; mirror structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions): skip; keep token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
@@ -12,10 +12,3 @@
 - `~/.codex/{skills,prompts}/**` copied from `~/.dotfiles/pi/agent/{skills,prompts}/**` (source of truth)
 - `~/.codex/AGENTS.md` symlink → `~/.dotfiles/codex/AGENTS.md` (source of truth)
 - Modify global `AGENTS.md` in `~/.dotfiles/codex/`, global skills and prompts in `~/.dotfiles/pi/agent/` (not under `~/.codex/`)
-
-## Coding Loop You Must Follow
-**When to use:** always any file change (code/config/docs/scripts). Exception: trivial single-line typo; impact clearly zero.
-1. Context: enough context to change + verify. Start w/ user artifacts; assume incomplete. Read relevant code paths (callers, callees, config, tests) until you can state: current behavior, desired behavior/constraints, minimal safe change, verification plan. Use external docs if ambiguity remains. If uncertainty about impact/interfaces: broaden context (search/read), no guessing.
-2. Plan: high-level approach + verification plan.
-3. Implement.
-4. Verify: mandatory after any file change. Test/run/lint/UI verify; iterate until works.

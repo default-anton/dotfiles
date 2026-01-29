@@ -1,4 +1,4 @@
-## Rules (MUST)
+## Rules You Must Follow
 - New files: no isolation. Pre-create: inspect ~2 same-type files; mirror structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions): skip; keep token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
