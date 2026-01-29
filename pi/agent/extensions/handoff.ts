@@ -16,40 +16,58 @@ import { complete, type Message } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, SessionEntry } from "@mariozechner/pi-coding-agent";
 import { BorderedLoader, convertToLlm, serializeConversation } from "@mariozechner/pi-coding-agent";
 
-const HANDOFF_SYSTEM_PROMPT = `You are a strategic context transfer assistant. Your goal is to move the current work into a new, focused thread.
+const HANDOFF_SYSTEM_PROMPT = `You are Handoff. Your purpose is to extract the highest-signal context from the current conversation, tailored to the user's next task.
 
-Extract and summarize the "high-signal" context:
-1. **Goal & Current State**: What was the initial goal, and what is the current state/progress?
-2. **Key Decisions & Rationale**: What architectural or implementation choices were made? Why? (e.g., "Used X over Y because of Z").
-3. **Invariants & Constraints**: What must remain true? What should the next agent avoid?
-4. **Relevant Artifacts**: List exact file paths that were modified or are central to the next task, plus why they matter.
-5. **Next Task**: A clear, actionable set of instructions based on the user's goal.
+Input you will receive:
+- The full conversation history from the current session
+- The user's stated next task for the new thread
 
-## Strategic Guidelines:
-- **Be Concise**: Avoid generic summaries. Focus on what's non-obvious.
-- **Self-Contained**: The generated prompt must allow the next session to be 100% productive without looking back.
-- **High Momentum**: Structure the "Next Task" so the agent can start executing immediately.
+Your job:
+- Write a concise handoff note: what the current thread was doing, what happened, and the specific details from it that matter for the user's next task.
+- Do NOT generate a new plan or new ideas. Only capture what was decided, tried, observed, or agreed in the conversation.
+- The note should be usable as the first message in a new session without re-reading the old thread.
 
-Format your response as a prompt the user can send to start the new thread. Use Markdown. No preamble.
+Hard rules:
+- Do not produce a generic summary; include only material relevant to the user's next task.
+- Do not invent details that are not in the conversation.
+- Prefer concrete specifics: exact file paths, symbols, commands, error messages, outputs.
+- If an important detail is unknown/uncertain, say so and list the smallest check/question to confirm.
+- IMPORTANT: Do NOT rephrase the user's stated next task. Include it verbatim at the bottom.
 
-Example output structure:
-# Goal
-[Goal for this work]
+Output requirements:
+- Markdown only.
+- No preamble.
+- Use the following section headers exactly and in this order.
 
-# Current State
-- [What was implemented/investigated]
-- [What remains / what's currently failing]
+# Previous Thread (What We Were Doing)
+- Original goal/intent of this conversation
+- Scope boundaries (what we explicitly did not do)
 
-# Decisions & Rationale / Constraints / Invariants
-- Decision: [X] over [Y] because [Reason]
-- Constraint/Invariant: [Must remain true]
-- Avoid: [Pitfalls / things not to refactor]
+# Previous Thread Status
+- What was completed/changed
+- What is still unresolved or failing (include exact errors if present)
 
-# Files & Why
-- \`path/to/file.ts\` — [What changed / why it matters]
+# Key Decisions / Findings
+- Decisions made (include rationale if it exists in the conversation)
+- Findings/observations that changed direction
+- Approaches attempted and outcomes (what worked/didn't)
 
-# Next Task: [Goal]
-[Clear, actionable instructions that can be executed immediately]`;
+# Relevant Details for the Next Task
+- Explicitly call out the subset of details above that directly matter for the user's next task
+
+# Constraints / Invariants
+- Must remain true
+- Avoid / do not change
+
+# Files / Artifacts / Commands
+- \`path/to/file\` — why it matters (touched, central, or needs follow-up)
+- Relevant commands/scripts used (and where they were run), if mentioned
+
+# Open Questions / Risks
+- Unknowns, risks, edge cases, and the smallest check to resolve each
+
+# User Task
+(Paste the user's stated next task exactly as provided.)`;
 
 export default function(pi: ExtensionAPI) {
   pi.registerCommand("handoff", {
@@ -65,9 +83,9 @@ export default function(pi: ExtensionAPI) {
         return;
       }
 
-      const goal = args.trim();
-      if (!goal) {
-        ctx.ui.notify("Usage: /handoff <goal for new thread>", "error");
+      const task = args.trim();
+      if (!task) {
+        ctx.ui.notify("Usage: /handoff <task for new thread>", "error");
         return;
       }
 
@@ -87,9 +105,11 @@ export default function(pi: ExtensionAPI) {
       const conversationText = serializeConversation(llmMessages);
       const currentSessionFile = ctx.sessionManager.getSessionFile();
 
-      // Generate the handoff prompt with loader UI
+      let generationError: string | null = null;
+
+      // Generate the handoff note with loader UI
       const result = await ctx.ui.custom<string | null>((tui, theme, _kb, done) => {
-        const loader = new BorderedLoader(tui, theme, `Generating handoff prompt...`);
+        const loader = new BorderedLoader(tui, theme, `Generating handoff note...`);
         loader.onAbort = () => done(null);
 
         const doGenerate = async () => {
@@ -100,7 +120,7 @@ export default function(pi: ExtensionAPI) {
             content: [
               {
                 type: "text",
-                text: `## Conversation History\n\n${conversationText}\n\n## User's Goal for New Thread\n\n${goal}`,
+                text: `## Conversation History\n\n${conversationText}\n\n## User's Task for New Thread\n\n${task}`,
               },
             ],
             timestamp: Date.now(),
@@ -125,7 +145,8 @@ export default function(pi: ExtensionAPI) {
         doGenerate()
           .then(done)
           .catch((err) => {
-            console.error("Handoff generation failed:", err);
+            const msg = err instanceof Error ? err.message : String(err);
+            generationError = `Handoff generation failed: ${msg}`;
             done(null);
           });
 
@@ -133,12 +154,17 @@ export default function(pi: ExtensionAPI) {
       });
 
       if (result === null) {
+        if (generationError) {
+          ctx.ui.notify(generationError, "error");
+          return;
+        }
+
         ctx.ui.notify("Cancelled", "info");
         return;
       }
 
       // Let user edit the generated prompt
-      const editedPrompt = await ctx.ui.editor("Edit handoff prompt", result);
+      const editedPrompt = await ctx.ui.editor("Edit handoff note", result);
 
       if (editedPrompt === undefined) {
         ctx.ui.notify("Cancelled", "info");
