@@ -1,27 +1,14 @@
 {
   "lastChangelogVersion": "0.50.5",
   "defaultThinkingLevel": "high",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.2",
+  "defaultProvider": "moonshot",
+  "defaultModel": "kimi-k2.5",
   "compaction": {
     "enabled": true
   },
   "hideThinkingBlock": false,
   "steeringMode": "one-at-a-time",
   "doubleEscapeAction": "branch",
-  "enabledModels": [
-    "moonshot/kimi-k2.5",
-    "openai/gpt-5.2",
-    "openai/gpt-5.2-codex",
-    "openai-codex/gpt-5.2",
-    "openai-codex/gpt-5.2-codex",
-    "google/gemini-3-flash-preview",
-    "google-antigravity/gemini-3-flash",
-    "google-vertex/gemini-3-flash-preview",
-    "google-vertex/gemini-3-pro-preview",
-    "deepseek/deepseek-reasoner",
-    "deepseek/deepseek-chat"
-  ],
   "packages": [
     "git:github.com/default-anton/pi-subdir-context",
     "git:github.com/default-anton/pi-moonshot"
