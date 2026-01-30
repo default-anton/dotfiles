@@ -309,7 +309,7 @@ export default function finderExtension(pi: ExtensionAPI) {
           };
         }
 
-        const subModel = getSmallModelFromProvider(currentProvider, modelRegistry);
+        const subModel = getSmallModelFromProvider(modelRegistry);
 
         if (!subModel) {
           const error = "No models available. Configure credentials (e.g. /login or auth.json) and try again.";
