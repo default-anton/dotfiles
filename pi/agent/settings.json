@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.50.6",
+  "lastChangelogVersion": "0.50.7",
   "defaultThinkingLevel": "high",
-  "defaultProvider": "moonshot",
-  "defaultModel": "kimi-k2.5",
+  "defaultProvider": "kimi-coding",
+  "defaultModel": "k2p5",
   "compaction": {
     "enabled": true
   },
