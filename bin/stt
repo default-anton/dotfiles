@@ -1,108 +1,119 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
-RECORDING_FILE="/tmp/recording.mp3"
-PID_FILE="/tmp/stt.pid"
+# Source shared library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/mlx-audio/constants.sh"
+source "${SCRIPT_DIR}/mlx-audio/lib.sh"
 
-paste_transcript() {
-  osascript <<EOF
-        tell application "System Events"
-            keystroke "v" using command down
-        end tell
+MODEL="${DEFAULT_STT_MODEL}"
+LANGUAGE=""
+OUTPUT=""
+AUDIO_FILE=""
+
+usage() {
+    local exit_code="${1:-1}"
+    cat <<EOF
+Usage: $0 [AUDIO_FILE] [--model MODEL] [--language LANG] [--output FILE]
+
+Transcribe audio to text using mlx-audio server.
+
+Arguments:
+  AUDIO_FILE      Audio file to transcribe (optional, reads from stdin if not provided)
+  --model MODEL   STT model (default: ${DEFAULT_STT_MODEL})
+  --language LANG Language hint, e.g., 'en', 'es' (optional)
+  --output FILE   Write transcription to file instead of stdout
+  -h, --help      Show this help
+
+Supported formats: mp3, wav, m4a, flac, ogg (any format ffmpeg can read)
+
+Examples:
+  $0 recording.mp3
+  $0 meeting.m4a --language en --output notes.txt
+  ffmpeg -i video.mp4 -f wav - | $0 --language es
 EOF
+    exit "$exit_code"
 }
 
-start_recording() {
-  if [ -f "${PID_FILE}" ]; then
-    echo "Recording is already in progress"
-    exit 1
-  fi
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --model)
+            MODEL="$2"
+            shift 2
+            ;;
+        --language)
+            LANGUAGE="$2"
+            shift 2
+            ;;
+        --output)
+            OUTPUT="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage 0
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            usage 1
+            ;;
+        *)
+            if [[ -z "$AUDIO_FILE" ]]; then
+                AUDIO_FILE="$1"
+                shift
+            else
+                echo "Unknown argument: $1" >&2
+                usage 1
+            fi
+            ;;
+    esac
+done
 
-  rm -f "${RECORDING_FILE}"
-  # Start sox recording in background
-  sox -q -d -c 1 -t mp3 -C 128.2 "${RECORDING_FILE}" rate 16k &
-  echo $! >"${PID_FILE}"
-}
+# Ensure server is running
+mlx_audio_server_ensure || exit 1
 
-stop_recording() {
-  if [ ! -f "${PID_FILE}" ]; then
-    echo "No recording in progress"
-    exit 1
-  fi
+# Prepare temp file for audio processing
+TEMP_AUDIO=$(mktemp /tmp/stt_XXXXXX.audio)
+trap 'mlx_audio_cleanup "$TEMP_AUDIO"' EXIT
 
-  # Kill the recording process with SIGINT (Ctrl+C) for proper cleanup
-  kill -2 $(cat "${PID_FILE}")
-  rm "${PID_FILE}"
-
-  # Wait for the file to be ready (no longer being written to)
-  timeout=10 # Maximum seconds to wait
-  elapsed=0
-  while [ "$(echo "$elapsed < $timeout" | bc -l)" -eq 1 ]; do
-    if [ ! -f "${RECORDING_FILE}" ]; then
-      echo "Error: Recording file not found"
-      exit 1
+# Get audio data
+if [[ -n "$AUDIO_FILE" ]]; then
+    if [[ ! -f "$AUDIO_FILE" ]]; then
+        echo "Error: Audio file '$AUDIO_FILE' not found." >&2
+        exit 1
     fi
+    cp "$AUDIO_FILE" "$TEMP_AUDIO"
+else
+    # Read from stdin
+    cat > "$TEMP_AUDIO"
+fi
 
-    if ! lsof "${RECORDING_FILE}" >/dev/null 2>&1; then
-      break # File is no longer being written to
-    fi
+echo "Transcribing..." >&2
 
-    sleep 0.1
-    elapsed=$(echo "$elapsed + 0.1" | bc -l)
-  done
+# Build curl command
+CURL_ARGS=(
+    -s -f
+    -X POST "http://localhost:${MLX_AUDIO_PORT}/v1/audio/transcriptions"
+    -F "file=@${TEMP_AUDIO}"
+    -F "model=${MODEL}"
+)
 
-  if [ "$(echo "$elapsed >= $timeout" | bc -l)" -eq 1 ]; then
-    echo "Error: Timeout waiting for recording file to be ready"
+[[ -n "$LANGUAGE" ]] && CURL_ARGS+=(-F "language=${LANGUAGE}")
+
+# Send request and extract text from NDJSON response
+# The server returns newline-delimited JSON, we want the final text
+TRANSCRIPT=$(curl "${CURL_ARGS[@]}" | jq -r 'select(.text) | .text' | tr -d '\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+if [[ -z "$TRANSCRIPT" ]]; then
+    echo "Error: Failed to transcribe audio." >&2
     exit 1
-  fi
+fi
 
-  # Transcribe the audio
-  TRANSCRIPTION=$(curl -s https://api.groq.com/openai/v1/audio/transcriptions \
-    -H "Authorization: Bearer ${GROQ_API_KEY}" \
-    -H "Content-Type: multipart/form-data" \
-    -F file="@${RECORDING_FILE}" \
-    -F model="whisper-large-v3" \
-    -F temperature="0.0" \
-    -F response_format="text" \
-    -F language="en" \
-    -F prompt="Hey, I've been looking at the project implementation details and thinking about our approach.")
-
-  # Save the current clipboard content
-  ORIGINAL_CLIPBOARD="$(pbpaste)"
-
-  # Normalize whitespace: remove leading/trailing spaces and collapse multiple spaces into one
-  TRANSCRIPTION=$(echo "${TRANSCRIPTION}" | tr -s '[:space:]' ' ' | sed -e 's/^ *//' -e 's/ *$//')
-  echo -n "${TRANSCRIPTION}" | pbcopy
-  paste_transcript
-
-  sleep 0.15
-  # Restore the original clipboard content
-  echo -n "${ORIGINAL_CLIPBOARD}" | pbcopy
-
-  # Cleanup
-  rm -f "${RECORDING_FILE}"
-}
-
-case "${1:-}" in
-"start")
-  start_recording
-  ;;
-"stop")
-  stop_recording
-  ;;
-"toggle")
-  if [ -f "${PID_FILE}" ]; then
-    stop_recording
-  else
-    start_recording
-  fi
-  ;;
-*)
-  echo "Usage: stt [start|stop|toggle]"
-  echo "  start  - Start recording audio"
-  echo "  stop   - Stop recording and transcribe"
-  echo "  toggle - Toggle recording on/off"
-  exit 1
-  ;;
-esac
+# Output result
+if [[ -n "$OUTPUT" ]]; then
+    echo "$TRANSCRIPT" > "$OUTPUT"
+    echo "Transcription saved to: $OUTPUT" >&2
+else
+    echo "$TRANSCRIPT"
+fi

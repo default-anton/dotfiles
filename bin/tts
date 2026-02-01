@@ -2,26 +2,35 @@
 
 set -eo pipefail
 
-PORT=9876
-MODEL="mlx-community/Kokoro-82M-bf16"
-VOICE="af_heart"
-SPEED=1.0
+# Source shared library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/mlx-audio/constants.sh"
+source "${SCRIPT_DIR}/mlx-audio/lib.sh"
+
+MODEL="${DEFAULT_TTS_MODEL}"
+VOICE="${DEFAULT_TTS_VOICE}"
+SPEED="${DEFAULT_TTS_SPEED}"
 OUTPUT="speech.mp3"
 INPUT_FILE=""
 TEXT=""
 
 usage() {
     local exit_code="${1:-1}"
-    echo "Usage: $0 [TEXT] [--input FILE] [--output FILE] [--speed SPEED]"
-    echo ""
-    echo "Arguments:"
-    echo "  TEXT            Text to speak (optional if --input or stdin is used)"
-    echo "  --input FILE    Read text from FILE"
-    echo "  --output FILE   Output mono MP3 file (default: speech.mp3)"
-    echo "  --speed SPEED   Speech speed (default: 1.0)"
-    echo ""
-    echo "Input text must be plain text with no formatting (no HTML, no Markdown)."
-    echo "Minimal formatting like bullet lists is fine. Output is always a mono MP3 file."
+    cat <<EOF
+Usage: $0 [TEXT] [--input FILE] [--output FILE] [--speed SPEED] [--voice VOICE] [--model MODEL]
+
+Arguments:
+  TEXT            Text to speak (optional if --input or stdin is used)
+  --input FILE    Read text from FILE
+  --output FILE   Output mono MP3 file (default: speech.mp3)
+  --speed SPEED   Speech speed (default: ${DEFAULT_TTS_SPEED})
+  --voice VOICE   Voice to use (default: ${DEFAULT_TTS_VOICE})
+  --model MODEL   TTS model (default: ${DEFAULT_TTS_MODEL})
+  -h, --help      Show this help
+
+Input text must be plain text with no formatting (no HTML, no Markdown).
+Minimal formatting like bullet lists is fine. Output is always a mono MP3 file.
+EOF
     exit "$exit_code"
 }
 
@@ -40,6 +49,14 @@ while [[ $# -gt 0 ]]; do
             SPEED="$2"
             shift 2
             ;;
+        --voice)
+            VOICE="$2"
+            shift 2
+            ;;
+        --model)
+            MODEL="$2"
+            shift 2
+            ;;
         -h|--help)
             usage 0
             ;;
@@ -48,7 +65,7 @@ while [[ $# -gt 0 ]]; do
                 TEXT="$1"
                 shift
             else
-                echo "Unknown argument: $1"
+                echo "Unknown argument: $1" >&2
                 usage 1
             fi
             ;;
@@ -58,7 +75,7 @@ done
 # Resolve input text (Precedence: --input > positional > stdin)
 if [[ -n "$INPUT_FILE" ]]; then
     if [[ ! -f "$INPUT_FILE" ]]; then
-        echo "Error: Input file '$INPUT_FILE' not found."
+        echo "Error: Input file '$INPUT_FILE' not found." >&2
         exit 1
     fi
     TEXT=$(cat "$INPUT_FILE")
@@ -69,68 +86,34 @@ elif [[ -z "$TEXT" ]]; then
 fi
 
 if [[ -z "$TEXT" ]]; then
-    echo "Error: No text provided."
-    usage
+    echo "Error: No text provided." >&2
+    usage 1
 fi
 
-# Ensure server is running and responsive
-check_server() {
-    curl -s -f "http://localhost:$PORT/v1/models" > /dev/null 2>&1
-}
-
-if ! check_server; then
-    # If something is on the port but it's not our server, fail
-    if lsof -i :$PORT > /dev/null; then
-        echo "Error: Port $PORT is occupied by another process."
-        exit 1
-    fi
-
-    echo "Starting mlx_audio.server on port $PORT..."
-    nohup mlx_audio.server --port $PORT > /tmp/mlx_audio_server.log 2>&1 &
-    disown
-    
-    # Wait for server to be ready
-    MAX_RETRIES=30
-    COUNT=0
-    while ! check_server; do
-        sleep 1
-        COUNT=$((COUNT + 1))
-        if [[ $COUNT -ge $MAX_RETRIES ]]; then
-            echo "Error: mlx_audio.server failed to start on port $PORT."
-            [[ -f /tmp/mlx_audio_server.log ]] && tail -n 20 /tmp/mlx_audio_server.log
-            exit 1
-        fi
-    done
-    echo "Server is ready."
-fi
+# Ensure server is running (using shared library)
+mlx_audio_server_ensure || exit 1
 
 # Prepare temp wav file
 TEMP_WAV=$(mktemp /tmp/tts_XXXXXX.wav)
-
-# Ensure cleanup of temp file on exit
-cleanup() {
-    rm -f "$TEMP_WAV"
-}
-trap cleanup EXIT
+trap 'mlx_audio_cleanup "$TEMP_WAV"' EXIT
 
 # Send request to server
-echo "Generating speech..."
-if ! curl -s -f -X POST "http://localhost:$PORT/v1/audio/speech" \
+echo "Generating speech..." >&2
+if ! curl -s -f -X POST "http://localhost:${MLX_AUDIO_PORT}/v1/audio/speech" \
   -H "Content-Type: application/json" \
   -d "$(jq -n \
     --arg model "$MODEL" \
     --arg input "$TEXT" \
     --arg voice "$VOICE" \
     --argjson speed "$SPEED" \
-    '{model: $model, input: $input, voice: $voice, speed: $speed, response_format: "wav"}')" \
+    '{model: $model, input: $input, voice: $voice, speed: $speed, response_format: "wav'}')" \
   --output "$TEMP_WAV"; then
-    echo "Error: Failed to generate speech from server."
+    echo "Error: Failed to generate speech from server." >&2
     exit 1
 fi
 
 # Convert to MP3
-# Requirements: mono (-ac 1), 16k (-ar 16000), 128k (-ab 128k)
-echo "Converting to MP3: $OUTPUT"
+echo "Converting to MP3: $OUTPUT" >&2
 ffmpeg -y -loglevel error -i "$TEMP_WAV" -ac 1 -ar 16000 -ab 128k "$OUTPUT"
 
 echo "Done: $OUTPUT"
