@@ -22,7 +22,6 @@ mlx_audio_server_ensure() {
 
     echo "Starting mlx_audio.server on port ${MLX_AUDIO_PORT}..." >&2
     nohup mlx_audio.server --port "${MLX_AUDIO_PORT}" > "${MLX_AUDIO_LOG}" 2>&1 &
-    local pid=$!
     disown
 
     # Wait for server to be ready
