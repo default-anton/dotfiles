@@ -70,8 +70,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Ensure server is running
-mlx_audio_server_ensure || exit 1
+# Ensure server is running (suppress output)
+mlx_audio_server_ensure 2>/dev/null || exit 1
 
 # Prepare temp file for audio processing
 TEMP_AUDIO=$(mktemp /tmp/stt_XXXXXX.audio)
@@ -89,7 +89,12 @@ else
     cat > "$TEMP_AUDIO"
 fi
 
-echo "Transcribing..." >&2
+# Convert Ogg/Opus (Telegram voice) to MP3 for mlx-audio compatibility
+if file "$TEMP_AUDIO" | grep -q "Ogg data"; then
+    TEMP_MP3=$(mktemp /tmp/stt_XXXXXX.mp3)
+    ffmpeg -i "$TEMP_AUDIO" -ar 16000 -ac 1 -y "$TEMP_MP3" 2>/dev/null || exit 1
+    mv "$TEMP_MP3" "$TEMP_AUDIO"
+fi
 
 # Build curl command
 CURL_ARGS=(
@@ -113,7 +118,6 @@ fi
 # Output result
 if [[ -n "$OUTPUT" ]]; then
     echo "$TRANSCRIPT" > "$OUTPUT"
-    echo "Transcription saved to: $OUTPUT" >&2
 else
     echo "$TRANSCRIPT"
 fi
