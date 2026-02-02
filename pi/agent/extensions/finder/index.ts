@@ -1,6 +1,6 @@
 import events from "node:events";
 
-import type { ExtensionAPI, ExtensionFactory, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionFactory, CustomToolContext } from "@mariozechner/pi-coding-agent";
 import {
   DefaultResourceLoader,
   SessionManager,
@@ -259,7 +259,7 @@ export default function finderExtension(pi: ExtensionAPI) {
       "Read-only codebase scout: searches repositories using rg/fd/ls and read, returns structured Markdown with Summary, Locations (path:lineStart-lineEnd), Evidence, and Searched sections.",
     parameters: FinderParams,
 
-    async execute(_toolCallId, params, onUpdate, ctx: ExtensionContext, signal) {
+    async execute(_toolCallId, params, onUpdate, ctx: CustomToolContext, signal) {
       const restoreMaxListeners = bumpDefaultEventTargetMaxListeners();
       try {
         const maxTurns = MAX_TURNS;

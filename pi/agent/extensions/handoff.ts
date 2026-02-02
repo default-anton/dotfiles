@@ -13,7 +13,7 @@
  */
 
 import { complete, type Message } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, SessionEntry } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, SessionEntry, HookContext } from "@mariozechner/pi-coding-agent";
 import { BorderedLoader, convertToLlm, serializeConversation } from "@mariozechner/pi-coding-agent";
 
 const HANDOFF_SYSTEM_PROMPT = `You are Handoff. Your purpose is to extract the highest-signal context from the current conversation, tailored to the user's next task.

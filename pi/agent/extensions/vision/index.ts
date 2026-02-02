@@ -3,7 +3,7 @@ import fs from "node:fs";
 import nodePath from "node:path";
 
 import type { ImageContent } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, ExtensionFactory } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionFactory, CustomToolContext } from "@mariozechner/pi-coding-agent";
 import {
 	DefaultResourceLoader,
 	SessionManager,
@@ -315,7 +315,7 @@ export default function visionExtension(pi: ExtensionAPI) {
 				"Vision-enabled subagent that analyzes screenshots/images and makes code changes based on visual input. Spawns as an isolated agent with access to coding tools (read, bash, edit, write).",
 			parameters: VisionParams,
 
-			async execute(_toolCallId, params, onUpdate, ctx, signal) {
+			async execute(_toolCallId, params, onUpdate, ctx: CustomToolContext, signal) {
 				const restoreMaxListeners = bumpDefaultEventTargetMaxListeners();
 				try {
 					const startedAt = Date.now();

@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { ExtensionAPI, ExtensionContext, Skill } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, HookContext, Skill } from "@mariozechner/pi-coding-agent";
 import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@mariozechner/pi-coding-agent";
 
 function escapeXml(str: string): string {
@@ -61,7 +61,7 @@ function formatAgentFilesForPrompt(agentFiles: Array<{ path: string; content: st
  * Extension that injects AGENTS.md files and skills into the system prompt.
  */
 export default function(pi: ExtensionAPI) {
-  pi.on("before_agent_start", async (event, ctx: ExtensionContext) => {
+  pi.on("before_agent_start", async (event, ctx: HookContext) => {
     const agentDir = getAgentDir();
     const settingsManager = SettingsManager.create(ctx.cwd, agentDir);
 
