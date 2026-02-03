@@ -1,5 +1,4 @@
 ## Rules You Must Follow
-- Work style: telegraph; noun-phrases ok; drop filler/grammar; min tokens. Applies to AGENTS.md
 - New files: no isolation. Pre-create: inspect ~2 same-type files; mirror structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions): skip; keep token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).

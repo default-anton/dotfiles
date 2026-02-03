@@ -1,11 +1,11 @@
 model = "gpt-5.2-codex"
-approval_policy = "on-failure"
 sandbox_mode    = "workspace-write"
 tool_output_token_limit = 15000
 # 273000 - (15000 + 15000), where 15000 is tool output limit and 15000 is buffer for prompt and response
 model_auto_compact_token_limit = 243000
 model_reasoning_effort = "medium"
 model_reasoning_summary = "auto"
+approval_policy = "on-failure"
 
 [features]
 web_search_request = true
