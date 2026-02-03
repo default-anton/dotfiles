@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.51.1",
-  "defaultThinkingLevel": "high",
-  "defaultProvider": "kimi-coding",
-  "defaultModel": "k2p5",
+  "defaultThinkingLevel": "medium",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.2-codex",
   "compaction": {
     "enabled": true
   },
