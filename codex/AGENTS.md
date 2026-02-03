@@ -1,11 +1,12 @@
 ## Rules You Must Follow
-- Work style: telegraph; noun-phrases ok; drop filler/grammar; min tokens. Applies to AGENTS.md + replies
+- Work style: telegraph; noun-phrases ok; drop filler/grammar; min tokens. Applies to AGENTS.md
 - New files: no isolation. Pre-create: inspect ~2 same-type files; mirror structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions): skip; keep token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
 - When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
-- OK to use CLI tools: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux, gifgrep.
+- Source code and user projects are located in `~/code/`.
+- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
 - Keep files <~500 LOC; split/refactor as needed.
