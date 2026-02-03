@@ -1,15 +1,15 @@
-model = "gpt-5.2-codex"
+model = "gpt-5.2"
 sandbox_mode    = "workspace-write"
 tool_output_token_limit = 15000
 # 273000 - (15000 + 15000), where 15000 is tool output limit and 15000 is buffer for prompt and response
 model_auto_compact_token_limit = 243000
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 model_reasoning_summary = "auto"
 approval_policy = "on-failure"
+model_personality = "pragmatic"
+web_search = "live"
 
 [features]
-web_search_request = true
-apply_patch_freeform = true
 shell_snapshot = true
 steer = true
 
@@ -19,3 +19,4 @@ hide_gpt5_1_migration_prompt = true
 
 [notice.model_migrations]
 "gpt-5.1-codex-max" = "gpt-5.2-codex"
+"gpt-5.2" = "gpt-5.2-codex"
