@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext, Skill } from "@mariozechner/pi-coding-agent";
 import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@mariozechner/pi-coding-agent";
@@ -10,6 +11,17 @@ function escapeXml(str: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
+}
+
+function formatPathForPrompt(filePath: string): string {
+  const homeDir = os.homedir();
+  if (filePath === homeDir) {
+    return "~";
+  }
+  if (filePath.startsWith(`${homeDir}${path.sep}`)) {
+    return `~${filePath.slice(homeDir.length)}`;
+  }
+  return filePath;
 }
 
 function formatSkillsForPrompt(skills: Skill[]): string {
@@ -24,7 +36,9 @@ function formatSkillsForPrompt(skills: Skill[]): string {
   ];
 
   for (const skill of skills) {
-    lines.push(`<skill name="${escapeXml(skill.name.trim())}" path="${escapeXml(skill.filePath)}">`);
+    lines.push(
+      `<skill name="${escapeXml(skill.name.trim())}" path="${escapeXml(formatPathForPrompt(skill.filePath))}">`,
+    );
     lines.push("<description>");
     lines.push(escapeXml(skill.description.trim()));
     lines.push("</description>");
@@ -36,7 +50,9 @@ function formatSkillsForPrompt(skills: Skill[]): string {
   return lines.join("\n");
 }
 
-function formatAgentFilesForPrompt(agentFiles: Array<{ path: string; content: string }>): string {
+function formatAgentFilesForPrompt(
+  agentFiles: Array<{ path: string; content: string }>,
+): string {
   if (agentFiles.length === 0) {
     return "";
   }
@@ -47,7 +63,7 @@ function formatAgentFilesForPrompt(agentFiles: Array<{ path: string; content: st
   ];
 
   for (const { path: filePath, content } of agentFiles) {
-    lines.push(`<agent_file path="${escapeXml(filePath)}">`);
+    lines.push(`<agent_file path="${escapeXml(formatPathForPrompt(filePath))}">`);
     lines.push(content.trim());
     lines.push("</agent_file>");
   }
@@ -106,10 +122,10 @@ export default function(pi: ExtensionAPI) {
       formatAgentFilesForPrompt(agentsFiles),
       formatSkillsForPrompt(filteredSkills),
       `\n\nCurrent date: ${dateTime}`,
-      `\nCurrent working directory: ${ctx.cwd}`,
-      `\n\nYour skills are located in: ${agentDir}/skills/`,
-      `\nYour extensions are located in: ${agentDir}/extensions/`,
-      `\nGlobal AGENTS.md: ${agentDir}/AGENTS.md (applies to all projects)`,
+      `\nCurrent working directory: ${formatPathForPrompt(ctx.cwd)}`,
+      `\n\nYour skills are located in: ${formatPathForPrompt(path.join(agentDir, "skills"))}/`,
+      `\nYour extensions are located in: ${formatPathForPrompt(path.join(agentDir, "extensions"))}/`,
+      `\nGlobal AGENTS.md: ${formatPathForPrompt(path.join(agentDir, "AGENTS.md"))} (applies to all projects)`,
     ].join("");
 
     return {
