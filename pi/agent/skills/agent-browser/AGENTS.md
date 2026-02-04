@@ -1,8 +1,21 @@
 - To update agent-browser:
-  - install/update the CLI: `mise use --global npm:agent-browser@latest`
-  - refresh the skill docs + assets from upstream:
-    - `curl -fsSL https://raw.githubusercontent.com/vercel-labs/agent-browser/refs/heads/main/skills/agent-browser/SKILL.md > SKILL.md`
-    - sync `references/` and `templates/` from `https://github.com/vercel-labs/agent-browser/tree/main/skills/agent-browser/`
-    - `chmod +x templates/*.sh`
-  - after refreshing, re-add this local note right under `## Quick start`:
-    - `Assume \`agent-browser\` is installed. If not, run \`mise use --global npm:agent-browser@latest\`.`
+  - install/update the CLI:
+    - `mise use --global npm:agent-browser@latest`
+  - refresh this skill directory (SKILL.md + references/ + templates/) from upstream (keeps this AGENTS.md):
+
+    ```bash
+    set -euo pipefail
+
+    VERSION=v0.9.0
+    DEST="$HOME/.dotfiles/pi/agent/skills/agent-browser"
+    TMP="$(mktemp -d /tmp/agent-browser-skill.XXXXXX)"
+
+    git clone --depth 1 --branch "$VERSION" https://github.com/vercel-labs/agent-browser.git "$TMP"
+    rsync -a --delete --exclude 'AGENTS.md' "$TMP/skills/agent-browser/" "$DEST/"
+    chmod +x "$DEST"/templates/*.sh || true
+
+    rm -rf "$TMP"
+    ```
+
+  - then run:
+    - `cd ~/.dotfiles && ./install --no-brew`
