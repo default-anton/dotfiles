@@ -56,16 +56,3 @@ Progress is iterative. If new information emerges at any step that invalidates e
 - Reproduce locally; reduce to a minimal failing case; add a test; iterate.
 - If uncertain, propose 2–3 options with tradeoffs and pick a default recommendation.
 
----
-
-To get pi coding agent docs & examples:
-```bash
-# list documentation files
-gh api repos/badlogic/pi-mono/contents/packages/coding-agent/docs?ref=v$(pi -v) -q '.[].name'
-# list examples
-gh api repos/badlogic/pi-mono/contents/packages/coding-agent/examples?ref=v$(pi -v) -q '.[].name'
-# get file content
-gh api repos/badlogic/pi-mono/contents/packages/coding-agent/docs/<FILENAME>?ref=v$(pi -v) -q '.content' | base64 -d
-```
-
-Read relevant pi docs when creating or modifying extensions, skills, prompt templates or tools.

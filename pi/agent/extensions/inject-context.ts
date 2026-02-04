@@ -1,8 +1,26 @@
+import { createRequire } from "node:module";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext, Skill } from "@mariozechner/pi-coding-agent";
 import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@mariozechner/pi-coding-agent";
+
+const require = createRequire(import.meta.url);
+
+function getPiDocsPaths(): { readmePath: string; docsPath: string; examplesPath: string } | null {
+  try {
+    const entryPath = require.resolve("@mariozechner/pi-coding-agent");
+    const packageDir = path.resolve(path.dirname(entryPath), "..");
+
+    return {
+      readmePath: path.join(packageDir, "README.md"),
+      docsPath: path.join(packageDir, "docs"),
+      examplesPath: path.join(packageDir, "examples"),
+    };
+  } catch {
+    return null;
+  }
+}
 
 function escapeXml(str: string): string {
   return str
@@ -73,6 +91,32 @@ function formatAgentFilesForPrompt(
   return lines.join("\n");
 }
 
+function formatPiDocumentationForPrompt(systemPrompt: string): string {
+  // pi's built-in system prompt already includes this section. Avoid duplicating it.
+  if (systemPrompt.includes("Pi documentation (read only when the user asks about pi itself")) {
+    return "";
+  }
+
+  const paths = getPiDocsPaths();
+  if (!paths) {
+    return "";
+  }
+
+  const readmePath = formatPathForPrompt(paths.readmePath);
+  const docsPath = formatPathForPrompt(paths.docsPath);
+  const examplesPath = formatPathForPrompt(paths.examplesPath);
+
+  return [
+    "\n\nPi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):",
+    `- Main documentation: ${readmePath}`,
+    `- Additional docs: ${docsPath}`,
+    `- Examples: ${examplesPath} (extensions, custom tools, SDK)`,
+    "- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)",
+    "- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing",
+    "- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)",
+  ].join("\n");
+}
+
 /**
  * Extension that injects AGENTS.md files and skills into the system prompt.
  */
@@ -91,10 +135,12 @@ export default function(pi: ExtensionAPI) {
     });
     await resourceLoader.reload();
 
-    let systemPrompt: string = event.systemPrompt;
+    const systemPromptPath = path.join(agentDir, "SYSTEM.md");
+    const hasSystemPromptOverride = fs.existsSync(systemPromptPath);
 
-    if (fs.existsSync(path.join(agentDir, "SYSTEM.md"))) {
-      systemPrompt = fs.readFileSync(path.join(agentDir, "SYSTEM.md"), "utf-8");
+    let baseSystemPrompt: string = event.systemPrompt;
+    if (hasSystemPromptOverride) {
+      baseSystemPrompt = fs.readFileSync(systemPromptPath, "utf-8");
     }
 
     const now = new Date();
@@ -113,12 +159,15 @@ export default function(pi: ExtensionAPI) {
 
     const { agentsFiles } = resourceLoader.getAgentsFiles();
 
-    if (filteredSkills.length === 0 && agentsFiles.length === 0) {
+    const piDocs = formatPiDocumentationForPrompt(baseSystemPrompt);
+
+    if (!hasSystemPromptOverride && piDocs === "" && filteredSkills.length === 0 && agentsFiles.length === 0) {
       return;
     }
 
     const prompt = [
       "\n\n---",
+      piDocs,
       formatAgentFilesForPrompt(agentsFiles),
       formatSkillsForPrompt(filteredSkills),
       `\n\nCurrent date: ${dateTime}`,
@@ -129,7 +178,7 @@ export default function(pi: ExtensionAPI) {
     ].join("");
 
     return {
-      systemPrompt: systemPrompt.trim() + prompt,
+      systemPrompt: baseSystemPrompt.trim() + prompt,
     };
   });
 }
