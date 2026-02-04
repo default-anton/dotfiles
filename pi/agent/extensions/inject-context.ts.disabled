@@ -1,25 +1,83 @@
-import { createRequire } from "node:module";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { ExtensionAPI, ExtensionContext, Skill } from "@mariozechner/pi-coding-agent";
 import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@mariozechner/pi-coding-agent";
 
-const require = createRequire(import.meta.url);
+let hasShownPiDocsResolveWarning = false;
 
-function getPiDocsPaths(): { readmePath: string; docsPath: string; examplesPath: string } | null {
-  try {
-    const entryPath = require.resolve("@mariozechner/pi-coding-agent");
-    const packageDir = path.resolve(path.dirname(entryPath), "..");
-
-    return {
-      readmePath: path.join(packageDir, "README.md"),
-      docsPath: path.join(packageDir, "docs"),
-      examplesPath: path.join(packageDir, "examples"),
-    };
-  } catch {
-    return null;
+function toFilePath(urlOrPath: string): string {
+  if (urlOrPath.startsWith("file://")) {
+    return fileURLToPath(urlOrPath);
   }
+  return urlOrPath;
+}
+
+function findPiPackageDirFromEntry(entryFilePath: string): string | null {
+  let dir = path.dirname(entryFilePath);
+
+  // Walk up a few levels to find the package root (README.md + docs/).
+  for (let i = 0; i < 6; i++) {
+    const readmePath = path.join(dir, "README.md");
+    const docsPath = path.join(dir, "docs");
+
+    if (fs.existsSync(readmePath) && fs.existsSync(docsPath)) {
+      return dir;
+    }
+
+    const parent = path.dirname(dir);
+    if (parent === dir) {
+      break;
+    }
+    dir = parent;
+  }
+
+  return null;
+}
+
+function resolvePiEntryFilePaths(): string[] {
+  type ImportMetaWithResolve = ImportMeta & { resolve?: (specifier: string) => string };
+  const metaResolve = (import.meta as ImportMetaWithResolve).resolve;
+
+  if (typeof metaResolve !== "function") {
+    return [];
+  }
+
+  try {
+    return [toFilePath(metaResolve("@mariozechner/pi-coding-agent"))];
+  } catch {
+    return [];
+  }
+}
+
+function getPiDocsPaths(ctx: ExtensionContext): { readmePath: string; docsPath: string; examplesPath: string } | null {
+  for (const entryFilePath of resolvePiEntryFilePaths()) {
+    const packageDir = findPiPackageDirFromEntry(entryFilePath);
+    if (!packageDir) {
+      continue;
+    }
+
+    const readmePath = path.join(packageDir, "README.md");
+    const docsPath = path.join(packageDir, "docs");
+    const examplesPath = path.join(packageDir, "examples");
+
+    if (!fs.existsSync(readmePath) || !fs.existsSync(docsPath) || !fs.existsSync(examplesPath)) {
+      continue;
+    }
+
+    return { readmePath, docsPath, examplesPath };
+  }
+
+  if (!hasShownPiDocsResolveWarning && ctx.hasUI) {
+    hasShownPiDocsResolveWarning = true;
+    ctx.ui.notify(
+      "Could not locate pi-coding-agent documentation paths. Pi docs links will be omitted from the system prompt.",
+      "warning",
+    );
+  }
+
+  return null;
 }
 
 function escapeXml(str: string): string {
@@ -27,7 +85,7 @@ function escapeXml(str: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+    .replace(/\"/g, "&quot;")
     .replace(/'/g, "&apos;");
 }
 
@@ -55,7 +113,7 @@ function formatSkillsForPrompt(skills: Skill[]): string {
 
   for (const skill of skills) {
     lines.push(
-      `<skill name="${escapeXml(skill.name.trim())}" path="${escapeXml(formatPathForPrompt(skill.filePath))}">`,
+      `<skill name=\"${escapeXml(skill.name.trim())}\" path=\"${escapeXml(formatPathForPrompt(skill.filePath))}\">`,
     );
     lines.push("<description>");
     lines.push(escapeXml(skill.description.trim()));
@@ -68,9 +126,7 @@ function formatSkillsForPrompt(skills: Skill[]): string {
   return lines.join("\n");
 }
 
-function formatAgentFilesForPrompt(
-  agentFiles: Array<{ path: string; content: string }>,
-): string {
+function formatAgentFilesForPrompt(agentFiles: Array<{ path: string; content: string }>): string {
   if (agentFiles.length === 0) {
     return "";
   }
@@ -81,7 +137,7 @@ function formatAgentFilesForPrompt(
   ];
 
   for (const { path: filePath, content } of agentFiles) {
-    lines.push(`<agent_file path="${escapeXml(formatPathForPrompt(filePath))}">`);
+    lines.push(`<agent_file path=\"${escapeXml(formatPathForPrompt(filePath))}\">`);
     lines.push(content.trim());
     lines.push("</agent_file>");
   }
@@ -91,13 +147,13 @@ function formatAgentFilesForPrompt(
   return lines.join("\n");
 }
 
-function formatPiDocumentationForPrompt(systemPrompt: string): string {
+function formatPiDocumentationForPrompt(systemPrompt: string, ctx: ExtensionContext): string {
   // pi's built-in system prompt already includes this section. Avoid duplicating it.
   if (systemPrompt.includes("Pi documentation (read only when the user asks about pi itself")) {
     return "";
   }
 
-  const paths = getPiDocsPaths();
+  const paths = getPiDocsPaths(ctx);
   if (!paths) {
     return "";
   }
@@ -155,11 +211,11 @@ export default function(pi: ExtensionAPI) {
     const { skills } = resourceLoader.getSkills();
 
     // Filter out skills with disableModelInvocation (they shouldn't be in the prompt)
-    const filteredSkills = skills.filter(skill => !skill.disableModelInvocation);
+    const filteredSkills = skills.filter((skill) => !skill.disableModelInvocation);
 
     const { agentsFiles } = resourceLoader.getAgentsFiles();
 
-    const piDocs = formatPiDocumentationForPrompt(baseSystemPrompt);
+    const piDocs = formatPiDocumentationForPrompt(baseSystemPrompt, ctx);
 
     if (!hasSystemPromptOverride && piDocs === "" && filteredSkills.length === 0 && agentsFiles.length === 0) {
       return;
