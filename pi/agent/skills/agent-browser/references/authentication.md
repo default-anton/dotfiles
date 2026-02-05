@@ -61,11 +61,8 @@ agent-browser state save ./auth-state.json
 Skip login by loading saved state:
 
 ```bash
-# Load saved auth state
-agent-browser state load ./auth-state.json
-
-# Navigate directly to protected page
-agent-browser open https://app.example.com/dashboard
+# Load saved auth state at browser launch (must be on the first command for the session)
+agent-browser --state ./auth-state.json open https://app.example.com/dashboard
 
 # Verify authenticated
 agent-browser snapshot -i
@@ -110,7 +107,7 @@ agent-browser click @e3
 
 # Wait for user to complete 2FA manually
 echo "Complete 2FA in the browser window..."
-agent-browser wait --url "**/dashboard" --timeout 120000
+agent-browser wait --url "**/dashboard"
 
 # Save state after 2FA
 agent-browser state save ./2fa-state.json
@@ -152,8 +149,7 @@ STATE_FILE="./auth-state.json"
 
 # Try loading existing state
 if [[ -f "$STATE_FILE" ]]; then
-    agent-browser state load "$STATE_FILE"
-    agent-browser open https://app.example.com/dashboard
+    agent-browser --state "$STATE_FILE" open https://app.example.com/dashboard
 
     # Check if session is still valid
     URL=$(agent-browser get url)

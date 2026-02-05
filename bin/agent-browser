@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+AB_BIN=""
+if AB_BIN=$(mise which agent-browser 2>/dev/null); then
+  :
+else
+  AB_BIN=""
+fi
+
+if [[ -z "${AB_BIN}" ]] || [[ ! -x "${AB_BIN}" ]]; then
+  cat >&2 <<'EOF'
+agent-browser: not found via mise.
+
+Install/upgrade with:
+  mise use --global npm:agent-browser@latest
+EOF
+  exit 127
+fi
+
+exec "${AB_BIN}" "$@"

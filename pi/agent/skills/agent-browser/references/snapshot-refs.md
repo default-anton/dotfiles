@@ -131,8 +131,10 @@ agent-browser click @e7            # Select item
 For complex pages, snapshot specific areas:
 
 ```bash
-# Snapshot just the form
-agent-browser snapshot @e9
+# Snapshot just the form (scope by CSS selector)
+agent-browser snapshot -i -s "form"
+# or:
+agent-browser snapshot -i -s "#signup-form"
 ```
 
 ## Ref Notation Details
@@ -175,7 +177,7 @@ agent-browser snapshot -i
 
 ```bash
 # Scroll to reveal element
-agent-browser scroll --bottom
+agent-browser scroll down 1200
 agent-browser snapshot -i
 
 # Or wait for dynamic content
@@ -187,8 +189,8 @@ agent-browser snapshot -i
 
 ```bash
 # Snapshot specific container
-agent-browser snapshot @e5
+agent-browser snapshot -i -s "#main"
 
 # Or use get text for content-only extraction
-agent-browser get text @e5
+agent-browser get text "#main"
 ```

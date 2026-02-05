@@ -28,9 +28,8 @@ echo "Authentication workflow: $LOGIN_URL"
 # SAVED STATE: Skip login if valid saved state exists
 # ================================================================
 if [[ -f "$STATE_FILE" ]]; then
-    echo "Loading saved state from $STATE_FILE..."
-    agent-browser state load "$STATE_FILE"
-    agent-browser open "$LOGIN_URL"
+    echo "Launching with saved state from $STATE_FILE..."
+    agent-browser --state "$STATE_FILE" open "$LOGIN_URL"
     agent-browser wait --load networkidle
 
     CURRENT_URL=$(agent-browser get url)

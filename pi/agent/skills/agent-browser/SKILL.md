@@ -36,6 +36,7 @@ agent-browser close                   # Close browser
 
 # Snapshot
 agent-browser snapshot -i             # Interactive elements with refs (recommended)
+agent-browser snapshot -i -C          # Also include cursor-interactive elements (onclick, tabindex, cursor:pointer)
 agent-browser snapshot -s "#selector" # Scope to CSS selector
 
 # Interaction (use @refs from snapshot)
@@ -91,9 +92,8 @@ agent-browser click @e3
 agent-browser wait --url "**/dashboard"
 agent-browser state save auth.json
 
-# Reuse in future sessions
-agent-browser state load auth.json
-agent-browser open https://app.example.com/dashboard
+# Reuse in future sessions (state must be loaded at browser launch)
+agent-browser --state auth.json open https://app.example.com/dashboard
 ```
 
 ### Data Extraction
@@ -127,6 +127,15 @@ agent-browser session list
 agent-browser --headed open https://example.com
 agent-browser highlight @e1          # Highlight element
 agent-browser record start demo.webm # Record session
+```
+
+### Local Files (PDFs, HTML)
+
+```bash
+# Open local files with file:// URLs
+agent-browser --allow-file-access open file:///path/to/document.pdf
+agent-browser --allow-file-access open file:///path/to/page.html
+agent-browser screenshot output.png
 ```
 
 ### iOS Simulator (Mobile Safari)
