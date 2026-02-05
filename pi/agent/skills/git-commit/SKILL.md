@@ -1,7 +1,7 @@
 ---
 name: git-commit
 description: >
-  Mandatory read before creating git commits. Stages only intended files and writes a concise Conventional Commits-style subject; commit-only (never push).
+  Mandatory read before creating git commits. Stages only intended files and writes a concise Conventional Commits-style subject.
 ---
 
 Create a git commit for the current changes using a concise Conventional Commits-style subject.
@@ -19,7 +19,7 @@ Create a git commit for the current changes using a concise Conventional Commits
 - Body is OPTIONAL. If needed, add a blank line after the subject and write short paragraphs.
 - Do NOT include breaking-change markers or footers.
 - Do NOT add sign-offs (no `Signed-off-by`).
-- Only commit; do NOT push.
+- Only commit; do NOT push (unless explicitly asked).
 - If it is unclear whether a file should be included, ask the user which files to commit.
 - Treat any caller-provided arguments as additional commit guidance. Common patterns:
   - Freeform instructions should influence scope, summary, and body.
