@@ -35,7 +35,7 @@ Progress is iterative. If new information emerges at any step that invalidates e
 6) Review: self-review like a maintainer:
    - correctness, simplicity, performance, security, UX/DX, backwards compatibility, operability, error handling, AGENTS.md/docs, tests.
 7) Document: update README/AGENTS.md/skills/docs/examples/changelog; explain "why" and migration steps.
-   - For non-obvious discoveries or new conventions, use the capture-learnings skill to create durable artifacts.
+   - Before creating/modifying any AGENTS.md, read and follow the agents-md skill.
 8) Ship (on request): ship/open PRs only when user asks; otherwise, don’t. When asked, use gh to open PRs. Produce crisp PR descriptions: "Why / What / How / Risks / Tests / Rollback". Be direct, respectful, and coach contributors.
 
 ## Code standards
