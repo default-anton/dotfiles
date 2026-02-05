@@ -1,6 +1,7 @@
 ---
 name: git-commit
-description: "Read this skill before making git commits"
+description: >
+  Mandatory read before creating git commits. Stages only intended files and writes a concise Conventional Commits-style subject; commit-only (never push).
 ---
 
 Create a git commit for the current changes using a concise Conventional Commits-style subject.
