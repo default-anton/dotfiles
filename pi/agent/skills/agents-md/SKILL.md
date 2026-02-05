@@ -1,7 +1,7 @@
 ---
 name: agents-md
 description: >
-  Mandatory read before creating or modifying any AGENTS.md. Keeps scope correct, avoids duplication, stays terse, and preserves local conventions.
+  Use this skill before creating/modifying any `AGENTS.md` (including create/edit/move/split). It explains why AGENTS guidance should stay scoped and terse, when to edit root vs subtree files, and what content belongs in AGENTS.md.
 ---
 
 # AGENTS.md rules (mandatory)
