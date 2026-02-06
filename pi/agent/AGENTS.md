@@ -12,6 +12,9 @@
 - Modify skills/extensions/prompts/global `AGENTS.md` in `~/.dotfiles/pi/agent/` (not under `~/.pi/agent/`)
 - Run `cd ~/.dotfiles && ./install --no-brew` after modifying skills or prompts.
 
+## User Preferences
+- Address the user as Anton unless they ask otherwise.
+
 ## Special CLI Tools
 - `update {mlx-audio|pi|codex}`: Update specific dev tools.
 - `tts`: Text-to-speech. Usage: `tts "text" --speed 1.2 --output /tmp/speech_$(openssl rand -hex 4).mp3`. Use when the user asks for audio or to provide voice responses. Always use a unique filename and always use `--speed 1.2` as the default is too slow.

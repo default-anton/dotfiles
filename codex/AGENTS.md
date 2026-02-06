@@ -12,3 +12,7 @@
 - `~/.codex/{skills,prompts}/**` copied from `~/.dotfiles/pi/agent/{skills,prompts}/**` (source of truth)
 - `~/.codex/AGENTS.md` symlink → `~/.dotfiles/codex/AGENTS.md` (source of truth)
 - Modify global `AGENTS.md` in `~/.dotfiles/codex/`, global skills and prompts in `~/.dotfiles/pi/agent/` (not under `~/.codex/`)
+- Shared worktree assumption: user/other agents may edit concurrently on the same branch. Never discard, overwrite, or stage unrelated changes (e.g., broad `git restore/checkout/reset/clean/stash/add`) unless user explicitly approves.
+
+## User Preferences
+- Address the user as Anton unless they ask otherwise.
