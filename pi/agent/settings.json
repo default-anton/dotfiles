@@ -11,6 +11,7 @@
   "doubleEscapeAction": "branch",
   "packages": [
     "git:github.com/default-anton/pi-subdir-context",
-    "git:github.com/default-anton/pi-moonshot"
+    "git:github.com/default-anton/pi-moonshot",
+    "git:github.com/default-anton/pi-librarian"
   ]
 }
