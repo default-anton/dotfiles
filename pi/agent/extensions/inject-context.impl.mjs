@@ -166,6 +166,26 @@ function formatPiDocumentationForPrompt(systemPrompt, ctx) {
   ].join("\n");
 }
 
+function formatHarnessSpecificInstructions(ctx) {
+  const modelId =
+    typeof ctx.model === "string"
+      ? ctx.model
+      : typeof ctx.model?.id === "string"
+        ? ctx.model.id
+        : "";
+
+  if (!modelId.startsWith("gpt-5.3-codex")) {
+    return "";
+  }
+
+  return [
+    "\n\nHarness-specific instructions:",
+    "- The pi harness does not provide an `apply_patch` tool.",
+    "- Never call `apply_patch`; it will fail.",
+    "- Use available file-editing tools instead: `read`, `edit`, and `write`.",
+  ].join("\n");
+}
+
 export default function injectContextExtension(pi) {
   pi.on("before_agent_start", async (event, ctx) => {
     const agentDir = getAgentDir();
@@ -204,6 +224,7 @@ export default function injectContextExtension(pi) {
     const { agentsFiles } = resourceLoader.getAgentsFiles();
 
     const piDocs = formatPiDocumentationForPrompt(baseSystemPrompt, ctx);
+    const harnessSpecificInstructions = formatHarnessSpecificInstructions(ctx);
 
     if (!hasSystemPromptOverride && piDocs === "" && filteredSkills.length === 0 && agentsFiles.length === 0) {
       return;
@@ -214,6 +235,7 @@ export default function injectContextExtension(pi) {
       piDocs,
       formatAgentFilesForPrompt(agentsFiles),
       formatSkillsForPrompt(filteredSkills),
+      harnessSpecificInstructions,
       `\n\nCurrent date: ${dateTime}`,
       `\nCurrent working directory: ${formatPathForPrompt(ctx.cwd)}`,
       `\n\nYour skills are located in: ${formatPathForPrompt(path.join(agentDir, "skills"))}/`,
