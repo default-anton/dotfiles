@@ -17,8 +17,11 @@ case "$1" in
   codex)
     mise use --global npm:@openai/codex@latest
     ;;
+  jagc)
+    mise use --global npm:jagc@latest
+    ;;
   *)
-    echo "Usage: update {mlx-audio|claude|pi|codex}"
+    echo "Usage: update {mlx-audio|claude|pi|codex|jagc}"
     exit 1
     ;;
 esac
