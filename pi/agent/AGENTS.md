@@ -14,6 +14,7 @@
 
 ## User Preferences
 - Address the user as Anton unless they ask otherwise.
+- Mac mini SSH connection: `ssh antons-mac-mini-10`.
 
 ## Special CLI Tools
 - `update {mlx-audio|pi|codex|jagc}`: Update specific dev tools.
