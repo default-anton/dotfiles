@@ -83,21 +83,17 @@ export default function(pi: ExtensionAPI) {
       const startIndex = branchBefore.length;
 
       const handoffRequest = `${HANDOFF_INSTRUCTIONS}\n\nTask for the next agent:\n${task}`;
-      const activeTools = pi.getActiveTools();
-      pi.setActiveTools([]);
 
-      try {
-        if (ctx.isIdle()) {
-          pi.sendUserMessage(handoffRequest);
-        } else {
-          pi.sendUserMessage(handoffRequest, { deliverAs: "followUp" });
-        }
-
-        notify("Generating handoff note...", "info");
-        await ctx.waitForIdle();
-      } finally {
-        pi.setActiveTools(activeTools);
+      if (ctx.isIdle()) {
+        pi.sendUserMessage(handoffRequest);
+      } else {
+        pi.sendUserMessage(handoffRequest, { deliverAs: "followUp" });
       }
+
+      notify("Generating handoff note...", "info");
+      // Yield one tick so sendUserMessage can enqueue before waitForIdle observes state.
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      await ctx.waitForIdle();
 
       const branchAfter = ctx.sessionManager.getBranch();
       const handoffNote = getAssistantText(branchAfter, startIndex);
