@@ -12,6 +12,7 @@
   "packages": [
     "git:github.com/default-anton/pi-subdir-context",
     "git:github.com/default-anton/pi-librarian",
-    "git:github.com/default-anton/pi-finder"
+    "git:github.com/default-anton/pi-finder",
+    "git:github.com/default-anton/pi-handoff"
   ]
 }
