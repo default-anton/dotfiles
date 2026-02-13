@@ -5,7 +5,20 @@
 
 URL="$1"
 
-if [[ "$URL" =~ ^https://raw\.githubusercontent\.com/.+\.md$ ]] || [[ "$URL" =~ ^https://gist\.githubusercontent\.com/.+/raw/.+\.md$ ]]; then
+if [[ -z "$URL" ]]; then
+  echo "usage: read_web_page <url>" >&2
+  exit 1
+fi
+
+# Convert GitHub blob links to raw URLs so we can fetch them directly with curl.
+if [[ "$URL" =~ ^https://github\.com/.+/.+/blob/.+ ]]; then
+  URL="${URL#https://github.com/}"
+  URL="https://raw.githubusercontent.com/${URL/\/blob\//\/}"
+  URL="${URL%%\?*}"
+  URL="${URL%%\#*}"
+fi
+
+if [[ "$URL" =~ ^https://raw\.githubusercontent\.com/ ]] || [[ "$URL" =~ ^https://gist\.githubusercontent\.com/.+/raw/ ]]; then
   curl -sSL "$URL"
   exit $?
 fi
@@ -14,4 +27,4 @@ uvx --from crawl4ai crwl "$URL" \
   -o md-fit \
   -B ~/.dotfiles/config/crwl/browser.yml \
   -C ~/.dotfiles/config/crwl/crawler.yml \
-  -f ~/.dotfiles/config/crwl/filter_pruning.yml \
+  -f ~/.dotfiles/config/crwl/filter_pruning.yml
