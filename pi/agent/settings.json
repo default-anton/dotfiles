@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.52.10",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "high",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.3-codex",
   "compaction": {
