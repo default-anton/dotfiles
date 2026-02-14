@@ -9,7 +9,7 @@
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Keep files <~500 LOC; split/refactor as needed.
 - `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
-- pi's (this is all your stuff) skills/extensions/prompts/global `AGENTS.md` are in `~/.dotfiles/pi/agent/` (not under `~/.pi/agent/`)
+- True location of pi (your) stuff is `~/.dotfiles/pi/agent/{AGENTS.md,SYSTEM.md,skills,extensions,prompts}`, not under `~/.pi/agent/`
 - Run `cd ~/.dotfiles && ./install --no-brew` after modifying skills or prompts.
 
 ## User Preferences
