@@ -139,11 +139,27 @@ export default function workflowRunnerExtension(pi: ExtensionAPI) {
     });
   }
 
+  function findExtensionCommand(commandName: string) {
+    return pi.getCommands().find((command) => command.name === commandName && command.source === "extension");
+  }
+
   async function ensureWorkflowCommands(ctx: ExtensionContext) {
     if (workflowCommandsLoaded) return;
 
     const workflows = await loadWorkflowDefinitions(ctx.cwd);
     for (const workflow of workflows) {
+      const extensionCommand = findExtensionCommand(workflow.slug);
+      if (extensionCommand) {
+        if (ctx.hasUI) {
+          const extensionOwner = extensionCommand.path ?? "<unknown>";
+          ctx.ui.notify(
+            `Skipping workflow /${workflow.slug}: command already registered by extension at ${extensionOwner}`,
+            "warning",
+          );
+        }
+        continue;
+      }
+
       registerWorkflowCommand(workflow);
     }
 
