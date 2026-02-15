@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+# E2E tests: bin/e2e/stt.sh (fixtures in bin/e2e/fixtures/).
+# If stt behavior changes (flags, output, errors, stdin/file handling,
+# long media handling, or chunking), update tests + fixtures in the same change.
 set -eo pipefail
 
-# Source shared library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/mlx-audio/constants.sh"
 source "${SCRIPT_DIR}/mlx-audio/lib.sh"
@@ -10,57 +12,236 @@ source "${SCRIPT_DIR}/mlx-audio/lib.sh"
 MODEL="${DEFAULT_STT_MODEL}"
 LANGUAGE=""
 OUTPUT=""
-AUDIO_FILE=""
+INPUT_FILE=""
+CHUNK_SECONDS="${STT_CHUNK_SECONDS:-}"
+TARGET_BITRATE="${STT_TARGET_BITRATE:-48k}"
+
+WORK_DIR="$(mktemp -d /tmp/stt_XXXXXX)"
+trap 'rm -rf "${WORK_DIR}"' EXIT
+
+fail() {
+    echo "Error: $*" >&2
+    exit 1
+}
 
 usage() {
     local exit_code="${1:-1}"
     cat <<EOF
-Usage: $0 [AUDIO_FILE] [--model MODEL] [--language LANG] [--output FILE]
+Usage: $0 [INPUT_FILE] [--model MODEL] [--language LANG] [--output FILE] [--chunk-seconds N]
 
-Transcribe audio to text using mlx-audio server.
+Transcribe audio/video to text using mlx-audio server.
 
 Arguments:
-  AUDIO_FILE      Audio file to transcribe (optional, reads from stdin if not provided)
-  --model MODEL   STT model (default: ${DEFAULT_STT_MODEL})
-  --language LANG Language hint, e.g., 'en', 'es' (optional)
-  --output FILE   Write transcription to file instead of stdout
-  -h, --help      Show this help
+  INPUT_FILE         Media file to transcribe (optional, reads from stdin if not provided)
+  --model MODEL      STT model (default: ${DEFAULT_STT_MODEL})
+  --language LANG    Language hint, e.g., 'en', 'es' (optional)
+  --output FILE      Write transcription to file instead of stdout
+  --chunk-seconds N  Chunk length in seconds (default: auto based on available memory)
+  -h, --help         Show this help
 
-Supported formats: mp3, wav, m4a, flac, ogg (any format ffmpeg can read)
+Input can be audio or video (any format ffmpeg can decode).
+Input is normalized to mono MP3 (${TARGET_BITRATE}) before transcription.
+Long inputs are split into chunks and combined.
 
 Examples:
   $0 recording.mp3
   $0 meeting.m4a --language en --output notes.txt
-  ffmpeg -i video.mp4 -f wav - | $0 --language es
+  $0 keynote.mp4 --language en --chunk-seconds 180
+  tts "Ship boring software fast." --speed 1.2 --output /tmp/demo.mp3 && $0 /tmp/demo.mp3 --language en
+  ffmpeg -i video.mp4 -f wav - | $0 --language en
 EOF
-    exit "$exit_code"
+    exit "${exit_code}"
 }
 
-# Parse arguments
+require_command() {
+    command -v "$1" >/dev/null 2>&1 || fail "Required command '$1' is not installed."
+}
+
+get_available_memory_mb() {
+    if [[ -n "${STT_AVAILABLE_MEMORY_MB:-}" ]]; then
+        echo "${STT_AVAILABLE_MEMORY_MB}"
+        return
+    fi
+
+    if command -v vm_stat >/dev/null 2>&1; then
+        local vm_output page_size available_pages
+        vm_output="$(vm_stat 2>/dev/null || true)"
+        page_size="$(printf '%s\n' "${vm_output}" | awk -F'page size of | bytes' '/page size of/{print $2; exit}')"
+        available_pages="$(printf '%s\n' "${vm_output}" | awk -F': *' '
+            /Pages free|Pages speculative/ {gsub("\\.", "", $2); sum += $2}
+            END {print int(sum)}
+        ')"
+
+        if [[ "${page_size}" =~ ^[0-9]+$ ]] && [[ "${available_pages}" =~ ^[0-9]+$ ]] && [[ "${available_pages}" -gt 0 ]]; then
+            echo $((available_pages * page_size / 1024 / 1024))
+            return
+        fi
+    fi
+
+    local total_mem_bytes
+    total_mem_bytes="$(sysctl -n hw.memsize 2>/dev/null || true)"
+    if [[ "${total_mem_bytes}" =~ ^[0-9]+$ ]] && [[ "${total_mem_bytes}" -gt 0 ]]; then
+        # Conservative fallback: use half of total memory as effective available budget.
+        echo $((total_mem_bytes / 1024 / 1024 / 2))
+        return
+    fi
+
+    echo 4096
+}
+
+select_chunk_seconds() {
+    if [[ -n "${CHUNK_SECONDS}" ]]; then
+        [[ "${CHUNK_SECONDS}" =~ ^[0-9]+$ ]] || fail "--chunk-seconds must be a positive integer."
+        [[ "${CHUNK_SECONDS}" -gt 0 ]] || fail "--chunk-seconds must be greater than 0."
+        echo "${CHUNK_SECONDS}"
+        return
+    fi
+
+    local available_mb
+    available_mb="$(get_available_memory_mb)"
+
+    # Empirically tuned for mlx-community/parakeet-tdt-0.6b-v2 on local Macs.
+    # Apple Silicon uses unified memory, so RAM budget is also VRAM budget.
+    if ((available_mb < 4096)); then
+        echo 60
+    elif ((available_mb < 8192)); then
+        echo 90
+    elif ((available_mb < 16384)); then
+        echo 120
+    elif ((available_mb < 32768)); then
+        echo 180
+    else
+        echo 300
+    fi
+}
+
+media_duration_seconds() {
+    local media_file="$1"
+    local duration
+
+    duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "${media_file}" 2>/dev/null || true)"
+    if [[ "${duration}" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        awk -v d="${duration}" 'BEGIN { printf "%.0f", d }'
+        return
+    fi
+
+    echo 0
+}
+
+normalize_media_to_mp3() {
+    local input_media="$1"
+    local output_mp3="$2"
+
+    ffmpeg -y -loglevel error \
+        -i "${input_media}" \
+        -vn \
+        -ac 1 \
+        -ar 16000 \
+        -b:a "${TARGET_BITRATE}" \
+        "${output_mp3}" || fail "Failed to decode input media with ffmpeg."
+}
+
+transcribe_file() {
+    local audio_file="$1"
+    local transcript
+
+    local curl_args=(
+        -s -f
+        -X POST "http://localhost:${MLX_AUDIO_PORT}/v1/audio/transcriptions"
+        -F "file=@${audio_file}"
+        -F "model=${MODEL}"
+    )
+
+    [[ -n "${LANGUAGE}" ]] && curl_args+=(-F "language=${LANGUAGE}")
+
+    if ! transcript="$(curl "${curl_args[@]}" | jq -r 'select(.text) | .text' | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')"; then
+        return 1
+    fi
+
+    if [[ -z "${transcript}" ]]; then
+        return 1
+    fi
+
+    printf '%s' "${transcript}"
+}
+
+transcribe_media() {
+    local prepared_audio="$1"
+    local duration chunk_seconds available_mb
+
+    duration="$(media_duration_seconds "${prepared_audio}")"
+    chunk_seconds="$(select_chunk_seconds)"
+    available_mb="$(get_available_memory_mb)"
+
+    if ((duration <= chunk_seconds)); then
+        transcribe_file "${prepared_audio}" || fail "Failed to transcribe audio."
+        return
+    fi
+
+    local chunk_dir
+    chunk_dir="${WORK_DIR}/chunks"
+    mkdir -p "${chunk_dir}"
+
+    echo "Info: Chunking audio into ${chunk_seconds}s segments (duration=${duration}s, available_mem=${available_mb}MB)." >&2
+
+    ffmpeg -y -loglevel error \
+        -i "${prepared_audio}" \
+        -f segment \
+        -segment_time "${chunk_seconds}" \
+        -reset_timestamps 1 \
+        -c:a copy \
+        "${chunk_dir}/chunk_%04d.mp3" || fail "Failed to split long audio into chunks."
+
+    shopt -s nullglob
+    local chunks=("${chunk_dir}"/chunk_*.mp3)
+    shopt -u nullglob
+
+    ((${#chunks[@]} > 0)) || fail "No audio chunks were produced."
+
+    local chunk transcript combined=""
+    for chunk in "${chunks[@]}"; do
+        transcript="$(transcribe_file "${chunk}")" || fail "Failed to transcribe chunk: ${chunk}"
+        [[ -n "${transcript}" ]] && combined+="${combined:+ }${transcript}"
+    done
+
+    combined="$(printf '%s' "${combined}" | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
+    [[ -n "${combined}" ]] || fail "Failed to transcribe audio chunks."
+
+    printf '%s' "${combined}"
+}
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --model)
+            [[ $# -ge 2 ]] || fail "--model requires a value."
             MODEL="$2"
             shift 2
             ;;
         --language)
+            [[ $# -ge 2 ]] || fail "--language requires a value."
             LANGUAGE="$2"
             shift 2
             ;;
         --output)
+            [[ $# -ge 2 ]] || fail "--output requires a value."
             OUTPUT="$2"
+            shift 2
+            ;;
+        --chunk-seconds)
+            [[ $# -ge 2 ]] || fail "--chunk-seconds requires a value."
+            CHUNK_SECONDS="$2"
             shift 2
             ;;
         -h|--help)
             usage 0
             ;;
-        -*)
+        -* )
             echo "Unknown option: $1" >&2
             usage 1
             ;;
         *)
-            if [[ -z "$AUDIO_FILE" ]]; then
-                AUDIO_FILE="$1"
+            if [[ -z "${INPUT_FILE}" ]]; then
+                INPUT_FILE="$1"
                 shift
             else
                 echo "Unknown argument: $1" >&2
@@ -70,54 +251,30 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Ensure server is running (suppress output)
+require_command ffmpeg
+require_command ffprobe
+require_command curl
+require_command jq
+
 mlx_audio_server_ensure 2>/dev/null || exit 1
 
-# Prepare temp file for audio processing
-TEMP_AUDIO=$(mktemp /tmp/stt_XXXXXX.audio)
-trap 'mlx_audio_cleanup "$TEMP_AUDIO"' EXIT
+RAW_INPUT="${WORK_DIR}/input.media"
+PREPARED_AUDIO="${WORK_DIR}/prepared.mp3"
 
-# Get audio data
-if [[ -n "$AUDIO_FILE" ]]; then
-    if [[ ! -f "$AUDIO_FILE" ]]; then
-        echo "Error: Audio file '$AUDIO_FILE' not found." >&2
-        exit 1
-    fi
-    cp "$AUDIO_FILE" "$TEMP_AUDIO"
+if [[ -n "${INPUT_FILE}" ]]; then
+    [[ -f "${INPUT_FILE}" ]] || fail "Audio file '${INPUT_FILE}' not found."
+    cp "${INPUT_FILE}" "${RAW_INPUT}"
 else
-    # Read from stdin
-    cat > "$TEMP_AUDIO"
+    cat > "${RAW_INPUT}"
 fi
 
-# Convert Ogg/Opus (Telegram voice) to MP3 for mlx-audio compatibility
-if file "$TEMP_AUDIO" | grep -q "Ogg data"; then
-    TEMP_MP3=$(mktemp /tmp/stt_XXXXXX.mp3)
-    ffmpeg -i "$TEMP_AUDIO" -ar 16000 -ac 1 -y "$TEMP_MP3" 2>/dev/null || exit 1
-    mv "$TEMP_MP3" "$TEMP_AUDIO"
-fi
+[[ -s "${RAW_INPUT}" ]] || fail "No input media provided."
 
-# Build curl command
-CURL_ARGS=(
-    -s -f
-    -X POST "http://localhost:${MLX_AUDIO_PORT}/v1/audio/transcriptions"
-    -F "file=@${TEMP_AUDIO}"
-    -F "model=${MODEL}"
-)
+normalize_media_to_mp3 "${RAW_INPUT}" "${PREPARED_AUDIO}"
+TRANSCRIPT="$(transcribe_media "${PREPARED_AUDIO}")"
 
-[[ -n "$LANGUAGE" ]] && CURL_ARGS+=(-F "language=${LANGUAGE}")
-
-# Send request and extract text from NDJSON response
-# The server returns newline-delimited JSON, we want the final text
-TRANSCRIPT=$(curl "${CURL_ARGS[@]}" | jq -r 'select(.text) | .text' | tr -d '\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-
-if [[ -z "$TRANSCRIPT" ]]; then
-    echo "Error: Failed to transcribe audio." >&2
-    exit 1
-fi
-
-# Output result
-if [[ -n "$OUTPUT" ]]; then
-    echo "$TRANSCRIPT" > "$OUTPUT"
+if [[ -n "${OUTPUT}" ]]; then
+    printf '%s\n' "${TRANSCRIPT}" > "${OUTPUT}"
 else
-    echo "$TRANSCRIPT"
+    printf '%s\n' "${TRANSCRIPT}"
 fi

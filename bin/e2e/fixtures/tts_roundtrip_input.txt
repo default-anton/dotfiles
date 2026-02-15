@@ -1,0 +1,1 @@
+Ship boring software fast. Build feedback loops early, automate repeatable work, and keep the developer experience sharp.

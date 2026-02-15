@@ -1,3 +1,8 @@
 Brewfile.lock.json
 /nvim/lua/local/
 nvim/lua/local
+/bin/e2e/fixtures/x_andreasklinger_status_2022339447769977134_low.mp4
+/bin/e2e/fixtures/x_andreasklinger_status_2022339447769977134_low.mp4.part
+/bin/e2e/fixtures/x_andreasklinger_status_2022339447769977134_low.mp4.ytdl
+/bin/e2e/fixtures/x_andreasklinger_status_2022339447769977134_low_mono.mp3
+/bin/e2e/fixtures/stt_hello_world.wav
