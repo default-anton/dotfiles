@@ -66,7 +66,12 @@ function formatConversation(messages: ExtractedMessage[]): string {
     .join("\n\n");
 }
 
-function buildReviewMessage(conversationMarkdown: string): string {
+function buildReviewMessage(conversationMarkdown: string, focus: string): string {
+  const focusText = focus.trim();
+  const reviewInstruction =
+    "Review these changes. Put your technical co-founder/staff engineer/strict maintainer hat on. You know what to look for.";
+  const reviewInstructionWithFocus = focusText ? `${reviewInstruction} ${focusText}` : reviewInstruction;
+
   return [
     "Conversation context copied from the previous session (user + assistant messages only; thinking and tool calls removed):",
     "",
@@ -74,14 +79,14 @@ function buildReviewMessage(conversationMarkdown: string): string {
     conversationMarkdown,
     "````",
     "",
-    "Review these changes. Put your technical co-founder/staff engineer/strict maintainer hat on. You know what to look for.",
+    reviewInstructionWithFocus,
   ].join("\n");
 }
 
 export default function reviewExtension(pi: ExtensionAPI) {
   pi.registerCommand("review", {
-    description: "Review this thread in child session",
-    handler: async (_args, ctx) => {
+    description: "Review this thread in child session (optional focus text)",
+    handler: async (args, ctx) => {
       if (!ctx.isIdle()) {
         await ctx.waitForIdle();
       }
@@ -93,7 +98,7 @@ export default function reviewExtension(pi: ExtensionAPI) {
         return;
       }
 
-      const reviewMessage = buildReviewMessage(formatConversation(extractedConversation));
+      const reviewMessage = buildReviewMessage(formatConversation(extractedConversation), args);
       const parentSession = ctx.sessionManager.getSessionFile();
       const newSessionResult = parentSession
         ? await ctx.newSession({ parentSession })
