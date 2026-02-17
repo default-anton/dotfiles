@@ -1,4 +1,4 @@
-model = "gpt-5.2-codex"
+model = "gpt-5.3-codex"
 sandbox_mode    = "workspace-write"
 tool_output_token_limit = 15000
 # 273000 - (15000 + 15000), where 15000 is tool output limit and 15000 is buffer for prompt and response
