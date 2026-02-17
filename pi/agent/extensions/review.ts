@@ -10,6 +10,9 @@ type TextBlock = {
   text: string;
 };
 
+const REVIEW_HAT_INSTRUCTION =
+  "Put your technical co-founder/staff engineer/strict maintainer hat on. You know what to look for.";
+
 function isTextBlock(block: unknown): block is TextBlock {
   return (
     !!block &&
@@ -66,11 +69,24 @@ function formatConversation(messages: ExtractedMessage[]): string {
     .join("\n\n");
 }
 
-function buildReviewMessage(conversationMarkdown: string, focus: string): string {
-  const focusText = focus.trim();
-  const reviewInstruction =
-    "Review these changes. Put your technical co-founder/staff engineer/strict maintainer hat on. You know what to look for.";
-  const reviewInstructionWithFocus = focusText ? `${reviewInstruction} ${focusText}` : reviewInstruction;
+function buildReviewInstruction(args: string, hasConversationContext: boolean): string {
+  const focusText = args.trim();
+  if (!focusText) {
+    return `Review these changes. ${REVIEW_HAT_INSTRUCTION}`;
+  }
+
+  if (hasConversationContext) {
+    return `Review these changes. ${REVIEW_HAT_INSTRUCTION} ${focusText}`;
+  }
+
+  return `Review ${focusText}. ${REVIEW_HAT_INSTRUCTION}`;
+}
+
+function buildReviewMessage(args: string, conversationMarkdown?: string): string {
+  const reviewInstruction = buildReviewInstruction(args, Boolean(conversationMarkdown));
+  if (!conversationMarkdown) {
+    return reviewInstruction;
+  }
 
   return [
     "Conversation context copied from the previous session (user + assistant messages only; thinking and tool calls removed):",
@@ -79,7 +95,7 @@ function buildReviewMessage(conversationMarkdown: string, focus: string): string
     conversationMarkdown,
     "````",
     "",
-    reviewInstructionWithFocus,
+    reviewInstruction,
   ].join("\n");
 }
 
@@ -92,13 +108,9 @@ export default function reviewExtension(pi: ExtensionAPI) {
       }
 
       const extractedConversation = extractConversation(ctx.sessionManager.getBranch());
-      if (extractedConversation.length === 0) {
-        if (ctx.hasUI) ctx.ui.notify("No user/assistant messages found to review", "warning");
-
-        return;
-      }
-
-      const reviewMessage = buildReviewMessage(formatConversation(extractedConversation), args);
+      const conversationMarkdown =
+        extractedConversation.length === 0 ? undefined : formatConversation(extractedConversation);
+      const reviewMessage = buildReviewMessage(args, conversationMarkdown);
       const parentSession = ctx.sessionManager.getSessionFile();
       const newSessionResult = parentSession
         ? await ctx.newSession({ parentSession })
