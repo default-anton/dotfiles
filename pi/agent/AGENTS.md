@@ -18,6 +18,5 @@
 - Mac mini SSH connection: `ssh antons-mac-mini-10`.
 
 ## Special CLI Tools
-- `update {mlx-audio|pi|codex|jagc}`: Update specific dev tools.
 - `tts`: Text-to-speech. Usage: `tts "text" --speed 1.2 --output /tmp/speech_$(openssl rand -hex 4).mp3`. Use when the user asks for audio or to provide voice responses. Always use a unique filename and always use `--speed 1.2` as the default is too slow.
 - `stt`: Speech-to-text. Use when the user asks to transcribe audio, convert speech to text, or process voice recordings. Start with `stt --help` to see usage options.
