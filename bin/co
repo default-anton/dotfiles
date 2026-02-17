@@ -11,8 +11,8 @@ if ! command -v codex >/dev/null 2>&1; then
 fi
 
 mapfile -t options <<'OPTIONS'
-Default:::codex --yolo --search --model gpt-5.2-codex -c model_reasoning_effort="medium" -c model_verbosity="medium"
-Smart:::codex --yolo --search --model gpt-5.2-codex -c model_reasoning_effort="high" -c model_verbosity="medium"
+Default:::codex --yolo --search --model gpt-5.3-codex -c model_reasoning_effort="medium" -c model_verbosity="medium"
+Smart:::codex --yolo --search --model gpt-5.3-codex -c model_reasoning_effort="high" -c model_verbosity="medium"
 OPTIONS
 
 if [ ${#options[@]} -eq 0 ]; then
