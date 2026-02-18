@@ -208,11 +208,9 @@ EOF
 
 ## State Management
 
-State must be applied at browser launch via `--state` (or `AGENT_BROWSER_STATE`).
-
 ```bash
-agent-browser state save auth.json              # Save cookies, storage, auth state
-agent-browser --state auth.json open https://example.com  # Launch with saved state
+agent-browser state save auth.json    # Save cookies, storage, auth state
+agent-browser state load auth.json    # Restore saved state
 ```
 
 ## Global Options
@@ -252,16 +250,10 @@ agent-browser trace stop trace.zip        # Stop and save trace
 ## Environment Variables
 
 ```bash
-AGENT_BROWSER_SESSION="mysession"                 # Session name (isolated browser context)
-AGENT_BROWSER_PROFILE="$HOME/.agent-browser"       # Persistent browser profile directory
-AGENT_BROWSER_STATE="./auth-state.json"            # Storage state JSON to load at launch
-AGENT_BROWSER_EXECUTABLE_PATH="/path/to/chrome"    # Custom browser executable path
-AGENT_BROWSER_ARGS="--no-sandbox,--disable-web-security" # Extra launch args (comma or newline separated)
-AGENT_BROWSER_USER_AGENT="MyUserAgent/1.0"         # Custom User-Agent
-AGENT_BROWSER_PROXY="http://user:pass@127.0.0.1:7890"    # Proxy server
-AGENT_BROWSER_PROXY_BYPASS="localhost,*.internal.com"     # Proxy bypass hosts
-AGENT_BROWSER_PROVIDER="ios"                        # Browser provider (ios, browserbase, kernel, browseruse)
-AGENT_BROWSER_STREAM_PORT="9223"                    # WebSocket streaming port
-AGENT_BROWSER_IOS_DEVICE="iPhone 16 Pro"            # Default iOS simulator device name
-AGENT_BROWSER_IOS_UDID="00000000-0000-0000-0000-000000000000" # Default iOS device UDID
+AGENT_BROWSER_SESSION="mysession"            # Default session name
+AGENT_BROWSER_EXECUTABLE_PATH="/path/chrome" # Custom browser path
+AGENT_BROWSER_EXTENSIONS="/ext1,/ext2"       # Comma-separated extension paths
+AGENT_BROWSER_PROVIDER="browserbase"         # Cloud browser provider
+AGENT_BROWSER_STREAM_PORT="9223"             # WebSocket streaming port
+AGENT_BROWSER_HOME="/path/to/agent-browser"  # Custom install location
 ```

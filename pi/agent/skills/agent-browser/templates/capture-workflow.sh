@@ -19,9 +19,10 @@ OUTPUT_DIR="${2:-.}"
 echo "Capturing: $TARGET_URL"
 mkdir -p "$OUTPUT_DIR"
 
-# Optional: Load authentication state (applied at browser launch)
+# Optional: Load authentication state
 # if [[ -f "./auth-state.json" ]]; then
-#   export AGENT_BROWSER_STATE="./auth-state.json"
+#     echo "Loading authentication state..."
+#     agent-browser state load "./auth-state.json"
 # fi
 
 # Navigate to target
