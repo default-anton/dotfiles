@@ -5,14 +5,14 @@ tool_output_token_limit = 15000
 model_auto_compact_token_limit = 243000
 model_reasoning_effort = "high"
 model_reasoning_summary = "auto"
-approval_policy = "on-failure"
+approval_policy = "on-request"
 web_search = "live"
 personality = "pragmatic"
 
 [features]
 shell_snapshot = true
 steer = true
-collab = true
+multi_agent = true
 
 [notice]
 hide_gpt5_1_migration_prompt = true
