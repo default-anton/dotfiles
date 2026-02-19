@@ -20,8 +20,11 @@ case "$1" in
   jagc)
     mise use --global npm:jagc@latest
     ;;
+  gemini)
+    mise use --global npm:@google/gemini-cli@latest
+    ;;
   *)
-    echo "Usage: update {mlx-audio|claude|pi|codex|jagc}"
+    echo "Usage: update {mlx-audio|claude|pi|codex|jagc|gemini}"
     exit 1
     ;;
 esac
