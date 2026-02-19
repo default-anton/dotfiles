@@ -1,4 +1,4 @@
 ---
-description: Simplify a target while preserving behavior and intent
+description: Review simplification opportunities while preserving behavior and intent
 ---
-Simplify $ARGUMENTS for clarity, consistency, and maintainability while preserving all functionality and meaning.
+Review $ARGUMENTS and provide a simplification assessment focused on clarity, consistency, and maintainability. Highlight concrete opportunities to simplify while preserving all functionality and meaning.
