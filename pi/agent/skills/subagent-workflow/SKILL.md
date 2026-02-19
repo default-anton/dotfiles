@@ -1,11 +1,11 @@
 ---
-name: subagent-workflow-executor
+name: subagent-workflow
 description: >
   Execute any user-provided workflow by spawning pi subagents with `pi -p`
   from an inline bash plan. Supports sequential and parallel phases.
 ---
 
-# Subagent Workflow Executor
+# Subagent Workflow
 
 Use when the user gives a workflow definition and wants it executed now with subagents.
 
