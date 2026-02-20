@@ -10,6 +10,15 @@ description: >
 
 Use when the user wants to define, update, or execute a workflow with subagents.
 
+## Workflow library + selection
+
+- Store reusable workflow specs only in: `~/.dotfiles/pi/agent/workflows/*.md`.
+- Do not search other locations unless the user gives an explicit path.
+- If the user names a workflow, match by filename stem first (case-insensitive).
+- If the user is loose (for example: “use your sub-agent workflow to implement this feature”), list available workflows and pick the best match using: filename, H1 title, `For ...` scope line, and step ids.
+- If no clear winner, present top 2–3 candidates with one-line rationale and ask for selection.
+- Before execution, state the chosen workflow path and why it matched.
+
 ## Default workflow format (unless user specifies another)
 
 <default-format>
@@ -55,7 +64,7 @@ Normalize each step as:
 `id | mode(serial|parallel:<group>) | access(ro|rw) | prompt | inputs | output`
 
 - `ro` => `pi --no-session --tools read,bash -p ...`
-- `rw` => `pi --no-session -p ...`
+- `rw` => `pi -p ...` (session-enabled)
 - Keep two-digit prefixes (`01`, `02`, ...), aligned step ids/output names.
 - Use `parallel:<group>` only for dependency-independent steps.
 - On workflow edits, update both `Steps` and `Order`.
@@ -77,7 +86,7 @@ RUN_DIR="$(mktemp -d)"
 ART="$RUN_DIR/artifacts"; mkdir -p "$ART"
 
 run_ro(){ local out="$1" prompt="$2"; shift 2; pi --no-session --tools read,bash -p "$@" "$prompt" > "$out"; }
-run_rw(){ local out="$1" prompt="$2"; shift 2; pi --no-session -p "$@" "$prompt" > "$out"; }
+run_rw(){ local out="$1" prompt="$2"; shift 2; pi -p "$@" "$prompt" > "$out"; }
 
 echo "$ART" # print early so path is visible even if a later step fails
 
