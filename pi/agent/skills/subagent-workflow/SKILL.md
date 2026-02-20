@@ -63,6 +63,7 @@ Normalize each step as:
 ## Execution rules
 
 - Build one inline bash plan with `set -euo pipefail`.
+- When running that plan via the harness `bash` tool, set a long timeout (`timeout: 14400`, ~4 hours).
 - Use a temp artifact dir; each step writes one `.md` artifact.
 - Pass dependencies via `@file`; wait for parallel PIDs before dependent steps.
 - Parallelize only steps in the same `parallel:<group>`; `rw` may run in parallel when dependencies allow.
