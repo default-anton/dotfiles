@@ -10,9 +10,9 @@
   "steeringMode": "one-at-a-time",
   "doubleEscapeAction": "branch",
   "packages": [
-    "git:github.com/default-anton/pi-subdir-context",
-    "git:github.com/default-anton/pi-librarian",
-    "git:github.com/default-anton/pi-finder",
-    "git:github.com/default-anton/pi-handoff"
+    "npm:pi-subdir-context",
+    "npm:pi-librarian",
+    "npm:pi-finder-subagent",
+    "npm:pi-handoff"
   ]
 }
