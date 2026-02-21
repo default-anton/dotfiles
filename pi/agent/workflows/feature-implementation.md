@@ -25,16 +25,18 @@ A coding agent has just implemented the feature from docs/<feature-name>.md. Put
 
 Prompt:
 ````markdown
-A coding agent has just implemented the feature from docs/<feature-name>.md. Review the change set (see `git status`) and provide a simplification assessment focused on clarity, consistency, and maintainability. Highlight concrete opportunities to simplify while preserving all functionality and meaning.
+A coding agent has just implemented the feature from docs/<feature-name>.md. Review the change set (see `git status`) and provide a simplification assessment focused on clarity, consistency, and maintainability.
+
+Scope your feedback to the current change set only. Do not suggest unrelated refactors or broader cleanup outside modified files unless it is a direct blocker for correctness, security, or maintainability of this change.
+
+Highlight concrete opportunities to simplify while preserving all functionality and meaning.
 ````
 
 4) `04-resolve-feedback` (`serial`, `rw`, inputs `@01-implement.md @02-review-maintainer.md @03-review-simplification.md`) -> `04-resolve-feedback.md`
 
 Prompt:
 ````markdown
-A coding agent has just implemented the feature from docs/<feature-name>.md. Address all feedback from both reviews by updating the implementation change set (code/tests/docs/etc. as needed).
-
-Do not defer review items. Re-run relevant validation loop(s) and report results.
+A coding agent has just implemented the feature from docs/<feature-name>.md. Address all feedback from both reviews by updating the implementation change set (code/tests/docs/etc. as needed). Do not defer review items.
 ````
 
 ## Order
