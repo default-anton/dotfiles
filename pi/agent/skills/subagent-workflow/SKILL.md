@@ -1,9 +1,9 @@
 ---
 name: subagent-workflow
 description: >
-  Execute any user-provided workflow by spawning pi subagents with `pi -p`
-  from an inline bash plan. Supports sequential and parallel phases. Also
-  help users define and manage workflow specs in a standard markdown format.
+  Execute user-provided workflows by orchestrating interactive pi subagents in tmux
+  windows with deterministic artifact/status files. Supports serial and parallel
+  phases. Also help users define and manage workflow specs in a standard markdown format.
 ---
 
 # Subagent Workflow
@@ -63,41 +63,61 @@ Prompt:
 Normalize each step as:
 `id | mode(serial|parallel:<group>) | access(ro|rw) | prompt | inputs | output`
 
-- `ro` => `pi --no-session --tools read,bash -p ...`
-- `rw` => `pi -p ...` (session-enabled)
+- `ro` => `subwf ... --ro` (internally `pi --no-session --tools read,bash`)
+- `rw` => `subwf ... --rw` (interactive session-enabled `pi`)
 - Keep two-digit prefixes (`01`, `02`, ...), aligned step ids/output names.
 - Use `parallel:<group>` only for dependency-independent steps.
 - On workflow edits, update both `Steps` and `Order`.
 
 ## Execution rules
 
+- Parse the workflow format in-agent. Do not ask `subwf` to parse or validate workflow files.
+- Use: `SUBWF=~/.dotfiles/pi/agent/skills/subagent-workflow/scripts/subwf`
 - Build one inline bash plan with `set -euo pipefail`.
 - When running that plan via the harness `bash` tool, set a long timeout (`timeout: 14400`, ~4 hours).
-- Use a temp artifact dir; each step writes one `.md` artifact.
-- Pass dependencies via `@file`; wait for parallel PIDs before dependent steps.
-- Parallelize only steps in the same `parallel:<group>`; `rw` may run in parallel when dependencies allow.
-- Prompts should request structured sections and concrete file paths.
+- Initialize once per execution: `RUN_DIR="$($SUBWF init)"` and set `--run-dir "$RUN_DIR"` on subsequent calls.
+- Each step must end with:
+  - artifact markdown: `$RUN_DIR/artifacts/<step-id>.md`
+  - status json: `$RUN_DIR/status/<step-id>.status.json`
+- For serial steps, prefer `subwf run ...`.
+- For parallel groups, use `subwf start ...` for each step, then a single `subwf wait ...`.
+- Pass dependencies with repeated `--input <path>`.
+- Default capture mode is interactive tmux + extension bridge.
+- Optional fallback during transition: `--capture-mode print`.
 
-Example execution plan (adapt step prompts/inputs to the workflow spec):
+Example execution plan (generic `01 -> (02+03) -> 04`):
 
 ```bash
 set -euo pipefail
-RUN_DIR="$(mktemp -d)"
-ART="$RUN_DIR/artifacts"; mkdir -p "$ART"
+SUBWF="$HOME/.dotfiles/pi/agent/skills/subagent-workflow/scripts/subwf"
+RUN_DIR="$($SUBWF init)"
 
-run_ro(){ local out="$1" prompt="$2"; shift 2; pi --no-session --tools read,bash -p "$@" "$prompt" > "$out"; }
-run_rw(){ local out="$1" prompt="$2"; shift 2; pi -p "$@" "$prompt" > "$out"; }
+echo "$RUN_DIR/artifacts"
 
-echo "$ART" # print early so path is visible even if a later step fails
+$SUBWF --run-dir "$RUN_DIR" run 01-implement \
+  --rw \
+  --prompt "Implement the spec completely. Return changed files + rationale." \
+  --input feature-spec.md
 
-# Example workflow execution (generic 01 -> 02/03 parallel -> 04)
-run_rw "$ART/01-implement.md" "Implement the spec completely. Return changed files + rationale." @feature-spec.md
-run_ro "$ART/02-review-maintainer.md" "Strict maintainer review. Output BLOCKERS/SHOULD_FIX/NITS." @"$ART/01-implement.md" & p1=$!
-run_ro "$ART/03-review-simplification.md" "Simplification review. Output SIMPLIFY_NOW/LATER with concrete edits." @"$ART/01-implement.md" & p2=$!
-wait "$p1" "$p2"
-run_rw "$ART/04-resolve-feedback.md" "Resolve accepted findings; list rejected findings with reason." @"$ART/02-review-maintainer.md" @"$ART/03-review-simplification.md"
+$SUBWF --run-dir "$RUN_DIR" start 02-review-maintainer \
+  --ro \
+  --prompt "Strict maintainer review. Output BLOCKERS/SHOULD_FIX/NITS." \
+  --input "$RUN_DIR/artifacts/01-implement.md"
 
-ls -1 "$ART"
+$SUBWF --run-dir "$RUN_DIR" start 03-review-simplification \
+  --ro \
+  --prompt "Simplification review. Output SIMPLIFY_NOW/LATER with concrete edits." \
+  --input "$RUN_DIR/artifacts/01-implement.md"
+
+$SUBWF --run-dir "$RUN_DIR" wait 02-review-maintainer 03-review-simplification
+
+$SUBWF --run-dir "$RUN_DIR" run 04-resolve-feedback \
+  --rw \
+  --prompt "Resolve accepted findings; list rejected findings with reason." \
+  --input "$RUN_DIR/artifacts/02-review-maintainer.md" \
+  --input "$RUN_DIR/artifacts/03-review-simplification.md"
+
+$SUBWF --run-dir "$RUN_DIR" status
 ```
 
 ## Final response format
@@ -105,4 +125,9 @@ ls -1 "$ART"
 Return only:
 - artifact directory path
 - ordered list of artifact `.md` files
-- compact status: per-step + overall
+- reviewer-focused execution summary (PR-style):
+  - Goal/scope
+  - What was done (ordered by step, with key decisions)
+  - Validation evidence (tests/checks/log signals)
+  - Risks, follow-ups, and rollback notes
+  - Final outcome (complete/partial/failed)
