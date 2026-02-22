@@ -1,7 +1,7 @@
 ---
 name: git-commit
 description: >
-  Mandatory read before creating git commits. Stages only intended files and writes a concise Conventional Commits-style subject.
+  Mandatory read before creating git commits. Stages only intended files, groups changes into logical commits, and writes concise Conventional Commits-style subjects.
 ---
 
 Create a git commit for the current changes using a concise Conventional Commits-style subject.
@@ -16,6 +16,10 @@ Create a git commit for the current changes using a concise Conventional Commits
 
 ## Notes
 
+- Keep commits logically grouped: one commit = one cohesive, reviewable change.
+- If current changes mix unrelated work, split into multiple commits with selective staging.
+- "commit all" means stage all relevant files, not "force one commit".
+- If multiple logical groups exist and user did not request a squash, create multiple commits.
 - Body is OPTIONAL. If needed, add a blank line after the subject and write short paragraphs.
 - Do NOT include breaking-change markers or footers.
 - Do NOT add sign-offs (no `Signed-off-by`).
@@ -30,7 +34,11 @@ Create a git commit for the current changes using a concise Conventional Commits
 
 1. Infer from the prompt if the user provided specific file paths/globs and/or additional instructions.
 2. Review `git status` and `git diff` to understand the current changes (limit to argument-specified files if provided).
-3. (Optional) Run `git log -n 50 --pretty=format:%s` to see commonly used scopes.
-4. If there are ambiguous extra files, ask the user for clarification before committing.
-5. Stage only the intended files (all changes if no files specified).
-6. Run `git commit -m "<subject>"` (and `-m "<body>"` if needed).
+3. Partition changes into logical commit groups by intent and cohesion; use the smallest reviewable units.
+4. If user asked to "commit all" and multiple groups exist, split into multiple commits by default; ask when grouping is ambiguous.
+5. (Optional) Run `git log -n 50 --pretty=format:%s` to see commonly used scopes.
+6. If there are ambiguous extra files, ask the user for clarification before committing.
+7. Stage only files for the current logical commit (all changes only when they form one cohesive group and no files were specified).
+8. Run `git diff --cached --name-only` to verify staged files match one logical group.
+9. Run `git commit -m "<subject>"` (and `-m "<body>"` if needed).
+10. Repeat staging/commit for remaining logical groups, if any.
