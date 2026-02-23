@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Check if PR number or URL is provided
+# Check when PR number or URL is provided
 if [ -z "$1" ]; then
   echo "Usage: $0 <pr-number-or-url>"
   exit 1
