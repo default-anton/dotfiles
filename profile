@@ -23,8 +23,6 @@ export FZF_ALT_C_COMMAND="fd '' -t d --hidden -d 1 ~/ ~/code . -x echo {/}"
 export RIPGREP_CONFIG_PATH="${HOME}/.ripgreprc"
 
 export PI_CACHE_RETENTION=long
-export PI_FINDER_MODELS=openai-codex/gpt-5.3-codex-spark:medium
-export PI_LIBRARIAN_MODELS=openai-codex/gpt-5.3-codex-spark:medium
 export PI_OPENAI_SERVICE_TIER=priority
 
 # Use fd (https://github.com/sharkdp/fd) instead of the default find

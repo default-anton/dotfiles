@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.54.2",
   "defaultThinkingLevel": "high",
-  "defaultProvider": "openai-codex",
+  "defaultProvider": "openai",
   "defaultModel": "gpt-5.3-codex",
   "compaction": {
     "enabled": true
@@ -11,8 +11,6 @@
   "doubleEscapeAction": "branch",
   "packages": [
     "npm:pi-subdir-context",
-    "npm:pi-librarian",
-    "npm:pi-finder-subagent",
     "npm:pi-handoff"
   ]
 }
