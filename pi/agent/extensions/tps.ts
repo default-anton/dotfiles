@@ -16,12 +16,6 @@ function isAssistantMessage(message: unknown): message is AssistantMessage {
   return role === "assistant";
 }
 
-const tokenCountFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
-  compactDisplay: "short",
-  maximumFractionDigits: 1,
-});
-
 function sumAssistantUsage(messages: readonly unknown[]): TokenUsageTotals {
   const totals: TokenUsageTotals = {
     input: 0,
@@ -44,26 +38,10 @@ function sumAssistantUsage(messages: readonly unknown[]): TokenUsageTotals {
   return totals;
 }
 
-function formatTokenCount(value: number): string {
-  return tokenCountFormatter.format(Math.max(0, value)).toLowerCase();
-}
-
 function buildTpsMessage(usage: TokenUsageTotals, elapsedSeconds: number): string {
   const tokensPerSecond = usage.output / elapsedSeconds;
-  const output = formatTokenCount(usage.output);
-  const input = formatTokenCount(usage.input);
-  const cacheRead = formatTokenCount(usage.cacheRead);
-  const cacheWrite = formatTokenCount(usage.cacheWrite);
-  const total = formatTokenCount(usage.total);
 
-  return [
-    `TPS ${tokensPerSecond.toFixed(1)} tok/s.`,
-    `out ${output},`,
-    `in ${input},`,
-    `cache r/w ${cacheRead}/${cacheWrite},`,
-    `total ${total},`,
-    `${elapsedSeconds.toFixed(1)}s`,
-  ].join(" ");
+  return `${tokensPerSecond.toFixed(1)} tok/s • ${elapsedSeconds.toFixed(1)}s`;
 }
 
 export default function tpsExtension(pi: ExtensionAPI) {
