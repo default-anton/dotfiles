@@ -27,24 +27,26 @@ fail() {
 usage() {
     local exit_code="${1:-1}"
     cat <<EOF
-Usage: $0 [INPUT_FILE] [--model MODEL] [--language LANG] [--output FILE] [--chunk-seconds N]
+Usage: $0 [INPUT_FILE_OR_URL] [--model MODEL] [--language LANG] [--output FILE] [--chunk-seconds N]
 
 Transcribe audio/video to text using mlx-audio server.
 
 Arguments:
-  INPUT_FILE         Media file to transcribe (optional, reads from stdin if not provided)
+  INPUT_FILE_OR_URL  Media file path or URL to transcribe (optional, reads from stdin if not provided)
   --model MODEL      STT model (default: ${DEFAULT_STT_MODEL})
   --language LANG    Language hint, e.g., 'en', 'es' (optional)
   --output FILE      Write transcription to file instead of stdout
   --chunk-seconds N  Chunk length in seconds (default: auto based on available memory)
   -h, --help         Show this help
 
-Input can be audio or video (any format ffmpeg can decode).
+Input can be local media, a supported URL (downloaded via yt-dlp), or stdin.
 Input is normalized to mono MP3 (${TARGET_BITRATE}) before transcription.
 Long inputs are split into chunks and combined.
 
 Examples:
   $0 recording.mp3
+  $0 "https://x.com/i/status/1234567890" --language en
+  $0 "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --language en
   $0 meeting.m4a --language en --output notes.txt
   $0 keynote.mp4 --language en --chunk-seconds 180
   tts "Ship boring software fast." --speed 1.2 --output /tmp/demo.mp3 && $0 /tmp/demo.mp3 --language en
@@ -55,6 +57,39 @@ EOF
 
 require_command() {
     command -v "$1" >/dev/null 2>&1 || fail "Required command '$1' is not installed."
+}
+
+is_url() {
+    [[ "$1" =~ ^https?:// ]]
+}
+
+download_url_audio() {
+    local media_url="$1"
+    local output_template="${WORK_DIR}/downloaded.%(ext)s"
+
+    require_command yt-dlp
+    echo "Info: Downloading media URL via yt-dlp..." >&2
+
+    yt-dlp --no-playlist -x --audio-format mp3 -o "${output_template}" "${media_url}" >&2 || \
+        fail "Failed to download media URL with yt-dlp."
+
+    if [[ -s "${WORK_DIR}/downloaded.mp3" ]]; then
+        printf '%s' "${WORK_DIR}/downloaded.mp3"
+        return
+    fi
+
+    shopt -s nullglob
+    local downloaded_files=("${WORK_DIR}"/downloaded.*)
+    shopt -u nullglob
+
+    local file
+    for file in "${downloaded_files[@]}"; do
+        [[ -s "${file}" ]] || continue
+        printf '%s' "${file}"
+        return
+    done
+
+    fail "yt-dlp finished but no audio file was produced."
 }
 
 get_available_memory_mb() {
@@ -260,17 +295,22 @@ mlx_audio_server_ensure 2>/dev/null || exit 1
 
 RAW_INPUT="${WORK_DIR}/input.media"
 PREPARED_AUDIO="${WORK_DIR}/prepared.mp3"
+SOURCE_MEDIA="${RAW_INPUT}"
 
 if [[ -n "${INPUT_FILE}" ]]; then
-    [[ -f "${INPUT_FILE}" ]] || fail "Audio file '${INPUT_FILE}' not found."
-    cp "${INPUT_FILE}" "${RAW_INPUT}"
+    if is_url "${INPUT_FILE}"; then
+        SOURCE_MEDIA="$(download_url_audio "${INPUT_FILE}")"
+    else
+        [[ -f "${INPUT_FILE}" ]] || fail "Audio file '${INPUT_FILE}' not found."
+        cp "${INPUT_FILE}" "${SOURCE_MEDIA}"
+    fi
 else
-    cat > "${RAW_INPUT}"
+    cat > "${SOURCE_MEDIA}"
 fi
 
-[[ -s "${RAW_INPUT}" ]] || fail "No input media provided."
+[[ -s "${SOURCE_MEDIA}" ]] || fail "No input media provided."
 
-normalize_media_to_mp3 "${RAW_INPUT}" "${PREPARED_AUDIO}"
+normalize_media_to_mp3 "${SOURCE_MEDIA}" "${PREPARED_AUDIO}"
 TRANSCRIPT="$(transcribe_media "${PREPARED_AUDIO}")"
 
 if [[ -n "${OUTPUT}" ]]; then
