@@ -2,3 +2,4 @@ font-family = "FiraCode Nerd Font Mono"
 font-size = "17"
 theme = "tokyonight"
 command = /opt/homebrew/bin/tmux new-session -A -s default
+auto-update-channel = tip
