@@ -66,7 +66,6 @@ brew 'switchaudio-osx'
 brew 'default-anton/tap/wt'
 brew 'tw93/tap/mole'
 brew 'steipete/tap/gifgrep'
-brew 'lightonai/colgrep/colgrep'
 
 cask 'font-fira-code-nerd-font'
 cask 'ghostty'
