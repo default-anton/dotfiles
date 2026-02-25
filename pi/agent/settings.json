@@ -11,6 +11,7 @@
   "doubleEscapeAction": "branch",
   "packages": [
     "npm:pi-subdir-context",
-    "npm:pi-handoff"
+    "npm:pi-handoff",
+    "npm:pi-tmux-window-name"
   ]
 }
