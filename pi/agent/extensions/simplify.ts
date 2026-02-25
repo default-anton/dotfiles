@@ -6,21 +6,17 @@ import { extractConversation, formatConversation } from "./lib/conversation-cont
 const SIMPLIFY_INSTRUCTION =
   "Focus on clarity, consistency, and maintainability. Highlight concrete simplifications while preserving all behavior and intent.";
 
-function buildSimplifyInstruction(args: string, hasConversationContext: boolean): string {
+function buildSimplifyInstruction(args: string): string {
   const focusText = args.trim();
   if (!focusText) {
     return `Review these changes and provide a simplification assessment. ${SIMPLIFY_INSTRUCTION}`;
   }
 
-  if (hasConversationContext) {
-    return `Review these changes and provide a simplification assessment. ${SIMPLIFY_INSTRUCTION} ${focusText}`;
-  }
-
-  return `Review ${focusText} and provide a simplification assessment. ${SIMPLIFY_INSTRUCTION}`;
+  return `Review these changes and provide a simplification assessment. ${SIMPLIFY_INSTRUCTION} ${focusText}`;
 }
 
 function buildSimplifyMessage(args: string, conversationMarkdown?: string): string {
-  const simplifyInstruction = buildSimplifyInstruction(args, Boolean(conversationMarkdown));
+  const simplifyInstruction = buildSimplifyInstruction(args);
   if (!conversationMarkdown) {
     return simplifyInstruction;
   }
