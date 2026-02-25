@@ -4,6 +4,7 @@
 .gemini
 .nvimrc
 .projections.json
+AGENTS.override.md
 .llmsidekick.lua
 .vscode
 test/reports
