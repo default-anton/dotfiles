@@ -6,6 +6,8 @@ import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@mariozechn
 
 let hasShownPiDocsResolveWarning = false;
 
+const AGENTS_CONTEXT_FILENAMES = ["AGENTS.override.md", "AGENTS.md", "CLAUDE.md"];
+
 function toFilePath(urlOrPath) {
   if (urlOrPath.startsWith("file://")) {
     return fileURLToPath(urlOrPath);
@@ -77,6 +79,63 @@ function getPiDocsPaths(ctx) {
   return null;
 }
 
+function discoverContextFileFromDir(dir) {
+  for (const filename of AGENTS_CONTEXT_FILENAMES) {
+    const filePath = path.join(dir, filename);
+    if (!fs.existsSync(filePath)) {
+      continue;
+    }
+
+    try {
+      return {
+        path: filePath,
+        content: fs.readFileSync(filePath, "utf-8"),
+      };
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+}
+
+function discoverAgentsFiles(cwd, agentDir) {
+  const agentsFiles = [];
+  const seenPaths = new Set();
+
+  const globalContext = discoverContextFileFromDir(agentDir);
+  if (globalContext) {
+    agentsFiles.push(globalContext);
+    seenPaths.add(globalContext.path);
+  }
+
+  const ancestorContexts = [];
+  let currentDir = path.resolve(cwd);
+  const rootDir = path.parse(currentDir).root;
+
+  while (true) {
+    const contextFile = discoverContextFileFromDir(currentDir);
+    if (contextFile && !seenPaths.has(contextFile.path)) {
+      ancestorContexts.unshift(contextFile);
+      seenPaths.add(contextFile.path);
+    }
+
+    if (currentDir === rootDir) {
+      break;
+    }
+
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      break;
+    }
+    currentDir = parentDir;
+  }
+
+  agentsFiles.push(...ancestorContexts);
+
+  return agentsFiles;
+}
+
 function escapeXml(str) {
   return str
     .replace(/&/g, "&amp;")
@@ -86,7 +145,17 @@ function escapeXml(str) {
     .replace(/'/g, "&apos;");
 }
 
-function formatPathForPrompt(filePath) {
+function formatPathForPrompt(filePath, cwd = "") {
+  if (cwd) {
+    const relativePath = path.relative(path.resolve(cwd), path.resolve(filePath));
+    if (relativePath === "") {
+      return ".";
+    }
+    if (!relativePath.startsWith("..") && !path.isAbsolute(relativePath)) {
+      return relativePath;
+    }
+  }
+
   const homeDir = os.homedir();
   if (filePath === homeDir) {
     return "~";
@@ -123,7 +192,7 @@ function formatSkillsForPrompt(skills) {
   return lines.join("\n");
 }
 
-function formatAgentFilesForPrompt(agentFiles) {
+function formatAgentFilesForPrompt(agentFiles, cwd) {
   if (agentFiles.length === 0) {
     return "";
   }
@@ -131,7 +200,7 @@ function formatAgentFilesForPrompt(agentFiles) {
   const lines = ["\n\nAGENTS.md files:", "<agents_files>"];
 
   for (const { path: filePath, content } of agentFiles) {
-    lines.push(`<agent_file path=\"${escapeXml(formatPathForPrompt(filePath))}\">`);
+    lines.push(`<agent_file path=\"${escapeXml(formatPathForPrompt(filePath, cwd))}\">`);
     lines.push(content.trim());
     lines.push("</agent_file>");
   }
@@ -221,7 +290,7 @@ export default function injectContextExtension(pi) {
     const { skills } = resourceLoader.getSkills();
     const filteredSkills = skills.filter((skill) => !skill.disableModelInvocation);
 
-    const { agentsFiles } = resourceLoader.getAgentsFiles();
+    const agentsFiles = discoverAgentsFiles(ctx.cwd, agentDir);
 
     const piDocs = formatPiDocumentationForPrompt(baseSystemPrompt, ctx);
     const harnessSpecificInstructions = formatHarnessSpecificInstructions(ctx);
@@ -233,7 +302,7 @@ export default function injectContextExtension(pi) {
     const prompt = [
       "\n\n---",
       piDocs,
-      formatAgentFilesForPrompt(agentsFiles),
+      formatAgentFilesForPrompt(agentsFiles, ctx.cwd),
       formatSkillsForPrompt(filteredSkills),
       harnessSpecificInstructions,
       `\n\nCurrent date: ${dateTime}`,
