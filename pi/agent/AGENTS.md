@@ -2,6 +2,8 @@
 - For new files, don’t work in isolation. Before creating one, inspect ~2 files of the same type and mirror their structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions) can skip this; keep them token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
+- Path handling: For file tools (`read`, `write`, `edit`), use cwd-relative paths by default. Use absolute paths only when needed to disambiguate
+ or when operating outside the current repo.
 - When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
 - When you need to look something up on the web, use Codex web search with a long bash timeout (`timeout: 1800`, i.e., 30 minutes): `codex --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."`
 - Source code and user projects are located in `~/code/`.
