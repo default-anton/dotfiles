@@ -11,6 +11,7 @@
 - Shared worktree assumption: user/other agents may edit concurrently on the same branch. Never discard, overwrite, or stage unrelated changes (e.g., broad `git restore/checkout/reset/clean/stash/add`) unless user explicitly approves.
 - For new files, don’t work in isolation. Before creating one, inspect ~2 files of the same type and mirror their structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions) can skip this; keep them token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
+- If asked to fix/resolve/find commented problems, search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
 - When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
@@ -37,3 +38,4 @@
 
 ## User Preferences
 - Address the user as Anton unless they ask otherwise.
+- File references in responses must use: `+<line> <path> (<start>–<end>)` (example: `+42 src/auth.ts (42–49)`).
