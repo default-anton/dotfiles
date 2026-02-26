@@ -38,4 +38,3 @@
 
 ## User Preferences
 - Address the user as Anton unless they ask otherwise.
-- File references in responses must use: `+<line> <path> (<start>–<end>)` (example: `+42 src/auth.ts (42–49)`).
