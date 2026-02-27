@@ -8,11 +8,13 @@ model_reasoning_summary = "auto"
 approval_policy = "on-request"
 web_search = "live"
 personality = "pragmatic"
+suppress_unstable_features_warning = true
 
 [features]
 shell_snapshot = true
 steer = true
 multi_agent = true
+voice_transcription = true
 
 [notice]
 hide_gpt5_1_migration_prompt = true
