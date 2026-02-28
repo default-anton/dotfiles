@@ -12,6 +12,7 @@ alias ,envkeys="env | cut -d= -f1"
 alias reranker="text-embeddings-router --model-id BAAI/bge-reranker-v2-m3 --revision 12e9746 --port 8787"
 alias c="claude --dangerously-skip-permissions"
 alias co="codex --yolo"
+alias coa="CODEX_HOME=$HOME/.codex-api codex --yolo"
 alias cchrome="c --mcp-config ~/.dotfiles/claude/chrome.mcp.json"
 alias ge="gemini --model flash --yolo"
 

@@ -37,6 +37,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.pi/agent/SYSTEM.md", "pi/agent/SYSTEM.md"),
     ("~/Library/Application Support/com.mitchellh.ghostty/config", "ghostty/config"),
     ("~/.codex/AGENTS.md", "codex/AGENTS.md"),
+    ("~/.codex-api/AGENTS.md", "codex/AGENTS.md"),
     ("~/.claude/commands", "claude/commands"),
     ("~/.claude/settings.json", "claude/settings.json"),
     ("~/.claude/CLAUDE.md", "claude/CLAUDE.md"),
@@ -47,6 +48,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
 
 COPY_FILES: Final[list[tuple[str, str]]] = [
     ("~/.codex/config.toml", "codex/config.toml"),
+    ("~/.codex-api/config.toml", "codex/config.toml"),
 ]
 
 TEMPLATES: Final[list[tuple[str, str]]] = [
@@ -129,61 +131,39 @@ def main():
         )
         process.wait(timeout=3600)
 
-    # Dynamically copy all .md files from pi/agent/prompts/ to ~/.codex/prompts/
-    prompts_dir = DOTFILES.joinpath("pi/agent/prompts")
-    if prompts_dir.exists():
-        for md_file in prompts_dir.glob("*.md"):
-            dst = Path("~/.codex/prompts").expanduser().joinpath(md_file.name)
-            print(f"rm -f {dst}")
-            process = Popen(
-                f'rm -f "{dst}"',
-                cwd=DOTFILES,
-                shell=True,
-                executable=os.getenv("SHELL"),
-            )
-            process.wait(timeout=3600)
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            print(f"cp {md_file} {dst}")
-            process = Popen(
-                f'cp "{md_file}" "{dst}"',
-                cwd=DOTFILES,
-                shell=True,
-                executable=os.getenv("SHELL"),
-            )
-            process.wait(timeout=3600)
-
-    # Dynamically copy all skills files from pi/agent/skills/ to ~/.codex/skills/
+    # Dynamically copy all skills files from pi/agent/skills/ to ~/.codex/skills/ and ~/.codex-api/skills/
     skills_dir = DOTFILES.joinpath("pi/agent/skills")
     if skills_dir.exists():
         for skill_dir in skills_dir.iterdir():
             if skill_dir.name in CODEX_EXCLUDE_SKILLS:
                 continue
 
-            dst = Path("~/.codex/skills").expanduser().joinpath(skill_dir.name)
-            print(f"rm -rf {dst}")
-            process = Popen(
-                f'rm -rf "{dst}"',
-                cwd=DOTFILES,
-                shell=True,
-                executable=os.getenv("SHELL"),
-            )
-            process.wait(timeout=3600)
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            print(f"cp -cRp {skill_dir} {dst}")
-            process = Popen(
-                f'cp -cRp "{skill_dir}" "{dst}"',
-                cwd=DOTFILES,
-                shell=True,
-                executable=os.getenv("SHELL"),
-            )
-            process.wait(timeout=3600)
+            for codex in (".codex", ".codex-api"):
+                dst = Path(f"~/{codex}/skills").expanduser().joinpath(skill_dir.name)
+                print(f"rm -rf {dst}")
+                process = Popen(
+                    f'rm -rf "{dst}"',
+                    cwd=DOTFILES,
+                    shell=True,
+                    executable=os.getenv("SHELL"),
+                )
+                process.wait(timeout=3600)
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                print(f"cp -cRp {skill_dir} {dst}")
+                process = Popen(
+                    f'cp -cRp "{skill_dir}" "{dst}"',
+                    cwd=DOTFILES,
+                    shell=True,
+                    executable=os.getenv("SHELL"),
+                )
+                process.wait(timeout=3600)
 
-            skill_md = dst.joinpath("SKILL.md")
-            if skill_md.exists():
-                content = skill_md.read_text()
-                updated = content.replace(".pi", ".codex")
-                skill_md.write_text(updated)
-                print(f"replaced .pi with .codex in {skill_md}")
+                skill_md = dst.joinpath("SKILL.md")
+                if skill_md.exists():
+                    content = skill_md.read_text()
+                    updated = content.replace(".pi", codex)
+                    skill_md.write_text(updated)
+                    print(f"replaced .pi with {codex} in {skill_md}")
 
     for (dst, template) in TEMPLATES:
         dst, template = Path(dst).expanduser(), DOTFILES.joinpath(template)
