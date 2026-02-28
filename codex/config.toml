@@ -1,11 +1,11 @@
 model = "gpt-5.3-codex"
-sandbox_mode    = "workspace-write"
+sandbox_mode    = "danger-full-access"
+approval_policy = "never"
 tool_output_token_limit = 15000
 # 273000 - (15000 + 15000), where 15000 is tool output limit and 15000 is buffer for prompt and response
 model_auto_compact_token_limit = 243000
 model_reasoning_effort = "high"
 model_reasoning_summary = "auto"
-approval_policy = "on-request"
 web_search = "live"
 personality = "pragmatic"
 suppress_unstable_features_warning = true
