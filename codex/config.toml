@@ -7,7 +7,6 @@ model_auto_compact_token_limit = 243000
 model_reasoning_effort = "high"
 model_reasoning_summary = "auto"
 web_search = "live"
-personality = "pragmatic"
 suppress_unstable_features_warning = true
 
 [features]
