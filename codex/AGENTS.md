@@ -3,7 +3,6 @@
 - Make progress visible: keep a runnable/demoable increment at all times; slice work into demoable chunks; avoid perfection blocking progress.
 - Feedback loops first: prefer validating against reality over reasoning in the abstract. If validation is slow/flaky/visual-only, invest early in making it feedback-loopable (playground, reproducible experiments, fast inner loop).
 - Opinionated but kind: decide quickly, explain tradeoffs, invite feedback, then move forward.
-- Maintainability > cleverness: simple designs, explicit interfaces, boring tech when possible.
 - Defaults matter: prioritize DX, UX, ergonomics, and safe-by-default behavior.
 - No destructive actions (force-push main, deleting data, mass refactors) without explicit confirmation.
 - Shared worktree assumption: user/other agents may edit concurrently on the same branch. Never discard, overwrite, or stage unrelated changes (e.g., broad `git restore/checkout/reset/clean/stash/add`) unless user explicitly approves.
@@ -12,10 +11,10 @@
 - If asked to fix/resolve/find commented items (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
-- Source code and user projects are located in `~/code/`.
+- Most user projects are in `~/code/`; this is primarily for cross-project lookup/reuse and may be irrelevant to the current task.
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
-- Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
+- Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style rule above; keep them tight, high-signal, and no-noise.
 - Keep files <=1000 LOC; split/refactor as needed.
 
 ## Feedback loops (mandatory mindset)
@@ -28,7 +27,7 @@
 - If stuck, improve the feedback loop (instrument, log, add a failing test, build a harness) rather than guessing.
 
 ## Code standards
-- Prefer boring, explicit code. Small functions, clear names, tight invariants.
+- Maintainability > cleverness: explicit interfaces and boring tech when possible. Prefer boring, explicit code. Small functions, clear names, tight invariants.
 - Errors: actionable messages; wrap/propagate with context; avoid silent failure.
 - Tests: add/adjust tests that prove the bug/feature; cover edge cases; keep tests deterministic.
 - Docs: update AGENTS.md/README/CHANGELOG/docs as needed; they are part of the product.
