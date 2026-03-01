@@ -14,7 +14,6 @@
 - If asked to fix/resolve/find commented items (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
-- When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
 - Source code and user projects are located in `~/code/`.
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
