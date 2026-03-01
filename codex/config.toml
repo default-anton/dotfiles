@@ -13,8 +13,8 @@ suppress_unstable_features_warning = true
 [features]
 shell_snapshot = true
 steer = true
-multi_agent = true
 voice_transcription = true
+prevent_idle_sleep = true
 
 [notice]
 hide_gpt5_1_migration_prompt = true
