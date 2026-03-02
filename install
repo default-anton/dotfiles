@@ -38,6 +38,8 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/Library/Application Support/com.mitchellh.ghostty/config", "ghostty/config"),
     ("~/.codex/AGENTS.md", "codex/AGENTS.md"),
     ("~/.codex-api/AGENTS.md", "codex/AGENTS.md"),
+    ("~/.codex/prompts", "codex/prompts"),
+    ("~/.codex-api/prompts", "codex/prompts"),
     ("~/.claude/commands", "claude/commands"),
     ("~/.claude/settings.json", "claude/settings.json"),
     ("~/.claude/CLAUDE.md", "claude/CLAUDE.md"),
