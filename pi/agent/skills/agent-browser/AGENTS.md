@@ -7,7 +7,7 @@
     ```bash
     set -euo pipefail
 
-    VERSION=v0.14.0
+    VERSION=v0.15.1
     DEST="$HOME/.dotfiles/pi/agent/skills/agent-browser"
     TMP="$(mktemp -d /tmp/agent-browser-skill.XXXXXX)"
 
