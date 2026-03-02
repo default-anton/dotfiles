@@ -4,5 +4,7 @@ command -v mise >/dev/null 2>&1 && eval "$($(brew --prefix)/bin/mise activate ba
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 
-command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"
+if [[ $- == *i* ]] && [[ ${TERM:-} != dumb ]] && command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook bash)"
