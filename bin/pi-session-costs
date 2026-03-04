@@ -1,0 +1,291 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+python3 - "$@" <<'PY'
+import argparse
+import json
+import os
+import sys
+from collections import defaultdict
+from datetime import datetime, timezone
+
+DEFAULT_SESSIONS_ROOT = "~/.pi/agent/sessions"
+
+
+def normalize_path(path: str) -> str:
+    expanded = os.path.expanduser(path.strip())
+    if not expanded:
+        return expanded
+    return os.path.realpath(expanded.rstrip("/"))
+
+
+def month_window(month_count: int) -> list[str]:
+    now = datetime.now(timezone.utc)
+    year = now.year
+    month = now.month
+    months: list[str] = []
+
+    for _ in range(month_count):
+        months.append(f"{year:04d}-{month:02d}")
+        month -= 1
+        if month == 0:
+            month = 12
+            year -= 1
+
+    months.reverse()
+    return months
+
+
+def iter_session_files(sessions_root: str):
+    with os.scandir(sessions_root) as project_entries:
+        for project_entry in project_entries:
+            if not project_entry.is_dir():
+                continue
+            try:
+                with os.scandir(project_entry.path) as files:
+                    for file_entry in files:
+                        if file_entry.is_file() and file_entry.name.endswith(".jsonl"):
+                            yield file_entry.path
+            except FileNotFoundError:
+                continue
+
+
+def parse_cost(value):
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value)
+        except ValueError:
+            return None
+    return None
+
+
+def model_key(entry: dict, message_payload: dict) -> str:
+    provider = entry.get("provider") or message_payload.get("provider")
+    model = (
+        entry.get("model")
+        or entry.get("modelId")
+        or message_payload.get("model")
+        or message_payload.get("modelId")
+    )
+
+    if provider and model:
+        return f"{provider}/{model}"
+    if model:
+        return str(model)
+    if provider:
+        return str(provider)
+    return "unknown"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="pi-session-costs",
+        description="Show monthly Pi session cost breakdown per model.",
+    )
+    parser.add_argument(
+        "-m",
+        "--months",
+        type=int,
+        default=1,
+        help="How many recent months to include (including current month). Default: 1",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        action="append",
+        default=[],
+        help="Project directory to include. Repeat to include multiple directories. You can also pass a comma-separated list. If omitted, all sessions are included.",
+    )
+    parser.add_argument(
+        "--sessions-root",
+        default=DEFAULT_SESSIONS_ROOT,
+        help=f"Session storage root. Default: {DEFAULT_SESSIONS_ROOT}",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output JSON instead of human-readable text.",
+    )
+    return parser.parse_args()
+
+
+def expand_dirs(raw_dirs: list[str]) -> list[str]:
+    expanded: list[str] = []
+
+    for value in raw_dirs:
+        for item in value.split(","):
+            cleaned = item.strip()
+            if cleaned:
+                expanded.append(cleaned)
+
+    normalized: list[str] = []
+    seen = set()
+    for path in expanded:
+        normalized_path = normalize_path(path)
+        if normalized_path and normalized_path not in seen:
+            seen.add(normalized_path)
+            normalized.append(normalized_path)
+
+    return normalized
+
+
+def main() -> int:
+    args = parse_args()
+
+    if args.months < 1:
+        print("Error: --months must be >= 1", file=sys.stderr)
+        return 2
+
+    selected_dirs = expand_dirs(args.dir)
+
+    sessions_root = normalize_path(args.sessions_root)
+    if not os.path.isdir(sessions_root):
+        print(f"Error: sessions root not found: {sessions_root}", file=sys.stderr)
+        return 1
+
+    months = month_window(args.months)
+    allowed_months = set(months)
+
+    monthly_by_model: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+    overall_by_model: dict[str, float] = defaultdict(float)
+
+    matched_files = 0
+
+    for session_file in iter_session_files(sessions_root):
+        try:
+            with open(session_file, "r", encoding="utf-8") as handle:
+                first_line = handle.readline()
+                if not first_line:
+                    continue
+
+                try:
+                    session_header = json.loads(first_line)
+                except json.JSONDecodeError:
+                    continue
+
+                cwd = session_header.get("cwd") if session_header.get("type") == "session" else None
+                if not isinstance(cwd, str):
+                    continue
+
+                cwd_normalized = normalize_path(cwd)
+                if selected_dirs and not any(
+                    cwd_normalized == selected_dir or cwd_normalized.startswith(f"{selected_dir}{os.sep}")
+                    for selected_dir in selected_dirs
+                ):
+                    continue
+
+                matched_files += 1
+
+                for line in handle:
+                    if '"usage"' not in line or '"type":"message"' not in line:
+                        continue
+
+                    try:
+                        entry = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+
+                    if entry.get("type") != "message":
+                        continue
+
+                    message = entry.get("message") or {}
+                    if message.get("role") != "assistant":
+                        continue
+
+                    usage = entry.get("usage") or message.get("usage") or {}
+                    cost_total = parse_cost((usage.get("cost") or {}).get("total"))
+                    if cost_total is None:
+                        continue
+
+                    timestamp = entry.get("timestamp")
+                    if not isinstance(timestamp, str) or len(timestamp) < 7:
+                        continue
+
+                    month = timestamp[:7]
+                    if month not in allowed_months:
+                        continue
+
+                    model = model_key(entry, message)
+                    monthly_by_model[month][model] += cost_total
+                    overall_by_model[model] += cost_total
+        except OSError:
+            continue
+
+    if matched_files == 0:
+        if selected_dirs:
+            print(
+                "Error: no session files matched the selected directories. "
+                "Try passing explicit --dir paths.",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                "Error: no session files found under sessions root.",
+                file=sys.stderr,
+            )
+        return 1
+
+    month_rows = []
+    grand_total = 0.0
+
+    for month in months:
+        model_totals = monthly_by_model.get(month, {})
+        sorted_models = sorted(model_totals.items(), key=lambda pair: pair[1], reverse=True)
+        month_total = sum(cost for _, cost in sorted_models)
+        grand_total += month_total
+        month_rows.append((month, sorted_models, month_total))
+
+    overall_rows = sorted(overall_by_model.items(), key=lambda pair: pair[1], reverse=True)
+
+    if args.json:
+        payload = {
+            "months": args.months,
+            "allDirectories": len(selected_dirs) == 0,
+            "directories": selected_dirs,
+            "sessionsRoot": sessions_root,
+            "matchedSessionFiles": matched_files,
+            "monthly": [
+                {
+                    "month": month,
+                    "models": [{"model": model, "cost": cost} for model, cost in model_rows],
+                    "total": month_total,
+                }
+                for month, model_rows, month_total in month_rows
+            ],
+            "overallByModel": [{"model": model, "cost": cost} for model, cost in overall_rows],
+            "grandTotal": grand_total,
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    print("Pi session cost report")
+    directories_label = ", ".join(selected_dirs) if selected_dirs else "ALL"
+    print(f"Directories: {directories_label}")
+    print(f"Months: {months[0]}..{months[-1]} ({args.months})")
+    print(f"Matched session files: {matched_files}")
+
+    for month, model_rows, month_total in month_rows:
+        print(f"\n{month}")
+        if not model_rows:
+            print("  (no costs)")
+        else:
+            for model, cost in model_rows:
+                print(f"  {model:<36} ${cost:,.4f}")
+        print(f"  {'TOTAL':<36} ${month_total:,.4f}")
+
+    print("\nOverall by model")
+    if not overall_rows:
+        print("  (no costs)")
+    else:
+        for model, cost in overall_rows:
+            print(f"  {model:<36} ${cost:,.4f}")
+
+    print(f"\nGRAND TOTAL{'':<25} ${grand_total:,.4f}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+PY
