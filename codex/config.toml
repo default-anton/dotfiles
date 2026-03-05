@@ -1,4 +1,4 @@
-model = "gpt-5.3-codex"
+model = "gpt-5.4"
 sandbox_mode    = "danger-full-access"
 approval_policy = "never"
 tool_output_token_limit = 15000
