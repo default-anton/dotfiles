@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.55.4",
+  "lastChangelogVersion": "0.56.0",
   "defaultThinkingLevel": "high",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.3-codex",
@@ -12,6 +12,7 @@
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-handoff",
-    "npm:pi-tmux-window-name"
+    "npm:pi-tmux-window-name",
+    "npm:pi-finder-subagent"
   ]
 }
