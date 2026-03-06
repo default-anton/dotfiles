@@ -12,7 +12,7 @@
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
-- Keep files <=500 LOC; split/refactor as needed.
+- Keep files <=1000 LOC; split/refactor as needed.
 - `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
 - True location of pi (your) stuff is `~/.dotfiles/pi/agent/{AGENTS.md,SYSTEM.md,skills,extensions,prompts}`, not under `~/.pi/agent/`
 - Run `cd ~/.dotfiles && ./install --no-brew` after modifying skills or prompts.
