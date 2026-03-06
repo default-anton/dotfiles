@@ -8,12 +8,15 @@ model_reasoning_effort = "high"
 model_reasoning_summary = "auto"
 web_search = "live"
 suppress_unstable_features_warning = true
+service_tier = "fast"
 
 [features]
 shell_snapshot = true
 steer = true
 voice_transcription = true
 prevent_idle_sleep = true
+responses_websockets_v2 = true
+child_agents_md = true
 
 [notice]
 hide_gpt5_1_migration_prompt = true
