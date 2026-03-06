@@ -12,7 +12,6 @@
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-handoff",
-    "npm:pi-tmux-window-name",
-    "npm:pi-finder-subagent"
+    "npm:pi-tmux-window-name"
   ]
 }
