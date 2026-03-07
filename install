@@ -2,9 +2,13 @@
 
 import argparse
 import os
+import shutil
+import tarfile
 from pathlib import Path
 from subprocess import Popen, check_output
+from tempfile import TemporaryDirectory
 from typing import Final
+from urllib.request import urlretrieve
 from platform import python_version
 
 NODE = "22"
@@ -12,6 +16,11 @@ RUBY = "3.4"
 LUA = "5.1"
 
 CODEX_EXCLUDE_SKILLS: Final[set[str]] = set()
+SHARED_SKILLS_REPO: Final[str] = "default-anton/very-good-agent-skills"
+SHARED_SKILLS_ARCHIVE_URL: Final[str] = (
+    f"https://codeload.github.com/{SHARED_SKILLS_REPO}/tar.gz/refs/heads/main"
+)
+SHARED_SKILLS: Final[set[str]] = {"agents-md", "git-commit"}
 
 SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
@@ -80,6 +89,62 @@ BASH_PROFILE_LINES: Final[list[str]] = [
     "source ~/.dotfiles/profile",
 ]
 
+
+def copy_directory(src: Path, dst: Path):
+    print(f"rm -rf {dst}")
+    if dst.is_symlink() or dst.is_file():
+        dst.unlink(missing_ok=True)
+    elif dst.exists():
+        shutil.rmtree(dst)
+
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    print(f"cp -cRp {src} {dst}")
+    shutil.copytree(src, dst, symlinks=True)
+
+
+def rewrite_skill_md(dst: Path, codex: str):
+    skill_md = dst.joinpath("SKILL.md")
+    if skill_md.exists():
+        content = skill_md.read_text()
+        updated = content.replace(".pi", codex)
+        if updated != content:
+            skill_md.write_text(updated)
+            print(f"replaced .pi with {codex} in {skill_md}")
+
+
+def install_skill(skill_dir: Path):
+    for codex in (".codex", ".codex-api"):
+        dst = Path(f"~/{codex}/skills").expanduser().joinpath(skill_dir.name)
+        copy_directory(skill_dir, dst)
+        rewrite_skill_md(dst, codex)
+
+
+def install_shared_skills():
+    with TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        archive_path = tmp_path.joinpath("shared-skills.tar.gz")
+        print(f"download {SHARED_SKILLS_ARCHIVE_URL} -> {archive_path}")
+        urlretrieve(SHARED_SKILLS_ARCHIVE_URL, archive_path)
+
+        extracted_dir = tmp_path.joinpath("shared-skills")
+        extracted_dir.mkdir()
+        with tarfile.open(archive_path) as archive:
+            archive.extractall(extracted_dir)
+
+        roots = [path for path in extracted_dir.iterdir() if path.is_dir()]
+        if len(roots) != 1:
+            raise RuntimeError(
+                f"expected one root directory in {archive_path}, found {len(roots)}"
+            )
+
+        for skill_name in sorted(SHARED_SKILLS):
+            skill_dir = roots[0].joinpath(skill_name)
+            if not skill_dir.exists():
+                raise FileNotFoundError(
+                    f"shared skill {skill_name} missing from {SHARED_SKILLS_REPO}"
+                )
+            install_skill(skill_dir)
+
 def main():
     major, minor, patch = map(int, python_version().split('.'))
     assert major == 3, 'python 3 expected'
@@ -133,39 +198,19 @@ def main():
         )
         process.wait(timeout=3600)
 
-    # Dynamically copy all skills files from pi/agent/skills/ to ~/.codex/skills/ and ~/.codex-api/skills/
+    # Copy local skills into ~/.codex/skills/ and ~/.codex-api/skills/.
     skills_dir = DOTFILES.joinpath("pi/agent/skills")
     if skills_dir.exists():
         for skill_dir in skills_dir.iterdir():
-            if skill_dir.name in CODEX_EXCLUDE_SKILLS:
+            if (
+                skill_dir.name in CODEX_EXCLUDE_SKILLS
+                or skill_dir.name in SHARED_SKILLS
+            ):
                 continue
 
-            for codex in (".codex", ".codex-api"):
-                dst = Path(f"~/{codex}/skills").expanduser().joinpath(skill_dir.name)
-                print(f"rm -rf {dst}")
-                process = Popen(
-                    f'rm -rf "{dst}"',
-                    cwd=DOTFILES,
-                    shell=True,
-                    executable=os.getenv("SHELL"),
-                )
-                process.wait(timeout=3600)
-                dst.parent.mkdir(parents=True, exist_ok=True)
-                print(f"cp -cRp {skill_dir} {dst}")
-                process = Popen(
-                    f'cp -cRp "{skill_dir}" "{dst}"',
-                    cwd=DOTFILES,
-                    shell=True,
-                    executable=os.getenv("SHELL"),
-                )
-                process.wait(timeout=3600)
+            install_skill(skill_dir)
 
-                skill_md = dst.joinpath("SKILL.md")
-                if skill_md.exists():
-                    content = skill_md.read_text()
-                    updated = content.replace(".pi", codex)
-                    skill_md.write_text(updated)
-                    print(f"replaced .pi with {codex} in {skill_md}")
+    install_shared_skills()
 
     for (dst, template) in TEMPLATES:
         dst, template = Path(dst).expanduser(), DOTFILES.joinpath(template)
