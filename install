@@ -20,7 +20,6 @@ SHARED_SKILLS_REPO: Final[str] = "default-anton/very-good-agent-skills"
 SHARED_SKILLS_ARCHIVE_URL: Final[str] = (
     f"https://codeload.github.com/{SHARED_SKILLS_REPO}/tar.gz/refs/heads/main"
 )
-SHARED_SKILLS: Final[set[str]] = {"agents-md", "create-cli", "git-commit"}
 
 SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.ripgreprc", "ripgreprc"),
@@ -119,7 +118,13 @@ def install_skill(skill_dir: Path):
         rewrite_skill_md(dst, codex)
 
 
-def install_shared_skills():
+def iter_shared_skill_dirs(root: Path):
+    for path in sorted(root.iterdir()):
+        if path.is_dir() and path.joinpath("SKILL.md").exists():
+            yield path
+
+
+def install_shared_skills() -> set[str]:
     with TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
         archive_path = tmp_path.joinpath("shared-skills.tar.gz")
@@ -137,13 +142,17 @@ def install_shared_skills():
                 f"expected one root directory in {archive_path}, found {len(roots)}"
             )
 
-        for skill_name in sorted(SHARED_SKILLS):
-            skill_dir = roots[0].joinpath(skill_name)
-            if not skill_dir.exists():
-                raise FileNotFoundError(
-                    f"shared skill {skill_name} missing from {SHARED_SKILLS_REPO}"
-                )
+        shared_skills = set()
+        for skill_dir in iter_shared_skill_dirs(roots[0]):
+            shared_skills.add(skill_dir.name)
             install_skill(skill_dir)
+
+        if not shared_skills:
+            raise FileNotFoundError(
+                f"no top-level skills with SKILL.md found in {SHARED_SKILLS_REPO}"
+            )
+
+        return shared_skills
 
 def main():
     major, minor, patch = map(int, python_version().split('.'))
@@ -198,19 +207,19 @@ def main():
         )
         process.wait(timeout=3600)
 
+    shared_skills = install_shared_skills()
+
     # Copy local skills into ~/.codex/skills/ and ~/.codex-api/skills/.
     skills_dir = DOTFILES.joinpath("pi/agent/skills")
     if skills_dir.exists():
         for skill_dir in skills_dir.iterdir():
             if (
                 skill_dir.name in CODEX_EXCLUDE_SKILLS
-                or skill_dir.name in SHARED_SKILLS
+                or skill_dir.name in shared_skills
             ):
                 continue
 
             install_skill(skill_dir)
-
-    install_shared_skills()
 
     for (dst, template) in TEMPLATES:
         dst, template = Path(dst).expanduser(), DOTFILES.joinpath(template)
