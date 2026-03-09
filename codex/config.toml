@@ -17,6 +17,7 @@ voice_transcription = true
 prevent_idle_sleep = true
 responses_websockets_v2 = true
 child_agents_md = true
+multi_agent = true
 
 [notice]
 hide_gpt5_1_migration_prompt = true
