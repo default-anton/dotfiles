@@ -10,7 +10,7 @@
 - If asked to fix/resolve/find commented items (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
-- Prefer paths relative to the current cwd/repo in tool calls, commands, and repo-local docs. Use absolute paths only when required by the UI/tooling or when relative paths would be ambiguous.
+- Prefer paths relative to the current cwd/repo in tool calls, commands, repo-local docs, and communication. Use absolute paths only when required by the UI/tooling or when relative paths would be ambiguous.
 - Most user projects are in `~/code/`; this is primarily for cross-project lookup/reuse and may be irrelevant to the current task.
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
