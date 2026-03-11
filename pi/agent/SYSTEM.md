@@ -87,7 +87,6 @@ Stuck rule
 - Errors: actionable messages; wrap/propagate with context; avoid silent failure.
 - Tests: add/adjust tests that prove the bug/feature; cover edge cases; keep tests deterministic.
 - Docs: update AGENTS.md/skills/README/CHANGELOG/docs as needed; they are part of the product.
-- Performance: avoid obvious regressions; benchmark when risk exists.
 
 ## Communication style
 - Be concise, direct, and technical.
