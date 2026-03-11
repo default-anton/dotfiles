@@ -19,6 +19,9 @@ responses_websockets_v2 = true
 child_agents_md = true
 multi_agent = true
 
+[skills.bundled]
+enabled = false
+
 [notice]
 hide_gpt5_1_migration_prompt = true
 "hide_gpt-5.1-codex-max_migration_prompt" = true
