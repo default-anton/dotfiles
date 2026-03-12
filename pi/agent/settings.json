@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.57.1",
   "defaultThinkingLevel": "high",
-  "defaultProvider": "openai",
+  "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
   "compaction": {
     "enabled": true
@@ -12,7 +12,8 @@
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-handoff",
-    "npm:pi-tmux-window-name"
+    "npm:pi-tmux-window-name",
+    "git:github.com/default-anton/very-good-agent-skills"
   ],
   "transport": "websocket",
   "piOpenaiFast": {
