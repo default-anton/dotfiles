@@ -17,5 +17,6 @@
   "transport": "websocket",
   "piOpenaiFast": {
     "enabled": true
-  }
+  },
+  "treeFilterMode": "no-tools"
 }
