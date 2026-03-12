@@ -39,5 +39,6 @@ gs.setup {
     map("n", "<leader>hu", gs.undo_stage_hunk)
     map("n", "<leader>hp", gs.preview_hunk)
     map('n', '<leader>hb', gs.blame)
+    map('n', '<leader>hd', gs.diffthis)
   end
 }
