@@ -1,17 +1,18 @@
 {
   "lastChangelogVersion": "0.57.1",
   "defaultThinkingLevel": "high",
-  "defaultProvider": "openai",
+  "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
   "compaction": {
     "enabled": true
   },
   "hideThinkingBlock": false,
   "steeringMode": "one-at-a-time",
-  "doubleEscapeAction": "branch",
+  "doubleEscapeAction": "tree",
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-handoff",
     "npm:pi-tmux-window-name"
-  ]
+  ],
+  "transport": "websocket"
 }
