@@ -14,5 +14,8 @@
     "npm:pi-handoff",
     "npm:pi-tmux-window-name"
   ],
-  "transport": "websocket"
+  "transport": "websocket",
+  "piOpenaiFast": {
+    "enabled": true
+  }
 }
