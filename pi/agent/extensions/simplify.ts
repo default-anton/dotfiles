@@ -15,17 +15,17 @@ function buildSimplifyInstruction(args: string): string {
   return `Review these changes and provide a simplification assessment. ${SIMPLIFY_INSTRUCTION} ${focusText}`;
 }
 
-function buildSimplifyMessage(args: string, conversationMarkdown?: string): string {
+function buildSimplifyMessage(args: string, conversationXml?: string): string {
   const simplifyInstruction = buildSimplifyInstruction(args);
-  if (!conversationMarkdown) {
+  if (!conversationXml) {
     return simplifyInstruction;
   }
 
   return [
     "Conversation context copied from the previous session (user + assistant messages only; thinking and tool calls removed):",
     "",
-    "````markdown",
-    conversationMarkdown,
+    "````xml",
+    conversationXml,
     "````",
     "",
     simplifyInstruction,
@@ -41,9 +41,9 @@ export default function simplifyExtension(pi: ExtensionAPI) {
       }
 
       const extractedConversation = extractConversation(ctx.sessionManager.getBranch());
-      const conversationMarkdown =
+      const conversationXml =
         extractedConversation.length === 0 ? undefined : formatConversation(extractedConversation);
-      const simplifyMessage = buildSimplifyMessage(args, conversationMarkdown);
+      const simplifyMessage = buildSimplifyMessage(args, conversationXml);
       await sendMessageInChildSession(pi, ctx, simplifyMessage, "simplify");
     },
   });

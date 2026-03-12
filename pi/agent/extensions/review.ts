@@ -15,17 +15,17 @@ function buildReviewInstruction(args: string): string {
   return `Review these changes. ${REVIEW_HAT_INSTRUCTION} ${focusText}`;
 }
 
-function buildReviewMessage(args: string, conversationMarkdown?: string): string {
+function buildReviewMessage(args: string, conversationXml?: string): string {
   const reviewInstruction = buildReviewInstruction(args);
-  if (!conversationMarkdown) {
+  if (!conversationXml) {
     return reviewInstruction;
   }
 
   return [
     "Conversation context copied from the previous session (user + assistant messages only; thinking and tool calls removed):",
     "",
-    "````markdown",
-    conversationMarkdown,
+    "````xml",
+    conversationXml,
     "````",
     "",
     reviewInstruction,
@@ -41,9 +41,9 @@ export default function reviewExtension(pi: ExtensionAPI) {
       }
 
       const extractedConversation = extractConversation(ctx.sessionManager.getBranch());
-      const conversationMarkdown =
+      const conversationXml =
         extractedConversation.length === 0 ? undefined : formatConversation(extractedConversation);
-      const reviewMessage = buildReviewMessage(args, conversationMarkdown);
+      const reviewMessage = buildReviewMessage(args, conversationXml);
       await sendMessageInChildSession(pi, ctx, reviewMessage, "review");
     },
   });

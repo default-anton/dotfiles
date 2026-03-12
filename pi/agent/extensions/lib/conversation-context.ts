@@ -60,8 +60,8 @@ export function extractConversation(branch: SessionEntry[]): ExtractedMessage[] 
 export function formatConversation(messages: ExtractedMessage[]): string {
   return messages
     .map((message, index) => {
-      const speaker = message.role === "user" ? "User" : "Assistant";
-      return `### ${index + 1}. ${speaker}\n${message.text}`;
+      const tag = message.role;
+      return `<${tag} index="${index + 1}">\n${message.text}\n</${tag}>`;
     })
     .join("\n\n");
 }
