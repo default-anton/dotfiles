@@ -4,7 +4,7 @@ import { sendMessageInChildSession } from "./lib/child-session.ts";
 import { extractConversation, formatConversation } from "./lib/conversation-context.ts";
 
 const REVIEW_HAT_INSTRUCTION =
-  "Put your technical co-founder/staff engineer/strict maintainer hat on. You know what to look for.";
+  "Put your technical co-founder/staff engineer/strict maintainer hat on. You know what to look for. Be meticulous.";
 
 function buildReviewInstruction(args: string): string {
   const focusText = args.trim();
