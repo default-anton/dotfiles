@@ -87,3 +87,38 @@ vim.api.nvim_create_user_command("Commit", function(opts)
   vim.cmd("term " .. cmd)
   vim.cmd("startinsert")
 end, { desc = "Run pi to prepare git commits", nargs = "+" })
+
+vim.api.nvim_create_user_command("Gq", function()
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  if vim.v.shell_error ~= 0 or not git_root or git_root == "" then
+    error("Gq: not in a Git repo")
+  end
+
+  local seen = {}
+  local items = {}
+  local commands = {
+    string.format("git -C %s diff --name-only --diff-filter=AM", vim.fn.shellescape(git_root)),
+    string.format("git -C %s diff --cached --name-only --diff-filter=AM", vim.fn.shellescape(git_root)),
+    string.format("git -C %s ls-files --others --exclude-standard --full-name", vim.fn.shellescape(git_root)),
+  }
+
+  for _, cmd in ipairs(commands) do
+    for _, file in ipairs(vim.fn.systemlist(cmd)) do
+      if file ~= "" and not seen[file] then
+        seen[file] = true
+        table.insert(items, { filename = git_root .. "/" .. file, lnum = 1, col = 1 })
+      end
+    end
+  end
+
+  vim.fn.setqflist({}, "r", { title = "Git changed files", items = items })
+
+  if #items == 0 then
+    vim.notify("Gq: no modified, added, or untracked files")
+    return
+  end
+
+  if #vim.api.nvim_list_uis() > 0 then
+    vim.cmd.copen()
+  end
+end, { desc = "Populate quickfix with Git changed files" })

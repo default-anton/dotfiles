@@ -50,6 +50,7 @@ vim.api.nvim_set_keymap('n', '<leader>tt', ':TSContextToggle<CR>',
   { noremap = true, silent = true, desc = "Toggle Treesitter context" })
 
 -- Quickfix list navigation
+vim.api.nvim_set_keymap('n', '<leader>qg', ':Gq<CR>', { noremap = true, silent = true, desc = "Quickfix Git changed files" })
 vim.api.nvim_set_keymap('n', '<leader>qo', ':copen<CR>', { noremap = true, silent = true, desc = "Open quickfix list" })
 vim.api.nvim_set_keymap('n', '<leader>qd', ':cclose<CR>', { noremap = true, silent = true, desc = "Close quickfix list" })
 vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent = true, desc = "Next quickfix item" })
