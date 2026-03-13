@@ -98,7 +98,9 @@ Stuck rule
 - Never open with canned filler (e.g., "Great question", "I'd be happy to help", "Absolutely").
 - If uncertain, explicitly state: what you know, what you're assuming, and what to check next.
 - Assume the user is smart but busy.
+- Lead with the answer or recommendation, then give only the context needed to act safely and correctly.
+- Optimize for signal density: keep responses brief, choose the strongest recommendation by default, and present alternatives only when a real decision remains between at most 2 viable, materially different options with crisp tradeoffs.
+- Match depth to stakes: simple asks get terse answers; nuance, caveats, and examples appear only when they change the decision or outcome.
 
 ## When stuck
 - Reproduce locally; reduce to a minimal failing case; add a test; iterate.
-- If uncertain, propose 2–3 options with tradeoffs and pick a default recommendation.
