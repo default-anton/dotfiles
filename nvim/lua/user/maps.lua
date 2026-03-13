@@ -57,6 +57,37 @@ vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz',
   { noremap = true, silent = true, desc = "Previous quickfix item" })
 
+local function open_review_diff(bufnr, attempts_left)
+  if vim.api.nvim_get_current_buf() ~= bufnr then
+    return
+  end
+
+  if vim.b[bufnr].gitsigns_status_dict ~= nil then
+    require('gitsigns').diffthis()
+    return
+  end
+
+  if attempts_left <= 0 then
+    vim.notify('Next review file: gitsigns did not attach to current buffer', vim.log.levels.WARN)
+    return
+  end
+
+  vim.defer_fn(function()
+    open_review_diff(bufnr, attempts_left - 1)
+  end, 50)
+end
+
+local function next_review_file()
+  vim.cmd.cnext()
+  vim.cmd.normal { 'zz', bang = true }
+  vim.cmd 'BufOnly!'
+  vim.schedule(function()
+    open_review_diff(vim.api.nvim_get_current_buf(), 20)
+  end)
+end
+
+vim.keymap.set('n', '<leader>qr', next_review_file, { silent = true, desc = "Next review file" })
+
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>',
   { noremap = true, silent = true, desc = "Run tests in current file" })
