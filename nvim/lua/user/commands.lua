@@ -1,3 +1,5 @@
+local review_diff = require "user.review-diff"
+
 vim.api.nvim_create_user_command("Pr", function()
   local Job = require "plenary.job"
   local open_pr = Job:new {
@@ -51,7 +53,8 @@ vim.api.nvim_create_user_command("Commit", function(opts)
     error("Commit: instructions required")
   end
 
-  local system_prompt = [[Git-commit agent. Only use bash. Always inspect git status + diff for requested scope. If staged: read staged diff. If unstaged/paths: read those diffs. Read recent commit messages by current Git user to match style. Then craft commit message + perform commits per instructions. No code edits, no push. If scope unclear, refuse.]]
+  local system_prompt =
+  [[Git-commit agent. Only use bash. Always inspect git status + diff for requested scope. If staged: read staged diff. If unstaged/paths: read those diffs. Read recent commit messages by current Git user to match style. Then craft commit message + perform commits per instructions. No code edits, no push. If scope unclear, refuse.]]
 
   local exit_extension = vim.fn.stdpath("config") .. "/lua/user/exit-after-turn.ts"
 
@@ -80,10 +83,10 @@ vim.api.nvim_create_user_command("Commit", function(opts)
   vim.cmd("startinsert")
 end, { desc = "Run pi to prepare git commits", nargs = "+" })
 
-vim.api.nvim_create_user_command("Gq", function()
+vim.api.nvim_create_user_command("Hd", function()
   local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
   if vim.v.shell_error ~= 0 or not git_root or git_root == "" then
-    error("Gq: not in a Git repo")
+    error("Hd: not in a Git repo")
   end
 
   local seen = {}
@@ -106,11 +109,13 @@ vim.api.nvim_create_user_command("Gq", function()
   vim.fn.setqflist({}, "r", { title = "Git changed files", items = items })
 
   if #items == 0 then
-    vim.notify("Gq: no modified, added, or untracked files")
+    vim.notify("Hd: no modified, added, or untracked files")
     return
   end
 
   if #vim.api.nvim_list_uis() > 0 then
     vim.cmd.copen()
+    vim.cmd.cfirst()
+    review_diff.open_review_diff(vim.api.nvim_get_current_buf(), 20)
   end
 end, { desc = "Populate quickfix with Git changed files" })

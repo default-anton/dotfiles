@@ -1,3 +1,4 @@
+local review_diff = require "user.review-diff"
 local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
 -- Repeat movement with ; and ,
@@ -50,43 +51,38 @@ vim.api.nvim_set_keymap('n', '<leader>tt', ':TSContextToggle<CR>',
   { noremap = true, silent = true, desc = "Toggle Treesitter context" })
 
 -- Quickfix list navigation
-vim.api.nvim_set_keymap('n', '<leader>qg', ':Gq<CR>', { noremap = true, silent = true, desc = "Quickfix Git changed files" })
+vim.api.nvim_set_keymap('n', '<leader>hD', ':Hd<CR>',
+  { noremap = true, silent = true, desc = "Quickfix Git changed files" })
 vim.api.nvim_set_keymap('n', '<leader>qo', ':copen<CR>', { noremap = true, silent = true, desc = "Open quickfix list" })
 vim.api.nvim_set_keymap('n', '<leader>qd', ':cclose<CR>', { noremap = true, silent = true, desc = "Close quickfix list" })
 vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent = true, desc = "Next quickfix item" })
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz',
   { noremap = true, silent = true, desc = "Previous quickfix item" })
 
-local function open_review_diff(bufnr, attempts_left)
-  if vim.api.nvim_get_current_buf() ~= bufnr then
+local function next_review_file(opts)
+  if opts.direction == "prev" then
+    vim.cmd.cprev()
+  elseif opts.direction == "next" then
+    vim.cmd.cnext()
+  else
+    vim.notify('Invalid direction for next_review_file: ' .. opts.direction, vim.log.levels.ERROR)
     return
   end
 
-  if vim.b[bufnr].gitsigns_status_dict ~= nil then
-    require('gitsigns').diffthis()
-    return
-  end
-
-  if attempts_left <= 0 then
-    vim.notify('Next review file: gitsigns did not attach to current buffer', vim.log.levels.WARN)
-    return
-  end
-
-  vim.defer_fn(function()
-    open_review_diff(bufnr, attempts_left - 1)
-  end, 50)
-end
-
-local function next_review_file()
-  vim.cmd.cnext()
   vim.cmd.normal { 'zz', bang = true }
   vim.cmd 'BufOnly!'
   vim.schedule(function()
-    open_review_diff(vim.api.nvim_get_current_buf(), 20)
+    review_diff.open_review_diff(vim.api.nvim_get_current_buf(), 20)
   end)
 end
 
-vim.keymap.set('n', '<leader>qr', next_review_file, { silent = true, desc = "Next review file" })
+vim.keymap.set('n', ']d', function()
+  next_review_file({ direction = "next" })
+end, { silent = true, desc = "Next review file" })
+
+vim.keymap.set('n', '[d', function()
+  next_review_file({ direction = "prev" })
+end, { silent = true, desc = "Previous review file" })
 
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>',
