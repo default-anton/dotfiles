@@ -13,14 +13,6 @@ vim.api.nvim_create_user_command("Pr", function()
   open_pr:start()
 end, { desc = "Open PR in browser or create a new one if none exists" })
 
-vim.api.nvim_create_user_command("Ctest", function()
-  local current_file = vim.fn.expand("%")
-  local spec_file = current_file:gsub("^app", "spec"):gsub("%.rb$", "_spec.rb")
-  local spec_dir = vim.fn.fnamemodify(spec_file, ":h")
-  vim.fn.mkdir(spec_dir, "p")
-  vim.cmd("edit " .. spec_file)
-end, { desc = "Create a spec file for the current file" })
-
 vim.api.nvim_create_user_command("Strip", function(opts)
   local Job = require "plenary.job"
   local bufnr = vim.api.nvim_get_current_buf()
