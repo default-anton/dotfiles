@@ -13,7 +13,8 @@
     "npm:pi-subdir-context",
     "npm:pi-handoff",
     "npm:pi-tmux-window-name",
-    "git:github.com/default-anton/very-good-agent-skills"
+    "git:github.com/default-anton/very-good-agent-skills",
+    "npm:pi-finder-subagent"
   ],
   "transport": "websocket",
   "piOpenaiFast": {
