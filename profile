@@ -10,7 +10,7 @@ export EDITOR=nvim
 command -v rbenv >/dev/null 2>&1 && eval "$(rbenv init - bash)"
 # If running interactively
 case $- in
-  *i*) [ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash ;;
+*i*) [ -f ~/.dotfiles/bin/sensible.bash ] && source ~/.dotfiles/bin/sensible.bash ;;
 esac
 
 bash_completion="$(brew --prefix)/etc/profile.d/bash_completion.sh"
@@ -23,6 +23,7 @@ export FZF_ALT_C_COMMAND="fd '' -t d --hidden -d 1 ~/ ~/code . -x echo {/}"
 export RIPGREP_CONFIG_PATH="${HOME}/.ripgreprc"
 
 export PI_CACHE_RETENTION=long
+export PI_FINDER_MODELS="openai-codex/gpt-5.3-codex-spark:high,openai-codex/gpt-5.4:medium"
 
 # Use fd (https://github.com/sharkdp/fd) instead of the default find
 # command for listing path candidates.
