@@ -1,5 +1,15 @@
 local builtin = require "telescope.builtin"
+local actions = require "telescope.actions"
+local transform_mod = require("telescope.actions.mt").transform_mod
 local ai_coders = require("user.ai-coders")
+
+local my_actions = {}
+
+my_actions.cfirst = function(prompt_bufnr)
+  vim.cmd.cfirst()
+end
+
+my_actions = transform_mod(my_actions)
 
 vim.keymap.set("n", "<leader>,", builtin.find_files, {})
 vim.keymap.set("n", "<leader>m", builtin.live_grep, {})
@@ -62,6 +72,8 @@ require("telescope").setup {
 
           return true
         end,
+        ["<C-q>"] = actions.send_to_qflist + actions.open_qflist + my_actions.cfirst,
+        ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist + my_actions.cfirst,
       },
     },
   },
