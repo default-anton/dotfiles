@@ -7,7 +7,7 @@
     ```bash
     set -euo pipefail
 
-    VERSION=v0.19.0
+    VERSION="$(git ls-remote --tags --sort='version:refname' https://github.com/vercel-labs/agent-browser.git | awk -F/ '/refs\/tags\/v[0-9]/{tag=$3} END { sub(/\^\{\}$/, "", tag); print tag }')"
     DEST="$HOME/.dotfiles/pi/agent/skills/agent-browser"
     TMP="$(mktemp -d /tmp/agent-browser-skill.XXXXXX)"
 

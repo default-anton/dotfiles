@@ -65,6 +65,7 @@ agent-browser close
 - `references/session-management.md` — sessions/state
 - `references/authentication.md` — login/2FA patterns
 - `references/video-recording.md` — headed/recording workflows
+- `references/profiling.md` — performance traces
 - `references/proxy-support.md` — proxies/geo testing
 
 Templates: `templates/*.sh` (ready-to-run workflows).
