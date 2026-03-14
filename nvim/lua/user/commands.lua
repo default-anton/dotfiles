@@ -1,5 +1,3 @@
-local review_diff = require "user.review-diff"
-
 vim.api.nvim_create_user_command("Pr", function()
   local Job = require "plenary.job"
   local open_pr = Job:new {
@@ -82,40 +80,3 @@ vim.api.nvim_create_user_command("Commit", function(opts)
   vim.cmd("term " .. cmd)
   vim.cmd("startinsert")
 end, { desc = "Run pi to prepare git commits", nargs = "+" })
-
-vim.api.nvim_create_user_command("Hd", function()
-  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
-  if vim.v.shell_error ~= 0 or not git_root or git_root == "" then
-    error("Hd: not in a Git repo")
-  end
-
-  local seen = {}
-  local items = {}
-  local commands = {
-    string.format("git -C %s diff --name-only --diff-filter=AM", vim.fn.shellescape(git_root)),
-    string.format("git -C %s diff --cached --name-only --diff-filter=AM", vim.fn.shellescape(git_root)),
-    string.format("git -C %s ls-files --others --exclude-standard --full-name", vim.fn.shellescape(git_root)),
-  }
-
-  for _, cmd in ipairs(commands) do
-    for _, file in ipairs(vim.fn.systemlist(cmd)) do
-      if file ~= "" and not seen[file] then
-        seen[file] = true
-        table.insert(items, { filename = git_root .. "/" .. file, lnum = 1, col = 1 })
-      end
-    end
-  end
-
-  vim.fn.setqflist({}, "r", { title = "Git changed files", items = items })
-
-  if #items == 0 then
-    vim.notify("Hd: no modified, added, or untracked files")
-    return
-  end
-
-  if #vim.api.nvim_list_uis() > 0 then
-    vim.cmd.copen()
-    vim.cmd.cfirst()
-    review_diff.open_review_diff(vim.api.nvim_get_current_buf(), 20)
-  end
-end, { desc = "Populate quickfix with Git changed files" })
