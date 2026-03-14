@@ -1,3 +1,4 @@
+local review_diff = require "user.review-diff"
 local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
 -- Repeat movement with ; and ,
@@ -55,6 +56,31 @@ vim.api.nvim_set_keymap('n', '<leader>qd', ':cclose<CR>', { noremap = true, sile
 vim.api.nvim_set_keymap('n', '<leader>qn', ':cn<CR>zz', { noremap = true, silent = true, desc = "Next quickfix item" })
 vim.api.nvim_set_keymap('n', '<leader>qp', ':cp<CR>zz',
   { noremap = true, silent = true, desc = "Previous quickfix item" })
+
+local function next_review_file(opts)
+  if opts.direction == "prev" then
+    vim.cmd.cprev()
+  elseif opts.direction == "next" then
+    vim.cmd.cnext()
+  else
+    vim.notify('Invalid direction for next_review_file: ' .. opts.direction, vim.log.levels.ERROR)
+    return
+  end
+
+  vim.cmd.normal { 'zz', bang = true }
+  vim.cmd 'BufOnly!'
+  vim.schedule(function()
+    review_diff.open_review_diff(vim.api.nvim_get_current_buf(), 20)
+  end)
+end
+
+vim.keymap.set('n', ']d', function()
+  next_review_file({ direction = "next" })
+end, { silent = true, desc = "Next review file" })
+
+vim.keymap.set('n', '[d', function()
+  next_review_file({ direction = "prev" })
+end, { silent = true, desc = "Previous review file" })
 
 -- Run tests
 vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>TestFile<CR>',

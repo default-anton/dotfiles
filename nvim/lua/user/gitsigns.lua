@@ -3,12 +3,12 @@ local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
 local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(
   function()
-    gs.nav_hunk('next', { wrap = false, greedy = false, preview = true, target = "all" }, function()
+    gs.nav_hunk('next', { wrap = false, target = "all" }, function()
       vim.cmd.normal({ 'zz', bang = true })
     end)
   end,
   function()
-    gs.nav_hunk('prev', { wrap = false, greedy = false, preview = true, target = "all" }, function()
+    gs.nav_hunk('prev', { wrap = false, target = "all" }, function()
       vim.cmd.normal({ 'zz', bang = true })
     end)
   end
