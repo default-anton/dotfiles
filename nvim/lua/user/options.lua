@@ -34,6 +34,7 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.opt.inccommand = 'split'
 vim.opt.grepprg = "rg --vimgrep --no-heading --smart-case"
+vim.opt.diffopt:append 'followwrap'
 
 -- Don't pass messages to |ins-completion-menu|.
 vim.opt.shortmess:append "c"
