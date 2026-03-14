@@ -38,42 +38,25 @@ cmp.setup {
     { name = "ultisnips" }, -- For ultisnips users.
     { name = "buffer", keyword_length = 3 },
     { name = "path" },
-    -- { name = 'vsnip' }, -- For vsnip users.
-    -- { name = 'luasnip' }, -- For luasnip users.
-    -- { name = 'snippy' }, -- For snippy users.
   }),
   formatting = {
-    fields = { "kind", "abbr", "menu" },
-    format = lspkind.cmp_format {
-      mode = "symbol",
-      menu = {
-        nvim_lsp_signature_help = "[sig]",
-        nvim_lsp = "[lsp]",
-        nvim_lua = "[lsp]",
-        ultisnips = "[snip]",
-        buffer = "[buf]",
-        path = "[path]",
+    fields = { 'abbr', 'icon', 'kind', 'menu' },
+    format = lspkind.cmp_format({
+      maxwidth = {
+        -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+        -- can also be a function to dynamically calculate max width such as
+        -- menu = function() return math.floor(0.45 * vim.o.columns) end,
+        menu = 50, -- leading text (labelDetails)
+        abbr = 50, -- actual suggestion item
       },
-    },
-  },
-  confirm_opts = {
-    behavior = cmp.ConfirmBehavior.Replace,
-    select = false,
-  },
-  window = {
-    documentation = {
-      border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
-    },
-  },
-  experimental = {
-    native_menu = false,
-
-    ghost_text = false, -- this feature conflict with copilot.vim's preview.
-  },
+      ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+      show_labelDetails = true -- show labelDetails in menu. Disabled by default
+    })
+  }
 }
 
 -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline("/", {
+cmp.setup.cmdline({ '/', '?' }, {
   mapping = cmp.mapping.preset.cmdline(),
   sources = {
     { name = "buffer" },
@@ -88,4 +71,5 @@ cmp.setup.cmdline(":", {
   }, {
     { name = "cmdline" },
   }),
+  matching = { disallow_symbol_nonprefix_matching = false }
 })

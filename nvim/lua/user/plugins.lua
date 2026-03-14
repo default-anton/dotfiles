@@ -48,7 +48,7 @@ require("lazy").setup({
   "github/copilot.vim",
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.8",
+    tag = "v0.2.1",
     dependencies = { "nvim-lua/plenary.nvim" },
   },
   { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
@@ -63,7 +63,6 @@ require("lazy").setup({
     opts = {},
   },
   "nvim-telescope/telescope-ui-select.nvim",
-  "Marskey/telescope-sg",
   {
     'laytan/cloak.nvim',
     config = function()
