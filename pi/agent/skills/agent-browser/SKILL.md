@@ -12,7 +12,7 @@ allowed-tools: Bash(npx agent-browser:*), Bash(agent-browser:*)
 ## Default loop (don’t fight it)
 
 1. `agent-browser open <url>`
-2. `agent-browser wait --load networkidle` (or `wait @e…`)
+2. `agent-browser wait --load networkidle` (or `wait @e…` / `wait --text ...`)
 3. `agent-browser snapshot -i` → get refs `@e1`, `@e2`, …
 4. Interact using refs (`click/fill/select/check/...`).
 5. Re-run `snapshot -i` after any navigation/DOM change (refs invalidate).
@@ -24,6 +24,7 @@ allowed-tools: Bash(npx agent-browser:*), Bash(agent-browser:*)
 agent-browser open https://example.com
 agent-browser wait --load networkidle
 agent-browser snapshot -i            # add --json for machine parsing
+agent-browser open https://example.com && agent-browser wait --load networkidle && agent-browser screenshot
 
 # Interact (use @e… from snapshot)
 agent-browser click @e1
@@ -39,10 +40,11 @@ agent-browser get text @e5
 agent-browser screenshot --full out.png
 agent-browser pdf out.pdf
 
-# Persistence
+# Persistence / existing browser session
 agent-browser --session-name myapp open https://app.example.com
 agent-browser state save auth.json
 agent-browser state load auth.json
+agent-browser --auto-connect state save auth.json  # prefer when Anton asks to use his Chrome
 
 # JS (avoid shell-escaping problems)
 agent-browser eval --stdin <<'JS'
@@ -55,7 +57,9 @@ agent-browser close
 ## Rules (practical)
 
 - **Always** `snapshot -i` again after clicks that navigate, form submits, modals, or lazy loads.
-- Prefer `wait --url "**/path"` or `wait --load networkidle` over arbitrary sleeps.
+- Prefer `wait --url "**/path"`, `wait --text "..."`, or `wait --load networkidle` over arbitrary sleeps.
+- Prefer `--auto-connect` when Anton asks to use his existing Chrome session.
+- Chain commands with `&&` only when you don’t need intermediate output.
 - Credentials: pass via env vars (`$USERNAME`, `$PASSWORD`), don’t hardcode.
 
 ## Deep dives
