@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.58.1",
+  "lastChangelogVersion": "0.58.3",
   "defaultThinkingLevel": "high",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
@@ -16,7 +16,7 @@
   ],
   "transport": "websocket",
   "piOpenaiFast": {
-    "enabled": true
+    "enabled": false
   },
   "treeFilterMode": "no-tools"
 }
