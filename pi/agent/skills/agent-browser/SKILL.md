@@ -1,21 +1,21 @@
 ---
 name: agent-browser
 description: >
-  Browser automation CLI for AI agents. Use when you must interact with a live page
-  (click/type/scroll/login/screenshot). For simple “fetch the page content”, prefer
-  `read_web_page <url>`.
+  Browser automation CLI for AI agents. Use when you must interact with a live page:
+  open sites, click/fill forms, log in, capture screenshots/PDFs, extract data, debug,
+  or test web apps. For simple “fetch the page content”, prefer `read_web_page <url>`.
 allowed-tools: Bash(npx agent-browser:*), Bash(agent-browser:*)
 ---
 
-# agent-browser (browser automation)
+# agent-browser
 
-## Default loop (don’t fight it)
+## Default loop
 
 1. `agent-browser open <url>`
-2. `agent-browser wait --load networkidle` (or `wait @e…` / `wait --text ...`)
-3. `agent-browser snapshot -i` → get refs `@e1`, `@e2`, …
-4. Interact using refs (`click/fill/select/check/...`).
-5. Re-run `snapshot -i` after any navigation/DOM change (refs invalidate).
+2. `agent-browser wait --load networkidle` (or `wait --url ...` / `wait --text ...` / `wait <selector>`)
+3. `agent-browser snapshot -i` (`--json` if you need machine parsing)
+4. Interact using refs: `@e1`, `@e2`, ...
+5. Re-run `snapshot -i` after any navigation or DOM change. Old refs expire.
 
 ## Minimal cheat sheet
 
@@ -23,53 +23,55 @@ allowed-tools: Bash(npx agent-browser:*), Bash(agent-browser:*)
 # Navigate + inspect
 agent-browser open https://example.com
 agent-browser wait --load networkidle
-agent-browser snapshot -i            # add --json for machine parsing
-agent-browser open https://example.com && agent-browser wait --load networkidle && agent-browser screenshot
+agent-browser snapshot -i
 
-# Interact (use @e… from snapshot)
+# Interact
 agent-browser click @e1
-agent-browser fill @e2 "text"        # clears then types
-agent-browser type @e2 "text"        # appends
+agent-browser fill @e2 "text"
+agent-browser type @e2 "more"
 agent-browser select @e3 "Option"
 agent-browser check @e4
-agent-browser scroll down 600
+agent-browser upload @e5 ./file.pdf
 agent-browser press Enter
 
 # Extract + capture
-agent-browser get text @e5
-agent-browser screenshot --full out.png
+agent-browser get text @e6
+agent-browser get url
+agent-browser screenshot --annotate out.png
+agent-browser screenshot --full page.png
 agent-browser pdf out.pdf
+agent-browser console
+agent-browser errors
 
-# Persistence / existing browser session
-agent-browser --session-name myapp open https://app.example.com
-agent-browser state save auth.json
-agent-browser state load auth.json
-agent-browser --auto-connect state save auth.json  # prefer when Anton asks to use his Chrome
-
-# JS (avoid shell-escaping problems)
+# JS / debugging
 agent-browser eval --stdin <<'JS'
 document.title
 JS
-
-agent-browser close
+agent-browser diff snapshot
 ```
 
-## Rules (practical)
+## Auth / state
 
-- **Always** `snapshot -i` again after clicks that navigate, form submits, modals, or lazy loads.
-- Prefer `wait --url "**/path"`, `wait --text "..."`, or `wait --load networkidle` over arbitrary sleeps.
-- Prefer `--auto-connect` when Anton asks to use his existing Chrome session.
-- Chain commands with `&&` only when you don’t need intermediate output.
-- Credentials: pass via env vars (`$USERNAME`, `$PASSWORD`), don’t hardcode.
+- Anton’s existing Chrome: `agent-browser --auto-connect state save auth.json`
+- Reuse state across runs: `agent-browser --session-name myapp open ...`
+- Keep credentials out of the transcript: `echo "$PASSWORD" | agent-browser auth save myapp --url https://app.example.com/login --username "$USERNAME" --password-stdin && agent-browser auth login myapp`
+
+## Rules
+
+- Prefer `wait --url/--text/--load` over sleeps.
+- Prefer refs from `snapshot -i` over brittle selectors once the page is open.
+- Use `&&` only when you do not need intermediate output.
+- Put secrets in env vars / stdin. State files are sensitive: gitignore them and delete when done.
+- Use `--auto-connect` when Anton asks to use his existing Chrome session.
 
 ## Deep dives
 
-- `references/commands.md` — full command surface
+- `references/commands.md` — command surface
 - `references/snapshot-refs.md` — ref lifecycle + troubleshooting
+- `references/authentication.md` — login/2FA/state/auth vault
 - `references/session-management.md` — sessions/state
-- `references/authentication.md` — login/2FA patterns
 - `references/video-recording.md` — headed/recording workflows
-- `references/profiling.md` — performance traces
+- `references/profiling.md` — traces/profiles
 - `references/proxy-support.md` — proxies/geo testing
 
-Templates: `templates/*.sh` (ready-to-run workflows).
+Templates: `templates/*.sh`
