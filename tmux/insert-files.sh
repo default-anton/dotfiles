@@ -56,16 +56,21 @@ else
   status=$?
   set -e
 
-  if [ $status -ne 0 ] || [ -z "$selection" ]; then
-    exit $status
-  fi
+  case $status in
+    0) ;;
+    1|130) exit 0 ;;
+    *) exit $status ;;
+  esac
 fi
 
 if [ -z "$selection" ]; then
   exit 0
 fi
 
-mapfile -t selections <<< "$selection"
+selections=()
+while IFS= read -r path; do
+  selections+=("$path")
+done <<< "$selection"
 inserted=''
 
 for path in "${selections[@]}"; do
