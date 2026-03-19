@@ -3,10 +3,25 @@ import { spawn } from "node:child_process";
 const SUBAGENT_DEPTH_ENV = "PI_SUBAGENT_DEPTH";
 const ANSWER_PREVIEW_LIMIT = 120;
 const LAST_TOOL_CALL_LIMIT = 3;
+const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhigh"]);
 
 type ChildModel = {
   provider: string;
   id: string;
+  name?: string;
+  contextWindow?: number;
+  usingSubscription?: boolean;
+};
+
+export type SpawnSubagentUsage = {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  costUsd: number;
+  contextTokens?: number;
+  contextWindow?: number;
+  usingSubscription?: boolean;
 };
 
 export type SpawnSubagentDetails = {
@@ -17,6 +32,7 @@ export type SpawnSubagentDetails = {
   turnCount: number;
   toolCallCount: number;
   lastToolCalls: string[];
+  usage: SpawnSubagentUsage;
   answerPreview?: string;
   stopReason?: string;
   error?: string;
@@ -29,6 +45,7 @@ export type SpawnSubagentRunInput = {
   model?: string;
   cwd: string;
   currentModel?: ChildModel;
+  availableModels?: ChildModel[];
   thinkingLevel: string;
   signal?: AbortSignal;
   onUpdate?: (details: SpawnSubagentDetails) => void;
@@ -77,6 +94,19 @@ function cloneDetails(details: SpawnSubagentDetails): SpawnSubagentDetails {
   return {
     ...details,
     lastToolCalls: [...details.lastToolCalls],
+    usage: {
+      ...details.usage,
+    },
+  };
+}
+
+function createEmptyUsage(): SpawnSubagentUsage {
+  return {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
+    costUsd: 0,
   };
 }
 
@@ -125,7 +155,76 @@ function extractAssistantText(message: unknown): string {
     .trim();
 }
 
-function updateAnswerFromMessage(details: SpawnSubagentDetails, message: unknown): string | undefined {
+function stripThinkingSuffix(modelName: string): string {
+  const normalized = modelName.trim();
+  const separatorIndex = normalized.lastIndexOf(":");
+  if (separatorIndex === -1) {
+    return normalized;
+  }
+
+  const suffix = normalized.slice(separatorIndex + 1);
+  if (!THINKING_LEVELS.has(suffix)) {
+    return normalized;
+  }
+
+  return normalized.slice(0, separatorIndex);
+}
+
+function findModelInfo(modelName: string, availableModels: ChildModel[] | undefined): ChildModel | undefined {
+  if (!availableModels || availableModels.length === 0) {
+    return undefined;
+  }
+
+  const raw = modelName.trim();
+  if (!raw) {
+    return undefined;
+  }
+
+  const normalized = stripThinkingSuffix(raw);
+  const rawLower = raw.toLowerCase();
+  const normalizedLower = normalized.toLowerCase();
+
+  const exact = availableModels.find((model) => `${model.provider}/${model.id}` === normalized);
+  if (exact) {
+    return exact;
+  }
+
+  const matches = availableModels.filter((model) => {
+    const fullId = `${model.provider}/${model.id}`.toLowerCase();
+    const id = model.id.toLowerCase();
+    const name = model.name?.toLowerCase();
+    return (
+      fullId === normalizedLower ||
+      fullId === rawLower ||
+      id === normalizedLower ||
+      id === rawLower ||
+      name === normalizedLower ||
+      name === rawLower
+    );
+  });
+
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+function applyResolvedModel(details: SpawnSubagentDetails, model: ChildModel | undefined): void {
+  if (!model) {
+    return;
+  }
+
+  if (model.contextWindow && model.contextWindow > 0) {
+    details.usage.contextWindow = model.contextWindow;
+  }
+  if (typeof model.usingSubscription === "boolean") {
+    details.usage.usingSubscription = model.usingSubscription;
+  }
+}
+
+function updateAnswerFromMessage(
+  details: SpawnSubagentDetails,
+  message: unknown,
+  availableModels: ChildModel[] | undefined,
+  includeUsage = true,
+): string | undefined {
   if (!message || typeof message !== "object") {
     return undefined;
   }
@@ -137,6 +236,26 @@ function updateAnswerFromMessage(details: SpawnSubagentDetails, message: unknown
 
   if ("model" in message && typeof message.model === "string" && message.model.trim()) {
     details.childModel = message.model;
+    applyResolvedModel(details, findModelInfo(message.model, availableModels));
+  }
+
+  if (includeUsage && "usage" in message && message.usage && typeof message.usage === "object") {
+    const usage = message.usage as {
+      input?: number;
+      output?: number;
+      cacheRead?: number;
+      cacheWrite?: number;
+      totalTokens?: number;
+      cost?: { total?: number };
+    };
+    details.usage.inputTokens += usage.input ?? 0;
+    details.usage.outputTokens += usage.output ?? 0;
+    details.usage.cacheReadTokens += usage.cacheRead ?? 0;
+    details.usage.cacheWriteTokens += usage.cacheWrite ?? 0;
+    details.usage.costUsd += usage.cost?.total ?? 0;
+    if (typeof usage.totalTokens === "number" && usage.totalTokens >= 0) {
+      details.usage.contextTokens = usage.totalTokens;
+    }
   }
 
   if ("stopReason" in message && typeof message.stopReason === "string" && message.stopReason.trim()) {
@@ -201,7 +320,13 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     turnCount: 0,
     toolCallCount: 0,
     lastToolCalls: [],
+    usage: createEmptyUsage(),
   };
+
+  if (!input.model?.trim()) {
+    applyResolvedModel(details, input.currentModel);
+  }
+  applyResolvedModel(details, findModelInfo(childModel, input.availableModels));
 
   let exitCode = 0;
   let finalAnswer = "";
@@ -283,7 +408,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       }
 
       if (event.type === "message_end" && event.message?.role === "assistant") {
-        const answer = updateAnswerFromMessage(details, event.message);
+        const answer = updateAnswerFromMessage(details, event.message, input.availableModels);
         if (answer) {
           finalAnswer = answer;
         }
@@ -293,7 +418,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
 
       if (event.type === "turn_end") {
         details.turnCount += 1;
-        const answer = updateAnswerFromMessage(details, event.message);
+        const answer = updateAnswerFromMessage(details, event.message, undefined, false);
         if (answer) {
           finalAnswer = answer;
         }

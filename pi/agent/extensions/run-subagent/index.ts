@@ -40,6 +40,62 @@ function previewFallback(text: string): string {
   return `${normalized.slice(0, 117)}...`;
 }
 
+function formatTokens(count: number): string {
+  if (count < 1000) {
+    return count.toString();
+  }
+
+  if (count < 10_000) {
+    return `${(count / 1000).toFixed(1)}k`;
+  }
+
+  if (count < 1_000_000) {
+    return `${Math.round(count / 1000)}k`;
+  }
+
+  return `${(count / 1_000_000).toFixed(1)}M`;
+}
+
+function formatCost(costUsd: number): string {
+  if (costUsd === 0) {
+    return "$0.000";
+  }
+
+  if (costUsd < 0.001) {
+    return `$${costUsd.toFixed(4)}`;
+  }
+
+  if (costUsd < 1) {
+    return `$${costUsd.toFixed(3)}`;
+  }
+
+  return `$${costUsd.toFixed(2)}`;
+}
+
+function renderUsage(details: SpawnSubagentDetails, theme: any): string {
+  const costLabel = `${formatCost(details.usage.costUsd)}${details.usage.usingSubscription ? " (sub)" : ""}`;
+  const cost = theme.fg("dim", costLabel);
+  const contextWindow = details.usage.contextWindow;
+  const contextTokens = details.usage.contextTokens;
+
+  if (!contextWindow || contextWindow <= 0) {
+    if (typeof contextTokens === "number") {
+      return `${cost} ${theme.fg("dim", `ctx:${formatTokens(contextTokens)}`)}`;
+    }
+
+    return cost;
+  }
+
+  if (typeof contextTokens !== "number") {
+    return `${cost} ${theme.fg("dim", `?/${formatTokens(contextWindow)}`)}`;
+  }
+
+  const percent = (contextTokens / contextWindow) * 100;
+  const contextText = `${percent.toFixed(1)}%/${formatTokens(contextWindow)}`;
+  const contextColor = percent > 90 ? "error" : percent > 70 ? "warning" : "dim";
+  return `${cost} ${theme.fg(contextColor, contextText)}`;
+}
+
 function renderDetails(details: SpawnSubagentDetails, theme: any, expanded: boolean): string {
   const statusIcon =
     details.status === "running"
@@ -54,9 +110,9 @@ function renderDetails(details: SpawnSubagentDetails, theme: any, expanded: bool
         ? theme.fg("success", "done")
         : theme.fg("error", "failed");
 
-  let text = `${statusIcon} ${theme.fg("toolTitle", theme.bold("run_subagent "))}${theme.fg("accent", details.taskTitle)}`;
-  text += `\n${theme.fg("muted", "status")} ${statusLabel}`;
+  let text = `${statusIcon} ${theme.fg("muted", "status")} ${statusLabel}`;
   text += `\n${theme.fg("muted", "turns")} ${theme.fg("text", String(details.turnCount))}  ${theme.fg("muted", "tool calls")} ${theme.fg("text", String(details.toolCallCount))}`;
+  text += `\n${theme.fg("muted", "usage")} ${renderUsage(details, theme)}`;
 
   text += `\n${theme.fg("muted", "last tool calls")}`;
   if (details.lastToolCalls.length === 0) {
@@ -117,8 +173,18 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
           ? {
               provider: ctx.model.provider,
               id: ctx.model.id,
+              name: ctx.model.name,
+              contextWindow: ctx.model.contextWindow,
+              usingSubscription: ctx.modelRegistry.isUsingOAuth(ctx.model),
             }
           : undefined,
+        availableModels: ctx.modelRegistry.getAvailable().map((model) => ({
+          provider: model.provider,
+          id: model.id,
+          name: model.name,
+          contextWindow: model.contextWindow,
+          usingSubscription: ctx.modelRegistry.isUsingOAuth(model),
+        })),
         thinkingLevel: pi.getThinkingLevel(),
         signal,
         onUpdate: onUpdate
