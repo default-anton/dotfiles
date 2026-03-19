@@ -12,8 +12,7 @@
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-tmux-window-name",
-    "git:github.com/default-anton/very-good-agent-skills",
-    "npm:pi-finder-subagent"
+    "git:github.com/default-anton/very-good-agent-skills"
   ],
   "transport": "websocket",
   "piOpenaiFast": {
