@@ -1,4 +1,6 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type {
+  ExtensionAPI,
+} from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type, type Static } from "@sinclair/typebox";
 import {
@@ -9,18 +11,22 @@ import {
 
 const SpawnSubagentParams = Type.Object({
   instructions: Type.String({
-    description:
-      "Standalone task brief sent to the child as its prompt. The child does not see the parent conversation, so include the goal, relevant context, constraints, concrete scope, expected deliverable, and validation to run before finishing.",
+    description: "Task brief sent to the child as its next prompt",
     minLength: 1,
   }),
   task_title: Type.String({
-    description: "Short UI label for this subagent run. Not sent to the child. Do not put required instructions or context here.",
+    description: "Short UI label for this subagent run. Not sent to the child. Do not put required instructions or context here",
     minLength: 1,
   }),
+  session_id: Type.Optional(
+    Type.String({
+      description: "Optional prior subagent session ID. If set, the child continues that session with these instructions",
+      minLength: 1,
+    }),
+  ),
   model: Type.Optional(
     Type.String({
-      description:
-        "Optional child model override, passed exactly as pi --model accepts. Leave unset to inherit the current model and thinking level. Override only when a smaller/faster or stronger model materially helps the subtask.",
+      description: "Optional child model override, passed exactly as pi --model accepts. Leave unset to inherit the current model and thinking level",
     }),
   ),
 });
@@ -130,6 +136,9 @@ function renderDetails(details: SpawnSubagentDetails, theme: any, expanded: bool
     if (details.childModel !== details.modelArg) {
       text += `\n${theme.fg("muted", "resolved model")} ${theme.fg("dim", details.childModel)}`;
     }
+    if (details.sessionId) {
+      text += `\n${theme.fg("muted", "session id")} ${theme.fg("dim", details.sessionId)}`;
+    }
     if (details.stopReason) {
       text += `\n${theme.fg("muted", "stop reason")} ${theme.fg("dim", details.stopReason)}`;
     }
@@ -150,16 +159,7 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
     name: "run_subagent",
     label: "Run Subagent",
     description:
-      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same on-disk system prompt, extensions, and tools, but it does not receive the parent conversation or plan unless you include that context in instructions. This call blocks until the child finishes. run_subagent is disabled in the child to prevent recursion.",
-    promptSnippet:
-      "Run a bounded subagent in a fresh pi subprocess when the user explicitly asks for delegated or parallel agent work.",
-    promptGuidelines: [
-      "Use run_subagent only when the user explicitly authorizes subagents, delegation, or parallel agent work.",
-      "run_subagent blocks until the child finishes. Do not delegate the immediate next blocking step if doing it yourself is simpler or faster.",
-      "The child starts in a fresh conversation. Put all operative context, constraints, deliverables, and validation expectations in instructions.",
-      "task_title is UI-only. Put required instructions in instructions, not task_title.",
-      "The child shares the same worktree. Give it a concrete scope, avoid overlapping write ownership, and tell it to adapt to concurrent changes instead of reverting unrelated edits.",
-    ],
+      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same system prompt, extensions, and tools. run_subagent is disabled in the child to prevent recursion. If session_id is set, the child continues that prior subagent session with the provided instructions.",
     parameters: SpawnSubagentParams,
 
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
@@ -167,16 +167,17 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
       const result = await runSpawnSubagent({
         instructions: typedParams.instructions,
         taskTitle: typedParams.task_title,
+        sessionId: typedParams.session_id,
         model: typedParams.model,
         cwd: ctx.cwd,
         currentModel: ctx.model
           ? {
-              provider: ctx.model.provider,
-              id: ctx.model.id,
-              name: ctx.model.name,
-              contextWindow: ctx.model.contextWindow,
-              usingSubscription: ctx.modelRegistry.isUsingOAuth(ctx.model),
-            }
+            provider: ctx.model.provider,
+            id: ctx.model.id,
+            name: ctx.model.name,
+            contextWindow: ctx.model.contextWindow,
+            usingSubscription: ctx.modelRegistry.isUsingOAuth(ctx.model),
+          }
           : undefined,
         availableModels: ctx.modelRegistry.getAvailable().map((model) => ({
           provider: model.provider,
@@ -189,11 +190,11 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
         signal,
         onUpdate: onUpdate
           ? (details) => {
-              onUpdate({
-                content: [{ type: "text", text: details.answerPreview || "(running...)" }],
-                details,
-              });
-            }
+            onUpdate({
+              content: [{ type: "text", text: details.answerPreview || "(running...)" }],
+              details,
+            });
+          }
           : undefined,
       });
 
@@ -210,6 +211,9 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
     renderCall(args, theme) {
       let text =
         theme.fg("toolTitle", theme.bold("run_subagent ")) + theme.fg("accent", args.task_title || "(untitled)");
+      if (args.session_id) {
+        text += ` ${theme.fg("dim", `↻ ${args.session_id}`)}`;
+      }
       if (args.model) {
         text += ` ${theme.fg("dim", args.model)}`;
       }

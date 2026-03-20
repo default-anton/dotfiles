@@ -33,6 +33,7 @@ export type SpawnSubagentDetails = {
   toolCallCount: number;
   lastToolCalls: string[];
   usage: SpawnSubagentUsage;
+  sessionId?: string;
   answerPreview?: string;
   stopReason?: string;
   error?: string;
@@ -42,6 +43,7 @@ export type SpawnSubagentDetails = {
 export type SpawnSubagentRunInput = {
   instructions: string;
   taskTitle: string;
+  sessionId?: string;
   model?: string;
   cwd: string;
   currentModel?: ChildModel;
@@ -283,40 +285,47 @@ function resolveModelArg(input: SpawnSubagentRunInput): string {
   return `${input.currentModel.provider}/${input.currentModel.id}:${input.thinkingLevel}`;
 }
 
-function buildFailureText(details: SpawnSubagentDetails, fallback: string): string {
-  const reason = details.error || details.answerPreview || fallback;
-  return `Subagent failed for \"${details.taskTitle}\": ${reason}`;
+function appendSessionId(text: string, sessionId: string | undefined): string {
+  if (!sessionId) {
+    return text;
+  }
+
+  return `${text}\n\nsubagent_session_id: ${sessionId}`;
 }
 
-function buildChildPrompt(input: SpawnSubagentRunInput): string {
+function buildFailureText(details: SpawnSubagentDetails, fallback: string): string {
+  const reason = details.error || details.answerPreview || fallback;
+  return appendSessionId(`Subagent failed for \"${details.taskTitle}\": ${reason}`, details.sessionId);
+}
+
+function buildFreshChildPrompt(instructions: string): string {
   return [
     "You are a delegated subagent running in a fresh pi session.",
-    "",
-    "Execution model:",
-    "- You do not have the parent conversation except for the task brief below.",
-    "- You share the same cwd/worktree as the parent and possibly other agents.",
-    "- Do not revert unrelated edits or assume the worktree is static; adapt to concurrent changes.",
-    "- Stay within the assigned scope. Avoid speculative side quests.",
-    "- Follow the task brief exactly. If it asks for analysis, review, or research, stay read-only unless the brief explicitly asks for edits or commands that change state.",
-    "- Use the available tools as needed to complete the task.",
-    "",
-    "Output:",
-    "- Return the requested result directly.",
-    "- When applicable, include: findings or changes made, files touched or evidence gathered, validation performed, and open issues, risks, or follow-ups.",
+    "- You only have the task brief below.",
+    "- You share the same cwd/worktree as the parent and other agents. Do not revert unrelated edits.",
+    "- Stay within scope.",
+    "- Return the requested result directly, including validation and any open issues when useful.",
     "",
     "Task brief:",
-    input.instructions,
+    instructions,
   ].join("\n");
 }
 
 export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<SpawnSubagentRunResult> {
   const childModel = resolveModelArg(input);
-  const childArgs = ["--mode", "json", "-p", "--no-session", "--model", childModel, buildChildPrompt(input)];
+  const requestedSessionId = input.sessionId?.trim() || undefined;
+  const childPrompt = requestedSessionId ? input.instructions : buildFreshChildPrompt(input.instructions);
+  const childArgs = ["--mode", "json", "-p"];
+  if (requestedSessionId) {
+    childArgs.push("--session", requestedSessionId);
+  }
+  childArgs.push("--model", childModel, childPrompt);
   const details: SpawnSubagentDetails = {
     status: "running",
     taskTitle: input.taskTitle,
     childModel,
     modelArg: childModel,
+    sessionId: requestedSessionId,
     turnCount: 0,
     toolCallCount: 0,
     lastToolCalls: [],
@@ -398,6 +407,12 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
         return;
       }
 
+      if (event.type === "session" && typeof event.id === "string" && event.id.trim()) {
+        details.sessionId = event.id;
+        emitUpdate();
+        return;
+      }
+
       if (event.type === "tool_execution_start") {
         details.toolCallCount += 1;
         details.lastToolCalls = [...details.lastToolCalls, summarizeToolCall(event.toolName, event.args)].slice(
@@ -475,7 +490,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
 
   details.status = "success";
   return {
-    contentText: finalAnswer || "Subagent finished without a text answer.",
+    contentText: appendSessionId(finalAnswer || "Subagent finished without a text answer.", details.sessionId),
     details: cloneDetails(details),
   };
 }
