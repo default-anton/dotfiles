@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
-# Priority lists - highest priority first
+set -euo pipefail
+
+# Switch to the highest-priority available input/output devices right now.
+# When an input device has a preset below, reapply its macOS input level after
+# switching so reboots/device reconnects don't leave it too quiet.
+
 INPUT_PRIORITY=(
   "RØDE VideoMic GO II"
   "MacBook Pro Microphone"
@@ -14,18 +19,44 @@ OUTPUT_PRIORITY=(
   "MacBook Pro Speakers"
 )
 
-available=$(SwitchAudioSource -af json | jq -s '.')
+# To add/update a preset:
+# 1. Switch to the microphone.
+# 2. Check its current input level with:
+#      osascript -e 'input volume of (get volume settings)'
+# 3. Save that number below for the device name.
+declare -A INPUT_VOLUME_PRESETS=(
+  ["RØDE VideoMic GO II"]=88
+  ["MacBook Pro Microphone"]=88
+)
 
-for device in "${INPUT_PRIORITY[@]}"; do
-  if jq -e --arg d "$device" '.[] | select(.name == $d and .type == "input")' <<< "$available" > /dev/null; then
-    SwitchAudioSource -s "$device" -t input
-    break
-  fi
-done
+available=$(SwitchAudioSource -a -f json | jq -s '.')
 
-for device in "${OUTPUT_PRIORITY[@]}"; do
-  if jq -e --arg d "$device" '.[] | select(.name == $d and .type == "output")' <<< "$available" > /dev/null; then
-    SwitchAudioSource -s "$device" -t output
-    break
+select_best_device() {
+  local type="$1"
+  shift
+
+  for device in "$@"; do
+    if jq -e --arg d "$device" --arg t "$type" '.[] | select(.name == $d and .type == $t)' <<<"$available" >/dev/null; then
+      SwitchAudioSource -s "$device" -t "$type" >/dev/null
+      printf '%s\n' "$device"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+apply_input_volume_preset() {
+  local device="$1"
+  local level="${INPUT_VOLUME_PRESETS[$device]-}"
+
+  if [[ -n "$level" ]]; then
+    osascript -e "set volume input volume $level" >/dev/null
   fi
-done
+}
+
+if selected_input=$(select_best_device input "${INPUT_PRIORITY[@]}"); then
+  apply_input_volume_preset "$selected_input"
+fi
+
+select_best_device output "${OUTPUT_PRIORITY[@]}" >/dev/null || true
