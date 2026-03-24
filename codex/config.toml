@@ -8,7 +8,6 @@ model_reasoning_effort = "high"
 model_reasoning_summary = "auto"
 web_search = "live"
 suppress_unstable_features_warning = true
-service_tier = "fast"
 
 [features]
 shell_snapshot = true
