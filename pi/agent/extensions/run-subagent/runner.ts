@@ -24,10 +24,10 @@ import {
 const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhigh"]);
 const POLL_INTERVAL_MS = 250;
 const RESULT_GRACE_PERIOD_MS = 2_000;
-const BOTTOM_PANE_HEIGHT = 18;
 const RIGHT_PANE_WIDTH = 120;
 
 let tmuxMutationQueue: Promise<void> = Promise.resolve();
+const activeSubagentsByWindowId = new Map<string, number>();
 
 type ChildModel = {
   provider: string;
@@ -69,10 +69,12 @@ type TmuxPane = {
 
 type TmuxLayout = {
   childPaneId: string;
+  windowId: string;
 };
 
 type TmuxContext = {
   callerPaneId: string;
+  sessionId: string;
   windowId: string;
 };
 
@@ -256,6 +258,28 @@ async function withTmuxMutationLock<T>(fn: () => Promise<T> | T): Promise<T> {
   return run;
 }
 
+function incrementActiveSubagent(windowId: string): void {
+  activeSubagentsByWindowId.set(windowId, (activeSubagentsByWindowId.get(windowId) ?? 0) + 1);
+}
+
+function decrementActiveSubagent(windowId: string | undefined): void {
+  if (!windowId) {
+    return;
+  }
+
+  const next = (activeSubagentsByWindowId.get(windowId) ?? 1) - 1;
+  if (next <= 0) {
+    activeSubagentsByWindowId.delete(windowId);
+    return;
+  }
+
+  activeSubagentsByWindowId.set(windowId, next);
+}
+
+function getActiveSubagentCount(windowId: string): number {
+  return activeSubagentsByWindowId.get(windowId) ?? 0;
+}
+
 function ensureTmuxAvailable(): void {
   if (!process.env.TMUX) {
     throw new Error("run_subagent requires pi to be running inside tmux.");
@@ -317,9 +341,11 @@ function resolveTmuxContext(): TmuxContext {
 
   try {
     const resolvedPaneId = tmux(["display-message", "-p", "-t", callerPaneId, "#{pane_id}"]);
+    const sessionId = tmux(["display-message", "-p", "-t", callerPaneId, "#{session_id}"]);
     const windowId = tmux(["display-message", "-p", "-t", callerPaneId, "#{window_id}"]);
     return {
       callerPaneId: resolvedPaneId,
+      sessionId,
       windowId,
     };
   } catch (error: any) {
@@ -353,22 +379,31 @@ function listWindowPanes(windowId: string): TmuxPane[] {
     });
 }
 
-function getPreferredSplitWidth(pane: TmuxPane): number {
-  const maxAllowed = Math.max(24, pane.width - 20);
-  const preferred = Math.max(24, Math.floor(pane.width * 0.4));
+function getPreferredSplitWidth(width: number): number {
+  const maxAllowed = Math.max(24, width - 20);
+  const preferred = Math.max(24, Math.floor(width * 0.4));
   return Math.min(RIGHT_PANE_WIDTH, maxAllowed, preferred);
 }
 
-function pickBestPane(panes: TmuxPane[]): TmuxPane {
+function getWindowWidth(panes: TmuxPane[]): number {
+  return panes.reduce((max, pane) => Math.max(max, pane.left + pane.width), 0);
+}
+
+function pickLargestPane(panes: TmuxPane[]): TmuxPane {
   return [...panes].sort((a, b) => {
-    const bottomDiff = b.top + b.height - (a.top + a.height);
-    if (bottomDiff !== 0) {
-      return bottomDiff;
+    const areaDiff = b.width * b.height - a.width * a.height;
+    if (areaDiff !== 0) {
+      return areaDiff;
     }
 
-    const rightDiff = b.left + b.width - (a.left + a.width);
-    if (rightDiff !== 0) {
-      return rightDiff;
+    const widthDiff = b.width - a.width;
+    if (widthDiff !== 0) {
+      return widthDiff;
+    }
+
+    const heightDiff = b.height - a.height;
+    if (heightDiff !== 0) {
+      return heightDiff;
     }
 
     const activeDiff = Number(b.active) - Number(a.active);
@@ -380,50 +415,119 @@ function pickBestPane(panes: TmuxPane[]): TmuxPane {
   })[0];
 }
 
-async function createTmuxLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): Promise<TmuxLayout> {
-  return withTmuxMutationLock(() => {
-    const panes = listWindowPanes(tmuxContext.windowId);
-    if (panes.length === 0) {
-      throw new Error("run_subagent could not find any tmux panes in the calling window.");
+function setPaneTitle(paneId: string, taskTitle: string): void {
+  try {
+    tmux(["select-pane", "-t", paneId, "-T", taskTitle]);
+  } catch {}
+}
+
+function getDedicatedWindowName(windowId: string): string {
+  return `subagents-${windowId.replace(/[^A-Za-z0-9_-]/g, "")}`;
+}
+
+function findWindowIdByName(sessionId: string, windowName: string): string | undefined {
+  const output = tmux(["list-windows", "-t", sessionId, "-F", "#{window_name}\t#{window_id}"]);
+  for (const line of output.split("\n")) {
+    const [name, windowId] = line.trim().split("\t");
+    if (name === windowName && windowId) {
+      return windowId;
+    }
+  }
+
+  return undefined;
+}
+
+function createSameWindowLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
+  const panes = listWindowPanes(tmuxContext.windowId);
+  if (panes.length === 0) {
+    throw new Error("run_subagent could not find any tmux panes in the calling window.");
+  }
+
+  const childPaneId = tmux([
+    "split-window",
+    "-d",
+    "-h",
+    "-f",
+    "-l",
+    String(getPreferredSplitWidth(getWindowWidth(panes))),
+    "-t",
+    tmuxContext.callerPaneId,
+    "-P",
+    "-F",
+    "#{pane_id}",
+    scriptPath,
+  ]);
+
+  setPaneTitle(childPaneId, taskTitle);
+  return {
+    childPaneId,
+    windowId: tmuxContext.windowId,
+  };
+}
+
+function createDedicatedWindowLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
+  const dedicatedWindowName = getDedicatedWindowName(tmuxContext.windowId);
+  const existingWindowId = findWindowIdByName(tmuxContext.sessionId, dedicatedWindowName);
+
+  if (!existingWindowId) {
+    const [windowId, childPaneId] = tmux([
+      "new-window",
+      "-d",
+      "-t",
+      tmuxContext.sessionId,
+      "-n",
+      dedicatedWindowName,
+      "-P",
+      "-F",
+      "#{window_id}\t#{pane_id}",
+      scriptPath,
+    ]).split("\t");
+    if (!windowId || !childPaneId) {
+      throw new Error("run_subagent could not create the subagent tmux window.");
     }
 
-    let childPaneId: string;
-    if (panes.length === 1) {
-      childPaneId = tmux([
-        "split-window",
-        "-d",
-        "-v",
-        "-l",
-        String(BOTTOM_PANE_HEIGHT),
-        "-t",
-        tmuxContext.callerPaneId,
-        "-P",
-        "-F",
-        "#{pane_id}",
-        scriptPath,
-      ]);
-    } else {
-      const targetPane = pickBestPane(panes);
-      childPaneId = tmux([
-        "split-window",
-        "-d",
-        "-h",
-        "-l",
-        String(getPreferredSplitWidth(targetPane)),
-        "-t",
-        targetPane.id,
-        "-P",
-        "-F",
-        "#{pane_id}",
-        scriptPath,
-      ]);
+    setPaneTitle(childPaneId, taskTitle);
+    return {
+      childPaneId,
+      windowId,
+    };
+  }
+
+  const panes = listWindowPanes(existingWindowId);
+  if (panes.length === 0) {
+    throw new Error("run_subagent could not find any tmux panes in the subagent window.");
+  }
+
+  const childPaneId = tmux([
+    "split-window",
+    "-d",
+    "-t",
+    pickLargestPane(panes).id,
+    "-P",
+    "-F",
+    "#{pane_id}",
+    scriptPath,
+  ]);
+  tmux(["select-layout", "-t", existingWindowId, "tiled"]);
+  setPaneTitle(childPaneId, taskTitle);
+
+  return {
+    childPaneId,
+    windowId: existingWindowId,
+  };
+}
+
+async function createTmuxLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): Promise<TmuxLayout> {
+  return withTmuxMutationLock(() => {
+    if (getActiveSubagentCount(tmuxContext.windowId) > 1) {
+      return createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext);
     }
 
     try {
-      tmux(["select-pane", "-t", childPaneId, "-T", taskTitle]);
-    } catch {}
-
-    return { childPaneId };
+      return createSameWindowLayout(scriptPath, taskTitle, tmuxContext);
+    } catch {
+      return createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext);
+    }
   });
 }
 
@@ -507,6 +611,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
   const resultPath = join(ipcDir, RESULT_FILE_NAME);
   const exitPath = join(ipcDir, EXIT_FILE_NAME);
   const tmuxContext = resolveTmuxContext();
+  incrementActiveSubagent(tmuxContext.windowId);
 
   let layout: TmuxLayout | undefined;
   let finalAnswer = "";
@@ -543,6 +648,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
   };
 
   try {
+    await sleep(0);
     const scriptPath = writeLauncherScript(input, childPrompt, childModel, requestedSessionId, ipcDir);
     layout = await createTmuxLayout(scriptPath, input.taskTitle, tmuxContext);
 
@@ -658,5 +764,6 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
         rmSync(ipcDir, { recursive: true, force: true });
       } catch {}
     }
+    decrementActiveSubagent(tmuxContext.windowId);
   }
 }

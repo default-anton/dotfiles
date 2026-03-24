@@ -159,7 +159,7 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
     name: "run_subagent",
     label: "Run Subagent",
     description:
-      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same system prompt, extensions, and tools. run_subagent is disabled in the child to prevent recursion. If session_id is set, the child continues that prior subagent session with the provided instructions.",
+      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same system prompt, extensions, and tools. run_subagent is disabled in the child to prevent recursion. If session_id is set, the child continues that prior subagent session with the provided instructions. Keep concurrent run_subagent calls to 8 or fewer; higher fan-out is not supported reliably.",
     parameters: SpawnSubagentParams,
 
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
