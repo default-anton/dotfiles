@@ -1,9 +1,33 @@
-import { spawn } from "node:child_process";
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { basename, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  EXIT_FILE_NAME,
+  RESULT_FILE_NAME,
+  STATE_FILE_NAME,
+  SUBAGENT_DEPTH_ENV,
+  SUBAGENT_IPC_DIR_ENV,
+  SUBAGENT_MODEL_ARG_ENV,
+  SUBAGENT_TASK_TITLE_ENV,
+  cloneDetails,
+  createEmptyUsage,
+  previewText,
+  readJsonFile,
+  type SpawnSubagentDetails,
+  type SpawnSubagentExitFile,
+  type SpawnSubagentResultFile,
+  type SpawnSubagentStateFile,
+} from "./ipc.ts";
 
-const SUBAGENT_DEPTH_ENV = "PI_SUBAGENT_DEPTH";
-const ANSWER_PREVIEW_LIMIT = 120;
-const LAST_TOOL_CALL_LIMIT = 3;
 const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhigh"]);
+const POLL_INTERVAL_MS = 250;
+const RESULT_GRACE_PERIOD_MS = 2_000;
+const BOTTOM_PANE_HEIGHT = 18;
+const RIGHT_PANE_WIDTH = 120;
+
+let tmuxMutationQueue: Promise<void> = Promise.resolve();
 
 type ChildModel = {
   provider: string;
@@ -13,32 +37,8 @@ type ChildModel = {
   usingSubscription?: boolean;
 };
 
-export type SpawnSubagentUsage = {
-  inputTokens: number;
-  outputTokens: number;
-  cacheReadTokens: number;
-  cacheWriteTokens: number;
-  costUsd: number;
-  contextTokens?: number;
-  contextWindow?: number;
-  usingSubscription?: boolean;
-};
-
-export type SpawnSubagentDetails = {
-  status: "running" | "success" | "error";
-  taskTitle: string;
-  childModel: string;
-  modelArg: string;
-  turnCount: number;
-  toolCallCount: number;
-  lastToolCalls: string[];
-  usage: SpawnSubagentUsage;
-  sessionId?: string;
-  answerPreview?: string;
-  stopReason?: string;
-  error?: string;
-  exitCode?: number;
-};
+export type { SpawnSubagentDetails } from "./ipc.ts";
+export type SpawnSubagentUsage = SpawnSubagentDetails["usage"];
 
 export type SpawnSubagentRunInput = {
   instructions: string;
@@ -58,103 +58,32 @@ export type SpawnSubagentRunResult = {
   details: SpawnSubagentDetails;
 };
 
+type TmuxPane = {
+  id: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  active: boolean;
+};
+
+type TmuxLayout = {
+  childPaneId: string;
+};
+
+type TmuxContext = {
+  callerPaneId: string;
+  windowId: string;
+};
+
 export function shouldRegisterSpawnSubagent(env: NodeJS.ProcessEnv = process.env): boolean {
   return getSubagentDepth(env) <= 0;
-}
-
-export function summarizeToolCall(toolName: string, args: Record<string, unknown> | undefined): string {
-  const pathArg =
-    typeof args?.path === "string"
-      ? args.path
-      : typeof args?.file_path === "string"
-        ? args.file_path
-        : undefined;
-
-  if (!pathArg) {
-    return toolName;
-  }
-
-  return `${toolName} ${shortenPath(pathArg)}`;
 }
 
 function getSubagentDepth(env: NodeJS.ProcessEnv): number {
   const rawDepth = env[SUBAGENT_DEPTH_ENV];
   const parsed = rawDepth ? Number.parseInt(rawDepth, 10) : 0;
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function shortenPath(path: string): string {
-  const normalized = path.startsWith("@") ? path.slice(1) : path;
-  if (normalized.length <= 64) {
-    return normalized;
-  }
-
-  return `${normalized.slice(0, 28)}…${normalized.slice(-28)}`;
-}
-
-function cloneDetails(details: SpawnSubagentDetails): SpawnSubagentDetails {
-  return {
-    ...details,
-    lastToolCalls: [...details.lastToolCalls],
-    usage: {
-      ...details.usage,
-    },
-  };
-}
-
-function createEmptyUsage(): SpawnSubagentUsage {
-  return {
-    inputTokens: 0,
-    outputTokens: 0,
-    cacheReadTokens: 0,
-    cacheWriteTokens: 0,
-    costUsd: 0,
-  };
-}
-
-function previewText(text: string | undefined): string | undefined {
-  if (!text) {
-    return undefined;
-  }
-
-  const normalized = text.replace(/\s+/g, " ").trim();
-  if (!normalized) {
-    return undefined;
-  }
-
-  if (normalized.length <= ANSWER_PREVIEW_LIMIT) {
-    return normalized;
-  }
-
-  return `${normalized.slice(0, ANSWER_PREVIEW_LIMIT - 3)}...`;
-}
-
-function extractAssistantText(message: unknown): string {
-  if (!message || typeof message !== "object") {
-    return "";
-  }
-
-  if (!("role" in message) || message.role !== "assistant") {
-    return "";
-  }
-
-  if (!("content" in message) || !Array.isArray(message.content)) {
-    return "";
-  }
-
-  return message.content
-    .filter(
-      (block): block is { type: "text"; text: string } =>
-        !!block &&
-        typeof block === "object" &&
-        "type" in block &&
-        block.type === "text" &&
-        "text" in block &&
-        typeof block.text === "string",
-    )
-    .map((block) => block.text)
-    .join("\n")
-    .trim();
 }
 
 function stripThinkingSuffix(modelName: string): string {
@@ -221,54 +150,35 @@ function applyResolvedModel(details: SpawnSubagentDetails, model: ChildModel | u
   }
 }
 
-function updateAnswerFromMessage(
+function mergeDetails(
   details: SpawnSubagentDetails,
-  message: unknown,
+  next: SpawnSubagentDetails,
   availableModels: ChildModel[] | undefined,
-  includeUsage = true,
-): string | undefined {
-  if (!message || typeof message !== "object") {
-    return undefined;
-  }
+): void {
+  const merged = cloneDetails({
+    ...details,
+    ...next,
+    lastToolCalls: [...next.lastToolCalls],
+    usage: {
+      ...details.usage,
+      ...next.usage,
+    },
+  });
+  applyResolvedModel(merged, findModelInfo(merged.childModel, availableModels));
 
-  const answer = extractAssistantText(message);
-  if (answer) {
-    details.answerPreview = previewText(answer);
-  }
-
-  if ("model" in message && typeof message.model === "string" && message.model.trim()) {
-    details.childModel = message.model;
-    applyResolvedModel(details, findModelInfo(message.model, availableModels));
-  }
-
-  if (includeUsage && "usage" in message && message.usage && typeof message.usage === "object") {
-    const usage = message.usage as {
-      input?: number;
-      output?: number;
-      cacheRead?: number;
-      cacheWrite?: number;
-      totalTokens?: number;
-      cost?: { total?: number };
-    };
-    details.usage.inputTokens += usage.input ?? 0;
-    details.usage.outputTokens += usage.output ?? 0;
-    details.usage.cacheReadTokens += usage.cacheRead ?? 0;
-    details.usage.cacheWriteTokens += usage.cacheWrite ?? 0;
-    details.usage.costUsd += usage.cost?.total ?? 0;
-    if (typeof usage.totalTokens === "number" && usage.totalTokens >= 0) {
-      details.usage.contextTokens = usage.totalTokens;
-    }
-  }
-
-  if ("stopReason" in message && typeof message.stopReason === "string" && message.stopReason.trim()) {
-    details.stopReason = message.stopReason;
-  }
-
-  if ("errorMessage" in message && typeof message.errorMessage === "string" && message.errorMessage.trim()) {
-    details.error = message.errorMessage;
-  }
-
-  return answer || undefined;
+  details.status = merged.status;
+  details.taskTitle = merged.taskTitle;
+  details.childModel = merged.childModel;
+  details.modelArg = merged.modelArg;
+  details.turnCount = merged.turnCount;
+  details.toolCallCount = merged.toolCallCount;
+  details.lastToolCalls = merged.lastToolCalls;
+  details.usage = merged.usage;
+  details.sessionId = merged.sessionId;
+  details.answerPreview = merged.answerPreview;
+  details.stopReason = merged.stopReason;
+  details.error = merged.error;
+  details.exitCode = merged.exitCode;
 }
 
 function resolveModelArg(input: SpawnSubagentRunInput): string {
@@ -311,15 +221,257 @@ function buildFreshChildPrompt(instructions: string): string {
   ].join("\n");
 }
 
+function shellEscape(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function getPiInvocation(args: string[]): { command: string; args: string[] } {
+  const currentScript = process.argv[1];
+  if (currentScript && existsSync(currentScript)) {
+    return { command: process.execPath, args: [currentScript, ...args] };
+  }
+
+  const execName = basename(process.execPath).toLowerCase();
+  const isGenericRuntime = /^(node|bun)(\.exe)?$/.test(execName);
+  if (!isGenericRuntime) {
+    return { command: process.execPath, args };
+  }
+
+  return { command: "pi", args };
+}
+
+function tmux(args: string[]): string {
+  return execFileSync("tmux", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  }).trim();
+}
+
+async function withTmuxMutationLock<T>(fn: () => Promise<T> | T): Promise<T> {
+  const run = tmuxMutationQueue.then(() => fn(), () => fn());
+  tmuxMutationQueue = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
+
+function ensureTmuxAvailable(): void {
+  if (!process.env.TMUX) {
+    throw new Error("run_subagent requires pi to be running inside tmux.");
+  }
+
+  try {
+    tmux(["display-message", "-p", "#{pane_id}"]);
+  } catch (error: any) {
+    throw new Error(`run_subagent could not talk to tmux: ${error?.message ?? String(error)}`);
+  }
+}
+
+function writeLauncherScript(
+  input: SpawnSubagentRunInput,
+  childPrompt: string,
+  childModel: string,
+  requestedSessionId: string | undefined,
+  ipcDir: string,
+): string {
+  const childExtensionPath = fileURLToPath(new URL("./subagent.ts", import.meta.url));
+  const scriptPath = join(ipcDir, "launch-subagent.sh");
+  const exitPath = join(ipcDir, EXIT_FILE_NAME);
+
+  const childArgs: string[] = [];
+  if (requestedSessionId) {
+    childArgs.push("--session", requestedSessionId);
+  }
+  childArgs.push("--model", childModel, "-e", childExtensionPath, childPrompt);
+
+  const invocation = getPiInvocation(childArgs);
+  const command = [invocation.command, ...invocation.args].map(shellEscape).join(" ");
+  const depth = String(getSubagentDepth(process.env) + 1);
+
+  const script = [
+    "#!/bin/sh",
+    "code=0",
+    `cd ${shellEscape(input.cwd)} || code=$?`,
+    'if [ "$code" -eq 0 ]; then',
+    `  ${SUBAGENT_DEPTH_ENV}=${shellEscape(depth)} \\\n  ${SUBAGENT_IPC_DIR_ENV}=${shellEscape(ipcDir)} \\\n  ${SUBAGENT_TASK_TITLE_ENV}=${shellEscape(input.taskTitle)} \\\n  ${SUBAGENT_MODEL_ARG_ENV}=${shellEscape(childModel)} \\\n  ${command}`,
+    "  code=$?",
+    "fi",
+    `tmp=${shellEscape(`${exitPath}.tmp`)}`,
+    `printf '{\"exitCode\":%s}\n' \"$code\" > \"$tmp\"`,
+    `mv \"$tmp\" ${shellEscape(exitPath)}`,
+    "exit \"$code\"",
+    "",
+  ].join("\n");
+
+  writeFileSync(scriptPath, script, { encoding: "utf8", mode: 0o700 });
+  chmodSync(scriptPath, 0o700);
+  return scriptPath;
+}
+
+function resolveTmuxContext(): TmuxContext {
+  const callerPaneId = process.env.TMUX_PANE?.trim();
+  if (!callerPaneId) {
+    throw new Error("run_subagent could not determine the calling tmux pane.");
+  }
+
+  try {
+    const resolvedPaneId = tmux(["display-message", "-p", "-t", callerPaneId, "#{pane_id}"]);
+    const windowId = tmux(["display-message", "-p", "-t", callerPaneId, "#{window_id}"]);
+    return {
+      callerPaneId: resolvedPaneId,
+      windowId,
+    };
+  } catch (error: any) {
+    throw new Error(`run_subagent could not resolve the calling tmux pane: ${error?.message ?? String(error)}`);
+  }
+}
+
+function listWindowPanes(windowId: string): TmuxPane[] {
+  const output = tmux([
+    "list-panes",
+    "-t",
+    windowId,
+    "-F",
+    "#{pane_id}\t#{pane_left}\t#{pane_top}\t#{pane_width}\t#{pane_height}\t#{pane_active}",
+  ]);
+
+  return output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [id, left, top, width, height, active] = line.split("\t");
+      return {
+        id,
+        left: Number.parseInt(left, 10),
+        top: Number.parseInt(top, 10),
+        width: Number.parseInt(width, 10),
+        height: Number.parseInt(height, 10),
+        active: active === "1",
+      } satisfies TmuxPane;
+    });
+}
+
+function getPreferredSplitWidth(pane: TmuxPane): number {
+  const maxAllowed = Math.max(24, pane.width - 20);
+  const preferred = Math.max(24, Math.floor(pane.width * 0.4));
+  return Math.min(RIGHT_PANE_WIDTH, maxAllowed, preferred);
+}
+
+function pickBestPane(panes: TmuxPane[]): TmuxPane {
+  return [...panes].sort((a, b) => {
+    const bottomDiff = b.top + b.height - (a.top + a.height);
+    if (bottomDiff !== 0) {
+      return bottomDiff;
+    }
+
+    const rightDiff = b.left + b.width - (a.left + a.width);
+    if (rightDiff !== 0) {
+      return rightDiff;
+    }
+
+    const activeDiff = Number(b.active) - Number(a.active);
+    if (activeDiff !== 0) {
+      return activeDiff;
+    }
+
+    return 0;
+  })[0];
+}
+
+async function createTmuxLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): Promise<TmuxLayout> {
+  return withTmuxMutationLock(() => {
+    const panes = listWindowPanes(tmuxContext.windowId);
+    if (panes.length === 0) {
+      throw new Error("run_subagent could not find any tmux panes in the calling window.");
+    }
+
+    let childPaneId: string;
+    if (panes.length === 1) {
+      childPaneId = tmux([
+        "split-window",
+        "-d",
+        "-v",
+        "-l",
+        String(BOTTOM_PANE_HEIGHT),
+        "-t",
+        tmuxContext.callerPaneId,
+        "-P",
+        "-F",
+        "#{pane_id}",
+        scriptPath,
+      ]);
+    } else {
+      const targetPane = pickBestPane(panes);
+      childPaneId = tmux([
+        "split-window",
+        "-d",
+        "-h",
+        "-l",
+        String(getPreferredSplitWidth(targetPane)),
+        "-t",
+        targetPane.id,
+        "-P",
+        "-F",
+        "#{pane_id}",
+        scriptPath,
+      ]);
+    }
+
+    try {
+      tmux(["select-pane", "-t", childPaneId, "-T", taskTitle]);
+    } catch {}
+
+    return { childPaneId };
+  });
+}
+
+function isPaneAlive(paneId: string): boolean {
+  if (!paneId) {
+    return false;
+  }
+
+  try {
+    tmux(["display-message", "-p", "-t", paneId, "#{pane_id}"]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function killPane(paneId: string | undefined): Promise<void> {
+  if (!paneId) {
+    return;
+  }
+
+  await withTmuxMutationLock(() => {
+    try {
+      if (isPaneAlive(paneId)) {
+        tmux(["kill-pane", "-t", paneId]);
+      }
+    } catch {}
+  });
+}
+
+async function cleanupTmuxLayout(layout: TmuxLayout | undefined): Promise<void> {
+  if (!layout) {
+    return;
+  }
+
+  await killPane(layout.childPaneId);
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<SpawnSubagentRunResult> {
   const childModel = resolveModelArg(input);
   const requestedSessionId = input.sessionId?.trim() || undefined;
   const childPrompt = requestedSessionId ? input.instructions : buildFreshChildPrompt(input.instructions);
-  const childArgs = ["--mode", "json", "-p"];
-  if (requestedSessionId) {
-    childArgs.push("--session", requestedSessionId);
-  }
-  childArgs.push("--model", childModel, childPrompt);
   const details: SpawnSubagentDetails = {
     status: "running",
     taskTitle: input.taskTitle,
@@ -337,18 +489,9 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
   }
   applyResolvedModel(details, findModelInfo(childModel, input.availableModels));
 
-  let exitCode = 0;
-  let finalAnswer = "";
-  let stderr = "";
-  let spawnError: string | undefined;
-  let aborted = Boolean(input.signal?.aborted);
-
-  const emitUpdate = () => {
-    input.onUpdate?.(cloneDetails(details));
-  };
-
-  if (aborted) {
+  if (input.signal?.aborted) {
     details.status = "error";
+    details.stopReason = "aborted";
     details.error = "Parent request was aborted before the subagent started.";
     details.answerPreview = previewText(details.error);
     return {
@@ -357,140 +500,163 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     };
   }
 
-  await new Promise<void>((resolve) => {
-    const child = spawn("pi", childArgs, {
-      cwd: input.cwd,
-      env: {
-        ...process.env,
-        [SUBAGENT_DEPTH_ENV]: String(getSubagentDepth(process.env) + 1),
-      },
-      shell: false,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+  ensureTmuxAvailable();
 
-    let finished = false;
-    let stdoutBuffer = "";
+  const ipcDir = mkdtempSync(join(tmpdir(), "pi-run-subagent-"));
+  const statePath = join(ipcDir, STATE_FILE_NAME);
+  const resultPath = join(ipcDir, RESULT_FILE_NAME);
+  const exitPath = join(ipcDir, EXIT_FILE_NAME);
+  const tmuxContext = resolveTmuxContext();
 
-    const finish = (code: number, errorMessage?: string) => {
-      if (finished) {
-        return;
+  let layout: TmuxLayout | undefined;
+  let finalAnswer = "";
+  let exitCode = 1;
+  let aborted = false;
+  let sawExit = false;
+  let sawResult = false;
+  let cleanupAfterReturn = false;
+  let successResultDeadline = 0;
+
+  const emitUpdate = () => {
+    input.onUpdate?.(cloneDetails(details));
+  };
+
+  const readStateUpdate = () => {
+    const state = readJsonFile<SpawnSubagentStateFile>(statePath);
+    if (state?.details) {
+      mergeDetails(details, state.details, input.availableModels);
+      emitUpdate();
+    }
+  };
+
+  const readTerminalResult = (): boolean => {
+    const result = readJsonFile<SpawnSubagentResultFile>(resultPath);
+    if (!result?.details) {
+      return false;
+    }
+
+    sawResult = true;
+    mergeDetails(details, result.details, input.availableModels);
+    finalAnswer = result.lastAssistantText.trim();
+    emitUpdate();
+    return true;
+  };
+
+  try {
+    const scriptPath = writeLauncherScript(input, childPrompt, childModel, requestedSessionId, ipcDir);
+    layout = await createTmuxLayout(scriptPath, input.taskTitle, tmuxContext);
+
+    let lastStateRaw = "";
+    let lastResultRaw = "";
+    while (true) {
+      if (input.signal?.aborted && !aborted) {
+        aborted = true;
+        details.stopReason = "aborted";
+        details.status = "error";
+        await cleanupTmuxLayout(layout);
       }
 
-      finished = true;
-      exitCode = code;
-      if (errorMessage) {
-        spawnError = errorMessage;
-      }
-      input.signal?.removeEventListener("abort", abortChild);
-      resolve();
-    };
-
-    const abortChild = () => {
-      aborted = true;
-      child.kill("SIGTERM");
-      setTimeout(() => {
-        if (!child.killed) {
-          child.kill("SIGKILL");
+      if (existsSync(statePath)) {
+        const nextRaw = readFileSync(statePath, "utf8");
+        if (nextRaw !== lastStateRaw) {
+          lastStateRaw = nextRaw;
+          readStateUpdate();
         }
-      }, 2_000);
-    };
-
-    const handleEvent = (line: string) => {
-      if (!line.trim()) {
-        return;
       }
 
-      let event: any;
-      try {
-        event = JSON.parse(line);
-      } catch {
-        return;
-      }
-
-      if (event.type === "session" && typeof event.id === "string" && event.id.trim()) {
-        details.sessionId = event.id;
-        emitUpdate();
-        return;
-      }
-
-      if (event.type === "tool_execution_start") {
-        details.toolCallCount += 1;
-        details.lastToolCalls = [...details.lastToolCalls, summarizeToolCall(event.toolName, event.args)].slice(
-          -LAST_TOOL_CALL_LIMIT,
-        );
-        emitUpdate();
-        return;
-      }
-
-      if (event.type === "message_end" && event.message?.role === "assistant") {
-        const answer = updateAnswerFromMessage(details, event.message, input.availableModels);
-        if (answer) {
-          finalAnswer = answer;
+      if (existsSync(resultPath)) {
+        const nextRaw = readFileSync(resultPath, "utf8");
+        if (nextRaw !== lastResultRaw) {
+          lastResultRaw = nextRaw;
+          const loaded = readTerminalResult();
+          if (loaded && details.stopReason === "stop" && successResultDeadline === 0) {
+            successResultDeadline = Date.now() + RESULT_GRACE_PERIOD_MS;
+          }
         }
-        emitUpdate();
-        return;
       }
 
-      if (event.type === "turn_end") {
-        details.turnCount += 1;
-        const answer = updateAnswerFromMessage(details, event.message, undefined, false);
-        if (answer) {
-          finalAnswer = answer;
+      if (existsSync(exitPath)) {
+        const exitFile = readJsonFile<SpawnSubagentExitFile>(exitPath);
+        exitCode = exitFile?.exitCode ?? 1;
+        sawExit = true;
+        cleanupAfterReturn = true;
+        break;
+      }
+
+      if (aborted && (!layout || !isPaneAlive(layout.childPaneId))) {
+        exitCode = 130;
+        sawExit = true;
+        cleanupAfterReturn = true;
+        break;
+      }
+
+      if (sawResult && details.stopReason !== "stop") {
+        break;
+      }
+
+      if (sawResult && details.stopReason === "stop") {
+        if (!layout || !isPaneAlive(layout.childPaneId)) {
+          exitCode = 0;
+          cleanupAfterReturn = true;
+          break;
         }
-        emitUpdate();
+
+        if (successResultDeadline > 0 && Date.now() >= successResultDeadline) {
+          break;
+        }
       }
-    };
 
-    child.stdout.on("data", (chunk: Buffer | string) => {
-      stdoutBuffer += chunk.toString();
-      const lines = stdoutBuffer.split("\n");
-      stdoutBuffer = lines.pop() ?? "";
-      for (const line of lines) {
-        handleEvent(line);
+      await sleep(POLL_INTERVAL_MS);
+    }
+
+    if (!sawResult) {
+      const waitUntil = Date.now() + RESULT_GRACE_PERIOD_MS;
+      while (!existsSync(resultPath) && Date.now() < waitUntil) {
+        await sleep(50);
       }
-    });
+      readTerminalResult();
+    }
 
-    child.stderr.on("data", (chunk: Buffer | string) => {
-      stderr += chunk.toString();
-    });
+    details.exitCode = sawExit ? exitCode : undefined;
+    if (!details.answerPreview) {
+      details.answerPreview = previewText(finalAnswer || details.error);
+    }
 
-    child.on("error", (error) => {
-      finish(1, `Failed to start pi subprocess: ${error.message}`);
-    });
+    const succeeded = details.stopReason === "stop" && (!sawExit || exitCode === 0);
+    if (!succeeded) {
+      details.status = "error";
+      details.stopReason = details.stopReason ?? (aborted ? "aborted" : "error");
+      details.error =
+        details.error ||
+        (aborted
+          ? "Subagent was aborted."
+          : sawExit && exitCode !== 0
+            ? `pi exited with code ${exitCode}.`
+            : details.stopReason === "length"
+              ? "Subagent hit the model context or output limit."
+              : details.stopReason === "toolUse"
+                ? "Subagent exited while waiting for another tool turn."
+                : details.stopReason === "aborted"
+                  ? "Subagent was aborted."
+                  : "Subagent failed.");
+      details.answerPreview = previewText(finalAnswer || details.error);
+      return {
+        contentText: buildFailureText(details, sawExit ? `pi exited with code ${exitCode}.` : "Subagent failed."),
+        details: cloneDetails(details),
+      };
+    }
 
-    child.on("close", (code) => {
-      if (stdoutBuffer.trim()) {
-        handleEvent(stdoutBuffer);
-      }
-      finish(code ?? 0);
-    });
-
-    input.signal?.addEventListener("abort", abortChild, { once: true });
-  });
-
-  details.exitCode = exitCode;
-  if (finalAnswer && !details.answerPreview) {
-    details.answerPreview = previewText(finalAnswer);
-  }
-
-  const failed = aborted || exitCode !== 0 || details.stopReason === "error" || details.stopReason === "aborted";
-  if (failed) {
-    details.status = "error";
-    details.error =
-      details.error ||
-      spawnError ||
-      stderr.trim() ||
-      (aborted ? "Subagent was aborted." : `pi exited with code ${exitCode}.`);
-    details.answerPreview = previewText(finalAnswer || details.error);
+    details.status = "success";
     return {
-      contentText: buildFailureText(details, `pi exited with code ${exitCode}.`),
+      contentText: appendSessionId(finalAnswer || "Subagent finished without a text answer.", details.sessionId),
       details: cloneDetails(details),
     };
+  } finally {
+    if (cleanupAfterReturn) {
+      await cleanupTmuxLayout(layout);
+      try {
+        rmSync(ipcDir, { recursive: true, force: true });
+      } catch {}
+    }
   }
-
-  details.status = "success";
-  return {
-    contentText: appendSessionId(finalAnswer || "Subagent finished without a text answer.", details.sessionId),
-    details: cloneDetails(details),
-  };
 }
