@@ -24,6 +24,7 @@ import {
 const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhigh"]);
 const POLL_INTERVAL_MS = 250;
 const RESULT_GRACE_PERIOD_MS = 2_000;
+const ABORT_CLEANUP_GRACE_PERIOD_MS = 1_000;
 const RIGHT_PANE_WIDTH = 120;
 
 let tmuxMutationQueue: Promise<void> = Promise.resolve();
@@ -651,6 +652,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
   let cleanupAfterReturn = false;
   let successResultDeadline = 0;
   let deadPaneDeadline = 0;
+  let abortCleanupDeadline = 0;
   let cleanupPromise: Promise<void> | undefined;
 
   const emitUpdate = () => {
@@ -663,6 +665,8 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     }
 
     aborted = true;
+    cleanupAfterReturn = true;
+    abortCleanupDeadline = Date.now() + ABORT_CLEANUP_GRACE_PERIOD_MS;
     details.stopReason = "aborted";
     details.status = "error";
     details.error = details.error || message;
@@ -799,13 +803,20 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       }
 
       if (sawResult && details.stopReason !== "stop") {
+        cleanupAfterReturn = true;
         break;
       }
 
       if (sawResult && details.stopReason === "stop") {
         if (successResultDeadline > 0 && Date.now() >= successResultDeadline) {
+          cleanupAfterReturn = true;
           break;
         }
+      }
+
+      if (aborted && abortCleanupDeadline > 0 && Date.now() >= abortCleanupDeadline) {
+        exitCode = 130;
+        break;
       }
 
       await sleep(POLL_INTERVAL_MS);

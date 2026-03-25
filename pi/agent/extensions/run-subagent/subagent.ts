@@ -217,9 +217,7 @@ export default function runSubagentChildExtension(pi: ExtensionAPI) {
 
   pi.on("agent_end", async (_event, ctx) => {
     finalize();
-    if (details.stopReason === "stop") {
-      ctx.shutdown();
-    }
+    ctx.shutdown();
   });
 
   pi.on("session_shutdown", async () => {
