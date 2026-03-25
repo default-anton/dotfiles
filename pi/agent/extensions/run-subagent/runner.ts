@@ -25,6 +25,8 @@ const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhi
 const POLL_INTERVAL_MS = 250;
 const RESULT_GRACE_PERIOD_MS = 2_000;
 const ABORT_CLEANUP_GRACE_PERIOD_MS = 1_000;
+const SHELL_READY_POLL_INTERVAL_MS = 50;
+const SHELL_READY_TIMEOUT_MS = 5_000;
 const RIGHT_PANE_WIDTH = 120;
 
 let tmuxMutationQueue: Promise<void> = Promise.resolve();
@@ -354,6 +356,64 @@ function resolveTmuxContext(): TmuxContext {
   }
 }
 
+function getPaneRuntime(paneId: string): { currentCommand: string; dead: boolean } | undefined {
+  try {
+    const [currentCommand = "", dead = "0"] = tmux([
+      "display-message",
+      "-p",
+      "-t",
+      paneId,
+      "#{pane_current_command}\t#{pane_dead}",
+    ]).split("\t");
+    return {
+      currentCommand: currentCommand.trim(),
+      dead: dead === "1",
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+async function waitForPaneShellReady(paneId: string, signal?: AbortSignal): Promise<void> {
+  const deadline = Date.now() + SHELL_READY_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    if (signal?.aborted) {
+      throw new Error("Subagent was aborted before the shell became ready.");
+    }
+
+    const runtime = getPaneRuntime(paneId);
+    if (!runtime || runtime.dead) {
+      throw new Error("Subagent pane exited before the shell became ready.");
+    }
+
+    if (runtime.currentCommand) {
+      return;
+    }
+
+    await sleep(SHELL_READY_POLL_INTERVAL_MS);
+  }
+
+  throw new Error("Timed out waiting for the subagent shell to become ready.");
+}
+
+async function startCommandInPane(paneId: string, command: string, signal?: AbortSignal): Promise<void> {
+  await waitForPaneShellReady(paneId, signal);
+
+  await withTmuxMutationLock(() => {
+    if (signal?.aborted) {
+      throw new Error("Subagent was aborted before the subagent command was started.");
+    }
+
+    if (!isPaneAlive(paneId)) {
+      throw new Error("Subagent pane exited before the subagent command was started.");
+    }
+
+    tmux(["send-keys", "-t", paneId, "-l", command]);
+    tmux(["send-keys", "-t", paneId, "C-m"]);
+  });
+}
+
 function listWindowPanes(windowId: string): TmuxPane[] {
   const output = tmux([
     "list-panes",
@@ -438,7 +498,7 @@ function findWindowIdByName(sessionId: string, windowName: string): string | und
   return undefined;
 }
 
-function createSameWindowLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
+function createSameWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
   const panes = listWindowPanes(tmuxContext.windowId);
   if (panes.length === 0) {
     throw new Error("run_subagent could not find any tmux panes in the calling window.");
@@ -446,6 +506,8 @@ function createSameWindowLayout(scriptPath: string, taskTitle: string, tmuxConte
 
   const childPaneId = tmux([
     "split-window",
+    "-c",
+    cwd,
     "-d",
     "-h",
     "-f",
@@ -456,7 +518,6 @@ function createSameWindowLayout(scriptPath: string, taskTitle: string, tmuxConte
     "-P",
     "-F",
     "#{pane_id}",
-    scriptPath,
   ]);
 
   setPaneTitle(childPaneId, taskTitle);
@@ -466,13 +527,15 @@ function createSameWindowLayout(scriptPath: string, taskTitle: string, tmuxConte
   };
 }
 
-function createDedicatedWindowLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
+function createDedicatedWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
   const dedicatedWindowName = getDedicatedWindowName(tmuxContext.windowId);
   const existingWindowId = findWindowIdByName(tmuxContext.sessionId, dedicatedWindowName);
 
   if (!existingWindowId) {
     const [windowId, childPaneId] = tmux([
       "new-window",
+      "-c",
+      cwd,
       "-d",
       "-t",
       tmuxContext.sessionId,
@@ -481,7 +544,6 @@ function createDedicatedWindowLayout(scriptPath: string, taskTitle: string, tmux
       "-P",
       "-F",
       "#{window_id}\t#{pane_id}",
-      scriptPath,
     ]).split("\t");
     if (!windowId || !childPaneId) {
       throw new Error("run_subagent could not create the subagent tmux window.");
@@ -501,13 +563,14 @@ function createDedicatedWindowLayout(scriptPath: string, taskTitle: string, tmux
 
   const childPaneId = tmux([
     "split-window",
+    "-c",
+    cwd,
     "-d",
     "-t",
     pickLargestPane(panes).id,
     "-P",
     "-F",
     "#{pane_id}",
-    scriptPath,
   ]);
   tmux(["select-layout", "-t", existingWindowId, "tiled"]);
   setPaneTitle(childPaneId, taskTitle);
@@ -531,7 +594,7 @@ function killPaneSync(paneId: string | undefined): void {
 }
 
 async function createTmuxLayout(
-  scriptPath: string,
+  cwd: string,
   taskTitle: string,
   tmuxContext: TmuxContext,
   signal?: AbortSignal,
@@ -543,12 +606,12 @@ async function createTmuxLayout(
 
     const layout =
       getActiveSubagentCount(tmuxContext.windowId) > 1
-        ? createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext)
+        ? createDedicatedWindowLayout(cwd, taskTitle, tmuxContext)
         : (() => {
           try {
-            return createSameWindowLayout(scriptPath, taskTitle, tmuxContext);
+            return createSameWindowLayout(cwd, taskTitle, tmuxContext);
           } catch {
-            return createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext);
+            return createDedicatedWindowLayout(cwd, taskTitle, tmuxContext);
           }
         })();
 
@@ -728,13 +791,35 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     }
 
     const scriptPath = writeLauncherScript(input, childPrompt, childModel, requestedSessionId, ipcDir);
-    layout = await createTmuxLayout(scriptPath, input.taskTitle, tmuxContext, input.signal);
+    layout = await createTmuxLayout(input.cwd, input.taskTitle, tmuxContext, input.signal);
 
     if (!layout) {
       markAborted("Subagent was aborted before the tmux pane was created.");
       cleanupAfterReturn = true;
       return {
         contentText: buildFailureText(details, "Parent request was aborted."),
+        details: cloneDetails(details),
+      };
+    }
+
+    try {
+      await startCommandInPane(layout.childPaneId, `${shellEscape(scriptPath)}; exit`, input.signal);
+    } catch (error: any) {
+      cleanupAfterReturn = true;
+      if (input.signal?.aborted) {
+        markAborted("Subagent was aborted before the subagent command was started.");
+        return {
+          contentText: buildFailureText(details, "Parent request was aborted."),
+          details: cloneDetails(details),
+        };
+      }
+
+      details.status = "error";
+      details.stopReason = "error";
+      details.error = error?.message ?? "run_subagent could not start the subagent command.";
+      details.answerPreview = previewText(details.error);
+      return {
+        contentText: buildFailureText(details, details.error),
         details: cloneDetails(details),
       };
     }
