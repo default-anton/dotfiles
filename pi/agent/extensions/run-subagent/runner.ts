@@ -28,6 +28,7 @@ const ABORT_CLEANUP_GRACE_PERIOD_MS = 1_000;
 const SHELL_READY_POLL_INTERVAL_MS = 50;
 const SHELL_READY_TIMEOUT_MS = 5_000;
 const RIGHT_PANE_WIDTH = 120;
+const PI_TMUX_WINDOW_NAME_DISABLED_ENV = "PI_TMUX_WINDOW_NAME_DISABLED";
 
 let tmuxMutationQueue: Promise<void> = Promise.resolve();
 const activeSubagentsByWindowId = new Map<string, number>();
@@ -321,7 +322,7 @@ function writeLauncherScript(
     "code=0",
     `cd ${shellEscape(input.cwd)} || code=$?`,
     'if [ "$code" -eq 0 ]; then',
-    `  ${SUBAGENT_DEPTH_ENV}=${shellEscape(depth)} \\\n  ${SUBAGENT_IPC_DIR_ENV}=${shellEscape(ipcDir)} \\\n  ${SUBAGENT_TASK_TITLE_ENV}=${shellEscape(input.taskTitle)} \\\n  ${SUBAGENT_MODEL_ARG_ENV}=${shellEscape(childModel)} \\\n  ${command}`,
+    `  ${SUBAGENT_DEPTH_ENV}=${shellEscape(depth)} \\\n  ${SUBAGENT_IPC_DIR_ENV}=${shellEscape(ipcDir)} \\\n  ${SUBAGENT_TASK_TITLE_ENV}=${shellEscape(input.taskTitle)} \\\n  ${SUBAGENT_MODEL_ARG_ENV}=${shellEscape(childModel)} \\\n  ${PI_TMUX_WINDOW_NAME_DISABLED_ENV}=1 \\\n  ${command}`,
     "  code=$?",
     "fi",
     `tmp=${shellEscape(`${exitPath}.tmp`)}`,
