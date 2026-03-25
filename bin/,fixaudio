@@ -55,8 +55,29 @@ apply_input_volume_preset() {
   fi
 }
 
+print_current_device() {
+  local type="$1"
+  local label="$2"
+  local current
+
+  current=$(SwitchAudioSource -c -t "$type" 2>/dev/null || true)
+  [[ -n "$current" ]] || return 0
+
+  printf '%s: %s\n' "$label" "$current"
+}
+
+switched=false
+
 if selected_input=$(select_best_device input "${INPUT_PRIORITY[@]}"); then
   apply_input_volume_preset "$selected_input"
+  switched=true
 fi
 
-select_best_device output "${OUTPUT_PRIORITY[@]}" >/dev/null || true
+if selected_output=$(select_best_device output "${OUTPUT_PRIORITY[@]}"); then
+  switched=true
+fi
+
+if [[ "$switched" == true ]]; then
+  print_current_device input "Input"
+  print_current_device output "Output"
+fi
