@@ -517,17 +517,46 @@ function createDedicatedWindowLayout(scriptPath: string, taskTitle: string, tmux
   };
 }
 
-async function createTmuxLayout(scriptPath: string, taskTitle: string, tmuxContext: TmuxContext): Promise<TmuxLayout> {
+function killPaneSync(paneId: string | undefined): void {
+  if (!paneId) {
+    return;
+  }
+
+  try {
+    if (isPaneAlive(paneId)) {
+      tmux(["kill-pane", "-t", paneId]);
+    }
+  } catch {}
+}
+
+async function createTmuxLayout(
+  scriptPath: string,
+  taskTitle: string,
+  tmuxContext: TmuxContext,
+  signal?: AbortSignal,
+): Promise<TmuxLayout | undefined> {
   return withTmuxMutationLock(() => {
-    if (getActiveSubagentCount(tmuxContext.windowId) > 1) {
-      return createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext);
+    if (signal?.aborted) {
+      return undefined;
     }
 
-    try {
-      return createSameWindowLayout(scriptPath, taskTitle, tmuxContext);
-    } catch {
-      return createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext);
+    const layout =
+      getActiveSubagentCount(tmuxContext.windowId) > 1
+        ? createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext)
+        : (() => {
+          try {
+            return createSameWindowLayout(scriptPath, taskTitle, tmuxContext);
+          } catch {
+            return createDedicatedWindowLayout(scriptPath, taskTitle, tmuxContext);
+          }
+        })();
+
+    if (signal?.aborted) {
+      killPaneSync(layout.childPaneId);
+      return undefined;
     }
+
+    return layout;
   });
 }
 
@@ -621,12 +650,39 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
   let sawResult = false;
   let cleanupAfterReturn = false;
   let successResultDeadline = 0;
+  let deadPaneDeadline = 0;
+  let cleanupPromise: Promise<void> | undefined;
 
   const emitUpdate = () => {
     input.onUpdate?.(cloneDetails(details));
   };
 
+  const markAborted = (message: string) => {
+    if (aborted) {
+      return;
+    }
+
+    aborted = true;
+    details.stopReason = "aborted";
+    details.status = "error";
+    details.error = details.error || message;
+    details.answerPreview = details.answerPreview || previewText(details.error);
+    emitUpdate();
+  };
+
+  const startCleanup = () => {
+    if (!cleanupPromise) {
+      cleanupPromise = cleanupTmuxLayout(layout);
+    }
+
+    return cleanupPromise;
+  };
+
   const readStateUpdate = () => {
+    if (aborted) {
+      return;
+    }
+
     const state = readJsonFile<SpawnSubagentStateFile>(statePath);
     if (state?.details) {
       mergeDetails(details, state.details, input.availableModels);
@@ -635,6 +691,10 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
   };
 
   const readTerminalResult = (): boolean => {
+    if (aborted) {
+      return false;
+    }
+
     const result = readJsonFile<SpawnSubagentResultFile>(resultPath);
     if (!result?.details) {
       return false;
@@ -647,19 +707,39 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     return true;
   };
 
+  const abortListener = () => {
+    markAborted("Subagent was aborted.");
+  };
+  input.signal?.addEventListener("abort", abortListener, { once: true });
+
   try {
     await sleep(0);
+    if (input.signal?.aborted) {
+      markAborted("Subagent was aborted before the subagent started.");
+      cleanupAfterReturn = true;
+      return {
+        contentText: buildFailureText(details, "Parent request was aborted."),
+        details: cloneDetails(details),
+      };
+    }
+
     const scriptPath = writeLauncherScript(input, childPrompt, childModel, requestedSessionId, ipcDir);
-    layout = await createTmuxLayout(scriptPath, input.taskTitle, tmuxContext);
+    layout = await createTmuxLayout(scriptPath, input.taskTitle, tmuxContext, input.signal);
+
+    if (!layout) {
+      markAborted("Subagent was aborted before the tmux pane was created.");
+      cleanupAfterReturn = true;
+      return {
+        contentText: buildFailureText(details, "Parent request was aborted."),
+        details: cloneDetails(details),
+      };
+    }
 
     let lastStateRaw = "";
     let lastResultRaw = "";
     while (true) {
-      if (input.signal?.aborted && !aborted) {
-        aborted = true;
-        details.stopReason = "aborted";
-        details.status = "error";
-        await cleanupTmuxLayout(layout);
+      if (aborted) {
+        startCleanup();
       }
 
       if (existsSync(statePath)) {
@@ -689,11 +769,33 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
         break;
       }
 
-      if (aborted && (!layout || !isPaneAlive(layout.childPaneId))) {
-        exitCode = 130;
-        sawExit = true;
-        cleanupAfterReturn = true;
-        break;
+      const paneAlive = layout ? isPaneAlive(layout.childPaneId) : false;
+      if (!paneAlive) {
+        if (aborted) {
+          exitCode = 130;
+          sawExit = true;
+          cleanupAfterReturn = true;
+          break;
+        }
+
+        if (sawResult && details.stopReason === "stop") {
+          exitCode = 0;
+          cleanupAfterReturn = true;
+          break;
+        }
+
+        if (deadPaneDeadline === 0) {
+          deadPaneDeadline = Date.now() + RESULT_GRACE_PERIOD_MS;
+        } else if (Date.now() >= deadPaneDeadline) {
+          exitCode = 1;
+          sawExit = true;
+          cleanupAfterReturn = true;
+          details.stopReason = details.stopReason ?? "error";
+          details.error = details.error || "Subagent pane exited before writing a result.";
+          break;
+        }
+      } else {
+        deadPaneDeadline = 0;
       }
 
       if (sawResult && details.stopReason !== "stop") {
@@ -701,12 +803,6 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       }
 
       if (sawResult && details.stopReason === "stop") {
-        if (!layout || !isPaneAlive(layout.childPaneId)) {
-          exitCode = 0;
-          cleanupAfterReturn = true;
-          break;
-        }
-
         if (successResultDeadline > 0 && Date.now() >= successResultDeadline) {
           break;
         }
@@ -715,7 +811,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       await sleep(POLL_INTERVAL_MS);
     }
 
-    if (!sawResult) {
+    if (!sawResult && !aborted) {
       const waitUntil = Date.now() + RESULT_GRACE_PERIOD_MS;
       while (!existsSync(resultPath) && Date.now() < waitUntil) {
         await sleep(50);
@@ -758,8 +854,9 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       details: cloneDetails(details),
     };
   } finally {
+    input.signal?.removeEventListener("abort", abortListener);
     if (cleanupAfterReturn) {
-      await cleanupTmuxLayout(layout);
+      await (cleanupPromise ?? cleanupTmuxLayout(layout));
       try {
         rmSync(ipcDir, { recursive: true, force: true });
       } catch {}

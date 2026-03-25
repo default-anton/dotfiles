@@ -78,6 +78,39 @@ function formatCost(costUsd: number): string {
   return `$${costUsd.toFixed(2)}`;
 }
 
+function getResultText(result: { content: Array<{ type: string; text?: string }> }): string | undefined {
+  const text = result.content
+    .filter((block): block is { type: "text"; text: string } => block.type === "text" && typeof block.text === "string")
+    .map((block) => block.text)
+    .join("\n")
+    .trim();
+
+  return text || undefined;
+}
+
+function coerceErrorDetails(
+  result: { content: Array<{ type: string; text?: string }> },
+  previous: SpawnSubagentDetails | undefined,
+  isError: boolean,
+): SpawnSubagentDetails | undefined {
+  if (!previous) {
+    return undefined;
+  }
+
+  if (!isError) {
+    return previous;
+  }
+
+  const errorText = getResultText(result);
+  return {
+    ...previous,
+    status: "error",
+    stopReason: previous.stopReason ?? "aborted",
+    error: previous.error || errorText,
+    answerPreview: previous.answerPreview || previewFallback(errorText || ""),
+  };
+}
+
 function renderUsage(details: SpawnSubagentDetails, theme: any): string {
   const costLabel = `${formatCost(details.usage.costUsd)}${details.usage.usingSubscription ? " (sub)" : ""}`;
   const cost = theme.fg("dim", costLabel);
@@ -220,8 +253,14 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
       return new Text(text, 0, 0);
     },
 
-    renderResult(result, { expanded }, theme) {
-      const details = result.details as SpawnSubagentDetails | undefined;
+    renderResult(result, { expanded }, theme, context) {
+      const state = context.state as { lastDetails?: SpawnSubagentDetails };
+      const incomingDetails = result.details as SpawnSubagentDetails | undefined;
+      if (incomingDetails) {
+        state.lastDetails = incomingDetails;
+      }
+
+      const details = coerceErrorDetails(result, incomingDetails || state.lastDetails, context.isError);
       if (!details) {
         const content = result.content[0];
         const text = content?.type === "text" ? previewFallback(content.text) : "(no output)";
