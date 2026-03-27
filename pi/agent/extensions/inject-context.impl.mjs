@@ -236,14 +236,9 @@ function formatPiDocumentationForPrompt(systemPrompt, ctx) {
 }
 
 function formatHarnessSpecificInstructions(ctx) {
-  const modelId =
-    typeof ctx.model === "string"
-      ? ctx.model
-      : typeof ctx.model?.id === "string"
-        ? ctx.model.id
-        : "";
+  const provider = typeof ctx.model?.provider === "string" ? ctx.model.provider.trim() : "";
 
-  if (!modelId.startsWith("gpt-5.3-codex")) {
+  if (provider !== "openai" && provider !== "openai-codex") {
     return "";
   }
 
