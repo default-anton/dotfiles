@@ -3,10 +3,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(event)
     local client = vim.lsp.get_client_by_id(event.data.client_id)
 
-    if client.name == 'copilot' then
-      return
-    end
-
     local builtin = require 'telescope.builtin'
 
     local map = function(keys, func)
