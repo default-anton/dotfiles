@@ -11,8 +11,7 @@
 - Subagents: use `model: openai-codex/gpt-5.4-mini:medium` for `run_subagent` unless the user explicitly asks for a different model, or instructed otherwise in project's AGENTS file.
 - Most user projects are in `~/code/`; this is primarily for cross-project lookup/reuse and may be irrelevant to the current task.
 - Dotfiles are located at `~/.dotfiles`.
-- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
-- Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
+- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
 - Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style; keep them tight, token-light, high-signal, and no-noise.
 - Keep files <=1000 LOC; split/refactor as needed.
 - `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
