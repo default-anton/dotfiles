@@ -9,6 +9,7 @@ brew 'mise'
 brew 'curl'
 brew 'bash'
 brew 'neovim', args: ['HEAD']
+brew 'tree-sitter-cli'
 brew 'starship'
 brew 'moreutils'
 brew 'fzy'

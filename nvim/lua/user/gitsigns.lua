@@ -1,18 +1,42 @@
 local gs = require "gitsigns"
-local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
-local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(
-  function()
-    gs.nav_hunk('next', { wrap = false, target = "all" }, function()
-      vim.cmd.normal({ 'zz', bang = true })
-    end)
-  end,
-  function()
-    gs.nav_hunk('prev', { wrap = false, target = "all" }, function()
-      vim.cmd.normal({ 'zz', bang = true })
-    end)
+local ok_ts_repeat_move, ts_repeat_move = pcall(require, "nvim-treesitter-textobjects.repeatable_move")
+if not ok_ts_repeat_move then
+  ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+end
+
+local function next_hunk()
+  gs.nav_hunk('next', { wrap = false, target = "all" }, function()
+    vim.cmd.normal({ 'zz', bang = true })
+  end)
+end
+
+local function prev_hunk()
+  gs.nav_hunk('prev', { wrap = false, target = "all" }, function()
+    vim.cmd.normal({ 'zz', bang = true })
+  end)
+end
+
+local next_hunk_repeat, prev_hunk_repeat
+if ts_repeat_move.make_repeatable_move_pair then
+  next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(next_hunk, prev_hunk)
+else
+  local repeat_hunk_move = ts_repeat_move.make_repeatable_move(function(opts, next_fn, prev_fn)
+    if opts.forward then
+      next_fn()
+    else
+      prev_fn()
+    end
+  end)
+
+  next_hunk_repeat = function()
+    repeat_hunk_move({ forward = true }, next_hunk, prev_hunk)
   end
-)
+
+  prev_hunk_repeat = function()
+    repeat_hunk_move({ forward = false }, next_hunk, prev_hunk)
+  end
+end
 
 gs.setup {
   on_attach = function(bufnr)

@@ -1,16 +1,65 @@
 local review_diff = require "user.review-diff"
-local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+
+local ok_ts_move, ts_move = pcall(require, "nvim-treesitter-textobjects.move")
+if not ok_ts_move then
+  ts_move = require "nvim-treesitter.textobjects.move"
+end
+
+local ok_ts_repeat_move, ts_repeat_move = pcall(require, "nvim-treesitter-textobjects.repeatable_move")
+if not ok_ts_repeat_move then
+  ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+end
+
+local ok_ts_select, ts_select = pcall(require, "nvim-treesitter-textobjects.select")
+if not ok_ts_select then
+  ts_select = require "nvim-treesitter.textobjects.select"
+end
+
+local function select_textobject(query, group)
+  return function()
+    ts_select.select_textobject(query, group)
+  end
+end
+
+local function goto_next_start(query, group)
+  return function()
+    ts_move.goto_next_start(query, group)
+  end
+end
+
+local function goto_previous_start(query, group)
+  return function()
+    ts_move.goto_previous_start(query, group)
+  end
+end
 
 -- Repeat movement with ; and ,
 -- ensure ; goes forward and , goes backward regardless of the last direction
-vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move, { desc = "Repeat last move next" })
-vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move, { desc = "Repeat last move previous" })
+vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next, { desc = "Repeat last move next" })
+vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous, { desc = "Repeat last move previous" })
 
 -- Optionally, make builtin f, F, t, T also repeatable with ; and ,
 vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true, desc = "Repeat f" })
 vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true, desc = "Repeat F" })
 vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true, desc = "Repeat t" })
 vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true, desc = "Repeat T" })
+
+vim.keymap.set({ "x", "o" }, "af", select_textobject("@function.outer", "textobjects"), { desc = "Select function" })
+vim.keymap.set({ "x", "o" }, "if", select_textobject("@function.inner", "textobjects"), { desc = "Select inner function" })
+vim.keymap.set({ "x", "o" }, "ac", select_textobject("@class.outer", "textobjects"), { desc = "Select class" })
+vim.keymap.set({ "x", "o" }, "ic", select_textobject("@class.inner", "textobjects"), { desc = "Select inner class" })
+vim.keymap.set({ "x", "o" }, "ab", select_textobject("@local.scope", "locals"), { desc = "Select language scope" })
+
+vim.keymap.set({ "n", "x", "o" }, "]f", goto_next_start("@function.outer", "textobjects"),
+  { desc = "Next function" })
+vim.keymap.set({ "n", "x", "o" }, "]]", goto_next_start("@class.outer", "textobjects"), { desc = "Next class" })
+vim.keymap.set({ "n", "x", "o" }, "]b", goto_next_start("@local.scope", "locals"), { desc = "Next scope" })
+vim.keymap.set({ "n", "x", "o" }, "[f", goto_previous_start("@function.outer", "textobjects"),
+  { desc = "Previous function" })
+vim.keymap.set({ "n", "x", "o" }, "[[", goto_previous_start("@class.outer", "textobjects"),
+  { desc = "Previous class" })
+vim.keymap.set({ "n", "x", "o" }, "[b", goto_previous_start("@local.scope", "locals"),
+  { desc = "Previous scope" })
 
 -- toggle node under cursor (split if one-line and join if multiline)
 vim.keymap.set("n", "gj", require('treesj').toggle, { desc = "Toggle treesj node" })
@@ -47,7 +96,7 @@ vim.keymap.set('v', 'gyl', copy_line_nums_to_clipboard,
 vim.api.nvim_set_keymap('n', 'gya', [[:let @+ = expand('%:p')<CR>]],
   { noremap = true, silent = true, desc = "Yank absolute file path" })
 
-vim.api.nvim_set_keymap('n', '<leader>tt', ':TSContextToggle<CR>',
+vim.api.nvim_set_keymap('n', '<leader>tt', ':TSContext toggle<CR>',
   { noremap = true, silent = true, desc = "Toggle Treesitter context" })
 
 -- Quickfix list navigation
