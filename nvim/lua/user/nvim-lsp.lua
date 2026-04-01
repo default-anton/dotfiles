@@ -1,7 +1,15 @@
+local lsp_attach_group = vim.api.nvim_create_augroup('lsp-attach', { clear = true })
+local lsp_document_highlight_group = vim.api.nvim_create_augroup('lsp-document-highlight', { clear = false })
+
 vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
+  group = lsp_attach_group,
   callback = function(event)
     local client = vim.lsp.get_client_by_id(event.data.client_id)
+
+    if client and client.name == 'ruby_lsp' then
+      -- Repo-pinned ruby-lsp 0.23.x returns an invalid nil result for cancelled document highlight requests.
+      client.server_capabilities.documentHighlightProvider = false
+    end
 
     local builtin = require 'telescope.builtin'
 
@@ -33,14 +41,27 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end)
 
     if client and client.server_capabilities.documentHighlightProvider then
+      vim.api.nvim_clear_autocmds({ group = lsp_document_highlight_group, buffer = event.buf })
+
       vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+        group = lsp_document_highlight_group,
         buffer = event.buf,
         callback = vim.lsp.buf.document_highlight,
       })
 
       vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+        group = lsp_document_highlight_group,
         buffer = event.buf,
         callback = vim.lsp.buf.clear_references,
+      })
+
+      vim.api.nvim_create_autocmd('LspDetach', {
+        group = lsp_document_highlight_group,
+        buffer = event.buf,
+        callback = function(detach_event)
+          vim.lsp.buf.clear_references()
+          vim.api.nvim_clear_autocmds({ group = lsp_document_highlight_group, buffer = detach_event.buf })
+        end,
       })
     end
 
