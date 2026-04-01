@@ -231,6 +231,24 @@ function shellEscape(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
+function buildChildEnvAssignments(input: SpawnSubagentRunInput, ipcDir: string, childModel: string): string[] {
+  const depth = String(getSubagentDepth(process.env) + 1);
+  const assignments = [
+    `${SUBAGENT_DEPTH_ENV}=${shellEscape(depth)}`,
+    `${SUBAGENT_IPC_DIR_ENV}=${shellEscape(ipcDir)}`,
+    `${SUBAGENT_TASK_TITLE_ENV}=${shellEscape(input.taskTitle)}`,
+    `${SUBAGENT_MODEL_ARG_ENV}=${shellEscape(childModel)}`,
+    `${PI_TMUX_WINDOW_NAME_DISABLED_ENV}=1`,
+  ];
+
+  const inheritedPath = process.env.PATH;
+  if (inheritedPath?.trim()) {
+    assignments.push(`PATH=${shellEscape(inheritedPath)}`);
+  }
+
+  return assignments;
+}
+
 function getPiInvocation(args: string[]): { command: string; args: string[] } {
   const currentScript = process.argv[1];
   if (currentScript && existsSync(currentScript)) {
@@ -315,14 +333,14 @@ function writeLauncherScript(
 
   const invocation = getPiInvocation(childArgs);
   const command = [invocation.command, ...invocation.args].map(shellEscape).join(" ");
-  const depth = String(getSubagentDepth(process.env) + 1);
+  const envAssignments = buildChildEnvAssignments(input, ipcDir, childModel);
 
   const script = [
     "#!/bin/sh",
     "code=0",
     `cd ${shellEscape(input.cwd)} || code=$?`,
     'if [ "$code" -eq 0 ]; then',
-    `  ${SUBAGENT_DEPTH_ENV}=${shellEscape(depth)} \\\n  ${SUBAGENT_IPC_DIR_ENV}=${shellEscape(ipcDir)} \\\n  ${SUBAGENT_TASK_TITLE_ENV}=${shellEscape(input.taskTitle)} \\\n  ${SUBAGENT_MODEL_ARG_ENV}=${shellEscape(childModel)} \\\n  ${PI_TMUX_WINDOW_NAME_DISABLED_ENV}=1 \\\n  ${command}`,
+    `  ${envAssignments.join(" \\\n  ")} \\\n  ${command}`,
     "  code=$?",
     "fi",
     `tmp=${shellEscape(`${exitPath}.tmp`)}`,
