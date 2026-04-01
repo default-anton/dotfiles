@@ -32,7 +32,9 @@ agent-browser type @e2 "more"
 agent-browser select @e3 "Option"
 agent-browser check @e4
 agent-browser upload @e5 ./file.pdf
+agent-browser frame @e6        # Scope to an iframe when needed
 agent-browser press Enter
+agent-browser dialog status
 
 # Extract + capture
 agent-browser get text @e6
@@ -60,6 +62,8 @@ agent-browser diff snapshot
 
 - Prefer `wait --url/--text/--load` over sleeps.
 - Prefer refs from `snapshot -i` over brittle selectors once the page is open.
+- Iframe content is inlined into `snapshot -i`; refs inside iframes work directly. Use `frame @eN` only when you want a scoped snapshot.
+- `alert` and `beforeunload` auto-accept by default; handle `confirm`/`prompt` explicitly with `dialog ...` or disable with `--no-auto-dialog`.
 - Use `&&` only when you do not need intermediate output.
 - Put secrets in env vars / stdin. State files are sensitive: gitignore them and delete when done.
 - Use `--auto-connect` when Anton asks to use his existing Chrome session.
