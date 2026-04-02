@@ -20,4 +20,3 @@
 
 ## User Preferences
 - Address the user as Anton unless they ask otherwise.
-- For the initial fast reconnaissance pass, use a subagent instead of starting with broad `rg`/`fd` sweeps.
