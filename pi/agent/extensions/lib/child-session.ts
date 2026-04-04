@@ -1,22 +1,41 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
+import type {
+  ExtensionAPI,
+  ExtensionCommandContext,
+  SessionEntry,
+} from "@mariozechner/pi-coding-agent";
 
-export async function sendMessageInChildSession(
+function getEmptyBranchTargetId(branch: SessionEntry[]): string | undefined {
+  for (const entry of branch) {
+    if (entry.type === "custom_message") {
+      return entry.id;
+    }
+
+    if (entry.type === "message" && entry.message.role === "user") {
+      return entry.id;
+    }
+  }
+
+  return undefined;
+}
+
+export async function sendMessageInNewBranch(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
+  branch: SessionEntry[],
   message: string,
-  sessionPurpose: string,
+  purpose: string,
 ): Promise<boolean> {
-  const parentSession = ctx.sessionManager.getSessionFile();
-  const newSessionResult = parentSession
-    ? await ctx.newSession({ parentSession })
-    : await ctx.newSession();
-
-  if (newSessionResult.cancelled) {
-    if (ctx.hasUI) ctx.ui.notify(`New ${sessionPurpose} session cancelled`, "info");
-    return false;
+  const targetId = getEmptyBranchTargetId(branch);
+  if (targetId) {
+    const result = await ctx.navigateTree(targetId, { summarize: false });
+    if (result.cancelled) {
+      if (ctx.hasUI) ctx.ui.notify(`New ${purpose} branch cancelled`, "info");
+      return false;
+    }
   }
 
   pi.sendUserMessage(message);
-  if (ctx.hasUI) ctx.ui.notify(`Started ${sessionPurpose} session`, "info");
+
+  if (ctx.hasUI) ctx.ui.notify(`Started ${purpose} branch`, "info");
   return true;
 }

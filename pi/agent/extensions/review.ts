@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
-import { sendMessageInChildSession } from "./lib/child-session.ts";
+import { sendMessageInNewBranch } from "./lib/child-session.ts";
 import { extractConversation, formatConversation } from "./lib/conversation-context.ts";
 
 const REVIEW_INSTRUCTION = [
@@ -31,7 +31,7 @@ function buildReviewMessage(args: string, conversationXml?: string): string {
   }
 
   return [
-    "Conversation context copied from the previous session (user + assistant messages only; thinking and tool calls removed):",
+    "Conversation context copied from the current branch (user + assistant messages only; thinking and tool calls removed):",
     "",
     "````xml",
     conversationXml,
@@ -43,17 +43,21 @@ function buildReviewMessage(args: string, conversationXml?: string): string {
 
 export default function reviewExtension(pi: ExtensionAPI) {
   pi.registerCommand("review", {
-    description: "Review current work in child session (optional focus text)",
+    description: "Review current work in new branch (optional focus text)",
     handler: async (args, ctx) => {
       if (!ctx.isIdle()) {
         await ctx.waitForIdle();
       }
 
-      const extractedConversation = extractConversation(ctx.sessionManager.getBranch());
+      const branch = ctx.sessionManager.getBranch();
+      const extractedConversation = extractConversation(branch);
       const conversationXml =
         extractedConversation.length === 0 ? undefined : formatConversation(extractedConversation);
       const reviewMessage = buildReviewMessage(args, conversationXml);
-      await sendMessageInChildSession(pi, ctx, reviewMessage, "review");
+      const started = await sendMessageInNewBranch(pi, ctx, branch, reviewMessage, "review");
+      if (started && ctx.hasUI) {
+        ctx.ui.setEditorText("");
+      }
     },
   });
 }
