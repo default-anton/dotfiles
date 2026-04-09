@@ -29,7 +29,7 @@ local parsers = {
   "yaml",
 }
 
-local disabled_langs = {}
+local disabled_langs = { "markdown" }
 local max_filesize = 100 * 1024
 local treesitter_group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true })
 
@@ -125,6 +125,16 @@ vim.api.nvim_create_autocmd("FileType", {
     start_treesitter(args.buf)
   end,
   desc = "Start treesitter for supported buffers",
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = treesitter_group,
+  pattern = "markdown",
+  callback = function(args)
+    -- Neovim's markdown ftplugin starts treesitter automatically; it stalls on prose buffers here.
+    pcall(vim.treesitter.stop, args.buf)
+  end,
+  desc = "Use syntax highlighting for markdown",
 })
 
 require('treesitter-context').setup {
