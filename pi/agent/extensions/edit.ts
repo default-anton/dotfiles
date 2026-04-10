@@ -6,7 +6,7 @@ const SingleEditParameters = Type.Object(
   {
     path: Type.String({ description: "Relative (prefered) or absolute path to the file to edit" }),
     oldText: Type.String({
-      description: "Exact text to replace. Must match a minimally unique substring in the file",
+      description: "Exact text to replace. Must match exactly once in the file. If repeated, include the smallest nearby unchanged context that makes it unique.",
     }),
     newText: Type.String(),
   },
