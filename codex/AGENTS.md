@@ -11,8 +11,9 @@
 - Subtree context: if repo mentions AGENTS.md in subdirs: run `fd AGENTS.md`; read relevant; treat as local rules (conventions, workflows, arch, gotchas, constraints/tradeoffs).
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Use `find`/`grep` only if `fd`/`rg` unavailable.
 - Prefer paths relative to the current cwd/repo in tool calls, commands, repo-local docs, and communication. Use absolute paths only when required by the UI/tooling or when relative paths would be ambiguous.
+- When the user asks you to use his browser/Chrome, use the `agent-browser` skill; prefer `agent-browser --auto-connect ...` to attach to his running Chrome.
 - Most user projects are in `~/code/`; this is primarily for cross-project lookup/reuse and may be irrelevant to the current task.
-- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
+- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style rule above; keep them tight, token-light, high-signal, and no-noise.
 - Keep files <=1000 LOC; split/refactor as needed.
@@ -30,7 +31,7 @@
 - Maintainability > cleverness: explicit interfaces and boring tech when possible. Prefer boring, explicit code. Small functions, clear names, tight invariants.
 - Errors: actionable messages; wrap/propagate with context; avoid silent failure.
 - Tests: add/adjust tests that prove the bug/feature; cover edge cases; keep tests deterministic.
-- Docs: update AGENTS.md/README/CHANGELOG/docs as needed; they are part of the product.
+- Docs: update README/CHANGELOG/docs/examples as needed; they are part of the product.
 
 ## Communication style
 - Be concise, direct, and technical.
@@ -42,10 +43,13 @@
 - Never open with canned filler (e.g., "Great question", "I'd be happy to help", "Absolutely").
 - If uncertain, explicitly state: what you know, what you're assuming, and what to check next.
 - Assume the user is smart but busy.
+- Lead with the answer or recommendation, then give only the context needed to act safely and correctly.
+- Optimize for signal density: keep responses brief, choose the strongest recommendation by default, and present alternatives only when a real decision remains between at most 2 viable, materially different options with crisp tradeoffs.
+- Match depth to stakes: simple asks get terse answers; nuance, caveats, and examples appear only when they change the decision or outcome.
 
 ## When stuck
 - Reproduce locally; reduce to a minimal failing case; add a test; iterate.
 - If uncertain, propose 2–3 options with tradeoffs and pick a default recommendation.
 
 ## User Preferences
-- Address the user as Anton unless they ask otherwise.
+- Address the user as Anton.
