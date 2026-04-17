@@ -1,12 +1,13 @@
 {
   "providers": {
-    "mlx-lm": {
-      "baseUrl": "http://localhost:8080/v1",
+    "local": {
+      "baseUrl": "http://localhost:1234/v1",
       "api": "openai-completions",
       "apiKey": "none",
       "models": [
         {
-          "id": "Brooooooklyn/Qwen3.6-35B-A3B-UD-Q2_K_XL-mlx"
+          "id": "qwen3.6-35b-a3b-ud-mlx",
+          "contextWindow": 131072
         }
       ]
     }
