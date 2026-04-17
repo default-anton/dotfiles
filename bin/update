@@ -16,6 +16,9 @@ case "$tool" in
 
     uv tool install "$package_spec" --force --prerelease=allow --python 3.11 --with "numpy<2.0.0" --with "spacy<4.0.0" --with "typer>=0.9.0" --with "pip" --with "python-multipart"
     ;;
+  mlx-lm)
+    uv tool install "mlx-lm@${version}"
+    ;;
   claude)
     brew upgrade --cask claude-code@latest
     ;;
@@ -26,14 +29,8 @@ case "$tool" in
   codex)
     mise use --global "npm:@openai/codex@${version}"
     ;;
-  jagc)
-    mise use --global "npm:jagc@${version}"
-    ;;
-  gemini)
-    mise use --global "npm:@google/gemini-cli@${version}"
-    ;;
   *)
-    echo "Usage: update {mlx-audio|claude|pi|codex|jagc|gemini} [version]"
+    echo "Usage: update {mlx-audio|mlx-lm|claude|pi|codex} [version]"
     exit 1
     ;;
 esac
