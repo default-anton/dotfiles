@@ -302,7 +302,6 @@ export default function injectContextExtension(pi) {
       harnessSpecificInstructions,
       `\n\nCurrent date: ${dateTime}`,
       `\nCurrent working directory: ${formatPathForPrompt(ctx.cwd)}`,
-      `\n\nYour skills are located in: ${formatPathForPrompt(path.join(agentDir, "skills"))}/`,
       `\nYour extensions are located in: ${formatPathForPrompt(path.join(agentDir, "extensions"))}/`,
       `\nGlobal AGENTS.md: ${formatPathForPrompt(path.join(agentDir, "AGENTS.md"))} (applies to all projects)`,
     ].join("");
