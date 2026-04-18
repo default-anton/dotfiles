@@ -1,1 +1,0 @@
-- To update agent-browser, run `pi/agent/skills/agent-browser/update.sh`.
