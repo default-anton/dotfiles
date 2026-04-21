@@ -16,8 +16,5 @@
     "git:github.com/twoGiants/pi-anthropic-vertex@249dbdb7d9722cc0bda1407b879ece4e7190c8d1"
   ],
   "transport": "websocket",
-  "piOpenaiFast": {
-    "enabled": false
-  },
   "treeFilterMode": "no-tools"
 }
