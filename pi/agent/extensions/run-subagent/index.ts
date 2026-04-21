@@ -219,6 +219,7 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
           contextWindow: model.contextWindow,
           usingSubscription: ctx.modelRegistry.isUsingOAuth(model),
         })),
+        activeTools: pi.getActiveTools(),
         thinkingLevel: pi.getThinkingLevel(),
         signal,
         onUpdate: onUpdate

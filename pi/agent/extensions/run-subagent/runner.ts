@@ -52,6 +52,7 @@ export type SpawnSubagentRunInput = {
   cwd: string;
   currentModel?: ChildModel;
   availableModels?: ChildModel[];
+  activeTools?: string[];
   thinkingLevel: string;
   signal?: AbortSignal;
   onUpdate?: (details: SpawnSubagentDetails) => void;
@@ -249,6 +250,19 @@ function buildChildEnvAssignments(input: SpawnSubagentRunInput, ipcDir: string, 
   return assignments;
 }
 
+function buildChildToolArgs(activeTools: string[] | undefined): string[] {
+  if (!activeTools) {
+    return [];
+  }
+
+  const toolNames = [...new Set(activeTools.map((toolName) => toolName.trim()).filter(Boolean))];
+  if (toolNames.length === 0) {
+    return ["--no-tools"];
+  }
+
+  return ["--tools", toolNames.join(",")];
+}
+
 function getPiInvocation(args: string[]): { command: string; args: string[] } {
   const currentScript = process.argv[1];
   if (currentScript && existsSync(currentScript)) {
@@ -329,7 +343,7 @@ function writeLauncherScript(
   if (requestedSessionId) {
     childArgs.push("--session", requestedSessionId);
   }
-  childArgs.push("--model", childModel, "-e", childExtensionPath, childPrompt);
+  childArgs.push("--model", childModel, ...buildChildToolArgs(input.activeTools), "-e", childExtensionPath, childPrompt);
 
   const invocation = getPiInvocation(childArgs);
   const command = [invocation.command, ...invocation.args].map(shellEscape).join(" ");
