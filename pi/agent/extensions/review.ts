@@ -1,5 +1,8 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
+const REVIEW_MODEL_ID = "gpt-5.4";
+const REVIEW_THINKING_LEVEL = "high";
+
 import { sendMessageInNewBranch } from "./lib/child-session.ts";
 import { extractConversation, formatConversation } from "./lib/conversation-context.ts";
 
@@ -47,6 +50,25 @@ export default function reviewExtension(pi: ExtensionAPI) {
       if (!ctx.isIdle()) {
         await ctx.waitForIdle();
       }
+
+      const reviewModel = ctx.modelRegistry
+        .getAvailable()
+        .find((model) => model.id === REVIEW_MODEL_ID);
+      if (!reviewModel) {
+        if (ctx.hasUI) {
+          ctx.ui.notify(`Cannot start review: model \`${REVIEW_MODEL_ID}\` is not available`, "warning");
+        }
+        return;
+      }
+
+      const modelSelected = await pi.setModel(reviewModel);
+      if (!modelSelected) {
+        if (ctx.hasUI) {
+          ctx.ui.notify(`Cannot start review: failed to select model \`${REVIEW_MODEL_ID}\``, "warning");
+        }
+        return;
+      }
+      pi.setThinkingLevel(REVIEW_THINKING_LEVEL);
 
       const branch = ctx.sessionManager.getBranch();
       const extractedConversation = extractConversation(branch);
