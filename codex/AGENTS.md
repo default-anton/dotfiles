@@ -14,7 +14,6 @@
 - When the user asks you to use his browser/Chrome, use the `agent-browser` skill; prefer `agent-browser --auto-connect ...` to attach to his running Chrome.
 - Most user projects are in `~/code/`; this is primarily for cross-project lookup/reuse and may be irrelevant to the current task.
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
-- Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style rule above; keep them tight, token-light, high-signal, and no-noise.
 - Keep files <=1000 LOC; split/refactor as needed.
 
@@ -28,7 +27,8 @@
 - If stuck, improve the feedback loop (instrument, log, add a failing test, build a harness) rather than guessing.
 
 ## Code standards
-- Maintainability > cleverness: explicit interfaces and boring tech when possible. Prefer boring, explicit code. Small functions, clear names, tight invariants.
+- Maintainability > cleverness: explicit interfaces and boring tech when possible. Prefer boring, explicit code. Tight, cohesive functions, clear names, tight invariants.
+- Avoid speculative abstraction: inline obvious one-use code; extract only for reuse, domain meaning, or to simplify dense logic.
 - Errors: actionable messages; wrap/propagate with context; avoid silent failure.
 - Tests: add/adjust tests that prove the bug/feature; cover edge cases; keep tests deterministic.
 - Docs: update README/CHANGELOG/docs/examples as needed; they are part of the product.
