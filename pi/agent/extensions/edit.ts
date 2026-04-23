@@ -1,17 +1,25 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { createEditToolDefinition } from "@mariozechner/pi-coding-agent";
-import { Type } from "@sinclair/typebox";
 
-const SingleEditParameters = Type.Object(
-  {
-    path: Type.String({ description: "Relative (prefered) or absolute path to the file to edit" }),
-    oldText: Type.String({
-      description: "Exact text to replace. Must match exactly once in the file. If repeated, include the smallest nearby unchanged context that makes it unique.",
-    }),
-    newText: Type.String(),
+const SingleEditParameters = {
+  type: "object",
+  properties: {
+    path: {
+      type: "string",
+      description: "Relative (prefered) or absolute path to the file to edit",
+    },
+    oldText: {
+      type: "string",
+      description:
+        "Exact text to replace. Must match exactly once in the file. If repeated, include the smallest nearby unchanged context that makes it unique.",
+    },
+    newText: {
+      type: "string",
+    },
   },
-  { additionalProperties: false },
-);
+  required: ["path", "oldText", "newText"],
+  additionalProperties: false,
+} as const;
 
 function prepareSingleEditArguments(args: unknown): unknown {
   if (!args || typeof args !== "object") {

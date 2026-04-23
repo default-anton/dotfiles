@@ -8,3 +8,4 @@ nvim/lua/local
 /bin/e2e/fixtures/stt_hello_world.wav
 __pycache__/
 *.pyc
+pi/agent/extensions/run-subagent/node_modules/

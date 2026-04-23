@@ -2,7 +2,7 @@ import type {
   ExtensionAPI,
 } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
-import { Type, type Static } from "@sinclair/typebox";
+import { Type, type Static } from "typebox";
 import {
   runSpawnSubagent,
   shouldRegisterSpawnSubagent,
