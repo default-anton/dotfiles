@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
-const REVIEW_MODEL_ID = "gpt-5.4";
+const REVIEW_MODEL_ID = "gpt-5.5";
 const REVIEW_THINKING_LEVEL = "high";
 
 import { sendMessageInNewBranch } from "./lib/child-session.ts";
