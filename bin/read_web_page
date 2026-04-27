@@ -10,6 +10,56 @@ if [[ -z "$URL" ]]; then
   exit 1
 fi
 
+github_api_get() {
+  gh api -H "Accept: application/vnd.github+json" "$1"
+}
+
+urlencode() {
+  jq -rn --arg value "$1" '$value | @uri'
+}
+
+urlencode_path() {
+  urlencode "$1" | sed 's/%2F/\//g'
+}
+
+# Convert GitHub tree links to a compact directory listing.
+if [[ "$URL" =~ ^https://github\.com/([^/?#]+)/([^/?#]+)/tree/(.+)$ ]]; then
+  OWNER="${BASH_REMATCH[1]}"
+  REPO="${BASH_REMATCH[2]}"
+  REST="${BASH_REMATCH[3]}"
+  REST="${REST%%\?*}"
+  REST="${REST%%\#*}"
+
+  IFS='/' read -r -a PARTS <<< "$REST"
+
+  for ((i = 0; i < ${#PARTS[@]}; i++)); do
+    REF="$(IFS=/; echo "${PARTS[*]:0:i+1}")"
+    PATH_IN_REPO="$(IFS=/; echo "${PARTS[*]:i+1}")"
+    ENCODED_PATH="$(urlencode_path "$PATH_IN_REPO")"
+    ENCODED_REF="$(urlencode "$REF")"
+
+    if [[ -n "$ENCODED_PATH" ]]; then
+      API_PATH="/repos/$OWNER/$REPO/contents/$ENCODED_PATH?ref=$ENCODED_REF"
+    else
+      API_PATH="/repos/$OWNER/$REPO/contents?ref=$ENCODED_REF"
+    fi
+
+    if BODY="$(github_api_get "$API_PATH" 2>/dev/null)" && jq -e 'type == "array"' >/dev/null <<< "$BODY"; then
+      jq -r --arg owner "$OWNER" --arg repo "$REPO" --arg ref "$REF" --arg path "$PATH_IN_REPO" '
+        "# \($owner)/\($repo)\(if $path == "" then "" else "/" + $path end) @ \($ref)\n",
+        (
+          sort_by(.type != "dir", .name)[] |
+          if .type == "dir" then "\(.name)/" else .name end
+        )
+      ' <<< "$BODY"
+      exit 0
+    fi
+  done
+
+  echo "Could not list GitHub tree URL: $URL" >&2
+  exit 1
+fi
+
 # Convert GitHub repository root pages to their README blob page.
 if [[ "$URL" =~ ^https://github\.com/[^/?#]+/[^/?#]+/?([?#].*)?$ ]]; then
   URL="${URL%%\?*}"
