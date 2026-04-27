@@ -12,8 +12,7 @@
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-tmux-window-name",
-    "git:github.com/default-anton/very-good-agent-skills",
-    "git:github.com/twoGiants/pi-anthropic-vertex@249dbdb7d9722cc0bda1407b879ece4e7190c8d1"
+    "git:github.com/default-anton/very-good-agent-skills"
   ],
   "transport": "websocket",
   "treeFilterMode": "no-tools"
