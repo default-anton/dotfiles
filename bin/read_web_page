@@ -10,6 +10,13 @@ if [[ -z "$URL" ]]; then
   exit 1
 fi
 
+# Convert GitHub repository root pages to their README blob page.
+if [[ "$URL" =~ ^https://github\.com/[^/?#]+/[^/?#]+/?([?#].*)?$ ]]; then
+  URL="${URL%%\?*}"
+  URL="${URL%%\#*}"
+  URL="${URL%/}/blob/HEAD/README.md"
+fi
+
 # Convert GitHub blob links to raw URLs so we can fetch them directly with curl.
 if [[ "$URL" =~ ^https://github\.com/.+/.+/blob/.+ ]]; then
   URL="${URL#https://github.com/}"
