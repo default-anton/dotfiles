@@ -235,21 +235,6 @@ function formatPiDocumentationForPrompt(systemPrompt, ctx) {
   ].join("\n");
 }
 
-function formatHarnessSpecificInstructions(ctx) {
-  const provider = typeof ctx.model?.provider === "string" ? ctx.model.provider.trim() : "";
-
-  if (provider !== "openai" && provider !== "openai-codex") {
-    return "";
-  }
-
-  return [
-    "\n\nHarness-specific instructions:",
-    "- The pi harness does not provide an `apply_patch` tool.",
-    "- Never call `apply_patch`; it will fail.",
-    "- Use available file-editing tools instead: `read`, `edit`, and `write`.",
-  ].join("\n");
-}
-
 export default function injectContextExtension(pi) {
   pi.on("before_agent_start", async (event, ctx) => {
     const agentDir = getAgentDir();
@@ -288,7 +273,6 @@ export default function injectContextExtension(pi) {
     const agentsFiles = discoverAgentsFiles(ctx.cwd, agentDir);
 
     const piDocs = formatPiDocumentationForPrompt(baseSystemPrompt, ctx);
-    const harnessSpecificInstructions = formatHarnessSpecificInstructions(ctx);
 
     if (!hasSystemPromptOverride && piDocs === "" && filteredSkills.length === 0 && agentsFiles.length === 0) {
       return;
@@ -299,10 +283,8 @@ export default function injectContextExtension(pi) {
       piDocs,
       formatAgentFilesForPrompt(agentsFiles, ctx.cwd),
       formatSkillsForPrompt(filteredSkills),
-      harnessSpecificInstructions,
       `\n\nCurrent date: ${dateTime}`,
       `\nCurrent working directory: ${formatPathForPrompt(ctx.cwd)}`,
-      `\nYour extensions are located in: ${formatPathForPrompt(path.join(agentDir, "extensions"))}/`,
       `\nGlobal AGENTS.md: ${formatPathForPrompt(path.join(agentDir, "AGENTS.md"))} (applies to all projects)`,
     ].join("");
 
