@@ -30,7 +30,7 @@ if [[ "$URL" =~ ^https://raw\.githubusercontent\.com/ ]] || [[ "$URL" =~ ^https:
   exit $?
 fi
 
-uvx --from crawl4ai crwl "$URL" \
+uvx --from crawl4ai@0.8.6 crwl "$URL" \
   -o md-fit \
   -B ~/.dotfiles/config/crwl/browser.yml \
   -C ~/.dotfiles/config/crwl/crawler.yml \
