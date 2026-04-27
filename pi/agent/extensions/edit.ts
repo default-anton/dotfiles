@@ -6,15 +6,17 @@ const SingleEditParameters = {
   properties: {
     path: {
       type: "string",
-      description: "Relative (prefered) or absolute path to the file to edit",
+      description: "Path to the existing file to edit. Prefer cwd-relative paths; absolute paths are allowed when needed.",
     },
     oldText: {
       type: "string",
       description:
-        "Exact text to replace. Must match exactly once in the file. If repeated, include the smallest nearby unchanged context that makes it unique.",
+        "Non-empty exact current file text to replace. It must occur exactly once in the file. If it occurs multiple times, read more context and include the smallest stable surrounding unchanged text that makes the match unique. Do not guess which occurrence to edit.",
     },
     newText: {
       type: "string",
+      description:
+        "Replacement text for oldText. Use an empty string to delete oldText. Include any unchanged context from oldText that should remain when editing a larger block.",
     },
   },
   required: ["path", "oldText", "newText"],
@@ -59,7 +61,8 @@ export default function editSingleExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "edit",
     label: "edit",
-    description: "Edit a file by exact text replacement",
+    description:
+      "Edit exactly one existing file by replacing exactly one unique oldText block with newText. One call performs one replacement only. For multiple separate sections in the same file, use multiple edit calls; for nearby, touching, nested, or overlapping changes, merge them into one larger oldText/newText block. Keep oldText as small as possible while still unique. If oldText is not unique or not found, read the file/context again before retrying; do not guess.",
     parameters: SingleEditParameters,
     prepareArguments: prepareSingleEditArguments,
     async execute(toolCallId, params, signal, onUpdate, ctx) {
