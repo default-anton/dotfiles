@@ -12,6 +12,7 @@
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-tmux-window-name",
+    "npm:pi-review",
     "git:github.com/default-anton/very-good-agent-skills"
   ],
   "transport": "websocket",
