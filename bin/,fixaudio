@@ -68,12 +68,13 @@ print_current_device() {
 
 switched=false
 
-if selected_input=$(select_best_device input "${INPUT_PRIORITY[@]}"); then
-  apply_input_volume_preset "$selected_input"
+if select_best_device output "${OUTPUT_PRIORITY[@]}" >/dev/null; then
   switched=true
 fi
 
-if selected_output=$(select_best_device output "${OUTPUT_PRIORITY[@]}"); then
+# Some output switches can cause macOS to also change the active input.
+if selected_input=$(select_best_device input "${INPUT_PRIORITY[@]}"); then
+  apply_input_volume_preset "$selected_input"
   switched=true
 fi
 
