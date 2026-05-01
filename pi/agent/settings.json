@@ -13,7 +13,8 @@
     "npm:pi-subdir-context",
     "npm:pi-tmux-window-name",
     "npm:pi-review",
-    "git:github.com/default-anton/very-good-agent-skills"
+    "git:github.com/default-anton/very-good-agent-skills",
+    "npm:glimpseui"
   ],
   "transport": "websocket-cached",
   "treeFilterMode": "no-tools"
