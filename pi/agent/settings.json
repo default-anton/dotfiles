@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.71.0",
+  "lastChangelogVersion": "0.71.1",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
@@ -15,6 +15,6 @@
     "npm:pi-review",
     "git:github.com/default-anton/very-good-agent-skills"
   ],
-  "transport": "websocket",
+  "transport": "websocket-cached",
   "treeFilterMode": "no-tools"
 }
