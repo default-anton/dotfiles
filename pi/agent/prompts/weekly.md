@@ -1,5 +1,6 @@
 ---
 description: Weekly update for management reporting
+argument-hint: "[instructions]"
 ---
 Create a concise weekly progress report for management.
 
@@ -76,3 +77,6 @@ Branch: `origin/branch-name` — branch-only progress, no PR found
 
 ---
 ```
+
+Additional user instructions:
+$ARGUMENTS
