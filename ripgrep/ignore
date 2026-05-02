@@ -1,0 +1,65 @@
+# Generated/source artifacts
+*.map
+*.js.map
+*.css.map
+*.d.ts.map
+*.min.js
+*.min.css
+*.tsbuildinfo
+
+# Text asset blobs that are usually search noise
+*.svg
+*.svgz
+*.drawio
+*.lcov
+lcov.info
+coverage-final.json
+junit.xml
+
+# Dependency and package-manager caches
+node_modules/
+bower_components/
+vendor/bundle/
+.pnpm-store/
+.yarn/cache/
+
+# Lockfiles: useful for package managers, almost never useful for text search
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+bun.lock
+bun.lockb
+Gemfile.lock
+poetry.lock
+Pipfile.lock
+Cargo.lock
+composer.lock
+
+# Common build/test outputs
+coverage/
+dist/
+build/
+out/
+target/
+.next/
+.nuxt/
+.svelte-kit/
+.turbo/
+.cache/
+.parcel-cache/
+.vite/
+
+# Framework/tooling generated directories
+public/packs/
+public/packs-test/
+public/assets/
+.storage/
+tmp/
+log/
+
+# Test fixtures that are usually generated/huge
+vcr_cassettes/
+
+# OS/editor noise
+.DS_Store
+*.log
