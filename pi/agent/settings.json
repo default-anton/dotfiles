@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.71.1",
+  "lastChangelogVersion": "0.72.0",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
