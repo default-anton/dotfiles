@@ -29,8 +29,12 @@ case "$tool" in
   codex)
     mise use --global "npm:@openai/codex@${version}"
     ;;
+  opencode)
+    # Source: https://github.com/anomalyco/opencode
+    mise use --global "npm:opencode-ai@${version}"
+    ;;
   *)
-    echo "Usage: update {mlx-audio|mlx-lm|claude|pi|codex} [version]"
+    echo "Usage: update {mlx-audio|mlx-lm|claude|pi|codex|opencode} [version]"
     exit 1
     ;;
 esac
