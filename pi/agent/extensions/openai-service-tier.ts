@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const ENV_VAR = "OPENAI_SERVICE_TIER";
 const STATUS_KEY = "openai-service-tier";

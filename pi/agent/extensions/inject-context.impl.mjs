@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@mariozechner/pi-coding-agent";
+import { DefaultResourceLoader, SettingsManager, getAgentDir } from "@earendil-works/pi-coding-agent";
 
 let hasShownPiDocsResolveWarning = false;
 
@@ -44,7 +44,7 @@ function resolvePiEntryFilePaths() {
   }
 
   try {
-    return [toFilePath(metaResolve("@mariozechner/pi-coding-agent"))];
+    return [toFilePath(metaResolve("@earendil-works/pi-coding-agent"))];
   } catch {
     return [];
   }

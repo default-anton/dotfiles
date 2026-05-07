@@ -1,5 +1,5 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { createEditToolDefinition } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { createEditToolDefinition } from "@earendil-works/pi-coding-agent";
 
 const SingleEditParameters = {
   type: "object",

@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 type ThinkingLevel = ReturnType<ExtensionAPI["getThinkingLevel"]>;
 type CycleThinkingLevel = Extract<ThinkingLevel, "medium" | "high">;

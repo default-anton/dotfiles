@@ -208,7 +208,7 @@ No silent failures. Every step must end with status file.
   - `examples/extensions/shutdown-command.ts` (`ctx.shutdown()` usage),
   - `examples/extensions/ssh.ts` (extension flag access timing at `session_start`).
 - Type-level semantics:
-  - `node_modules/@mariozechner/pi-ai/dist/types.d.ts` (`AssistantMessage.stopReason`, `errorMessage`).
+  - `node_modules/@earendil-works/pi-ai/dist/types.d.ts` (`AssistantMessage.stopReason`, `errorMessage`).
 
 ---
 

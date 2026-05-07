@@ -1,7 +1,7 @@
 import type {
   ExtensionAPI,
-} from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
+} from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 import { Type, type Static } from "typebox";
 import {
   runSpawnSubagent,
