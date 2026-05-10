@@ -13,6 +13,7 @@
     "npm:pi-subdir-context",
     "npm:pi-tmux-window-name",
     "npm:pi-review",
+    "npm:@akuzmenko/rgk",
     "git:github.com/default-anton/very-good-agent-skills",
     "npm:glimpseui"
   ],
