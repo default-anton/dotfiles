@@ -14,7 +14,12 @@
     "npm:pi-tmux-window-name",
     "npm:pi-review",
     "npm:@akuzmenko/rgk",
-    "git:github.com/default-anton/very-good-agent-skills",
+    {
+      "source": "git:github.com/default-anton/very-good-agent-skills",
+      "skills": [
+        "-git-commit/SKILL.md"
+      ]
+    },
     "npm:glimpseui"
   ],
   "transport": "websocket-cached",
