@@ -1,6 +1,7 @@
 # Rules You Must Follow
 - For new files, don’t work in isolation. Before creating one, inspect ~2 files of the same type and mirror their structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions) can skip this; keep them token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
+- Commit messages must follow Conventional Commits.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks. Use `find`/`grep` only if `fd`/`rg` unavailable.
 - When exploring with `rg`, add `--keep '<natural language condition>'` (a Codex-only `rg` extension) to filter/rank matched lines into `path:line:column:text`; omit `--keep` when you need every literal match, e.g. refactors/edits.
