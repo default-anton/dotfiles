@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { basename, isAbsolute, resolve } from "node:path";
 import MarkdownIt from "markdown-it";
 import { open } from "glimpseui";
+import { fileReferencePreviewPlugin, renderFileReferencePlaceholders } from "./file-reference-preview.ts";
 
 const stylesheet = readFileSync(new URL("./markdown.css", import.meta.url), "utf8");
 const windows = new Set<unknown>();
@@ -17,6 +18,8 @@ interface Heading {
 interface RenderEnv {
   headings: Heading[];
   slugCounts: Map<string, number>;
+  cwd: string;
+  filePreviewCount: number;
 }
 
 const markdown = new MarkdownIt({
@@ -24,6 +27,8 @@ const markdown = new MarkdownIt({
   linkify: true,
   typographer: true,
 });
+
+markdown.use(fileReferencePreviewPlugin);
 
 markdown.renderer.rules.heading_open = (tokens, index, options, env, self) => {
   const renderEnv = env as RenderEnv;
@@ -115,9 +120,9 @@ async function markdownSource(args: string, ctx: { cwd: string; sessionManager: 
   };
 }
 
-function render(markdownText: string, title: string): string {
-  const env: RenderEnv = { headings: [], slugCounts: new Map() };
-  const body = markdown.render(markdownText, env);
+function render(markdownText: string, title: string, cwd: string): string {
+  const env: RenderEnv = { headings: [], slugCounts: new Map(), cwd, filePreviewCount: 0 };
+  const body = renderFileReferencePlaceholders(markdown.render(markdownText, env), env);
   const toc = env.headings.length > 0 ? renderToc(env.headings) : "";
   const layoutClass = env.headings.length > 0 ? "layout has-toc" : "layout";
 
@@ -175,7 +180,7 @@ export default function openMarkdownExtension(pi: ExtensionAPI) {
         return;
       }
 
-      const win = open(render(source.markdown, source.title), {
+      const win = open(render(source.markdown, source.title, ctx.cwd), {
         width: 1150,
         height: 850,
         title: source.title,

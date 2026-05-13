@@ -277,6 +277,85 @@ a:hover {
   white-space: pre;
 }
 
+.file-ref-preview {
+  overflow: hidden;
+  margin: 1.15rem 0;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-elevated) 82%, transparent);
+}
+
+.file-ref-preview figcaption,
+.file-ref-preview summary {
+  padding: 0.62rem 0.85rem;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 680;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.file-ref-preview summary {
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.file-ref-preview pre {
+  margin: 0;
+  padding: 0.72rem 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--code-bg);
+}
+
+.file-ref-preview code {
+  display: block;
+  min-width: max-content;
+}
+
+.file-ref-preview .line {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  min-height: 1.45em;
+}
+
+.file-ref-preview .line-number {
+  padding: 0 0.8rem;
+  color: var(--muted);
+  text-align: right;
+  user-select: none;
+}
+
+.file-ref-preview .line-code {
+  padding-right: 1rem;
+  color: var(--code-text);
+  white-space: pre;
+}
+
+.file-ref-preview .gap .line-code {
+  color: var(--muted);
+}
+
+.file-ref-preview.compact {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0.15rem 0;
+  vertical-align: top;
+}
+
+.file-ref-preview.compact pre {
+  max-width: min(78vw, 900px);
+}
+
+.file-ref-truncated {
+  padding: 0.48rem 0.85rem;
+  border-top: 1px solid var(--border-soft);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
 .content table {
   display: block;
   width: 100%;
