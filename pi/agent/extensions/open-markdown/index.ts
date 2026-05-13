@@ -155,6 +155,15 @@ async function render(markdownText: string, title: string, cwd: string): Promise
     ${toc}
     <article class="content">${body}</article>
   </main>
+  <script>
+    document.addEventListener("keydown", (event) => {
+      const key = event.key.toLowerCase();
+      if (event.key === "Escape" || (event.metaKey && (key === "q" || key === "w"))) {
+        event.preventDefault();
+        window.glimpse.close();
+      }
+    });
+  </script>
 </body>
 </html>`;
 }
