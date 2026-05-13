@@ -249,7 +249,7 @@ a:hover {
   border-radius: 14px;
   background: var(--code-bg);
   color: var(--code-text);
-  line-height: 1.5;
+  line-height: 1.35;
 }
 
 .content code,
@@ -275,6 +275,28 @@ a:hover {
   border: 0;
   background: transparent;
   white-space: pre;
+}
+
+.shiki {
+  overflow: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+.file-ref-code span {
+  background-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  .file-ref-code span {
+    background-color: transparent !important;
+  }
 }
 
 .file-ref-preview {
@@ -304,10 +326,11 @@ a:hover {
 
 .file-ref-preview pre {
   margin: 0;
-  padding: 0.72rem 0;
+  padding: 0.62rem 0;
   border: 0;
   border-radius: 0;
   background: var(--code-bg);
+  line-height: 1.36;
 }
 
 .file-ref-preview code {
@@ -318,7 +341,7 @@ a:hover {
 .file-ref-preview .line {
   display: grid;
   grid-template-columns: 4.5rem minmax(0, 1fr);
-  min-height: 1.45em;
+  min-height: 1.36em;
 }
 
 .file-ref-preview .line-number {

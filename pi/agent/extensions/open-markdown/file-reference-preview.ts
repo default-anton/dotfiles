@@ -2,6 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { extname, isAbsolute, relative, resolve, sep } from "node:path";
 import type MarkdownIt from "markdown-it";
 import type Token from "markdown-it/lib/token.mjs";
+import type { CodeHighlighter } from "./syntax-highlighting.ts";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_REFERENCES = 50;
@@ -35,6 +36,7 @@ interface Snippet {
 interface FilePreviewEnv {
   cwd?: string;
   filePreviewCount?: number;
+  highlighter?: CodeHighlighter;
 }
 
 type PreviewMode = "block" | "compact";
@@ -386,7 +388,7 @@ function renderReference(raw: string, env: FilePreviewEnv, mode: PreviewMode): s
   }
 
   env.filePreviewCount = (env.filePreviewCount ?? 0) + 1;
-  return renderSnippet(reference, snippet, mode);
+  return renderSnippet(reference, snippet, mode, env.highlighter);
 }
 
 function parseFileReference(text: string): FileReference | undefined {
@@ -508,25 +510,61 @@ function languageForPath(path: string): string {
   return LANGUAGE_BY_EXTENSION.get(extname(path).toLowerCase()) ?? "text";
 }
 
-function renderSnippet(reference: FileReference, snippet: Snippet, mode: PreviewMode): string {
-  const code = snippet.lines.map((line) => renderSnippetLine(line)).join("\n");
+function renderSnippet(reference: FileReference, snippet: Snippet, mode: PreviewMode, highlighter: CodeHighlighter | undefined): string {
+  const code = renderSnippetLines(snippet, highlighter).join("");
   const truncated = snippet.truncated ? `<div class="file-ref-truncated">Preview truncated after ${MAX_RENDERED_LINES} lines.</div>` : "";
   const title = escapeHtml(reference.raw);
   const languageClass = escapeHtml(`language-${snippet.language}`);
 
   if (mode === "compact") {
-    return `<details class="file-ref-preview compact"><summary>${title}</summary><pre><code class="${languageClass}">${code}</code></pre>${truncated}</details>`;
+    return `<details class="file-ref-preview compact"><summary>${title}</summary><pre class="shiki file-ref-code"><code class="${languageClass}">${code}</code></pre>${truncated}</details>`;
   }
 
-  return `<figure class="file-ref-preview"><figcaption>${title}</figcaption><pre><code class="${languageClass}">${code}</code></pre>${truncated}</figure>`;
+  return `<figure class="file-ref-preview"><figcaption>${title}</figcaption><pre class="shiki file-ref-code"><code class="${languageClass}">${code}</code></pre>${truncated}</figure>`;
 }
 
-function renderSnippetLine(line: SnippetLine): string {
-  if (line.gap) {
-    return `<span class="line gap"><span class="line-number" aria-hidden="true"> </span><span class="line-code">${escapeHtml(line.text)}</span></span>`;
+function renderSnippetLines(snippet: Snippet, highlighter: CodeHighlighter | undefined): string[] {
+  const rendered: string[] = [];
+  let pendingLines: SnippetLine[] = [];
+
+  const flushPending = () => {
+    if (pendingLines.length === 0) {
+      return;
+    }
+
+    const highlightedLines = highlighter
+      ? highlighter.renderLines(
+          pendingLines.map((line) => line.text),
+          snippet.language,
+        )
+      : pendingLines.map((line) => escapeHtml(line.text));
+
+    pendingLines.forEach((line, index) => {
+      rendered.push(renderSnippetLine(line, highlightedLines[index] ?? ""));
+    });
+    pendingLines = [];
+  };
+
+  for (const line of snippet.lines) {
+    if (line.gap) {
+      flushPending();
+      rendered.push(renderGapLine(line));
+      continue;
+    }
+
+    pendingLines.push(line);
   }
 
-  return `<span class="line"><span class="line-number">${line.number}</span><span class="line-code">${escapeHtml(line.text)}</span></span>`;
+  flushPending();
+  return rendered;
+}
+
+function renderSnippetLine(line: SnippetLine, code: string): string {
+  return `<span class="line"><span class="line-number">${line.number}</span><span class="line-code">${code}</span></span>`;
+}
+
+function renderGapLine(line: SnippetLine): string {
+  return `<span class="line gap"><span class="line-number" aria-hidden="true"> </span><span class="line-code">${escapeHtml(line.text)}</span></span>`;
 }
 
 function escapeHtml(value: string): string {

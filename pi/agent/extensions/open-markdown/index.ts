@@ -5,6 +5,7 @@ import { basename, isAbsolute, resolve } from "node:path";
 import MarkdownIt from "markdown-it";
 import { open } from "glimpseui";
 import { fileReferencePreviewPlugin, renderFileReferencePlaceholders } from "./file-reference-preview.ts";
+import { collectMarkdownCodeLanguages, getCodeHighlighter, type CodeHighlighter } from "./syntax-highlighting.ts";
 
 const stylesheet = readFileSync(new URL("./markdown.css", import.meta.url), "utf8");
 const windows = new Set<unknown>();
@@ -20,12 +21,18 @@ interface RenderEnv {
   slugCounts: Map<string, number>;
   cwd: string;
   filePreviewCount: number;
+  highlighter: CodeHighlighter;
 }
+
+let activeHighlighter: CodeHighlighter | undefined;
 
 const markdown = new MarkdownIt({
   html: false,
   linkify: true,
   typographer: true,
+  highlight(code, language) {
+    return activeHighlighter?.renderBlock(code, language) ?? escapeHtml(code);
+  },
 });
 
 markdown.use(fileReferencePreviewPlugin);
@@ -120,9 +127,18 @@ async function markdownSource(args: string, ctx: { cwd: string; sessionManager: 
   };
 }
 
-function render(markdownText: string, title: string, cwd: string): string {
-  const env: RenderEnv = { headings: [], slugCounts: new Map(), cwd, filePreviewCount: 0 };
-  const body = renderFileReferencePlaceholders(markdown.render(markdownText, env), env);
+async function render(markdownText: string, title: string, cwd: string): Promise<string> {
+  const highlighter = await getCodeHighlighter();
+  await highlighter.ensureLanguages(collectMarkdownCodeLanguages(markdownText));
+
+  const env: RenderEnv = { headings: [], slugCounts: new Map(), cwd, filePreviewCount: 0, highlighter };
+  activeHighlighter = highlighter;
+  let body: string;
+  try {
+    body = renderFileReferencePlaceholders(markdown.render(markdownText, env), env);
+  } finally {
+    activeHighlighter = undefined;
+  }
   const toc = env.headings.length > 0 ? renderToc(env.headings) : "";
   const layoutClass = env.headings.length > 0 ? "layout has-toc" : "layout";
 
@@ -180,7 +196,7 @@ export default function openMarkdownExtension(pi: ExtensionAPI) {
         return;
       }
 
-      const win = open(render(source.markdown, source.title, ctx.cwd), {
+      const win = open(await render(source.markdown, source.title, ctx.cwd), {
         width: 1150,
         height: 850,
         title: source.title,
