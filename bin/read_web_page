@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# To set up crwl, run `uvx --from crawl4ai crawl4ai-setup`
-# If it's still not working, run `uvx --from crawl4ai crawl4ai-doctor`
+# To set up crwl, run `uvx --from crawl4ai@0.8.6 crawl4ai-setup`
+# If it's still not working, run `uvx --from crawl4ai@0.8.6 crawl4ai-doctor`
 
 URL="$1"
 
