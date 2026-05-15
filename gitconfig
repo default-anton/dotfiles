@@ -53,7 +53,7 @@
 
 [delta]
     navigate = true
-    syntax-theme = base16-256
+    syntax-theme = ansi
     line-numbers = true
 
 [init]
