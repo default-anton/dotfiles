@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.74.0",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "high",
   "defaultProvider": "openai",
   "defaultModel": "gpt-5.5",
   "compaction": {
@@ -13,8 +13,7 @@
     "npm:pi-subdir-context",
     "npm:pi-tmux-window-name",
     "npm:pi-review",
-    "npm:@akuzmenko/rgk",
-    "npm:glimpseui"
+    "npm:@akuzmenko/rgk"
   ],
   "transport": "websocket-cached",
   "treeFilterMode": "no-tools"
