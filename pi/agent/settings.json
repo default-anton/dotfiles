@@ -7,7 +7,10 @@
     "enabled": true
   },
   "hideThinkingBlock": false,
-  "steeringMode": "one-at-a-time",
+  "branchSummary": {
+    "skipPrompt": true
+  },
+  "steeringMode": "all",
   "doubleEscapeAction": "tree",
   "packages": [
     "npm:pi-subdir-context",
