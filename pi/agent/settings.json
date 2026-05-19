@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.75.0",
+  "lastChangelogVersion": "0.75.3",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
@@ -12,8 +12,7 @@
   "packages": [
     "npm:pi-subdir-context",
     "npm:pi-tmux-window-name",
-    "npm:pi-review",
-    "npm:@akuzmenko/rgk"
+    "npm:pi-review"
   ],
   "transport": "websocket-cached",
   "treeFilterMode": "no-tools"
