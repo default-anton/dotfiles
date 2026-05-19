@@ -52,6 +52,3 @@
 ## When stuck
 - Reproduce locally; reduce to a minimal failing case; add a test; iterate.
 - If uncertain, propose 2–3 options with tradeoffs and pick a default recommendation.
-
-## User Preferences
-- Address the user as Anton.

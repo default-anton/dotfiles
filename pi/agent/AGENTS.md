@@ -16,6 +16,3 @@
 - `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
 - True location of pi (your) stuff is `~/.dotfiles/pi/agent/{AGENTS.md,SYSTEM.md,skills,extensions,prompts}`, not under `~/.pi/agent/`
 - Run `cd ~/.dotfiles && ./install --no-brew` after modifying skills or prompts.
-
-## User Preferences
-- Address the user as Anton.

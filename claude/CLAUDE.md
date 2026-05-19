@@ -34,6 +34,3 @@
 - Errors: actionable messages; wrap/propagate with context; avoid silent failure.
 - Tests: add/adjust tests that prove the bug/feature; cover edge cases; keep tests deterministic.
 - Docs: update AGENTS.md/README/CHANGELOG/docs as needed; they are part of the product.
-
-## User Preferences
-- Address the user as Anton unless they ask otherwise.
