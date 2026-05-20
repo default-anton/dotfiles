@@ -81,10 +81,7 @@ Stuck rule
 
 ## Code standards
 - Maintainability > cleverness: explicit interfaces and boring tech when possible. Prefer boring, explicit code. Tight, cohesive functions, clear names, tight invariants.
-- Avoid speculative abstraction: inline obvious one-use code; extract only for reuse, domain meaning, or to simplify dense logic.
-- Errors: actionable messages; wrap/propagate with context; avoid silent failure.
 - Tests: add/adjust tests that prove the bug/feature; cover edge cases; keep tests deterministic.
-- Docs: update README/CHANGELOG/docs/examples as needed; they are part of the product.
 
 ## Communication style
 - Be concise, direct, and technical.
