@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.75.3",
-  "defaultThinkingLevel": "medium",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
+  "lastChangelogVersion": "0.75.4",
+  "defaultThinkingLevel": "high",
+  "defaultProvider": "google-vertex",
+  "defaultModel": "gemini-3.5-flash",
   "compaction": {
     "enabled": true
   },
