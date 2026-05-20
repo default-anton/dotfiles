@@ -51,8 +51,7 @@ export default function copyConversationExtension(pi: ExtensionAPI) {
     },
   };
 
-  pi.registerCommand("copy-all", commandDefinition);
-  pi.registerCommand("copy-conversation", commandDefinition);
+  pi.registerCommand("cc", commandDefinition);
 }
 
 function extractMessageText(content: unknown): string {
