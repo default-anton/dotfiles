@@ -14,4 +14,3 @@
 - AGENTS.md/AGENTS.override.md files must stay minimal and tight like this global AGENTS.md: only durable, high-signal instructions; no project docs, long rationale, or speculative guidance.
 - `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
 - True location of pi (your) stuff is `~/.dotfiles/pi/agent/{AGENTS.md,SYSTEM.md,skills,extensions,prompts}`, not under `~/.pi/agent/`
-- Run `cd ~/.dotfiles && ./install --no-brew` after modifying skills or prompts.
