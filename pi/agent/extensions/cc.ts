@@ -42,7 +42,7 @@ export default function copyConversationExtension(pi: ExtensionAPI) {
           return;
         }
 
-        const conversationText = formattedParts.join("\n\n").trim();
+        const conversationText = formattedParts.join("\n\n").trim() + "\n\n---\n\n";
         await copyToClipboard(conversationText);
         ctx.ui.notify("Copied entire conversation to clipboard", "info");
       } catch (error: any) {
@@ -69,16 +69,11 @@ function extractMessageText(content: unknown): string {
       continue;
     }
 
-    const block = part as { type?: string; text?: string; thinking?: string };
+    const block = part as { type?: string; text?: string };
     if (block.type === "text" && typeof block.text === "string") {
       const text = block.text.trim();
       if (text) {
         parts.push(text);
-      }
-    } else if (block.type === "thinking" && typeof block.thinking === "string") {
-      const thinking = block.thinking.trim();
-      if (thinking) {
-        parts.push(`<think>\n${thinking}\n</think>`);
       }
     }
   }
