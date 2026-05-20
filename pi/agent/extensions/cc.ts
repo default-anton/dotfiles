@@ -30,8 +30,7 @@ export default function copyConversationExtension(pi: ExtensionAPI) {
             if (role === "user" || role === "assistant") {
               const textContent = extractMessageText(entry.message.content);
               if (textContent) {
-                const label = role === "user" ? "User" : "Assistant";
-                formattedParts.push(`**${label}**:\n${textContent}`);
+                formattedParts.push(textContent);
               }
             }
           }
@@ -42,7 +41,7 @@ export default function copyConversationExtension(pi: ExtensionAPI) {
           return;
         }
 
-        const conversationText = formattedParts.join("\n\n").trim() + "\n\n---\n\n";
+        const conversationText = formattedParts.join("\n\n------\n\n").trim() + "\n\n------\n\n";
         await copyToClipboard(conversationText);
         ctx.ui.notify("Copied entire conversation to clipboard", "info");
       } catch (error: any) {
