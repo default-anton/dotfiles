@@ -18,7 +18,6 @@
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, gifgrep, direnv, tts, yt-dlp, imagemagick, ffmpeg, pandoc
 - Use `gifgrep` to spice up docs/presentations with animated GIFs when asked.
 - Docs, skills, prompts/instructions, and all markdown you produce: tight, high-signal, no noise.
-- Keep files <=500 LOC; split/refactor as needed.
 
 ## Feedback loops (mandatory mindset)
 - Before any functional or user-visible change (including small UI tweaks), define the feedback loop: how will we know it works (tests, CLI output, logs, screenshots, benchmarks, etc.).

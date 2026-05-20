@@ -17,7 +17,6 @@
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
 - Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style rule above; keep them tight, token-light, high-signal, and no-noise.
 - AGENTS.md/AGENTS.override.md files must stay minimal and tight like this global AGENTS.md: only durable, high-signal instructions; no project docs, long rationale, or speculative guidance.
-- Keep files <=1000 LOC; split/refactor as needed.
 
 ## Feedback loops (mandatory mindset)
 - Before any functional or user-visible change (including small UI tweaks), define the feedback loop: how will we know it works (tests, CLI output, logs, screenshots, benchmarks, etc.).

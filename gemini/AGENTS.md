@@ -1,11 +1,8 @@
-## Rules You MUST Follow
-- Never create new files in isolation. Before creating ANY new file (model, controller, test, component, etc.), you MUST:
-   - Examine 2-3 existing files of the same type to identify established patterns
-   - Match their structure, style, and conventions exactly
-
-   Exception: ad hoc one-off artifacts (e.g., RCA write-ups, notes, plans, proposals, suggestions, etc.) — no pattern review required; keep them token-efficient
-- Do NOT add code comments unless they explain **why** something non-obvious exists. If the "why" can be expressed through better naming or code structure, do that instead. When in doubt, no comment
-- Prefer fd over find for file searching tasks
-- Prefer rg (ripgrep) over grep for text searching tasks
-- Feel free to use any of the following CLI tools to enhance your productivity: fd, rg, ast-grep, direnv, gh, git, go, jq, mise, uv, tmux.
-- If you need to use `grep` and `find`, prefer `rg` and `fd` respectively for better performance and usability.
+# Rules You Must Follow
+- For new files, don’t work in isolation. Before creating one, inspect ~2 files of the same type and mirror their structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions) can skip this; keep them token-light.
+- Shared worktree assumption: user/other agents may edit concurrently on the same branch. Never discard, overwrite, or stage unrelated changes (e.g., broad `git restore/checkout/reset/clean/stash/add`) unless user explicitly approves.
+- Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
+- Commit messages must follow Conventional Commits.
+- Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks. Use `find`/`grep` only if `fd`/`rg` unavailable.
+- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
+- AGENTS.md files must stay minimal and tight like this global AGENTS.md: only durable, high-signal instructions; no project docs, long rationale, or speculative guidance.

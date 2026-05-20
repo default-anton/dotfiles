@@ -12,7 +12,6 @@
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
 - Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style; keep them tight, token-light, high-signal, and no-noise.
 - AGENTS.md/AGENTS.override.md files must stay minimal and tight like this global AGENTS.md: only durable, high-signal instructions; no project docs, long rationale, or speculative guidance.
-- Keep files <=1000 LOC; split/refactor as needed.
 - `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
 - True location of pi (your) stuff is `~/.dotfiles/pi/agent/{AGENTS.md,SYSTEM.md,skills,extensions,prompts}`, not under `~/.pi/agent/`
 - Run `cd ~/.dotfiles && ./install --no-brew` after modifying skills or prompts.
