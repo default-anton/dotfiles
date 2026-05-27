@@ -138,7 +138,6 @@ local servers = {
     }
   },
   ts_ls = {},
-  tailwindcss = {},
   eslint = {
     settings = {
       -- Add any specific ESLint settings here
@@ -153,16 +152,14 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
+local enabled_servers = vim.tbl_keys(servers)
+for server_name, server in pairs(servers) do
+  server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+  vim.lsp.config(server_name, server)
+end
+vim.lsp.enable(enabled_servers)
+
 require('mason-lspconfig').setup {
-  ensure_installed = vim.tbl_keys(servers),
-  handlers = {
-    function(server_name)
-      local server = servers[server_name] or {}
-      -- This handles overriding only values explicitly passed
-      -- by the server configuration above. Useful when disabling
-      -- certain features of an LSP (for example, turning off formatting for tsserver)
-      server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-      require('lspconfig')[server_name].setup(server)
-    end,
-  },
+  ensure_installed = enabled_servers,
+  automatic_enable = false,
 }
