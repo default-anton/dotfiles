@@ -14,6 +14,7 @@ INPUT_PRIORITY=(
 
 OUTPUT_PRIORITY=(
   "OpenFit 2 by Shokz"
+  "External Headphones"
   "Headphones"
   "DELL S3225QS"
   "MacBook Pro Speakers"
