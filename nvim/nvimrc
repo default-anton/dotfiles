@@ -1,3 +1,5 @@
+let g:python3_host_prog = expand('~/.local/share/nvim/python3-provider/bin/python')
+
 lua vim.loader.enable()
 lua require("user")
 
