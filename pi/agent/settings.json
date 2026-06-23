@@ -1,6 +1,6 @@
 {
-  "lastChangelogVersion": "0.80.1",
-  "defaultThinkingLevel": "low",
+  "lastChangelogVersion": "0.80.2",
+  "defaultThinkingLevel": "medium",
   "defaultProvider": "openai",
   "defaultModel": "gpt-5.5",
   "compaction": {
