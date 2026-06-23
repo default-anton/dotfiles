@@ -1,6 +1,6 @@
 {
-  "lastChangelogVersion": "0.79.2",
-  "defaultThinkingLevel": "high",
+  "lastChangelogVersion": "0.80.1",
+  "defaultThinkingLevel": "low",
   "defaultProvider": "openai",
   "defaultModel": "gpt-5.5",
   "compaction": {
@@ -18,5 +18,6 @@
     "npm:pi-review"
   ],
   "transport": "websocket-cached",
-  "treeFilterMode": "no-tools"
+  "treeFilterMode": "no-tools",
+  "theme": "dark"
 }
