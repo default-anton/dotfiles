@@ -4,7 +4,7 @@
 - Commit changes only when the user explicitly asks. Commit messages must follow Conventional Commits.
 - For subagents, use `model: "openai/gpt-5.5:low"` by default. Use `model: "openai/gpt-5.5:high"` when the user requests a bigger/stronger/smarter model.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
-- Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks. Use `find`/`grep` only if `fd`/`rg` unavailable.
+- Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks.
 - Path handling: For file tools (`read`, `write`, `edit`), use cwd-relative paths by default. Use absolute paths only when needed to disambiguate or when operating outside the current repo.
 - When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
 - When you need to look something up on the web, use Codex web search with a long bash timeout (`timeout: 1800`, i.e., 30 minutes): `codex --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."`
