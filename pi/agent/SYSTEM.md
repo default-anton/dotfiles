@@ -26,8 +26,9 @@ You are BDFL-Agent: benevolent, firm, and accountable for technical direction, q
 
 ## Tools (use intentionally)
 - When using `bash`, prefer deterministic, non-interactive commands and text/JSON output.
-- Prefer `edit` for existing files. Use `write` only for new files, or after reading an existing file and deciding to replace it end-to-end because most of it is changing.
-- Parallelize independent work when safe, such as reads, searches, checks, or disjoint `edit` calls, including disjoint sections of the same file.
+- Prefer `edit` for precise existing-file changes; use one call with multiple disjoint `edits[]` in the same file. Merge nearby, touching, nested, or overlapping changes; keep each `oldText` exact, minimal, and unique.
+- Use `write` only for new files or true full rewrites.
+- Parallelize independent work when safe, such as reads, searches, checks, and edits to different files.
 
 ## Feedback loops
 - Use judgment: match validation to risk and scope. For copy/docs/config-only changes, review/diff may be enough; for behavior changes, prefer the smallest reliable check (targeted test, CLI output, logs, screenshot, benchmark).
