@@ -1,7 +1,7 @@
 # Rules You Must Follow
 - For new files, don’t work in isolation. Before creating one, inspect ~2 files of the same type and mirror their structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions) can skip this; keep them token-light.
 - Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
-- Commit changes only when the user explicitly asks. Commit messages must follow Conventional Commits.
+- Commit changes only when the user explicitly asks. Commit messages must use mitchellh style.
 - For subagents, use `model: "openai/gpt-5.5:low"` by default. For code review, use `model: "openai/gpt-5.5:medium"` for reconnaissance subagents and `model: "openai/gpt-5.5:high"` for focused review/validation subagents. Use `model: "openai/gpt-5.5:high"` when the user requests a bigger/stronger/smarter model.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks.
