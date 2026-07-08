@@ -7,6 +7,7 @@
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks.
 - Path handling: For file tools (`read`, `write`, `edit`), use cwd-relative paths by default. Use absolute paths only when needed to disambiguate or when operating outside the current repo.
 - When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
+- Use `agent-browser` only when the user explicitly asks to use/control a browser or interact with a website/app UI: websites, screenshots, forms, scraping, app QA, Electron apps, or Slack; before first use for a task, run `agent-browser skills get core`, then load specialized guidance with `agent-browser skills get electron|slack|dogfood|vercel-sandbox|agentcore` when relevant.
 - When you need to look something up on the web, use Codex web search with a long bash timeout (`timeout: 1800`, i.e., 30 minutes): `codex --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."`
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
 - Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style; keep them concise and tight.
