@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.80.3",
-  "defaultThinkingLevel": "high",
+  "lastChangelogVersion": "0.80.5",
+  "defaultThinkingLevel": "medium",
   "defaultProvider": "openai",
-  "defaultModel": "gpt-5.6-luna",
+  "defaultModel": "gpt-5.6-sol",
   "compaction": {
     "enabled": true
   },
