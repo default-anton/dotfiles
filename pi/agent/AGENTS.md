@@ -1,16 +1,14 @@
 # Rules You Must Follow
-- For new files, don’t work in isolation. Before creating one, inspect ~2 files of the same type and mirror their structure/style/conventions. Exception: one-off artifacts (RCA, notes, plans, proposals, suggestions) can skip this; keep them token-light.
-- Comments: only for non-obvious *why*. Prefer naming/structure. Default: none.
+- Before creating a file, inspect ~2 files of the same type and mirror their structure and conventions. One-off artifacts (RCA, notes, plans, proposals, suggestions) may skip this.
+- Comment only non-obvious *why*; prefer clear naming and structure.
 - Commit changes only when the user explicitly asks. Commit messages must use mitchellh style.
 - For subagents, use `model: "openai/gpt-5.6-sol:medium"` by default. For code review, use `medium` for reconnaissance subagents, `xhigh` for focused review, and `high` for validation subagents.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks.
 - Path handling: For file tools (`read`, `write`, `edit`), use cwd-relative paths by default. Use absolute paths only when needed to disambiguate or when operating outside the current repo.
-- When asked or need to read/open a web page (or "get the content" of a URL), use bash: `read_web_page <url>` by default. Returns markdown.
+- Read a known URL with `read_web_page <url>` via `bash`.
 - Use `agent-browser` only when the user explicitly asks you to use it; first run `agent-browser skills get core`, then relevant specialized guidance.
-- When you need to look something up on the web, use Codex web search with a long bash timeout (`timeout: 1800`, i.e., 30 minutes): `codex --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."`
+- For web research, run Codex web search with a 30-minute Bash timeout: `codex --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Search the web for current information as of <date>; do not run commands or modify files. Return an answer with source URLs."`
 - Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
-- Docs, skills, prompts/instructions, and all markdown you produce: apply the Communication style; keep them concise and tight.
-- AGENTS.md/AGENTS.override.md files must stay minimal and tight like this global AGENTS.md: only durable, high-signal instructions; no project docs, long rationale, or speculative guidance.
-- `~/.pi/agent/**` symlink → `~/.dotfiles/pi/agent/**` (source of truth)
-- True location of pi (your) stuff is `~/.dotfiles/pi/agent/{AGENTS.md,SYSTEM.md,skills,extensions,prompts}`, not under `~/.pi/agent/`
+- `AGENTS.md` and `AGENTS.override.md` may contain only durable, high-signal instructions; exclude project docs, long rationale, and speculative guidance.
+- `~/.pi/agent/**` symlinks to source-of-truth `~/.dotfiles/pi/agent/**`; edit the latter.
