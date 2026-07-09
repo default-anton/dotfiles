@@ -1,15 +1,15 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 type ThinkingLevel = ReturnType<ExtensionAPI["getThinkingLevel"]>;
-type CycleThinkingLevel = Extract<ThinkingLevel, "low" | "medium" | "high">;
+type CycleThinkingLevel = Extract<ThinkingLevel, "medium" | "high" | "xhigh">;
 
 const SHORTCUT = "shift+tab";
 
 function getNextThinkingLevel(current: ThinkingLevel): CycleThinkingLevel {
-  if (current === "low") return "medium";
   if (current === "medium") return "high";
-  if (current === "high") return "low";
-  return "low";
+  if (current === "high") return "xhigh";
+  if (current === "xhigh") return "medium";
+  return "medium";
 }
 
 function cycleThinkingLevel(pi: ExtensionAPI, ctx: ExtensionContext): void {
@@ -18,9 +18,9 @@ function cycleThinkingLevel(pi: ExtensionAPI, ctx: ExtensionContext): void {
   ctx.ui.notify(`Thinking level: ${next}`, "info");
 }
 
-export default function thinkingLowMediumHighExtension(pi: ExtensionAPI) {
+export default function thinkingMediumHighXhighExtension(pi: ExtensionAPI) {
   pi.registerShortcut(SHORTCUT, {
-    description: "Cycle thinking level between low, medium, and high",
+    description: "Cycle thinking level between medium, high, and xhigh",
     handler: async (ctx) => {
       cycleThinkingLevel(pi, ctx);
     },

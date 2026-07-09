@@ -20,7 +20,8 @@
           "reasoning": true,
           "thinkingLevelMap": {
             "off": "none",
-            "minimal": null
+            "minimal": null,
+            "xhigh": "xhigh"
           },
           "input": ["text", "image"],
           "cost": {
@@ -39,7 +40,8 @@
           "reasoning": true,
           "thinkingLevelMap": {
             "off": "none",
-            "minimal": null
+            "minimal": null,
+            "xhigh": "xhigh"
           },
           "input": ["text", "image"],
           "cost": {
@@ -58,7 +60,8 @@
           "reasoning": true,
           "thinkingLevelMap": {
             "off": "none",
-            "minimal": null
+            "minimal": null,
+            "xhigh": "xhigh"
           },
           "input": ["text", "image"],
           "cost": {
