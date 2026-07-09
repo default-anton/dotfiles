@@ -5,7 +5,7 @@
 - For subagents, use `model: "openai/gpt-5.6-sol:medium"` by default. For code review, use `medium` for reconnaissance subagents, `xhigh` for focused review, and `high` for validation subagents.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks.
-- Path handling: For file tools (`read`, `write`, `edit`), use cwd-relative paths by default. Use absolute paths only when needed to disambiguate or when operating outside the current repo.
+- Path handling: Use cwd-relative paths by default and `~/...` for home-directory paths; use absolute paths only when needed to disambiguate.
 - Read a known URL with `read_web_page <url>` via `bash`.
 - Use `agent-browser` only when the user explicitly asks you to use it; first run `agent-browser skills get core`, then relevant specialized guidance.
 - For web research, run Codex web search with a 30-minute Bash timeout: `codex --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Search the web for current information as of <date>; do not run commands or modify files. Return an answer with source URLs."`
