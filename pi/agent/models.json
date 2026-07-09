@@ -71,29 +71,6 @@
           "maxTokens": 128000
         }
       ]
-    },
-    "google-vertex": {
-      "models": [
-        {
-          "id": "gemini-3.5-flash",
-          "name": "Gemini 3.5 Flash (Vertex)",
-          "api": "google-vertex",
-          "baseUrl": "https://{location}-aiplatform.googleapis.com",
-          "reasoning": true,
-          "thinkingLevelMap": {
-            "off": null
-          },
-          "input": ["text", "image"],
-          "cost": {
-            "input": 1.5,
-            "output": 9,
-            "cacheRead": 0.15,
-            "cacheWrite": 0.0833
-          },
-          "contextWindow": 1048576,
-          "maxTokens": 65535
-        }
-      ]
     }
   }
 }
