@@ -2,7 +2,7 @@
 - Before creating a file, inspect ~2 files of the same type and mirror their structure and conventions. One-off artifacts (RCA, notes, plans, proposals, suggestions) may skip this.
 - Comment only non-obvious *why*; prefer clear naming and structure.
 - Commit changes only when the user explicitly asks. Commit messages must use mitchellh style.
-- For subagents, use `model: "openai/gpt-5.6-sol:medium"` by default. For code review, use `medium` for reconnaissance subagents, `xhigh` for focused review, and `high` for validation subagents.
+- For subagents, default to `openai/gpt-5.6-sol:medium`. For code review, use `medium` for reconnaissance, `xhigh` for focused review, and `high` for validation.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `afix:` markers with context via `rg -n -A 5 '\bafix:'` and address each match.
 - Prefer `fd` (not `find`) for filename/path search; prefer `rg`/ripgrep (not `grep`) for searching text in files. Do not add `--hidden` or `fd` equivalents that bypass ignore defaults unless the user asks.
 - Path handling: Use cwd-relative paths by default and `~/...` for home-directory paths; use absolute paths only when needed to disambiguate.
