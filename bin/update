@@ -25,13 +25,16 @@ case "$tool" in
   pi)
     # Source: https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent
     mise use --global "npm:@earendil-works/pi-coding-agent@${version}"
+    mise prune --tools "npm:@earendil-works/pi-coding-agent"
     ;;
   codex)
     mise use --global "npm:@openai/codex@${version}"
+    mise prune --tools "npm:@openai/codex"
     ;;
   opencode)
     # Source: https://github.com/anomalyco/opencode
     mise use --global "npm:opencode-ai@${version}"
+    mise prune --tools "npm:opencode-ai"
     ;;
   *)
     echo "Usage: update {mlx-audio|mlx-lm|claude|pi|codex|opencode} [version]"
