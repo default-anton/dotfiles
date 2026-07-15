@@ -26,7 +26,7 @@ OUTPUT_PRIORITY=(
 #      osascript -e 'input volume of (get volume settings)'
 # 3. Save that number below for the device name.
 declare -A INPUT_VOLUME_PRESETS=(
-  ["RØDE VideoMic GO II"]=33
+  ["RØDE VideoMic GO II"]=46
   ["MacBook Pro Microphone"]=88
 )
 
