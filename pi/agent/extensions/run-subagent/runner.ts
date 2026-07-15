@@ -218,7 +218,6 @@ function buildFailureText(details: SpawnSubagentDetails, fallback: string): stri
 function buildFreshChildPrompt(instructions: string): string {
   return [
     "You are a delegated subagent running in a fresh pi session.",
-    "- You only have the task brief below.",
     "- You share the same cwd/worktree as the parent and other agents. Do not revert unrelated edits.",
     "- Stay within scope.",
     "- Return the requested result directly, including validation and any open issues when useful.",
