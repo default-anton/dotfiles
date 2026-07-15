@@ -38,6 +38,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.config/skhd", "config/skhd"),
     ("~/.pi/agent/settings.json", "pi/agent/settings.json"),
     ("~/.pi/agent/keybindings.json", "pi/agent/keybindings.json"),
+    ("~/.pi/agent/pi-review.json", "pi/agent/pi-review.json"),
     ("~/.pi/agent/models.json", "pi/agent/models.json"),
     ("~/.pi/agent/AGENTS.md", "pi/agent/AGENTS.md"),
     ("~/.pi/agent/prompts", "pi/agent/prompts"),
