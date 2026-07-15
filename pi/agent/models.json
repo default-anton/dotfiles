@@ -1,15 +1,30 @@
 {
   "providers": {
-    "local": {
-      "baseUrl": "http://localhost:1234/v1",
-      "api": "openai-completions",
-      "apiKey": "none",
-      "models": [
-        {
-          "id": "qwen3.6-35b-a3b-ud-mlx",
-          "contextWindow": 131072
+    "openai": {
+      "modelOverrides": {
+        "gpt-5.6-terra": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": null,
+            "medium": "medium",
+            "high": "high",
+            "xhigh": null,
+            "max": null
+          }
+        },
+        "gpt-5.6-sol": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": null,
+            "medium": "medium",
+            "high": "high",
+            "xhigh": null,
+            "max": null
+          }
         }
-      ]
+      }
     }
   }
 }
