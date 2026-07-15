@@ -2,7 +2,11 @@
   "lastChangelogVersion": "0.80.7",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai",
-  "defaultModel": "gpt-5.6-terra",
+  "defaultModel": "gpt-5.6-sol",
+  "enabledModels": [
+    "openai/gpt-5.6-terra",
+    "openai/gpt-5.6-sol"
+  ],
   "compaction": {
     "enabled": true
   },
