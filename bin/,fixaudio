@@ -7,6 +7,7 @@ set -euo pipefail
 # switching so reboots/device reconnects don't leave it too quiet.
 
 INPUT_PRIORITY=(
+  "External Microphone"
   "RØDE VideoMic GO II"
   "MacBook Pro Microphone"
   "OpenFit 2 by Shokz"
@@ -26,6 +27,7 @@ OUTPUT_PRIORITY=(
 #      osascript -e 'input volume of (get volume settings)'
 # 3. Save that number below for the device name.
 declare -A INPUT_VOLUME_PRESETS=(
+  ["External Microphone"]=63
   ["RØDE VideoMic GO II"]=42
   ["MacBook Pro Microphone"]=88
 )
