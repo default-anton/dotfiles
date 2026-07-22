@@ -30,8 +30,9 @@ const SHELL_READY_TIMEOUT_MS = 5_000;
 const RIGHT_PANE_WIDTH = 120;
 const PI_TMUX_WINDOW_NAME_DISABLED_ENV = "PI_TMUX_WINDOW_NAME_DISABLED";
 
-let tmuxMutationQueue: Promise<void> = Promise.resolve();
-const activeSubagentsByWindowId = new Map<string, number>();
+let terminalMutationQueue: Promise<void> = Promise.resolve();
+const activeSubagentsByGroupId = new Map<string, number>();
+const herdrSubagentTabsByCallerTabId = new Map<string, string>();
 
 type ChildModel = {
   provider: string;
@@ -72,15 +73,41 @@ type TmuxPane = {
   active: boolean;
 };
 
-type TmuxLayout = {
+type TerminalLayout = {
+  backend: "tmux" | "herdr";
   childPaneId: string;
-  windowId: string;
+  groupId: string;
 };
 
 type TmuxContext = {
+  backend: "tmux";
   callerPaneId: string;
   sessionId: string;
   windowId: string;
+  groupId: string;
+};
+
+type HerdrContext = {
+  backend: "herdr";
+  callerPaneId: string;
+  callerTabId: string;
+  workspaceId: string;
+  groupId: string;
+};
+
+type TerminalContext = TmuxContext | HerdrContext;
+
+type HerdrPane = {
+  pane_id: string;
+  tab_id: string;
+};
+
+type HerdrLayoutPane = {
+  pane_id: string;
+  rect: {
+    width: number;
+    height: number;
+  };
 };
 
 export function shouldRegisterSpawnSubagent(env: NodeJS.ProcessEnv = process.env): boolean {
@@ -284,44 +311,61 @@ function tmux(args: string[]): string {
   }).trim();
 }
 
-async function withTmuxMutationLock<T>(fn: () => Promise<T> | T): Promise<T> {
-  const run = tmuxMutationQueue.then(() => fn(), () => fn());
-  tmuxMutationQueue = run.then(
+function herdr<T>(args: string[]): T {
+  const output = execFileSync("herdr", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+  return output ? JSON.parse(output) as T : undefined as T;
+}
+
+async function withTerminalMutationLock<T>(fn: () => Promise<T> | T): Promise<T> {
+  const run = terminalMutationQueue.then(() => fn(), () => fn());
+  terminalMutationQueue = run.then(
     () => undefined,
     () => undefined,
   );
   return run;
 }
 
-function incrementActiveSubagent(windowId: string): void {
-  activeSubagentsByWindowId.set(windowId, (activeSubagentsByWindowId.get(windowId) ?? 0) + 1);
+function incrementActiveSubagent(groupId: string): void {
+  activeSubagentsByGroupId.set(groupId, (activeSubagentsByGroupId.get(groupId) ?? 0) + 1);
 }
 
-function decrementActiveSubagent(windowId: string | undefined): void {
-  if (!windowId) {
-    return;
-  }
-
-  const next = (activeSubagentsByWindowId.get(windowId) ?? 1) - 1;
+function decrementActiveSubagent(context: TerminalContext): void {
+  const next = (activeSubagentsByGroupId.get(context.groupId) ?? 1) - 1;
   if (next <= 0) {
-    activeSubagentsByWindowId.delete(windowId);
+    activeSubagentsByGroupId.delete(context.groupId);
+    if (context.backend === "herdr") {
+      herdrSubagentTabsByCallerTabId.delete(context.callerTabId);
+    }
     return;
   }
 
-  activeSubagentsByWindowId.set(windowId, next);
+  activeSubagentsByGroupId.set(context.groupId, next);
 }
 
-function getActiveSubagentCount(windowId: string): number {
-  return activeSubagentsByWindowId.get(windowId) ?? 0;
+function getActiveSubagentCount(groupId: string): number {
+  return activeSubagentsByGroupId.get(groupId) ?? 0;
 }
 
-function ensureTmuxAvailable(): void {
+function ensureTerminalAvailable(): "herdr" | "tmux" {
+  if (process.env.HERDR_PANE_ID?.trim()) {
+    try {
+      herdr(["pane", "current", "--pane", process.env.HERDR_PANE_ID]);
+      return "herdr";
+    } catch (error: any) {
+      throw new Error(`run_subagent could not talk to herdr: ${error?.message ?? String(error)}`);
+    }
+  }
+
   if (!process.env.TMUX) {
-    throw new Error("run_subagent requires pi to be running inside tmux.");
+    throw new Error("run_subagent requires pi to be running inside herdr or tmux.");
   }
 
   try {
     tmux(["display-message", "-p", "#{pane_id}"]);
+    return "tmux";
   } catch (error: any) {
     throw new Error(`run_subagent could not talk to tmux: ${error?.message ?? String(error)}`);
   }
@@ -379,13 +423,48 @@ function resolveTmuxContext(): TmuxContext {
     const sessionId = tmux(["display-message", "-p", "-t", callerPaneId, "#{session_id}"]);
     const windowId = tmux(["display-message", "-p", "-t", callerPaneId, "#{window_id}"]);
     return {
+      backend: "tmux",
       callerPaneId: resolvedPaneId,
       sessionId,
       windowId,
+      groupId: `tmux:${windowId}`,
     };
   } catch (error: any) {
     throw new Error(`run_subagent could not resolve the calling tmux pane: ${error?.message ?? String(error)}`);
   }
+}
+
+function resolveHerdrContext(): HerdrContext {
+  const callerPaneId = process.env.HERDR_PANE_ID?.trim();
+  if (!callerPaneId) {
+    throw new Error("run_subagent could not determine the calling herdr pane.");
+  }
+
+  try {
+    const response = herdr<{
+      result?: { pane?: HerdrPane & { workspace_id?: string } };
+    }>(["pane", "current", "--pane", callerPaneId]);
+    const pane = response.result?.pane;
+    const callerTabId = pane?.tab_id || process.env.HERDR_TAB_ID?.trim();
+    const workspaceId = pane?.workspace_id || process.env.HERDR_WORKSPACE_ID?.trim();
+    if (!pane?.pane_id || !callerTabId || !workspaceId) {
+      throw new Error("herdr returned incomplete pane metadata");
+    }
+
+    return {
+      backend: "herdr",
+      callerPaneId: pane.pane_id,
+      callerTabId,
+      workspaceId,
+      groupId: `herdr:${callerTabId}`,
+    };
+  } catch (error: any) {
+    throw new Error(`run_subagent could not resolve the calling herdr pane: ${error?.message ?? String(error)}`);
+  }
+}
+
+function resolveTerminalContext(backend: "herdr" | "tmux"): TerminalContext {
+  return backend === "herdr" ? resolveHerdrContext() : resolveTmuxContext();
 }
 
 function getPaneRuntime(paneId: string): { currentCommand: string; dead: boolean } | undefined {
@@ -429,15 +508,24 @@ async function waitForPaneShellReady(paneId: string, signal?: AbortSignal): Prom
   throw new Error("Timed out waiting for the subagent shell to become ready.");
 }
 
+function isTmuxPaneAlive(paneId: string): boolean {
+  try {
+    tmux(["display-message", "-p", "-t", paneId, "#{pane_id}"]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function startCommandInPane(paneId: string, command: string, signal?: AbortSignal): Promise<void> {
   await waitForPaneShellReady(paneId, signal);
 
-  await withTmuxMutationLock(() => {
+  await withTerminalMutationLock(() => {
     if (signal?.aborted) {
       throw new Error("Subagent was aborted before the subagent command was started.");
     }
 
-    if (!isPaneAlive(paneId)) {
+    if (!isTmuxPaneAlive(paneId)) {
       throw new Error("Subagent pane exited before the subagent command was started.");
     }
 
@@ -530,7 +618,7 @@ function findWindowIdByName(sessionId: string, windowName: string): string | und
   return undefined;
 }
 
-function createSameWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
+function createSameWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TerminalLayout {
   const panes = listWindowPanes(tmuxContext.windowId);
   if (panes.length === 0) {
     throw new Error("run_subagent could not find any tmux panes in the calling window.");
@@ -554,12 +642,13 @@ function createSameWindowLayout(cwd: string, taskTitle: string, tmuxContext: Tmu
 
   setPaneTitle(childPaneId, taskTitle);
   return {
+    backend: "tmux",
     childPaneId,
-    windowId: tmuxContext.windowId,
+    groupId: tmuxContext.groupId,
   };
 }
 
-function createDedicatedWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TmuxLayout {
+function createDedicatedWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TerminalLayout {
   const dedicatedWindowName = getDedicatedWindowName(tmuxContext.windowId);
   const existingWindowId = findWindowIdByName(tmuxContext.sessionId, dedicatedWindowName);
 
@@ -583,8 +672,9 @@ function createDedicatedWindowLayout(cwd: string, taskTitle: string, tmuxContext
 
     setPaneTitle(childPaneId, taskTitle);
     return {
+      backend: "tmux",
       childPaneId,
-      windowId,
+      groupId: tmuxContext.groupId,
     };
   }
 
@@ -608,8 +698,9 @@ function createDedicatedWindowLayout(cwd: string, taskTitle: string, tmuxContext
   setPaneTitle(childPaneId, taskTitle);
 
   return {
+    backend: "tmux",
     childPaneId,
-    windowId: existingWindowId,
+    groupId: tmuxContext.groupId,
   };
 }
 
@@ -619,36 +710,127 @@ function killPaneSync(paneId: string | undefined): void {
   }
 
   try {
-    if (isPaneAlive(paneId)) {
+    if (isTmuxPaneAlive(paneId)) {
       tmux(["kill-pane", "-t", paneId]);
     }
   } catch {}
 }
 
-async function createTmuxLayout(
+function listHerdrTabPanes(context: HerdrContext, tabId: string): HerdrPane[] {
+  const response = herdr<{ result?: { panes?: HerdrPane[] } }>([
+    "pane",
+    "list",
+    "--workspace",
+    context.workspaceId,
+  ]);
+  return (response.result?.panes ?? []).filter((pane) => pane.tab_id === tabId);
+}
+
+function setHerdrPaneTitle(paneId: string, taskTitle: string): void {
+  try {
+    herdr(["pane", "rename", paneId, taskTitle]);
+  } catch {}
+}
+
+function getHerdrSplitTarget(paneId: string): { paneId: string; direction: "right" | "down" } {
+  const response = herdr<{
+    result?: { layout?: { panes?: HerdrLayoutPane[] } };
+  }>(["pane", "layout", "--pane", paneId]);
+  const panes = response.result?.layout?.panes ?? [];
+  const largest = [...panes].sort((a, b) =>
+    b.rect.width * b.rect.height - a.rect.width * a.rect.height
+  )[0];
+  if (!largest) {
+    return { paneId, direction: "right" };
+  }
+
+  return {
+    paneId: largest.pane_id,
+    direction: largest.rect.width >= largest.rect.height * 2 ? "right" : "down",
+  };
+}
+
+function createHerdrLayout(cwd: string, taskTitle: string, context: HerdrContext): TerminalLayout {
+  const existingTabId = herdrSubagentTabsByCallerTabId.get(context.callerTabId);
+  const existingPanes = existingTabId ? listHerdrTabPanes(context, existingTabId) : [];
+
+  let tabId = existingTabId;
+  let childPaneId: string;
+  if (tabId && existingPanes.length > 0) {
+    const splitTarget = getHerdrSplitTarget(existingPanes[0].pane_id);
+    const response = herdr<{ result?: { pane?: HerdrPane } }>([
+      "pane",
+      "split",
+      splitTarget.paneId,
+      "--direction",
+      splitTarget.direction,
+      "--cwd",
+      cwd,
+      "--no-focus",
+    ]);
+    childPaneId = response.result?.pane?.pane_id ?? "";
+  } else {
+    const response = herdr<{
+      result?: { root_pane?: HerdrPane; tab?: { tab_id?: string } };
+    }>([
+      "tab",
+      "create",
+      "--workspace",
+      context.workspaceId,
+      "--cwd",
+      cwd,
+      "--label",
+      "subagents",
+      "--no-focus",
+    ]);
+    tabId = response.result?.tab?.tab_id;
+    childPaneId = response.result?.root_pane?.pane_id ?? "";
+  }
+
+  if (!tabId || !childPaneId) {
+    throw new Error("run_subagent could not create the subagent herdr tab or pane.");
+  }
+
+  herdrSubagentTabsByCallerTabId.set(context.callerTabId, tabId);
+  setHerdrPaneTitle(childPaneId, taskTitle);
+  return {
+    backend: "herdr",
+    childPaneId,
+    groupId: context.groupId,
+  };
+}
+
+async function createTerminalLayout(
   cwd: string,
   taskTitle: string,
-  tmuxContext: TmuxContext,
+  context: TerminalContext,
   signal?: AbortSignal,
-): Promise<TmuxLayout | undefined> {
-  return withTmuxMutationLock(() => {
+): Promise<TerminalLayout | undefined> {
+  return withTerminalMutationLock(() => {
     if (signal?.aborted) {
       return undefined;
     }
 
-    const layout =
-      getActiveSubagentCount(tmuxContext.windowId) > 1
-        ? createDedicatedWindowLayout(cwd, taskTitle, tmuxContext)
+    const layout = context.backend === "herdr"
+      ? createHerdrLayout(cwd, taskTitle, context)
+      : getActiveSubagentCount(context.groupId) > 1
+        ? createDedicatedWindowLayout(cwd, taskTitle, context)
         : (() => {
           try {
-            return createSameWindowLayout(cwd, taskTitle, tmuxContext);
+            return createSameWindowLayout(cwd, taskTitle, context);
           } catch {
-            return createDedicatedWindowLayout(cwd, taskTitle, tmuxContext);
+            return createDedicatedWindowLayout(cwd, taskTitle, context);
           }
         })();
 
     if (signal?.aborted) {
-      killPaneSync(layout.childPaneId);
+      if (layout.backend === "herdr") {
+        try {
+          herdr(["pane", "close", layout.childPaneId]);
+        } catch {}
+      } else {
+        killPaneSync(layout.childPaneId);
+      }
       return undefined;
     }
 
@@ -656,39 +838,61 @@ async function createTmuxLayout(
   });
 }
 
-function isPaneAlive(paneId: string): boolean {
-  if (!paneId) {
+async function startCommandInTerminalPane(
+  layout: TerminalLayout,
+  command: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  if (layout.backend === "tmux") {
+    await startCommandInPane(layout.childPaneId, command, signal);
+    return;
+  }
+
+  await withTerminalMutationLock(() => {
+    if (signal?.aborted) {
+      throw new Error("Subagent was aborted before the subagent command was started.");
+    }
+    if (!isTerminalPaneAlive(layout)) {
+      throw new Error("Subagent pane exited before the subagent command was started.");
+    }
+    herdr(["pane", "run", layout.childPaneId, command]);
+  });
+}
+
+function isTerminalPaneAlive(layout: TerminalLayout): boolean {
+  if (!layout.childPaneId) {
     return false;
   }
 
   try {
-    tmux(["display-message", "-p", "-t", paneId, "#{pane_id}"]);
+    if (layout.backend === "herdr") {
+      herdr(["pane", "get", layout.childPaneId]);
+    } else {
+      tmux(["display-message", "-p", "-t", layout.childPaneId, "#{pane_id}"]);
+    }
     return true;
   } catch {
     return false;
   }
 }
 
-async function killPane(paneId: string | undefined): Promise<void> {
-  if (!paneId) {
-    return;
-  }
-
-  await withTmuxMutationLock(() => {
-    try {
-      if (isPaneAlive(paneId)) {
-        tmux(["kill-pane", "-t", paneId]);
-      }
-    } catch {}
-  });
-}
-
-async function cleanupTmuxLayout(layout: TmuxLayout | undefined): Promise<void> {
+async function cleanupTerminalLayout(layout: TerminalLayout | undefined): Promise<void> {
   if (!layout) {
     return;
   }
 
-  await killPane(layout.childPaneId);
+  await withTerminalMutationLock(() => {
+    try {
+      if (!isTerminalPaneAlive(layout)) {
+        return;
+      }
+      if (layout.backend === "herdr") {
+        herdr(["pane", "close", layout.childPaneId]);
+      } else {
+        tmux(["kill-pane", "-t", layout.childPaneId]);
+      }
+    } catch {}
+  });
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -729,16 +933,16 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     };
   }
 
-  ensureTmuxAvailable();
+  const terminalBackend = ensureTerminalAvailable();
 
   const ipcDir = mkdtempSync(join(tmpdir(), "pi-run-subagent-"));
   const statePath = join(ipcDir, STATE_FILE_NAME);
   const resultPath = join(ipcDir, RESULT_FILE_NAME);
   const exitPath = join(ipcDir, EXIT_FILE_NAME);
-  const tmuxContext = resolveTmuxContext();
-  incrementActiveSubagent(tmuxContext.windowId);
+  const terminalContext = resolveTerminalContext(terminalBackend);
+  incrementActiveSubagent(terminalContext.groupId);
 
-  let layout: TmuxLayout | undefined;
+  let layout: TerminalLayout | undefined;
   let finalAnswer = "";
   let exitCode = 1;
   let aborted = false;
@@ -771,7 +975,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
 
   const startCleanup = () => {
     if (!cleanupPromise) {
-      cleanupPromise = cleanupTmuxLayout(layout);
+      cleanupPromise = cleanupTerminalLayout(layout);
     }
 
     return cleanupPromise;
@@ -823,10 +1027,10 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     }
 
     const scriptPath = writeLauncherScript(input, childPrompt, childModel, requestedSessionId, ipcDir);
-    layout = await createTmuxLayout(input.cwd, input.taskTitle, tmuxContext, input.signal);
+    layout = await createTerminalLayout(input.cwd, input.taskTitle, terminalContext, input.signal);
 
     if (!layout) {
-      markAborted("Subagent was aborted before the tmux pane was created.");
+      markAborted("Subagent was aborted before the terminal pane was created.");
       cleanupAfterReturn = true;
       return {
         contentText: buildFailureText(details, "Parent request was aborted."),
@@ -835,7 +1039,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     }
 
     try {
-      await startCommandInPane(layout.childPaneId, `${shellEscape(scriptPath)}; exit`, input.signal);
+      await startCommandInTerminalPane(layout, `${shellEscape(scriptPath)}; exit`, input.signal);
     } catch (error: any) {
       cleanupAfterReturn = true;
       if (input.signal?.aborted) {
@@ -890,7 +1094,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
         break;
       }
 
-      const paneAlive = layout ? isPaneAlive(layout.childPaneId) : false;
+      const paneAlive = layout ? isTerminalPaneAlive(layout) : false;
       if (!paneAlive) {
         if (aborted) {
           exitCode = 130;
@@ -984,11 +1188,11 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
   } finally {
     input.signal?.removeEventListener("abort", abortListener);
     if (cleanupAfterReturn) {
-      await (cleanupPromise ?? cleanupTmuxLayout(layout));
+      await (cleanupPromise ?? cleanupTerminalLayout(layout));
       try {
         rmSync(ipcDir, { recursive: true, force: true });
       } catch {}
     }
-    decrementActiveSubagent(tmuxContext.windowId);
+    decrementActiveSubagent(terminalContext);
   }
 }
