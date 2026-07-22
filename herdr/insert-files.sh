@@ -2,25 +2,16 @@
 
 set -euo pipefail
 
-pane_id=${1:-}
+pane_id=${HERDR_ACTIVE_PANE_ID:-}
+herdr_bin=${HERDR_BIN_PATH:-}
 
 if [ -z "$pane_id" ]; then
-  printf 'Usage: %s <pane-id>\n' "$0" >&2
-  exit 2
+  printf 'insert-files: HERDR_ACTIVE_PANE_ID is not set\n' >&2
+  exit 1
 fi
 
 PATH="/opt/homebrew/bin:/usr/local/bin:${HOME}/.dotfiles/bin:${HOME}/bin:${HOME}/.local/bin:${PATH:-}"
 export PATH
-
-report_error() {
-  local message=$1
-
-  if command -v tmux >/dev/null 2>&1; then
-    tmux display-message "$message"
-  fi
-
-  printf '%s\n' "$message" >&2
-}
 
 require_command() {
   local command_name=$1
@@ -29,18 +20,22 @@ require_command() {
     return 0
   fi
 
-  report_error "insert-files: $command_name not found on PATH"
+  printf 'insert-files: %s not found on PATH\n' "$command_name" >&2
   exit 1
 }
 
-require_command tmux
 require_command fd
+
+if [ -z "$herdr_bin" ]; then
+  require_command herdr
+  herdr_bin=$(command -v herdr)
+fi
 
 file_command=(fd --type f --hidden --follow --exclude .git)
 dir_command=(fd --type d --hidden --follow --exclude .git)
 
-if [ "${TMUX_INSERT_FILES_SELECTION+x}" = x ]; then
-  selection=$TMUX_INSERT_FILES_SELECTION
+if [ "${HERDR_INSERT_FILES_SELECTION+x}" = x ]; then
+  selection=$HERDR_INSERT_FILES_SELECTION
 else
   require_command fzf
 
@@ -93,4 +88,4 @@ if [ -z "$inserted" ]; then
   exit 0
 fi
 
-tmux send-keys -t "$pane_id" -l "$inserted"
+"$herdr_bin" pane send-text "$pane_id" "$inserted"
