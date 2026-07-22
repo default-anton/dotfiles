@@ -27,6 +27,10 @@ case "$tool" in
     mise use --global "npm:@earendil-works/pi-coding-agent@${version}"
     mise prune --tools "npm:@earendil-works/pi-coding-agent"
     ;;
+  herdr)
+    mise use --global "herdr@${version}"
+    mise prune --tools herdr
+    ;;
   codex)
     mise use --global "npm:@openai/codex@${version}"
     mise prune --tools "npm:@openai/codex"
