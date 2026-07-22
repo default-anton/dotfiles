@@ -28,6 +28,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.sqliterc", "sqliterc"),
     ("~/.bash_aliases", "bash_aliases"),
     ("~/.tmux.conf", "tmux.conf"),
+    ("~/.config/herdr/config.toml", "herdr/config.toml"),
     ("~/.config/pgcli/config", "pgcli/config"),
     ("~/.config/nvim", "nvim"),
     ("~/.config/lazygit/config.yml", "lazygit.yml"),
