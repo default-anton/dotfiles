@@ -41,8 +41,8 @@ local find_files_in_dir = {
   end,
 }
 
-local send_file_to_claude = {
-  desc = "Send file reference to claude tmux pane",
+local send_file_to_ai_coders = {
+  desc = "Send file reference to AI coding agents",
   callback = function(_)
     local entry = oil.get_cursor_entry()
     local cwd = oil.get_current_dir()
@@ -69,7 +69,7 @@ oil.setup({
   keymaps = {
     ["<leader>m"] = live_grep_in_dir,
     ["<leader>,"] = find_files_in_dir,
-    ["<C-a>"] = send_file_to_claude,
+    ["<C-a>"] = send_file_to_ai_coders,
   },
 })
 

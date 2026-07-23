@@ -19,6 +19,60 @@ local function current_pane_info()
   return { session = session, window = window, pane = pane }
 end
 
+local function decode_json(output)
+  local ok, value = pcall(vim.json.decode, output)
+  if ok then
+    return value
+  end
+end
+
+local function current_herdr_tab()
+  if not vim.env.HERDR_ENV then
+    return nil
+  end
+
+  local pane_id = vim.env.HERDR_PANE_ID
+  if pane_id and pane_id ~= "" then
+    local output = vim.fn.system({ "herdr", "pane", "current", "--pane", pane_id })
+    if vim.v.shell_error == 0 then
+      local response = decode_json(output)
+      local pane = response and response.result and response.result.pane
+      if pane and pane.tab_id then
+        return pane.tab_id
+      end
+    end
+  end
+
+  local tab_id = vim.env.HERDR_TAB_ID
+  if tab_id and tab_id ~= "" then
+    return tab_id
+  end
+end
+
+local function herdr_targets(tab_id)
+  local output = vim.fn.system({ "herdr", "agent", "list" })
+  if vim.v.shell_error ~= 0 then
+    return {}
+  end
+
+  local response = decode_json(output)
+  local agents = response and response.result and response.result.agents
+  if type(agents) ~= "table" then
+    return {}
+  end
+
+  local targets = {}
+  for _, cli in ipairs(CLIS) do
+    for _, agent in ipairs(agents) do
+      if agent.tab_id == tab_id and agent.agent == cli.name then
+        table.insert(targets, { backend = "herdr", pane = agent.pane_id, prefix = cli.prefix })
+      end
+    end
+  end
+
+  return targets
+end
+
 local function pane_distance(pane_id, current)
   if not pane_id or pane_id == "" or not current then
     return nil
@@ -65,19 +119,38 @@ function M.get_active_cli()
   return closest_pane, closest_prefix
 end
 
+local function active_targets()
+  local herdr_tab = current_herdr_tab()
+  if herdr_tab then
+    return herdr_targets(herdr_tab)
+  end
+
+  local tmux_pane, prefix = M.get_active_cli()
+  if tmux_pane then
+    return { { backend = "tmux", pane = tmux_pane, prefix = prefix } }
+  end
+
+  return {}
+end
+
+local function send_text(target, text)
+  if target.backend == "herdr" then
+    vim.fn.system({ "herdr", "pane", "send-text", target.pane, text })
+  else
+    vim.fn.system({ "tmux", "send-keys", "-t", target.pane, "-l", text })
+  end
+end
+
 function M.send_file_references(paths)
   if type(paths) ~= "table" then
     paths = { paths }
   end
 
-  local tmux_pane, reference_prefix = M.get_active_cli()
-
-  if tmux_pane then
+  for _, target in ipairs(active_targets()) do
     local relative_paths = vim.tbl_map(function(path)
-      return (reference_prefix or "") .. vim.fn.fnamemodify(path, ":.")
+      return (target.prefix or "") .. vim.fn.fnamemodify(path, ":.")
     end, paths)
-    local references = table.concat(relative_paths, ", ")
-    vim.fn.system(string.format('tmux send-keys -t %s "%s"', tmux_pane, references .. ", "))
+    send_text(target, table.concat(relative_paths, ", ") .. ", ")
   end
 end
 
@@ -89,7 +162,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     if vim.bo.filetype ~= "TelescopePrompt" and vim.bo.filetype ~= "oil" then
       vim.keymap.set('n', '<C-a>', function()
         M.send_file_references({ vim.fn.expand('%') })
-      end, vim.tbl_extend('force', opts, { desc = 'Send file reference to AI CLI tmux pane' }))
+      end, vim.tbl_extend('force', opts, { desc = 'Send file reference to AI coding agents' }))
 
       vim.keymap.set('v', '<C-a>', function()
         -- Get the current visual selection positions
@@ -108,13 +181,10 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
           reference = string.format('%s:%d-%d, ', file_path, start_line, end_line)
         end
 
-        local tmux_pane, reference_prefix = M.get_active_cli()
-
-        if tmux_pane then
-          reference = (reference_prefix or "") .. reference
-          vim.fn.system(string.format('tmux send-keys -t %s "%s"', tmux_pane, reference))
+        for _, target in ipairs(active_targets()) do
+          send_text(target, (target.prefix or "") .. reference)
         end
-      end, vim.tbl_extend('force', opts, { desc = 'Send line reference to AI CLI tmux pane' }))
+      end, vim.tbl_extend('force', opts, { desc = 'Send line reference to AI coding agents' }))
     end
   end,
 })
