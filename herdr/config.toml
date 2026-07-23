@@ -171,7 +171,7 @@ height = "80%"
 
 # Copy text selected by mouse drag or double-click.
 # Set false to disable mouse text selection and copying.
-copy_on_select = false
+# copy_on_select = true
 
 # Host cursor policy: "auto", "native", or "drawn".
 # "auto" draws Herdr's own cursor on native Windows builds and WSL to avoid ConPTY cursor flicker, and uses the native terminal cursor elsewhere.
