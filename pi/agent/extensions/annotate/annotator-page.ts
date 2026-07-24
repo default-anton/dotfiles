@@ -496,8 +496,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       white-space: nowrap;
     }
 
-    .discard-action { color: var(--danger); }
-
     .send-action {
       min-width: 130px;
       border-color: var(--accent);
@@ -621,9 +619,8 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     <span id="footer-status" class="count">No comments</span>
     <div class="bottombar-spacer"></div>
     <div class="review-actions">
-      <button id="discard-review" class="discard-action" type="button" disabled>Discard…</button>
-      <button id="insert-action" type="button" disabled>Insert into editor</button>
-      <button id="send-action" class="send-action" type="button" disabled>Send comments</button>
+      <button id="insert-action" type="button" disabled>Insert ⌘⇧↵</button>
+      <button id="send-action" class="send-action" type="button" disabled>Send ⌘↵</button>
     </div>
   </footer>
 
@@ -659,6 +656,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
         <span>Send comments</span><kbd>⌘ Enter</kbd>
         <span>Insert into editor</span><kbd>⌘ Shift Enter</kbd>
         <span>Undo removed comment</span><kbd>⌘ Z</kbd>
+        <span>Clear comments</span><kbd>⌘ Backspace</kbd>
         <span>Cancel the current action</span><kbd>Esc</kbd>
       </div>
       <div class="modal-actions">
@@ -667,16 +665,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     </section>
   </div>
 
-  <div id="discard-modal" class="modal-backdrop" hidden>
-    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="discard-heading">
-      <h2 id="discard-heading">Discard this review?</h2>
-      <p id="discard-copy"></p>
-      <div class="modal-actions">
-        <button id="keep-review" type="button">Keep reviewing</button>
-        <button id="confirm-discard" class="danger" type="button">Discard</button>
-      </div>
-    </section>
-  </div>
 
   <script>
     const decodeUtf8 = (base64) => {
@@ -709,13 +697,11 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     const topCount = document.getElementById("top-count");
     const footerStatus = document.getElementById("footer-status");
     const wrapElement = document.getElementById("wrap");
-    const discardReviewButton = document.getElementById("discard-review");
     const insertAction = document.getElementById("insert-action");
     const sendAction = document.getElementById("send-action");
     const toastElement = document.getElementById("toast");
     const toastMessage = document.getElementById("toast-message");
     const helpModal = document.getElementById("help-modal");
-    const discardModal = document.getElementById("discard-modal");
 
     const lineStarts = buildLineStarts(sourceText);
     let annotations = [];
@@ -731,6 +717,9 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     let geometryTimer = null;
     let finishing = false;
     let lastSourceSelectionAt = 0;
+    let sourceSelectionInProgress = false;
+    let selectionCaptureFrame = null;
+    let pendingSelectionAnchor = null;
     let settings = loadSettings();
 
     pathElement.textContent = displayPath;
@@ -1320,8 +1309,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       const disabled = count === 0 || unresolved > 0 || Boolean(composer);
       sendAction.disabled = disabled;
       insertAction.disabled = disabled;
-      discardReviewButton.disabled = count === 0 && !composer;
-      sendAction.textContent = "Send " + count + plural(count, " comment", " comments");
     }
 
     function eventPoint(event) {
@@ -1331,16 +1318,31 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     function sourceOffset(node, offset) {
       const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
       const content = element?.closest?.(".line-content");
-      if (!content || !sourceElement.contains(content)) return null;
-
-      const range = document.createRange();
-      range.selectNodeContents(content);
-      try {
-        range.setEnd(node, offset);
-      } catch {
-        return null;
+      if (content && sourceElement.contains(content)) {
+        const range = document.createRange();
+        range.selectNodeContents(content);
+        try {
+          range.setEnd(node, offset);
+        } catch {
+          return null;
+        }
+        return Number(content.dataset.start) + range.toString().length;
       }
-      return Number(content.dataset.start) + range.toString().length;
+
+      if (node.nodeType !== Node.ELEMENT_NODE) return null;
+      if (node === sourceElement) {
+        if (offset <= 0) return 0;
+        if (offset >= sourceElement.children.length) return sourceText.length;
+        return lineStarts[offset] ?? null;
+      }
+
+      const row = element?.closest?.(".source-line");
+      if (!row || !sourceElement.contains(row) || node !== row) return null;
+      const lineContent = row.querySelector(".line-content");
+      const contentIndex = Array.prototype.indexOf.call(row.childNodes, lineContent);
+      return offset <= contentIndex
+        ? Number(lineContent.dataset.start)
+        : Number(lineContent.dataset.end);
     }
 
     function selectedSourceRange() {
@@ -1350,6 +1352,17 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       const start = sourceOffset(range.startContainer, range.startOffset);
       const end = sourceOffset(range.endContainer, range.endOffset);
       return start === null || end === null || end <= start ? null : { start, end };
+    }
+
+    function scheduleSourceSelectionCapture(anchor = null) {
+      if (anchor) pendingSelectionAnchor = anchor;
+      if (selectionCaptureFrame !== null) cancelAnimationFrame(selectionCaptureFrame);
+      selectionCaptureFrame = requestAnimationFrame(() => {
+        selectionCaptureFrame = null;
+        const captureAnchor = pendingSelectionAnchor;
+        pendingSelectionAnchor = null;
+        captureSourceSelection(captureAnchor);
+      });
     }
 
     function captureSourceSelection(anchor) {
@@ -1603,28 +1616,18 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       sourceElement.focus();
     }
 
-    function openDiscardConfirmation() {
-      const count = annotations.length;
-      document.getElementById("discard-copy").textContent =
-        "This permanently removes " + count + plural(count, " saved comment.", " saved comments.");
-      discardModal.hidden = false;
-      document.getElementById("keep-review").focus();
-    }
-
-    function closeDiscardConfirmation() {
-      discardModal.hidden = true;
-      sourceElement.focus();
-    }
-
-    function discardReview() {
-      captureWindowGeometry();
-      finishing = true;
-      clearTimeout(persistTimer);
-      safeStorageRemove(draftKey);
+    function clearComments() {
       annotations = [];
+      nextId = 1;
       composer = null;
       composerAnchor = null;
-      sendTerminalMessage("close");
+      activeId = null;
+      reattachId = null;
+      deletedAnnotation = null;
+      hideToast();
+      safeStorageRemove(draftKey);
+      render();
+      sourceElement.focus();
     }
 
     function closeAndKeepDraft() {
@@ -1633,9 +1636,8 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       sendTerminalMessage("close");
     }
 
-    sourceElement.addEventListener("mouseup", (event) => {
-      const anchor = eventPoint(event);
-      queueMicrotask(() => captureSourceSelection(anchor));
+    sourceElement.addEventListener("mousedown", () => {
+      sourceSelectionInProgress = true;
     });
     sourceElement.addEventListener("copy", (event) => {
       const range = selectedSourceRange();
@@ -1643,10 +1645,16 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       event.preventDefault();
       event.clipboardData.setData("text/plain", sourceText.slice(range.start, range.end));
     });
-    sourceElement.addEventListener("keyup", (event) => {
-      if (event.key === "Shift" || event.shiftKey) {
-        queueMicrotask(() => captureSourceSelection(null));
-      }
+    document.addEventListener("mouseup", (event) => {
+      if (!sourceSelectionInProgress) return;
+      sourceSelectionInProgress = false;
+      scheduleSourceSelectionCapture(eventPoint(event));
+    });
+    document.addEventListener("keyup", () => {
+      scheduleSourceSelectionCapture();
+    });
+    window.addEventListener("blur", () => {
+      sourceSelectionInProgress = false;
     });
 
     document.getElementById("document-comment").addEventListener("click", (event) => {
@@ -1658,8 +1666,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     document.getElementById("close").addEventListener("click", closeAndKeepDraft);
     document.getElementById("help").addEventListener("click", openHelp);
     document.getElementById("close-help").addEventListener("click", closeHelp);
-    document.getElementById("keep-review").addEventListener("click", closeDiscardConfirmation);
-    document.getElementById("confirm-discard").addEventListener("click", discardReview);
 
     commentElement.addEventListener("input", schedulePersist);
     commentElement.addEventListener("keydown", (event) => {
@@ -1682,7 +1688,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
 
     sendAction.addEventListener("click", () => finish("send"));
     insertAction.addEventListener("click", () => finish("insert"));
-    discardReviewButton.addEventListener("click", openDiscardConfirmation);
 
     dividerElement.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -1721,6 +1726,12 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
         return;
       }
 
+      if (command && event.key === "Backspace" && !typing) {
+        event.preventDefault();
+        clearComments();
+        return;
+      }
+
       if (command && event.key === "Enter" && !typing) {
         event.preventDefault();
         finish(event.shiftKey ? "insert" : "send");
@@ -1729,7 +1740,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
 
       if (event.key === "Escape") {
         if (!helpModal.hidden) closeHelp();
-        else if (!discardModal.hidden) closeDiscardConfirmation();
         else if (composer) cancelComposer();
         else if (reattachId) {
           reattachId = null;
