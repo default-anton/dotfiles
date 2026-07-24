@@ -270,8 +270,10 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     .review-header strong { font-size: 13px; }
 
     .review-scroll {
+      min-width: 0;
       min-height: 0;
-      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
       padding: 10px;
     }
 
@@ -296,16 +298,19 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     .empty-state[hidden],
     .composer[hidden],
     .toast[hidden],
-    .popover[hidden],
     .modal-backdrop[hidden] { display: none; }
 
     .composer {
-      margin: 2px 2px 12px;
+      position: fixed;
+      z-index: 20;
+      width: min(420px, calc(100vw - 24px));
+      max-height: calc(100vh - 24px);
+      overflow: auto;
       padding: 10px;
       border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--border));
       border-radius: 8px;
       background: var(--background);
-      box-shadow: 0 5px 18px color-mix(in srgb, #000 12%, transparent);
+      box-shadow: 0 9px 28px color-mix(in srgb, #000 22%, transparent);
     }
 
     .composer-target {
@@ -371,11 +376,15 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
 
     .annotation-list {
       display: grid;
+      min-width: 0;
+      grid-template-columns: minmax(0, 1fr);
       gap: 8px;
     }
 
     .annotation-card {
       position: relative;
+      min-width: 0;
+      max-width: 100%;
       padding: 9px 34px 9px 10px;
       border: 1px solid var(--border);
       border-radius: 7px;
@@ -420,12 +429,16 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     }
 
     .annotation-comment {
+      min-width: 0;
       margin-top: 7px;
       line-height: 1.45;
+      overflow-wrap: anywhere;
       white-space: pre-wrap;
     }
 
     .annotation-preview {
+      min-width: 0;
+      max-width: 100%;
       margin-top: 7px;
       overflow: hidden;
       color: var(--muted);
@@ -471,59 +484,26 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
 
     .wrap-control input { margin: 0; }
 
-    .action-group {
-      position: relative;
+    .review-actions {
       display: inline-flex;
+      align-items: center;
+      gap: 7px;
     }
 
-    .primary-action,
-    .action-menu-button {
+    .review-actions button {
       min-height: 30px;
+      padding: 5px 10px;
+      white-space: nowrap;
+    }
+
+    .discard-action { color: var(--danger); }
+
+    .send-action {
+      min-width: 130px;
       border-color: var(--accent);
       background: var(--accent);
       color: var(--accent-foreground);
     }
-
-    .primary-action {
-      min-width: 145px;
-      padding: 5px 10px;
-      border-radius: 6px 0 0 6px;
-    }
-
-    .action-menu-button {
-      width: 30px;
-      padding: 0;
-      border-left-color: color-mix(in srgb, var(--accent-foreground) 30%, transparent);
-      border-radius: 0 6px 6px 0;
-    }
-
-    .popover {
-      position: absolute;
-      z-index: 20;
-      right: 0;
-      bottom: calc(100% + 7px);
-      width: 230px;
-      padding: 5px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--background);
-      box-shadow: 0 9px 28px color-mix(in srgb, #000 22%, transparent);
-    }
-
-    .menu-item {
-      display: flex;
-      width: 100%;
-      align-items: center;
-      justify-content: space-between;
-      padding: 7px 8px;
-      border-color: transparent;
-      background: transparent;
-      text-align: left;
-    }
-
-    .menu-item.danger { color: var(--danger); }
-    .menu-shortcut { color: var(--muted); font-size: 11px; }
-    .menu-separator { height: 1px; margin: 4px 2px; background: var(--border); }
 
     .toast {
       position: fixed;
@@ -607,7 +587,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     <div class="topbar-spacer"></div>
     <span id="top-count" class="count">0 comments</span>
     <button id="help" class="icon-button" type="button" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
-    <button id="close" class="icon-button" type="button" title="Close and keep draft (Esc)" aria-label="Close and keep draft">×</button>
+    <button id="close" class="icon-button" type="button" title="Close and keep draft" aria-label="Close and keep draft">×</button>
   </header>
 
   <main class="workspace">
@@ -625,20 +605,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       <div id="review-scroll" class="review-scroll">
         <div id="restore-banner" class="banner" hidden></div>
 
-        <section id="composer" class="composer" aria-label="Comment editor" hidden>
-          <div class="composer-target">
-            <span id="composer-number" class="target-number" hidden></span>
-            <span id="composer-location"></span>
-          </div>
-          <div id="composer-preview" class="composer-preview"></div>
-          <textarea id="comment" placeholder="Write a comment…" aria-label="Comment"></textarea>
-          <div class="composer-actions">
-            <span class="shortcut-hint">Esc cancel · ⌘↵ save</span>
-            <button id="cancel-comment" class="text-button" type="button">Cancel</button>
-            <button id="save-comment" class="text-button save-button" type="button">Add</button>
-          </div>
-        </section>
-
         <div id="empty-state" class="empty-state">
           Select text to comment on it. Press <kbd>D</kbd> for a whole-document comment.
         </div>
@@ -654,21 +620,26 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     </label>
     <span id="footer-status" class="count">No comments</span>
     <div class="bottombar-spacer"></div>
-    <div class="action-group">
-      <button id="primary-action" class="primary-action" type="button" disabled>Send review</button>
-      <button id="action-menu-button" class="action-menu-button" type="button" disabled aria-haspopup="menu" aria-expanded="false" title="More review actions">⌄</button>
-      <div id="action-menu" class="popover" role="menu" hidden>
-        <button id="menu-send" class="menu-item" type="button" role="menuitem">
-          <span>Send review</span><span class="menu-shortcut">⌘↵</span>
-        </button>
-        <button id="menu-insert" class="menu-item" type="button" role="menuitem">
-          <span>Insert into editor</span><span class="menu-shortcut">⌘⇧↵</span>
-        </button>
-        <div class="menu-separator"></div>
-        <button id="menu-discard" class="menu-item danger" type="button" role="menuitem">Discard review…</button>
-      </div>
+    <div class="review-actions">
+      <button id="discard-review" class="discard-action" type="button" disabled>Discard…</button>
+      <button id="insert-action" type="button" disabled>Insert into editor</button>
+      <button id="send-action" class="send-action" type="button" disabled>Send comments</button>
     </div>
   </footer>
+
+  <section id="composer" class="composer" aria-label="Comment editor" hidden>
+    <div class="composer-target">
+      <span id="composer-number" class="target-number" hidden></span>
+      <span id="composer-location"></span>
+    </div>
+    <div id="composer-preview" class="composer-preview"></div>
+    <textarea id="comment" placeholder="Write a comment…" aria-label="Comment"></textarea>
+    <div class="composer-actions">
+      <span class="shortcut-hint">Esc cancel · ⌘↵ save</span>
+      <button id="cancel-comment" class="text-button" type="button">Cancel</button>
+      <button id="save-comment" class="text-button save-button" type="button">Add</button>
+    </div>
+  </section>
 
   <div id="toast" class="toast" role="status" hidden>
     <span id="toast-message"></span>
@@ -685,10 +656,10 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
         <span>Previous / next comment</span><kbd>K</kbd> / <kbd>J</kbd>
         <span>Toggle line wrapping</span><kbd>W</kbd>
         <span>Save a comment</span><kbd>⌘ Enter</kbd>
-        <span>Run the default action</span><kbd>⌘ Enter</kbd>
-        <span>Run the other action</span><kbd>⌘ Shift Enter</kbd>
+        <span>Send comments</span><kbd>⌘ Enter</kbd>
+        <span>Insert into editor</span><kbd>⌘ Shift Enter</kbd>
         <span>Undo removed comment</span><kbd>⌘ Z</kbd>
-        <span>Cancel or close</span><kbd>Esc</kbd>
+        <span>Cancel the current action</span><kbd>Esc</kbd>
       </div>
       <div class="modal-actions">
         <button id="close-help" type="button">Close</button>
@@ -726,7 +697,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     const documentPane = document.getElementById("document-pane");
     const sourceElement = document.getElementById("source");
     const dividerElement = document.getElementById("divider");
-    const reviewScroll = document.getElementById("review-scroll");
     const bannerElement = document.getElementById("restore-banner");
     const composerElement = document.getElementById("composer");
     const composerNumber = document.getElementById("composer-number");
@@ -739,9 +709,9 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     const topCount = document.getElementById("top-count");
     const footerStatus = document.getElementById("footer-status");
     const wrapElement = document.getElementById("wrap");
-    const primaryAction = document.getElementById("primary-action");
-    const actionMenuButton = document.getElementById("action-menu-button");
-    const actionMenu = document.getElementById("action-menu");
+    const discardReviewButton = document.getElementById("discard-review");
+    const insertAction = document.getElementById("insert-action");
+    const sendAction = document.getElementById("send-action");
     const toastElement = document.getElementById("toast");
     const toastMessage = document.getElementById("toast-message");
     const helpModal = document.getElementById("help-modal");
@@ -751,6 +721,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     let annotations = [];
     let nextId = 1;
     let composer = null;
+    let composerAnchor = null;
     let activeId = null;
     let reattachId = null;
     let deletedAnnotation = null;
@@ -795,7 +766,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       return {
         wrap: typeof stored?.wrap === "boolean" ? stored.wrap : true,
         railWidth: Number.isFinite(stored?.railWidth) ? clamp(stored.railWidth, 280, 620) : 360,
-        preferredAction: stored?.preferredAction === "insert" ? "insert" : "send",
         geometry: geometry && Number.isFinite(geometry.x) && Number.isFinite(geometry.y) &&
           Number.isFinite(geometry.width) && Number.isFinite(geometry.height)
           ? geometry
@@ -1129,7 +1099,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
           marker.title = "Comment " + annotationNumber(range) + " — " + lineLabel(range.start, range.end);
           marker.addEventListener("click", (event) => {
             event.stopPropagation();
-            beginEdit(range.id);
+            beginEdit(range.id, eventPoint(event));
           });
           markers.append(marker);
         }
@@ -1181,10 +1151,10 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
           const id = matching.find((range) => !range.draft)?.id;
           if (id) setActiveId(id, false);
         });
-        span.addEventListener("click", () => {
+        span.addEventListener("click", (event) => {
           if (performance.now() - lastSourceSelectionAt < 250) return;
           const id = matching.find((range) => !range.draft)?.id;
-          if (id && window.getSelection()?.isCollapsed) beginEdit(id);
+          if (id && window.getSelection()?.isCollapsed) beginEdit(id, eventPoint(event));
         });
         content.append(span);
       }
@@ -1219,6 +1189,32 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       composerLocation.textContent = location;
       composerPreview.textContent = preview;
       saveCommentButton.textContent = composer.mode === "edit" ? "Save" : "Add";
+      positionComposer();
+    }
+
+    function positionComposer() {
+      if (composerElement.hidden) return;
+
+      const margin = 12;
+      const gap = 12;
+      const bounds = composerElement.getBoundingClientRect();
+      let left = (window.innerWidth - bounds.width) / 2;
+      let top = (window.innerHeight - bounds.height) / 2;
+
+      if (composerAnchor) {
+        left = composerAnchor.x + gap;
+        if (left + bounds.width > window.innerWidth - margin) {
+          left = composerAnchor.x - bounds.width - gap;
+        }
+
+        top = composerAnchor.y + gap;
+        if (top + bounds.height > window.innerHeight - margin) {
+          top = composerAnchor.y - bounds.height - gap;
+        }
+      }
+
+      composerElement.style.left = clamp(left, margin, window.innerWidth - bounds.width - margin) + "px";
+      composerElement.style.top = clamp(top, margin, window.innerHeight - bounds.height - margin) + "px";
     }
 
     function renderAnnotationList() {
@@ -1288,8 +1284,8 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
 
         card.addEventListener("mouseenter", () => setActiveId(annotation.id, false));
         card.addEventListener("focus", () => setActiveId(annotation.id, false));
-        card.addEventListener("click", () => {
-          beginEdit(annotation.id);
+        card.addEventListener("click", (event) => {
+          beginEdit(annotation.id, eventPoint(event));
           scrollAnnotationSource(annotation);
         });
         card.addEventListener("keydown", (event) => {
@@ -1322,14 +1318,14 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
             : count + plural(count, " comment", " comments") + " ready";
 
       const disabled = count === 0 || unresolved > 0 || Boolean(composer);
-      primaryAction.disabled = disabled;
-      actionMenuButton.disabled = count === 0;
-      const verb = settings.preferredAction === "send" ? "Send" : "Insert";
-      primaryAction.textContent = verb + " " + count + plural(count, " comment", " comments");
-      document.querySelector("#menu-send .menu-shortcut").textContent =
-        settings.preferredAction === "send" ? "⌘↵" : "⌘⇧↵";
-      document.querySelector("#menu-insert .menu-shortcut").textContent =
-        settings.preferredAction === "insert" ? "⌘↵" : "⌘⇧↵";
+      sendAction.disabled = disabled;
+      insertAction.disabled = disabled;
+      discardReviewButton.disabled = count === 0 && !composer;
+      sendAction.textContent = "Send " + count + plural(count, " comment", " comments");
+    }
+
+    function eventPoint(event) {
+      return event.detail === 0 ? null : { x: event.clientX, y: event.clientY };
     }
 
     function sourceOffset(node, offset) {
@@ -1356,7 +1352,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       return start === null || end === null || end <= start ? null : { start, end };
     }
 
-    function captureSourceSelection() {
+    function captureSourceSelection(anchor) {
       const selection = window.getSelection();
       const selectedRange = selectedSourceRange();
       if (!selection || !selectedRange) return;
@@ -1391,6 +1387,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
         target: { start, end, selectedText: sourceText.slice(start, end) },
         comment: "",
       };
+      composerAnchor = anchor;
       activeId = null;
       selection.removeAllRanges();
       render();
@@ -1398,27 +1395,28 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       commentElement.focus();
     }
 
-    function beginDocumentComment() {
+    function beginDocumentComment(anchor = null) {
       if (composer && commentElement.value.trim() !== "") {
         showToast("Save or cancel the current comment first", false);
         commentElement.focus();
         return;
       }
       composer = { mode: "create-document", comment: "" };
+      composerAnchor = anchor;
       activeId = null;
       render();
       commentElement.value = "";
       commentElement.focus();
     }
 
-    function beginEdit(id) {
+    function beginEdit(id, anchor = null) {
       const annotation = annotations.find((item) => item.id === id);
       if (!annotation) return;
       composer = { mode: "edit", annotationId: id, comment: annotation.comment };
+      composerAnchor = anchor;
       activeId = id;
       render();
       commentElement.value = annotation.comment;
-      reviewScroll.scrollTop = 0;
       commentElement.focus();
       commentElement.setSelectionRange(commentElement.value.length, commentElement.value.length);
     }
@@ -1456,6 +1454,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       }
 
       composer = null;
+      composerAnchor = null;
       commentElement.value = "";
       render();
       sourceElement.focus();
@@ -1463,6 +1462,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
 
     function cancelComposer() {
       composer = null;
+      composerAnchor = null;
       commentElement.value = "";
       render();
       sourceElement.focus();
@@ -1482,17 +1482,26 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       if (index === -1) return;
       deletedAnnotation = { annotation: annotations[index], index };
       annotations.splice(index, 1);
+      if (annotations.length === 0) nextId = 1;
       if (activeId === id) activeId = null;
       if (reattachId === id) reattachId = null;
-      if (composer?.annotationId === id) composer = null;
+      if (composer?.annotationId === id) {
+        composer = null;
+        composerAnchor = null;
+      }
       render();
       showToast("Comment removed", true);
     }
 
     function undoRemoval() {
       if (!deletedAnnotation) return;
-      annotations.splice(deletedAnnotation.index, 0, deletedAnnotation.annotation);
-      activeId = deletedAnnotation.annotation.id;
+      const { annotation, index } = deletedAnnotation;
+      if (annotations.some((item) => item.id === annotation.id)) {
+        annotation.id = "a" + nextId++;
+      }
+      annotations.splice(index, 0, annotation);
+      nextId = Math.max(nextId, annotationNumber(annotation) + 1);
+      activeId = annotation.id;
       deletedAnnotation = null;
       hideToast();
       render();
@@ -1566,7 +1575,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
         return;
       }
 
-      settings.preferredAction = action;
       captureWindowGeometry();
       finishing = true;
       clearTimeout(persistTimer);
@@ -1585,19 +1593,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       });
     }
 
-    function alternateAction() {
-      return settings.preferredAction === "send" ? "insert" : "send";
-    }
-
-    function toggleActionMenu(force) {
-      const open = typeof force === "boolean" ? force : actionMenu.hidden;
-      actionMenu.hidden = !open;
-      actionMenuButton.setAttribute("aria-expanded", String(open));
-      if (open) {
-        document.getElementById(settings.preferredAction === "send" ? "menu-send" : "menu-insert").focus();
-      }
-    }
-
     function openHelp() {
       helpModal.hidden = false;
       document.getElementById("close-help").focus();
@@ -1609,7 +1604,6 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     }
 
     function openDiscardConfirmation() {
-      toggleActionMenu(false);
       const count = annotations.length;
       document.getElementById("discard-copy").textContent =
         "This permanently removes " + count + plural(count, " saved comment.", " saved comments.");
@@ -1629,6 +1623,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       safeStorageRemove(draftKey);
       annotations = [];
       composer = null;
+      composerAnchor = null;
       sendTerminalMessage("close");
     }
 
@@ -1638,7 +1633,10 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       sendTerminalMessage("close");
     }
 
-    sourceElement.addEventListener("mouseup", () => queueMicrotask(captureSourceSelection));
+    sourceElement.addEventListener("mouseup", (event) => {
+      const anchor = eventPoint(event);
+      queueMicrotask(() => captureSourceSelection(anchor));
+    });
     sourceElement.addEventListener("copy", (event) => {
       const range = selectedSourceRange();
       if (!range || !event.clipboardData) return;
@@ -1646,10 +1644,14 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       event.clipboardData.setData("text/plain", sourceText.slice(range.start, range.end));
     });
     sourceElement.addEventListener("keyup", (event) => {
-      if (event.key === "Shift" || event.shiftKey) queueMicrotask(captureSourceSelection);
+      if (event.key === "Shift" || event.shiftKey) {
+        queueMicrotask(() => captureSourceSelection(null));
+      }
     });
 
-    document.getElementById("document-comment").addEventListener("click", beginDocumentComment);
+    document.getElementById("document-comment").addEventListener("click", (event) => {
+      beginDocumentComment(eventPoint(event));
+    });
     document.getElementById("save-comment").addEventListener("click", saveComment);
     document.getElementById("cancel-comment").addEventListener("click", cancelComposer);
     document.getElementById("undo").addEventListener("click", undoRemoval);
@@ -1678,15 +1680,9 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       saveSettings();
     });
 
-    primaryAction.addEventListener("click", () => finish(settings.preferredAction));
-    actionMenuButton.addEventListener("click", () => toggleActionMenu());
-    document.getElementById("menu-send").addEventListener("click", () => finish("send"));
-    document.getElementById("menu-insert").addEventListener("click", () => finish("insert"));
-    document.getElementById("menu-discard").addEventListener("click", openDiscardConfirmation);
-
-    document.addEventListener("pointerdown", (event) => {
-      if (!event.target.closest(".action-group")) toggleActionMenu(false);
-    });
+    sendAction.addEventListener("click", () => finish("send"));
+    insertAction.addEventListener("click", () => finish("insert"));
+    discardReviewButton.addEventListener("click", openDiscardConfirmation);
 
     dividerElement.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -1711,8 +1707,15 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     document.addEventListener("keydown", (event) => {
       const typing = event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement;
       const command = event.metaKey || event.ctrlKey;
+      const key = event.key.toLowerCase();
 
-      if (command && event.key.toLowerCase() === "z" && !typing && deletedAnnotation) {
+      if (command && (key === "w" || key === "q")) {
+        event.preventDefault();
+        closeAndKeepDraft();
+        return;
+      }
+
+      if (command && key === "z" && !typing && deletedAnnotation) {
         event.preventDefault();
         undoRemoval();
         return;
@@ -1720,27 +1723,25 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
 
       if (command && event.key === "Enter" && !typing) {
         event.preventDefault();
-        finish(event.shiftKey ? alternateAction() : settings.preferredAction);
+        finish(event.shiftKey ? "insert" : "send");
         return;
       }
 
       if (event.key === "Escape") {
         if (!helpModal.hidden) closeHelp();
         else if (!discardModal.hidden) closeDiscardConfirmation();
-        else if (!actionMenu.hidden) toggleActionMenu(false);
         else if (composer) cancelComposer();
         else if (reattachId) {
           reattachId = null;
           renderActions();
           sourceElement.focus();
-        } else closeAndKeepDraft();
+        } else return;
         event.preventDefault();
         return;
       }
 
       const buttonFocused = event.target instanceof HTMLButtonElement;
       if (typing || buttonFocused || command || event.altKey) return;
-      const key = event.key.toLowerCase();
       if (key === "?") {
         event.preventDefault();
         openHelp();
@@ -1767,6 +1768,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     });
 
     window.addEventListener("resize", () => {
+      positionComposer();
       clearTimeout(geometryTimer);
       geometryTimer = setTimeout(captureWindowGeometry, 250);
     });

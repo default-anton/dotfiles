@@ -71,7 +71,6 @@ async function runAnnotator(
     width: 1_280,
     height: 840,
     title: `Annotate — ${displayPath}`,
-    noDock: true,
   });
 
   return new Promise((resolve, reject) => {
