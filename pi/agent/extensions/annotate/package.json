@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "echo 'nothing to clean'",
     "build": "echo 'nothing to build'",
-    "check": "echo 'nothing to check'"
+    "check": "node --experimental-strip-types ./check.ts"
   },
   "pi": {
     "extensions": [
