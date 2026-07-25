@@ -43,7 +43,7 @@ export async function annotateMarkdown(
   const draftKey = annotationDraftKey(path);
   const initialState = stateStore.initialValues(draftKey);
   const rawResult = await runAnnotator(
-    buildAnnotatorHTML({ path, displayPath, source, ...initialState }),
+    await buildAnnotatorHTML({ path, displayPath, source, ...initialState }),
     displayPath,
     draftKey,
     stateStore,

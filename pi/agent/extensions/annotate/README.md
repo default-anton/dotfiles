@@ -10,7 +10,7 @@ Run:
 /annotate path/to/file.md
 ```
 
-Select source text to add a comment, or add a whole-document comment. Choose **Send ⌘↵** to send the comments or **Insert ⌘⇧↵** to place them in the editor.
+The source uses Shiki syntax highlighting with Pierre's light and dark themes. Select source text to add a comment, or add a whole-document comment. Syntax colors remain visible under comment highlights. Choose **Send ⌘↵** to send the comments or **Insert ⌘⇧↵** to place them in the editor.
 
 ## Shortcuts
 

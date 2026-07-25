@@ -1,3 +1,5 @@
+import { highlightMarkdown } from "./markdown-highlighter.ts";
+
 interface AnnotatorPageOptions {
   path: string;
   displayPath: string;
@@ -6,8 +8,15 @@ interface AnnotatorPageOptions {
   draft: string | null;
 }
 
-export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
+export async function buildAnnotatorHTML(
+  options: AnnotatorPageOptions,
+): Promise<string> {
+  const highlighted = await highlightMarkdown(options.source);
   const sourceBase64 = Buffer.from(options.source, "utf8").toString("base64");
+  const syntaxBase64 = Buffer.from(
+    JSON.stringify(highlighted.tokens),
+    "utf8",
+  ).toString("base64");
   const pathBase64 = Buffer.from(options.path, "utf8").toString("base64");
   const displayPathBase64 = Buffer.from(options.displayPath, "utf8").toString(
     "base64",
@@ -29,8 +38,8 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     :root {
       color-scheme: light dark;
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --background: Canvas;
-      --foreground: CanvasText;
+      --background: ${highlighted.lightBackground};
+      --foreground: ${highlighted.lightForeground};
       --muted: color-mix(in srgb, CanvasText 58%, transparent);
       --subtle: color-mix(in srgb, CanvasText 7%, Canvas);
       --panel: color-mix(in srgb, CanvasText 3%, Canvas);
@@ -61,7 +70,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     body {
       display: grid;
       grid-template-rows: 45px minmax(0, 1fr) 45px;
-      font-size: 13px;
+      font-size: 15px;
     }
 
     button,
@@ -106,7 +115,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       min-width: 0;
       overflow: hidden;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -129,7 +138,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       place-items: center;
       border-color: transparent;
       background: transparent;
-      font-size: 16px;
+      font-size: 18px;
       line-height: 1;
     }
 
@@ -158,7 +167,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       padding: 12px 0 45vh;
       outline: none;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 13px;
+      font-size: 15px;
       line-height: 1.62;
       tab-size: 2;
       user-select: text;
@@ -198,7 +207,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       border-radius: 50%;
       background: color-mix(in srgb, #b58700 85%, CanvasText);
       color: white;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       line-height: 1;
     }
@@ -222,6 +231,18 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     }
 
     .source.nowrap .line-content { white-space: pre; }
+
+    .source ::selection {
+      background: color-mix(in srgb, var(--accent) 34%, transparent);
+      color: inherit;
+    }
+
+    .syntax-token {
+      color: var(--syntax-light);
+      font-style: var(--syntax-font-style, normal);
+      font-weight: var(--syntax-font-weight, inherit);
+      text-decoration: var(--syntax-text-decoration, none);
+    }
 
     .annotated {
       border-radius: 2px;
@@ -267,7 +288,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       border-bottom: 1px solid var(--border);
     }
 
-    .review-header strong { font-size: 13px; }
+    .review-header strong { font-size: 15px; }
 
     .review-scroll {
       min-width: 0;
@@ -284,7 +305,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       border: 1px solid var(--border);
       border-radius: 7px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 14px;
       line-height: 1.45;
     }
 
@@ -318,7 +339,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       align-items: center;
       gap: 6px;
       margin-bottom: 7px;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 650;
     }
 
@@ -330,7 +351,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       border-radius: 50%;
       background: var(--accent);
       color: var(--accent-foreground);
-      font-size: 10px;
+      font-size: 12px;
     }
 
     .composer-preview {
@@ -338,7 +359,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       overflow: hidden;
       color: var(--muted);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 11px;
+      font-size: 13px;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -365,7 +386,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     .shortcut-hint {
       flex: 1;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 13px;
     }
 
     .save-button {
@@ -408,7 +429,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       align-items: center;
       gap: 6px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 13px;
     }
 
     .annotation-number {
@@ -419,7 +440,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       border-radius: 50%;
       background: color-mix(in srgb, #b58700 85%, CanvasText);
       color: white;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
     }
 
@@ -443,7 +464,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       overflow: hidden;
       color: var(--muted);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 11px;
+      font-size: 13px;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -460,7 +481,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       border-color: transparent;
       background: transparent;
       color: var(--muted);
-      font-size: 17px;
+      font-size: 19px;
       line-height: 1;
     }
 
@@ -479,7 +500,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       min-height: 28px;
       padding: 0 8px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .wrap-control input { margin: 0; }
@@ -547,7 +568,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       box-shadow: 0 14px 45px color-mix(in srgb, #000 30%, transparent);
     }
 
-    .modal h2 { margin: 0 0 9px; font-size: 16px; }
+    .modal h2 { margin: 0 0 9px; font-size: 18px; }
     .modal p { margin: 0 0 14px; color: var(--muted); line-height: 1.5; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
     .modal-actions button { padding: 6px 10px; }
@@ -566,8 +587,17 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       border-bottom-color: var(--strong-border);
       border-radius: 4px;
       background: var(--subtle);
-      font: 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font: 13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       white-space: nowrap;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: ${highlighted.darkBackground};
+        --foreground: ${highlighted.darkForeground};
+      }
+
+      .syntax-token { color: var(--syntax-dark); }
     }
 
     @media (max-width: 760px) {
@@ -673,6 +703,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     };
 
     const sourceText = decodeUtf8("${sourceBase64}");
+    const syntaxTokens = JSON.parse(decodeUtf8("${syntaxBase64}"));
     const sourcePath = decodeUtf8("${pathBase64}");
     const displayPath = decodeUtf8("${displayPathBase64}");
     const settingsKey = "pi-annotate:settings:v1";
@@ -704,6 +735,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
     const helpModal = document.getElementById("help-modal");
 
     const lineStarts = buildLineStarts(sourceText);
+    const syntaxTokensByLine = groupSyntaxTokensByLine(syntaxTokens);
     let annotations = [];
     let nextId = 1;
     let composer = null;
@@ -979,6 +1011,17 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       return low;
     }
 
+    function groupSyntaxTokensByLine(tokens) {
+      const grouped = new Map();
+      for (const token of tokens) {
+        const lineIndex = lineIndexAt(token.start);
+        const lineTokens = grouped.get(lineIndex) || [];
+        lineTokens.push(token);
+        grouped.set(lineIndex, lineTokens);
+      }
+      return grouped;
+    }
+
     function lineLabel(start, end) {
       const first = lineIndexAt(start) + 1;
       const last = lineIndexAt(Math.max(start, end - 1)) + 1;
@@ -1097,7 +1140,13 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
         content.className = "line-content";
         content.dataset.start = String(lineStart);
         content.dataset.end = String(lineEnd);
-        appendLineContent(content, lineStart, lineEnd, activeRanges);
+        appendLineContent(
+          content,
+          lineStart,
+          lineEnd,
+          activeRanges,
+          syntaxTokensByLine.get(lineIndex) || [],
+        );
 
         row.append(number, markers, content);
         fragment.append(row);
@@ -1109,7 +1158,7 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
       updateActiveStyles();
     }
 
-    function appendLineContent(content, lineStart, lineEnd, ranges) {
+    function appendLineContent(content, lineStart, lineEnd, ranges, lineSyntax) {
       if (lineStart === lineEnd) return;
 
       const boundaries = new Set([lineStart, lineEnd]);
@@ -1119,6 +1168,10 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
           boundaries.add(clamp(range.end, lineStart, lineEnd));
         }
       }
+      for (const token of lineSyntax) {
+        boundaries.add(clamp(token.start, lineStart, lineEnd));
+        boundaries.add(clamp(token.end, lineStart, lineEnd));
+      }
 
       const points = Array.from(boundaries).sort((left, right) => left - right);
       for (let index = 0; index < points.length - 1; index += 1) {
@@ -1126,27 +1179,42 @@ export function buildAnnotatorHTML(options: AnnotatorPageOptions): string {
         const end = points[index + 1];
         const text = sourceText.slice(start, end);
         const matching = ranges.filter((range) => range.start < end && range.end > start);
-        if (matching.length === 0) {
+        const syntax = lineSyntax.find((token) => token.start <= start && token.end >= end);
+        if (matching.length === 0 && !syntax) {
           content.append(document.createTextNode(text));
           continue;
         }
 
         const span = document.createElement("span");
-        const isDraft = matching.some((range) => range.draft);
-        span.className = isDraft ? "draft-range" : "annotated";
-        span.dataset.annotationIds = matching.filter((range) => !range.draft).map((range) => range.id).join(" ");
         span.textContent = text;
-        span.addEventListener("mouseenter", () => {
-          const id = matching.find((range) => !range.draft)?.id;
-          if (id) setActiveId(id, false);
-        });
-        span.addEventListener("click", (event) => {
-          if (performance.now() - lastSourceSelectionAt < 250) return;
-          const id = matching.find((range) => !range.draft)?.id;
-          if (id && window.getSelection()?.isCollapsed) beginEdit(id, eventPoint(event));
-        });
+        if (syntax) applySyntaxStyle(span, syntax);
+        if (matching.length > 0) applyAnnotationStyle(span, matching);
         content.append(span);
       }
+    }
+
+    function applySyntaxStyle(span, syntax) {
+      span.classList.add("syntax-token");
+      span.style.setProperty("--syntax-light", syntax.lightColor);
+      span.style.setProperty("--syntax-dark", syntax.darkColor);
+      if ((syntax.fontStyle & 1) !== 0) span.style.setProperty("--syntax-font-style", "italic");
+      if ((syntax.fontStyle & 2) !== 0) span.style.setProperty("--syntax-font-weight", "700");
+      if ((syntax.fontStyle & 4) !== 0) span.style.setProperty("--syntax-text-decoration", "underline");
+    }
+
+    function applyAnnotationStyle(span, matching) {
+      const isDraft = matching.some((range) => range.draft);
+      span.classList.add(isDraft ? "draft-range" : "annotated");
+      span.dataset.annotationIds = matching.filter((range) => !range.draft).map((range) => range.id).join(" ");
+      span.addEventListener("mouseenter", () => {
+        const id = matching.find((range) => !range.draft)?.id;
+        if (id) setActiveId(id, false);
+      });
+      span.addEventListener("click", (event) => {
+        if (performance.now() - lastSourceSelectionAt < 250) return;
+        const id = matching.find((range) => !range.draft)?.id;
+        if (id && window.getSelection()?.isCollapsed) beginEdit(id, eventPoint(event));
+      });
     }
 
     function renderComposer() {
