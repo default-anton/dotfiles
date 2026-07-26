@@ -14,8 +14,6 @@ import type {
   SessionEntry,
 } from "@earendil-works/pi-coding-agent";
 
-const MODEL_PROVIDER = "openai";
-const MODEL_ID = "gpt-5.6-luna";
 const MAX_FILENAME_LENGTH = 80;
 
 const returnFilename: Tool = {
@@ -99,9 +97,9 @@ async function generateFilename(
   assistantText: string,
   ctx: ExtensionCommandContext,
 ): Promise<string> {
-  const model = ctx.modelRegistry.find(MODEL_PROVIDER, MODEL_ID);
+  const model = ctx.model;
   if (!model) {
-    throw new Error(`Model ${MODEL_PROVIDER}/${MODEL_ID} is unavailable`);
+    throw new Error("No model is selected");
   }
 
   const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
@@ -109,7 +107,7 @@ async function generateFilename(
     throw new Error(auth.error);
   }
   if (!auth.apiKey) {
-    throw new Error(`No authentication available for ${MODEL_PROVIDER}/${MODEL_ID}`);
+    throw new Error(`No authentication available for ${model.provider}/${model.id}`);
   }
 
   const context: Context = {
