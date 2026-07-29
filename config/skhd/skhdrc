@@ -82,6 +82,7 @@ ctrl + cmd - g : open -a 'Gemini'
 ctrl + cmd - f : open -a 'Finder'
 ctrl + cmd - h : open -a 'Hey'
 ctrl + cmd - t : open -a 'Google Tasks'
+ctrl + cmd - s : open -a 'sebastian'
 
 # GRID <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
 
