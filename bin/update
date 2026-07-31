@@ -6,19 +6,6 @@ tool="$1"
 version="${2:-latest}"
 
 case "$tool" in
-  mlx-audio)
-    # Source: https://github.com/Blaizzy/mlx-audio
-    package_spec="mlx-audio[all]"
-
-    if [[ "$version" != "latest" ]]; then
-      package_spec="${package_spec}==${version}"
-    fi
-
-    uv tool install "$package_spec" --force --prerelease=allow --python 3.11 --with "numpy<2.0.0" --with "spacy<4.0.0" --with "typer>=0.9.0" --with "pip" --with "python-multipart"
-    ;;
-  mlx-lm)
-    uv tool install "mlx-lm@${version}"
-    ;;
   claude)
     brew upgrade --cask claude-code@latest
     ;;
@@ -35,13 +22,8 @@ case "$tool" in
     mise use --global "npm:@openai/codex@${version}"
     mise prune --tools "npm:@openai/codex"
     ;;
-  opencode)
-    # Source: https://github.com/anomalyco/opencode
-    mise use --global "npm:opencode-ai@${version}"
-    mise prune --tools "npm:opencode-ai"
-    ;;
   *)
-    echo "Usage: update {mlx-audio|mlx-lm|claude|pi|codex|opencode} [version]"
+    echo "Usage: update {claude|pi|codex} [version]"
     exit 1
     ;;
 esac

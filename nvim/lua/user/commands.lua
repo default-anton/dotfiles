@@ -45,38 +45,38 @@ vim.api.nvim_create_user_command("Strip", function(opts)
   end
 end, { desc = "Remove trailing whitespace from buffer or selection", range = true })
 
-vim.api.nvim_create_user_command("Commit", function(opts)
-  local instructions = opts.args
-  if instructions == "" then
-    error("Commit: instructions required")
+vim.api.nvim_create_user_command("Br", function(opts)
+  local branch = opts.args
+  if branch == "" then
+    vim.notify("Branch name or URL is required", vim.log.levels.ERROR)
+    return
   end
 
-  local system_prompt =
-  [[Git-commit agent. Only use bash. Always inspect git status + diff for requested scope. If staged: read staged diff. If unstaged/paths: read those diffs. Read recent commit messages by current Git user to match style. Then craft commit message + perform commits per instructions. No code edits, no push. If scope unclear, refuse.]]
+  vim.fn.system "cd /Users/akuzmenko/code/aha-dev-cli && git pull --rebase && bundle"
 
-  local exit_extension = vim.fn.stdpath("config") .. "/lua/user/exit-after-turn.ts"
-
-  local args = {
-    "--provider",
-    "google-vertex",
-    "--model",
-    "gemini-3-flash-preview",
-    "--thinking",
-    "low",
-    "--no-session",
-    "--no-extensions",
-    "--no-skills",
-    "--tools",
-    "bash",
-    "--extension",
-    exit_extension,
-    "--system-prompt",
-    system_prompt,
-    instructions,
+  local Job = require "plenary.job"
+  local create_branch = Job:new {
+    command = "aha",
+    args = { "branch", branch },
   }
 
-  local escaped = vim.tbl_map(vim.fn.shellescape, args)
-  local cmd = "pi " .. table.concat(escaped, " ")
-  vim.cmd("term " .. cmd)
-  vim.cmd("startinsert")
-end, { desc = "Run pi to prepare git commits", nargs = "+" })
+  create_branch:sync(10000)
+
+  vim.notify("Branch created: " .. branch, vim.log.levels.INFO)
+end, { nargs = 1, desc = "Create a new branch using aha-dev-cli" })
+
+vim.api.nvim_create_user_command("Feat", function()
+  local current_branch = vim.fn.system("git rev-parse --abbrev-ref HEAD"):gsub("\n", "")
+  local feature_key = string.match(current_branch, "[A-Z]+%-%d+%-%d+")
+  if feature_key == nil then
+    feature_key = string.match(current_branch, "[A-Z]+%-%d+")
+    if feature_key == nil then
+      vim.api.nvim_echo({ { "No feature key found." } }, true, {})
+      return
+    end
+
+    vim.fn.system("open https://" .. vim.env.AHA_DOMAIN .. ".aha.io/features/" .. feature_key)
+  else
+    vim.fn.system("open https://" .. vim.env.AHA_DOMAIN .. ".aha.io/requirements/" .. feature_key)
+  end
+end, { nargs = 0 })

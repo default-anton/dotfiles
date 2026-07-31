@@ -12,25 +12,19 @@
     s     = stash
     co    = checkout
     br    = branch
-    dmbr  = !git br --merged | egrep -v '(^\\*|^master$|^develop$|^main$)' | xargs git br -d
     ci    = commit --verbose
     st    = status
     b     = blame -w -C -C -C
     l     = "!bash -c '. ~/.dotfiles/githelpers && pretty_git_log $@' -"
     r     = !GIT_NO_PAGER=1 git l -30
-    la    = !git l --all
     fap   = fetch --all -p
     amend = commit --amend
     dc    = diff --cached --ignore-space-change
-    dcs   = !DELTA_FEATURES=+side-by-side git dc
     df    = diff --ignore-space-change
-    dfs   = !DELTA_FEATURES=+side-by-side git df
     all   = add --all
     poo   = push origin HEAD
     rom   = !git fap && git rebase origin/$(git_default_branch)
     changed = !git status --porcelain | grep '^ *[AM]' | cut -d ' ' -f 3-
-    review = !git df $(git merge-base $(git_default_branch) HEAD)..HEAD
-    prdf = !git df $(git merge-base HEAD origin/$(git_default_branch))
 
 [color]
     ui   = true

@@ -9,6 +9,6 @@
 - Read a known URL with `read_web_page <url>` via `bash`.
 - Use `agent-browser` only when the user explicitly asks you to use it; first run `agent-browser skills get core`, then relevant specialized guidance.
 - For web research, run Codex web search with a 30-minute Bash timeout: `codex --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Search the web for current information as of <date>; do not run commands or modify files. Return an answer with source URLs."`
-- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, tmux, imagemagick, ffmpeg
+- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, herdr, imagemagick, ffmpeg
 - `AGENTS.md` and `AGENTS.override.md` may contain only durable, high-signal instructions; exclude project docs, long rationale, and speculative guidance.
 - `~/.pi/agent/**` symlinks to source-of-truth `~/.dotfiles/pi/agent/**`; edit the latter.

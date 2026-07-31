@@ -13,13 +13,6 @@ vnoremap <silent> # :<C-u>call GetVisualSelection()<cr>?<C-R>=@/<cr><cr>
 let g:test#neovim#start_normal = 1
 let test#strategy = "neovim"
 let test#lua#busted#executable = "ntest"
-"let test#transformation = 'tmux'
-
-function! TmuxTransform(cmd) abort
-  return 'tmux send -t bottom-left '.shellescape(a:cmd).' Enter'
-endfunction
-
-let g:test#custom_transformations = {'tmux': function('TmuxTransform')}
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)

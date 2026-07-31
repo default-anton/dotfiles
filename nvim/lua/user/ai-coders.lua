@@ -7,18 +7,6 @@ local CLIS = {
   { name = "claude", prefix = "@" },
 }
 
-local function current_pane_info()
-  local session = vim.trim(vim.fn.system("tmux display-message -p '#{session_name}'"))
-  local window = vim.trim(vim.fn.system("tmux display-message -p '#{window_index}'"))
-  local pane = vim.trim(vim.fn.system("tmux display-message -p '#{pane_index}'"))
-
-  if session == "" or window == "" or pane == "" then
-    return nil
-  end
-
-  return { session = session, window = window, pane = pane }
-end
-
 local function decode_json(output)
   local ok, value = pcall(vim.json.decode, output)
   if ok then
@@ -65,7 +53,7 @@ local function herdr_targets(tab_id)
   for _, cli in ipairs(CLIS) do
     for _, agent in ipairs(agents) do
       if agent.tab_id == tab_id and agent.agent == cli.name then
-        table.insert(targets, { backend = "herdr", pane = agent.pane_id, prefix = cli.prefix })
+        table.insert(targets, { pane = agent.pane_id, prefix = cli.prefix })
       end
     end
   end
@@ -73,72 +61,13 @@ local function herdr_targets(tab_id)
   return targets
 end
 
-local function pane_distance(pane_id, current)
-  if not pane_id or pane_id == "" or not current then
-    return nil
-  end
-
-  local session, window, pane = pane_id:match("([^:]+):([^.]+)%.(.+)")
-  if not session then
-    return nil
-  end
-
-  if session == current.session and window == current.window and pane == current.pane then
-    return 0
-  elseif session == current.session and window == current.window then
-    return 1
-  elseif session == current.session then
-    return 2
-  end
-
-  return 3
-end
-
-function M.get_active_cli()
-  local current = current_pane_info()
-  local closest_pane
-  local closest_prefix
-  local closest_distance
-
-  for _, cli in ipairs(CLIS) do
-    local tmux_pane = vim.trim(vim.fn.system("tmux-find " .. cli.name))
-    if tmux_pane ~= "" then
-      if not current then
-        return tmux_pane, cli.prefix
-      end
-
-      local distance = pane_distance(tmux_pane, current)
-      if distance and (not closest_distance or distance < closest_distance) then
-        closest_pane = tmux_pane
-        closest_prefix = cli.prefix
-        closest_distance = distance
-      end
-    end
-  end
-
-  return closest_pane, closest_prefix
-end
-
 local function active_targets()
   local herdr_tab = current_herdr_tab()
-  if herdr_tab then
-    return herdr_targets(herdr_tab)
-  end
-
-  local tmux_pane, prefix = M.get_active_cli()
-  if tmux_pane then
-    return { { backend = "tmux", pane = tmux_pane, prefix = prefix } }
-  end
-
-  return {}
+  return herdr_tab and herdr_targets(herdr_tab) or {}
 end
 
 local function send_text(target, text)
-  if target.backend == "herdr" then
-    vim.fn.system({ "herdr", "pane", "send-text", target.pane, text })
-  else
-    vim.fn.system({ "tmux", "send-keys", "-t", target.pane, "-l", text })
-  end
+  vim.fn.system({ "herdr", "pane", "send-text", target.pane, text })
 end
 
 function M.send_file_references(paths)

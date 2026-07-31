@@ -25,10 +25,6 @@ const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhi
 const POLL_INTERVAL_MS = 250;
 const RESULT_GRACE_PERIOD_MS = 2_000;
 const ABORT_CLEANUP_GRACE_PERIOD_MS = 1_000;
-const SHELL_READY_POLL_INTERVAL_MS = 50;
-const SHELL_READY_TIMEOUT_MS = 5_000;
-const RIGHT_PANE_WIDTH = 120;
-const PI_TMUX_WINDOW_NAME_DISABLED_ENV = "PI_TMUX_WINDOW_NAME_DISABLED";
 
 let terminalMutationQueue: Promise<void> = Promise.resolve();
 const activeSubagentsByGroupId = new Map<string, number>();
@@ -64,38 +60,17 @@ export type SpawnSubagentRunResult = {
   details: SpawnSubagentDetails;
 };
 
-type TmuxPane = {
-  id: string;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  active: boolean;
-};
-
 type TerminalLayout = {
-  backend: "tmux" | "herdr";
   childPaneId: string;
   groupId: string;
 };
 
-type TmuxContext = {
-  backend: "tmux";
-  callerPaneId: string;
-  sessionId: string;
-  windowId: string;
-  groupId: string;
-};
-
 type HerdrContext = {
-  backend: "herdr";
   callerPaneId: string;
   callerTabId: string;
   workspaceId: string;
   groupId: string;
 };
-
-type TerminalContext = TmuxContext | HerdrContext;
 
 type HerdrPane = {
   pane_id: string;
@@ -265,7 +240,6 @@ function buildChildEnvAssignments(input: SpawnSubagentRunInput, ipcDir: string, 
     `${SUBAGENT_IPC_DIR_ENV}=${shellEscape(ipcDir)}`,
     `${SUBAGENT_TASK_TITLE_ENV}=${shellEscape(input.taskTitle)}`,
     `${SUBAGENT_MODEL_ARG_ENV}=${shellEscape(childModel)}`,
-    `${PI_TMUX_WINDOW_NAME_DISABLED_ENV}=1`,
   ];
 
   const inheritedPath = process.env.PATH;
@@ -304,13 +278,6 @@ function getPiInvocation(args: string[]): { command: string; args: string[] } {
   return { command: "pi", args };
 }
 
-function tmux(args: string[]): string {
-  return execFileSync("tmux", args, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "ignore"],
-  }).trim();
-}
-
 function herdr<T>(args: string[]): T {
   const output = execFileSync("herdr", args, {
     encoding: "utf8",
@@ -332,42 +299,27 @@ function incrementActiveSubagent(groupId: string): void {
   activeSubagentsByGroupId.set(groupId, (activeSubagentsByGroupId.get(groupId) ?? 0) + 1);
 }
 
-function decrementActiveSubagent(context: TerminalContext): void {
+function decrementActiveSubagent(context: HerdrContext): void {
   const next = (activeSubagentsByGroupId.get(context.groupId) ?? 1) - 1;
   if (next <= 0) {
     activeSubagentsByGroupId.delete(context.groupId);
-    if (context.backend === "herdr") {
-      herdrSubagentTabsByCallerTabId.delete(context.callerTabId);
-    }
+    herdrSubagentTabsByCallerTabId.delete(context.callerTabId);
     return;
   }
 
   activeSubagentsByGroupId.set(context.groupId, next);
 }
 
-function getActiveSubagentCount(groupId: string): number {
-  return activeSubagentsByGroupId.get(groupId) ?? 0;
-}
-
-function ensureTerminalAvailable(): "herdr" | "tmux" {
-  if (process.env.HERDR_PANE_ID?.trim()) {
-    try {
-      herdr(["pane", "current", "--pane", process.env.HERDR_PANE_ID]);
-      return "herdr";
-    } catch (error: any) {
-      throw new Error(`run_subagent could not talk to herdr: ${error?.message ?? String(error)}`);
-    }
-  }
-
-  if (!process.env.TMUX) {
-    throw new Error("run_subagent requires pi to be running inside herdr or tmux.");
+function ensureTerminalAvailable(): void {
+  const paneId = process.env.HERDR_PANE_ID?.trim();
+  if (!paneId) {
+    throw new Error("run_subagent requires pi to be running inside herdr.");
   }
 
   try {
-    tmux(["display-message", "-p", "#{pane_id}"]);
-    return "tmux";
+    herdr(["pane", "current", "--pane", paneId]);
   } catch (error: any) {
-    throw new Error(`run_subagent could not talk to tmux: ${error?.message ?? String(error)}`);
+    throw new Error(`run_subagent could not talk to herdr: ${error?.message ?? String(error)}`);
   }
 }
 
@@ -412,28 +364,6 @@ function writeLauncherScript(
   return scriptPath;
 }
 
-function resolveTmuxContext(): TmuxContext {
-  const callerPaneId = process.env.TMUX_PANE?.trim();
-  if (!callerPaneId) {
-    throw new Error("run_subagent could not determine the calling tmux pane.");
-  }
-
-  try {
-    const resolvedPaneId = tmux(["display-message", "-p", "-t", callerPaneId, "#{pane_id}"]);
-    const sessionId = tmux(["display-message", "-p", "-t", callerPaneId, "#{session_id}"]);
-    const windowId = tmux(["display-message", "-p", "-t", callerPaneId, "#{window_id}"]);
-    return {
-      backend: "tmux",
-      callerPaneId: resolvedPaneId,
-      sessionId,
-      windowId,
-      groupId: `tmux:${windowId}`,
-    };
-  } catch (error: any) {
-    throw new Error(`run_subagent could not resolve the calling tmux pane: ${error?.message ?? String(error)}`);
-  }
-}
-
 function resolveHerdrContext(): HerdrContext {
   const callerPaneId = process.env.HERDR_PANE_ID?.trim();
   if (!callerPaneId) {
@@ -452,7 +382,6 @@ function resolveHerdrContext(): HerdrContext {
     }
 
     return {
-      backend: "herdr",
       callerPaneId: pane.pane_id,
       callerTabId,
       workspaceId,
@@ -461,259 +390,6 @@ function resolveHerdrContext(): HerdrContext {
   } catch (error: any) {
     throw new Error(`run_subagent could not resolve the calling herdr pane: ${error?.message ?? String(error)}`);
   }
-}
-
-function resolveTerminalContext(backend: "herdr" | "tmux"): TerminalContext {
-  return backend === "herdr" ? resolveHerdrContext() : resolveTmuxContext();
-}
-
-function getPaneRuntime(paneId: string): { currentCommand: string; dead: boolean } | undefined {
-  try {
-    const [currentCommand = "", dead = "0"] = tmux([
-      "display-message",
-      "-p",
-      "-t",
-      paneId,
-      "#{pane_current_command}\t#{pane_dead}",
-    ]).split("\t");
-    return {
-      currentCommand: currentCommand.trim(),
-      dead: dead === "1",
-    };
-  } catch {
-    return undefined;
-  }
-}
-
-async function waitForPaneShellReady(paneId: string, signal?: AbortSignal): Promise<void> {
-  const deadline = Date.now() + SHELL_READY_TIMEOUT_MS;
-
-  while (Date.now() < deadline) {
-    if (signal?.aborted) {
-      throw new Error("Subagent was aborted before the shell became ready.");
-    }
-
-    const runtime = getPaneRuntime(paneId);
-    if (!runtime || runtime.dead) {
-      throw new Error("Subagent pane exited before the shell became ready.");
-    }
-
-    if (runtime.currentCommand) {
-      return;
-    }
-
-    await sleep(SHELL_READY_POLL_INTERVAL_MS);
-  }
-
-  throw new Error("Timed out waiting for the subagent shell to become ready.");
-}
-
-function isTmuxPaneAlive(paneId: string): boolean {
-  try {
-    tmux(["display-message", "-p", "-t", paneId, "#{pane_id}"]);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function startCommandInPane(paneId: string, command: string, signal?: AbortSignal): Promise<void> {
-  await waitForPaneShellReady(paneId, signal);
-
-  await withTerminalMutationLock(() => {
-    if (signal?.aborted) {
-      throw new Error("Subagent was aborted before the subagent command was started.");
-    }
-
-    if (!isTmuxPaneAlive(paneId)) {
-      throw new Error("Subagent pane exited before the subagent command was started.");
-    }
-
-    tmux(["send-keys", "-t", paneId, "-l", command]);
-    tmux(["send-keys", "-t", paneId, "C-m"]);
-  });
-}
-
-function listWindowPanes(windowId: string): TmuxPane[] {
-  const output = tmux([
-    "list-panes",
-    "-t",
-    windowId,
-    "-F",
-    "#{pane_id}\t#{pane_left}\t#{pane_top}\t#{pane_width}\t#{pane_height}\t#{pane_active}",
-  ]);
-
-  return output
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [id, left, top, width, height, active] = line.split("\t");
-      return {
-        id,
-        left: Number.parseInt(left, 10),
-        top: Number.parseInt(top, 10),
-        width: Number.parseInt(width, 10),
-        height: Number.parseInt(height, 10),
-        active: active === "1",
-      } satisfies TmuxPane;
-    });
-}
-
-function getPreferredSplitWidth(width: number): number {
-  const maxAllowed = Math.max(24, width - 20);
-  const preferred = Math.max(24, Math.floor(width * 0.4));
-  return Math.min(RIGHT_PANE_WIDTH, maxAllowed, preferred);
-}
-
-function getWindowWidth(panes: TmuxPane[]): number {
-  return panes.reduce((max, pane) => Math.max(max, pane.left + pane.width), 0);
-}
-
-function pickLargestPane(panes: TmuxPane[]): TmuxPane {
-  return [...panes].sort((a, b) => {
-    const areaDiff = b.width * b.height - a.width * a.height;
-    if (areaDiff !== 0) {
-      return areaDiff;
-    }
-
-    const widthDiff = b.width - a.width;
-    if (widthDiff !== 0) {
-      return widthDiff;
-    }
-
-    const heightDiff = b.height - a.height;
-    if (heightDiff !== 0) {
-      return heightDiff;
-    }
-
-    const activeDiff = Number(b.active) - Number(a.active);
-    if (activeDiff !== 0) {
-      return activeDiff;
-    }
-
-    return 0;
-  })[0];
-}
-
-function setPaneTitle(paneId: string, taskTitle: string): void {
-  try {
-    tmux(["select-pane", "-t", paneId, "-T", taskTitle]);
-  } catch {}
-}
-
-function getDedicatedWindowName(windowId: string): string {
-  return `subagents-${windowId.replace(/[^A-Za-z0-9_-]/g, "")}`;
-}
-
-function findWindowIdByName(sessionId: string, windowName: string): string | undefined {
-  const output = tmux(["list-windows", "-t", sessionId, "-F", "#{window_name}\t#{window_id}"]);
-  for (const line of output.split("\n")) {
-    const [name, windowId] = line.trim().split("\t");
-    if (name === windowName && windowId) {
-      return windowId;
-    }
-  }
-
-  return undefined;
-}
-
-function createSameWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TerminalLayout {
-  const panes = listWindowPanes(tmuxContext.windowId);
-  if (panes.length === 0) {
-    throw new Error("run_subagent could not find any tmux panes in the calling window.");
-  }
-
-  const childPaneId = tmux([
-    "split-window",
-    "-c",
-    cwd,
-    "-d",
-    "-h",
-    "-f",
-    "-l",
-    String(getPreferredSplitWidth(getWindowWidth(panes))),
-    "-t",
-    tmuxContext.callerPaneId,
-    "-P",
-    "-F",
-    "#{pane_id}",
-  ]);
-
-  setPaneTitle(childPaneId, taskTitle);
-  return {
-    backend: "tmux",
-    childPaneId,
-    groupId: tmuxContext.groupId,
-  };
-}
-
-function createDedicatedWindowLayout(cwd: string, taskTitle: string, tmuxContext: TmuxContext): TerminalLayout {
-  const dedicatedWindowName = getDedicatedWindowName(tmuxContext.windowId);
-  const existingWindowId = findWindowIdByName(tmuxContext.sessionId, dedicatedWindowName);
-
-  if (!existingWindowId) {
-    const [windowId, childPaneId] = tmux([
-      "new-window",
-      "-c",
-      cwd,
-      "-d",
-      "-t",
-      tmuxContext.sessionId,
-      "-n",
-      dedicatedWindowName,
-      "-P",
-      "-F",
-      "#{window_id}\t#{pane_id}",
-    ]).split("\t");
-    if (!windowId || !childPaneId) {
-      throw new Error("run_subagent could not create the subagent tmux window.");
-    }
-
-    setPaneTitle(childPaneId, taskTitle);
-    return {
-      backend: "tmux",
-      childPaneId,
-      groupId: tmuxContext.groupId,
-    };
-  }
-
-  const panes = listWindowPanes(existingWindowId);
-  if (panes.length === 0) {
-    throw new Error("run_subagent could not find any tmux panes in the subagent window.");
-  }
-
-  const childPaneId = tmux([
-    "split-window",
-    "-c",
-    cwd,
-    "-d",
-    "-t",
-    pickLargestPane(panes).id,
-    "-P",
-    "-F",
-    "#{pane_id}",
-  ]);
-  tmux(["select-layout", "-t", existingWindowId, "tiled"]);
-  setPaneTitle(childPaneId, taskTitle);
-
-  return {
-    backend: "tmux",
-    childPaneId,
-    groupId: tmuxContext.groupId,
-  };
-}
-
-function killPaneSync(paneId: string | undefined): void {
-  if (!paneId) {
-    return;
-  }
-
-  try {
-    if (isTmuxPaneAlive(paneId)) {
-      tmux(["kill-pane", "-t", paneId]);
-    }
-  } catch {}
 }
 
 function listHerdrTabPanes(context: HerdrContext, tabId: string): HerdrPane[] {
@@ -794,7 +470,6 @@ function createHerdrLayout(cwd: string, taskTitle: string, context: HerdrContext
   herdrSubagentTabsByCallerTabId.set(context.callerTabId, tabId);
   setHerdrPaneTitle(childPaneId, taskTitle);
   return {
-    backend: "herdr",
     childPaneId,
     groupId: context.groupId,
   };
@@ -803,7 +478,7 @@ function createHerdrLayout(cwd: string, taskTitle: string, context: HerdrContext
 async function createTerminalLayout(
   cwd: string,
   taskTitle: string,
-  context: TerminalContext,
+  context: HerdrContext,
   signal?: AbortSignal,
 ): Promise<TerminalLayout | undefined> {
   return withTerminalMutationLock(() => {
@@ -811,26 +486,11 @@ async function createTerminalLayout(
       return undefined;
     }
 
-    const layout = context.backend === "herdr"
-      ? createHerdrLayout(cwd, taskTitle, context)
-      : getActiveSubagentCount(context.groupId) > 1
-        ? createDedicatedWindowLayout(cwd, taskTitle, context)
-        : (() => {
-          try {
-            return createSameWindowLayout(cwd, taskTitle, context);
-          } catch {
-            return createDedicatedWindowLayout(cwd, taskTitle, context);
-          }
-        })();
-
+    const layout = createHerdrLayout(cwd, taskTitle, context);
     if (signal?.aborted) {
-      if (layout.backend === "herdr") {
-        try {
-          herdr(["pane", "close", layout.childPaneId]);
-        } catch {}
-      } else {
-        killPaneSync(layout.childPaneId);
-      }
+      try {
+        herdr(["pane", "close", layout.childPaneId]);
+      } catch {}
       return undefined;
     }
 
@@ -843,11 +503,6 @@ async function startCommandInTerminalPane(
   command: string,
   signal?: AbortSignal,
 ): Promise<void> {
-  if (layout.backend === "tmux") {
-    await startCommandInPane(layout.childPaneId, command, signal);
-    return;
-  }
-
   await withTerminalMutationLock(() => {
     if (signal?.aborted) {
       throw new Error("Subagent was aborted before the subagent command was started.");
@@ -865,11 +520,7 @@ function isTerminalPaneAlive(layout: TerminalLayout): boolean {
   }
 
   try {
-    if (layout.backend === "herdr") {
-      herdr(["pane", "get", layout.childPaneId]);
-    } else {
-      tmux(["display-message", "-p", "-t", layout.childPaneId, "#{pane_id}"]);
-    }
+    herdr(["pane", "get", layout.childPaneId]);
     return true;
   } catch {
     return false;
@@ -883,13 +534,8 @@ async function cleanupTerminalLayout(layout: TerminalLayout | undefined): Promis
 
   await withTerminalMutationLock(() => {
     try {
-      if (!isTerminalPaneAlive(layout)) {
-        return;
-      }
-      if (layout.backend === "herdr") {
+      if (isTerminalPaneAlive(layout)) {
         herdr(["pane", "close", layout.childPaneId]);
-      } else {
-        tmux(["kill-pane", "-t", layout.childPaneId]);
       }
     } catch {}
   });
@@ -933,13 +579,13 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     };
   }
 
-  const terminalBackend = ensureTerminalAvailable();
+  ensureTerminalAvailable();
 
   const ipcDir = mkdtempSync(join(tmpdir(), "pi-run-subagent-"));
   const statePath = join(ipcDir, STATE_FILE_NAME);
   const resultPath = join(ipcDir, RESULT_FILE_NAME);
   const exitPath = join(ipcDir, EXIT_FILE_NAME);
-  const terminalContext = resolveTerminalContext(terminalBackend);
+  const terminalContext = resolveHerdrContext();
   incrementActiveSubagent(terminalContext.groupId);
 
   let layout: TerminalLayout | undefined;
