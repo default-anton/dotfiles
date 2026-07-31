@@ -46,8 +46,8 @@ SHELL_CMDS: Final[list[str]] = [
     "brew trust koekeishiya/formulae",
     "brew bundle --no-upgrade",
     "$(brew --prefix)/opt/fzf/install",
-    f"$(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY} lua@{LUA} herdr@latest \"npm:@earendil-works/pi-coding-agent@latest\" \"npm:@openai/codex@latest\" claude-code@latest",
-    "pip3 install --user pynvim",
+    f"$(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY} lua@{LUA} go@latest jherdr@latest \"npm:@earendil-works/pi-coding-agent@latest\" \"npm:@openai/codex@latest\" claude-code@latest",
+    "python3 -m venv ~/.local/share/nvim/python3-provider && ~/.local/share/nvim/python3-provider/bin/python -m pip install --upgrade pynvim",
 ]
 
 BASHRC_LINES: Final[list[str]] = [
