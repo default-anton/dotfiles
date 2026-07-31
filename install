@@ -43,10 +43,11 @@ DIRS_TO_CREATE: Final[list[str]] = [
 DOTFILES: Path = Path("~/.dotfiles").expanduser()
 
 SHELL_CMDS: Final[list[str]] = [
+    "brew trust koekeishiya/formulae",
     "brew bundle --no-upgrade",
     "$(brew --prefix)/opt/fzf/install",
     f"$(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY} lua@{LUA} herdr@latest \"npm:@earendil-works/pi-coding-agent@latest\" \"npm:@openai/codex@latest\" claude-code@latest",
-    "pip3 install --break-system-packages --user pynvim",
+    "pip3 install --user pynvim",
 ]
 
 BASHRC_LINES: Final[list[str]] = [
