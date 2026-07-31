@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 from subprocess import Popen, check_output
 from typing import Final
-from platform import python_version
 
 NODE = "24"
 RUBY = "4"
@@ -60,22 +59,17 @@ BASH_PROFILE_LINES: Final[list[str]] = [
 ]
 
 def main():
-    major, minor, _patch = map(int, python_version().split('.'))
-    assert major == 3, 'python 3 expected'
-
     parser = argparse.ArgumentParser()
-
-    if minor >= 9:
-        parser.add_argument("--brew", action=argparse.BooleanOptionalAction)
-        parser.set_defaults(brew=True)
-    else:
-        parser.add_argument("--no-brew", dest='brew', action='store_false')
-
+    parser.add_argument(
+        "--setup",
+        action="store_true",
+        help="install and configure dependencies",
+    )
     args = parser.parse_args()
 
-    os.environ["HOMEBREW_PREFIX"] = check_output(["brew", "--prefix"]).strip().decode()
+    if args.setup:
+        os.environ["HOMEBREW_PREFIX"] = check_output(["brew", "--prefix"]).strip().decode()
 
-    if args.brew:
         for cmd in SHELL_CMDS:
             process = Popen(
                 cmd,
