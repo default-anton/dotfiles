@@ -3,7 +3,7 @@
 set -e
 
 if [[ $# -eq 0 ]]; then
-  for tool in claude pi herdr codex; do
+  for tool in claude pi herdr worktrunk codex; do
     "$0" "$tool"
   done
   exit
@@ -26,12 +26,16 @@ case "$tool" in
     mise use --global "herdr@${version}"
     mise prune --tools herdr
     ;;
+  worktrunk)
+    mise use --global "worktrunk@${version}"
+    mise prune --tools worktrunk
+    ;;
   codex)
     mise use --global "npm:@openai/codex@${version}"
     mise prune --tools "npm:@openai/codex"
     ;;
   *)
-    echo "Usage: update {claude|pi|herdr|codex} [version]"
+    echo "Usage: update {claude|pi|herdr|worktrunk|codex} [version]"
     exit 1
     ;;
 esac
