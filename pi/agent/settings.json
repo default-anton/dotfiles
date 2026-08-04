@@ -2,7 +2,7 @@
   "lastChangelogVersion": "0.83.0",
   "defaultThinkingLevel": "high",
   "defaultProvider": "openai",
-  "defaultModel": "gpt-5.6-luna",
+  "defaultModel": "gpt-5.6-terra",
   "enabledModels": [
     "openai/gpt-5.6-luna",
     "openai/gpt-5.6-terra",
