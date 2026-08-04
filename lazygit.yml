@@ -62,11 +62,10 @@ qgui:
   portraitMode: auto
   filterMode: substring
 git:
-  pagers:
+  diffRenderers:
     - colorArg: always
-      pager: delta --dark --paging=never
+      command: delta --dark --paging=never
       useConfig: false
-      externalDiffCommand: ""
   commit:
     signOff: false
     autoWrapCommitMessage: true
