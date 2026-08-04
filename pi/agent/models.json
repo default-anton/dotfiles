@@ -10,7 +10,18 @@
             "medium": null,
             "high": "high",
             "xhigh": null,
-            "max": "max"
+            "max": null
+          }
+        },
+        "gpt-5.6-terra": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": null,
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": null
           }
         },
         "gpt-5.6-sol": {
