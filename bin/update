@@ -2,12 +2,20 @@
 
 set -e
 
+if [[ $# -eq 0 ]]; then
+  for tool in claude pi herdr codex; do
+    "$0" "$tool"
+  done
+  exit
+fi
+
 tool="$1"
 version="${2:-latest}"
 
 case "$tool" in
   claude)
-    brew upgrade --cask claude-code@latest
+    mise use --global "claude-code@${version}"
+    mise prune --tools claude-code
     ;;
   pi)
     # Source: https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent
@@ -23,7 +31,7 @@ case "$tool" in
     mise prune --tools "npm:@openai/codex"
     ;;
   *)
-    echo "Usage: update {claude|pi|codex} [version]"
+    echo "Usage: update {claude|pi|herdr|codex} [version]"
     exit 1
     ;;
 esac
