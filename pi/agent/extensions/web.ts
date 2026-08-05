@@ -2,11 +2,13 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Type } from "@earendil-works/pi-ai";
+import { Markdown, Text } from "@earendil-works/pi-tui";
 import {
   DEFAULT_MAX_BYTES,
   DEFAULT_MAX_LINES,
   defineTool,
   formatSize,
+  getMarkdownTheme,
   truncateHead,
   type ExtensionAPI,
 } from "@earendil-works/pi-coding-agent";
@@ -147,6 +149,66 @@ async function formatResult(result: unknown) {
   return `${truncation.content}\n\n[Output truncated: showing ${formatSize(truncation.outputBytes)} of ${formatSize(truncation.totalBytes)}. Full output saved to: ${outputPath}]`;
 }
 
+function compactText(value: string, maxLength = 120): string {
+  const compact = value.replace(/\s+/g, " ").trim();
+  return compact.length > maxLength ? `${compact.slice(0, maxLength - 1)}…` : compact;
+}
+
+function escapeMarkdown(value: string): string {
+  return value.replace(/([\\`*_[\]<>])/g, "\\$1");
+}
+
+function getResultTitle(result: {
+  url: string;
+  title?: string | null;
+  excerpts: string[];
+  full_content?: string | null;
+}): string {
+  if (result.title?.trim()) return compactText(result.title);
+
+  const content = result.full_content || result.excerpts.join("\n");
+  const heading = content.match(/^#{1,6}\s+(.+?)\s*#*$/m)?.[1];
+  return compactText(heading || result.url);
+}
+
+function formatExpandedResults(
+  results: Array<{
+    url: string;
+    title?: string | null;
+    publish_date?: string | null;
+    excerpts: string[];
+    full_content?: string | null;
+  }>,
+  errors: ParallelExtractResponse["errors"] = [],
+  warnings: NonNullable<ParallelExtractResponse["warnings"]> = [],
+): string {
+  const sections = [`**${results.length} ${results.length === 1 ? "result" : "results"}**`];
+
+  for (const [index, result] of results.entries()) {
+    const title = escapeMarkdown(getResultTitle(result));
+    const metadata = [`<${result.url}>`];
+    if (result.publish_date) metadata.push(`Published ${escapeMarkdown(result.publish_date)}`);
+
+    const content = result.full_content || result.excerpts.join("\n\n") || "_No content returned._";
+    sections.push(`## ${index + 1}. ${title}\n\n${metadata.join(" · ")}\n\n${content}`);
+  }
+
+  if (errors.length > 0) {
+    const items = errors.map((error) => {
+      const message = error.content || error.error_type;
+      return `- <${error.url}> — ${escapeMarkdown(compactText(message))}`;
+    });
+    sections.push(`## Errors\n\n${items.join("\n")}`);
+  }
+
+  if (warnings.length > 0) {
+    const items = warnings.map((warning) => `- ${escapeMarkdown(compactText(warning.message))}`);
+    sections.push(`## Warnings\n\n${items.join("\n")}`);
+  }
+
+  return sections.join("\n\n---\n\n");
+}
+
 const outputLimit = `Output is truncated to ${DEFAULT_MAX_LINES} lines or ${formatSize(DEFAULT_MAX_BYTES)}; full output is saved to a temporary file.`;
 
 const fetchWebTool = defineTool({
@@ -191,6 +253,45 @@ const fetchWebTool = defineTool({
       details: result,
     };
   },
+  renderCall(args, theme) {
+    const urls = args.urls ?? [];
+    const urlCount = `${urls.length} ${urls.length === 1 ? "URL" : "URLs"}`;
+    let text = theme.fg("toolTitle", theme.bold("fetch_web ")) + theme.fg("muted", urlCount);
+    for (const url of urls) {
+      text += `\n${theme.fg("accent", url)}`;
+    }
+    if (args.objective) {
+      text += `\n${theme.fg("muted", "Objective: ")}${theme.fg("dim", args.objective)}`;
+    }
+    return new Text(text, 0, 0);
+  },
+  renderResult(result, { expanded }, theme, context) {
+    if (!isExtractResponse(result.details)) {
+      const content = result.content[0];
+      const text = content?.type === "text" ? content.text : "No output";
+      return new Text(theme.fg(context.isError ? "error" : "toolOutput", text), 0, 0);
+    }
+
+    const { results, errors, warnings = [] } = result.details;
+    if (expanded) {
+      return new Markdown(formatExpandedResults(results, errors, warnings), 0, 0, getMarkdownTheme());
+    }
+
+    const resultLabel = `${results.length} ${results.length === 1 ? "result" : "results"}`;
+    let text = theme.fg("muted", resultLabel);
+    const firstResult = results[0];
+    if (firstResult) {
+      text += theme.fg("dim", " · ") + theme.fg("toolOutput", getResultTitle(firstResult));
+      if (results.length > 1) text += theme.fg("dim", ` · +${results.length - 1} more`);
+    }
+    if (errors.length > 0) {
+      text += theme.fg("dim", " · ") + theme.fg("error", `${errors.length} ${errors.length === 1 ? "error" : "errors"}`);
+    }
+    if (warnings.length > 0) {
+      text += theme.fg("dim", " · ") + theme.fg("warning", `${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`);
+    }
+    return new Text(text, 0, 0);
+  },
 });
 
 const searchWebTool = defineTool({
@@ -233,6 +334,43 @@ const searchWebTool = defineTool({
       content: [{ type: "text", text: await formatResult({ results, warnings }) }],
       details: result,
     };
+  },
+  renderCall(args, theme) {
+    let text = theme.fg("toolTitle", theme.bold("search_web"));
+    if (args.objective) {
+      text += ` ${theme.fg("accent", args.objective)}`;
+    }
+    if (args.search_queries?.length) {
+      text += `\n${theme.fg("muted", "Queries:")}`;
+      for (const query of args.search_queries) {
+        text += `\n${theme.fg("dim", `• ${query}`)}`;
+      }
+    }
+    return new Text(text, 0, 0);
+  },
+  renderResult(result, { expanded }, theme, context) {
+    if (!isSearchResponse(result.details)) {
+      const content = result.content[0];
+      const text = content?.type === "text" ? content.text : "No output";
+      return new Text(theme.fg(context.isError ? "error" : "toolOutput", text), 0, 0);
+    }
+
+    const { results, warnings = [] } = result.details;
+    if (expanded) {
+      return new Markdown(formatExpandedResults(results, [], warnings), 0, 0, getMarkdownTheme());
+    }
+
+    const resultLabel = `${results.length} ${results.length === 1 ? "result" : "results"}`;
+    let text = theme.fg("muted", resultLabel);
+    const firstResult = results[0];
+    if (firstResult) {
+      text += theme.fg("dim", " · ") + theme.fg("toolOutput", getResultTitle(firstResult));
+      if (results.length > 1) text += theme.fg("dim", ` · +${results.length - 1} more`);
+    }
+    if (warnings.length > 0) {
+      text += theme.fg("dim", " · ") + theme.fg("warning", `${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`);
+    }
+    return new Text(text, 0, 0);
   },
 });
 
