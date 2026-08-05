@@ -40,7 +40,22 @@ vim.keymap.set("n", "<leader>/", function()
   })
 end, {})
 vim.keymap.set("n", "<leader>co", builtin.resume, {})
-vim.keymap.set("n", "<leader>d", builtin.git_status, {})
+vim.keymap.set("n", "<leader>d", function()
+  local git_root = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })[1]
+  local opts = { cwd = vim.v.shell_error == 0 and git_root or vim.uv.cwd() }
+  local make_entry = require("telescope.make_entry").gen_from_git_status(opts)
+
+  opts.entry_maker = function(line)
+    local entry = make_entry(line)
+    if entry and entry.status:find("D", 1, true) then
+      return nil
+    end
+
+    return entry
+  end
+
+  builtin.git_status(opts)
+end, { desc = "Find changed and created files" })
 
 require("telescope").setup {
   defaults = {
