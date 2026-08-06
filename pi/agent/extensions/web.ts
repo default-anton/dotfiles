@@ -2,15 +2,16 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Type } from "@earendil-works/pi-ai";
-import { Markdown, Text } from "@earendil-works/pi-tui";
+import { Text } from "@earendil-works/pi-tui";
 import {
   DEFAULT_MAX_BYTES,
   DEFAULT_MAX_LINES,
   defineTool,
   formatSize,
-  getMarkdownTheme,
+  keyHint,
   truncateHead,
   type ExtensionAPI,
+  type Theme,
 } from "@earendil-works/pi-coding-agent";
 
 interface FetchWebArgs {
@@ -154,16 +155,18 @@ function compactText(value: string, maxLength = 120): string {
   return compact.length > maxLength ? `${compact.slice(0, maxLength - 1)}…` : compact;
 }
 
-function escapeMarkdown(value: string): string {
-  return value.replace(/([\\`*_[\]<>])/g, "\\$1");
-}
-
-function getResultTitle(result: {
+type WebResult = {
   url: string;
   title?: string | null;
+  publish_date?: string | null;
   excerpts: string[];
   full_content?: string | null;
-}): string {
+};
+
+type WebError = ParallelExtractResponse["errors"][number];
+type WebWarning = NonNullable<ParallelExtractResponse["warnings"]>[number];
+
+function getResultTitle(result: WebResult): string {
   if (result.title?.trim()) return compactText(result.title);
 
   const content = result.full_content || result.excerpts.join("\n");
@@ -171,42 +174,71 @@ function getResultTitle(result: {
   return compactText(heading || result.url);
 }
 
-function formatExpandedResults(
-  results: Array<{
-    url: string;
-    title?: string | null;
-    publish_date?: string | null;
-    excerpts: string[];
-    full_content?: string | null;
-  }>,
-  errors: ParallelExtractResponse["errors"] = [],
-  warnings: NonNullable<ParallelExtractResponse["warnings"]> = [],
+function getResultText(result: { content: Array<{ type: string; text?: string }> }): string {
+  return result.content
+    .filter((block): block is { type: "text"; text: string } => block.type === "text" && typeof block.text === "string")
+    .map((block) => block.text)
+    .join("\n");
+}
+
+function renderWebResult(
+  results: WebResult[],
+  errors: WebError[],
+  warnings: WebWarning[],
+  expanded: boolean,
+  includeExcerpts: boolean,
+  theme: Theme,
 ): string {
-  const sections = [`**${results.length} ${results.length === 1 ? "result" : "results"}**`];
+  const resultLabel = `${results.length} ${results.length === 1 ? "source" : "sources"}`;
+  let text = results.length === 0
+    ? theme.fg("muted", "No sources")
+    : theme.fg("success", resultLabel);
+  const firstResult = results[0];
+
+  if (!expanded) {
+    if (firstResult) {
+      text += theme.fg("dim", " · ") + theme.fg("toolOutput", getResultTitle(firstResult));
+      if (results.length > 1) text += theme.fg("dim", ` · +${results.length - 1} more`);
+    }
+    if (errors.length > 0) {
+      text += theme.fg("dim", " · ") + theme.fg("error", `${errors.length} failed`);
+    }
+    if (warnings.length > 0) {
+      text += theme.fg("dim", " · ") + theme.fg("warning", `${warnings.length} warnings`);
+    }
+    if (results.length + errors.length + warnings.length > 0) {
+      text += theme.fg("dim", ` · ${keyHint("app.tools.expand", "sources")}`);
+    }
+    return text;
+  }
 
   for (const [index, result] of results.entries()) {
-    const title = escapeMarkdown(getResultTitle(result));
-    const metadata = [`<${result.url}>`];
-    if (result.publish_date) metadata.push(`Published ${escapeMarkdown(result.publish_date)}`);
+    const metadata = result.publish_date ? ` · ${compactText(result.publish_date, 40)}` : "";
+    text += `\n${theme.fg("muted", `${index + 1}. `)}${theme.fg("toolOutput", getResultTitle(result))}`;
+    text += `\n   ${theme.fg("accent", result.url)}${theme.fg("dim", metadata)}`;
 
-    const content = result.full_content || result.excerpts.join("\n\n") || "_No content returned._";
-    sections.push(`## ${index + 1}. ${title}\n\n${metadata.join(" · ")}\n\n${content}`);
+    const excerpt = result.excerpts[0];
+    if (includeExcerpts && excerpt) {
+      text += `\n   ${theme.fg("dim", compactText(excerpt, 180))}`;
+    }
   }
 
   if (errors.length > 0) {
-    const items = errors.map((error) => {
-      const message = error.content || error.error_type;
-      return `- <${error.url}> — ${escapeMarkdown(compactText(message))}`;
-    });
-    sections.push(`## Errors\n\n${items.join("\n")}`);
+    text += `\n${theme.fg("error", `${errors.length} failed`)}`;
+    for (const error of errors) {
+      const message = compactText(error.content || error.error_type);
+      text += `\n   ${theme.fg("accent", error.url)}${theme.fg("dim", ` · ${message}`)}`;
+    }
   }
 
   if (warnings.length > 0) {
-    const items = warnings.map((warning) => `- ${escapeMarkdown(compactText(warning.message))}`);
-    sections.push(`## Warnings\n\n${items.join("\n")}`);
+    text += `\n${theme.fg("warning", `${warnings.length} warnings`)}`;
+    for (const warning of warnings) {
+      text += `\n   ${theme.fg("dim", compactText(warning.message))}`;
+    }
   }
 
-  return sections.join("\n\n---\n\n");
+  return text;
 }
 
 const outputLimit = `Output is truncated to ${DEFAULT_MAX_LINES} lines or ${formatSize(DEFAULT_MAX_BYTES)}; full output is saved to a temporary file.`;
@@ -267,30 +299,12 @@ const fetchWebTool = defineTool({
   },
   renderResult(result, { expanded }, theme, context) {
     if (!isExtractResponse(result.details)) {
-      const content = result.content[0];
-      const text = content?.type === "text" ? content.text : "No output";
+      const text = compactText(getResultText(result), 240) || "No output";
       return new Text(theme.fg(context.isError ? "error" : "toolOutput", text), 0, 0);
     }
 
     const { results, errors, warnings = [] } = result.details;
-    if (expanded) {
-      return new Markdown(formatExpandedResults(results, errors, warnings), 0, 0, getMarkdownTheme());
-    }
-
-    const resultLabel = `${results.length} ${results.length === 1 ? "result" : "results"}`;
-    let text = theme.fg("muted", resultLabel);
-    const firstResult = results[0];
-    if (firstResult) {
-      text += theme.fg("dim", " · ") + theme.fg("toolOutput", getResultTitle(firstResult));
-      if (results.length > 1) text += theme.fg("dim", ` · +${results.length - 1} more`);
-    }
-    if (errors.length > 0) {
-      text += theme.fg("dim", " · ") + theme.fg("error", `${errors.length} ${errors.length === 1 ? "error" : "errors"}`);
-    }
-    if (warnings.length > 0) {
-      text += theme.fg("dim", " · ") + theme.fg("warning", `${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`);
-    }
-    return new Text(text, 0, 0);
+    return new Text(renderWebResult(results, errors, warnings, expanded, false, theme), 0, 0);
   },
 });
 
@@ -350,27 +364,12 @@ const searchWebTool = defineTool({
   },
   renderResult(result, { expanded }, theme, context) {
     if (!isSearchResponse(result.details)) {
-      const content = result.content[0];
-      const text = content?.type === "text" ? content.text : "No output";
+      const text = compactText(getResultText(result), 240) || "No output";
       return new Text(theme.fg(context.isError ? "error" : "toolOutput", text), 0, 0);
     }
 
     const { results, warnings = [] } = result.details;
-    if (expanded) {
-      return new Markdown(formatExpandedResults(results, [], warnings), 0, 0, getMarkdownTheme());
-    }
-
-    const resultLabel = `${results.length} ${results.length === 1 ? "result" : "results"}`;
-    let text = theme.fg("muted", resultLabel);
-    const firstResult = results[0];
-    if (firstResult) {
-      text += theme.fg("dim", " · ") + theme.fg("toolOutput", getResultTitle(firstResult));
-      if (results.length > 1) text += theme.fg("dim", ` · +${results.length - 1} more`);
-    }
-    if (warnings.length > 0) {
-      text += theme.fg("dim", " · ") + theme.fg("warning", `${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`);
-    }
-    return new Text(text, 0, 0);
+    return new Text(renderWebResult(results, [], warnings, expanded, true, theme), 0, 0);
   },
 });
 
