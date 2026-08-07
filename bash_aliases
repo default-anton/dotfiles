@@ -7,7 +7,7 @@ alias v=nvim
 alias cat=bat
 alias coa="CODEX_HOME=$HOME/.codex-api codex"
 alias r=bin/rails
-alias ahaupdate='pnpm install --frozen-lockfile && bundle install && bin/rails db:migrate'
+alias ahaupdate='pnpm install --frozen-lockfile && pnpm rebuild --pending && bundle install && bin/rails db:migrate'
 pi() { mise -q exec node@24 -- "$(mise -q which pi)" "$@"; }
 codex() { mise -q exec node@24 -- "$(mise -q which codex)" "$@"; }
 agent-browser() { mise -q exec node@24 -- "$(mise -q which agent-browser)" "$@"; }
