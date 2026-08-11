@@ -1,3 +1,4 @@
---glob=!git/*
 --smart-case
+--hidden
+--max-filesize=5M
 --ignore-file=/Users/akuzmenko/.dotfiles/ripgrep/ignore
