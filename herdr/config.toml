@@ -147,27 +147,6 @@ height = "80%"
 # [worktrees]
 # directory = "~/.herdr/worktrees"
 
-# Override herdr's built-in "new worktree" key (prefix+shift+g) with worktrunk's
-# default-branch switch/create picker:
-[[keys.command]]
-key = "prefix+shift+g"
-type = "plugin_action"
-command = "worktrunk.open"
-description = "Worktree: switch / create from default branch"
-
-# Optional: bind current-branch creation separately.
-[[keys.command]]
-key = "prefix+shift+c"
-type = "plugin_action"
-command = "worktrunk.open-current"
-description = "Worktree: switch / create from current branch"
-
-[[keys.command]]
-key = "prefix+shift+d"
-type = "plugin_action"
-command = "worktrunk.remove"
-description = "Worktree: remove"
-
 [ui]
 # Sidebar width (auto-scaled based on workspace names, this sets the default)
 # sidebar_width = 26
