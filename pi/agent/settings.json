@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.84.0",
+  "lastChangelogVersion": "0.84.1",
   "defaultThinkingLevel": "high",
   "defaultProvider": "deepseek",
   "defaultModel": "deepseek-v4-flash",
@@ -19,8 +19,7 @@
   "steeringMode": "all",
   "doubleEscapeAction": "tree",
   "packages": [
-    "npm:pi-subdir-context",
-    "npm:pi-review"
+    "npm:pi-subdir-context"
   ],
   "transport": "websocket-cached",
   "treeFilterMode": "no-tools",
