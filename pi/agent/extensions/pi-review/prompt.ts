@@ -21,7 +21,7 @@ Check the work against the stated task, requirements, and acceptance criteria. R
 Focus on correctness, security, performance, operability, and maintainability.
 Do not speculate. Point to the affected behavior, invariant, or code path.
 Prefer issues the author would likely fix before merge.
-Assume existing interfaces and behavior must remain backward compatible unless the user or project instructions say otherwise.
+Flag changes that break existing behavior, invariants, security boundaries, or interfaces unless the task requires the break. Also flag departures from established project patterns that lack a clear reason.
 
 After subagents return, read their reports, remove duplicates, resolve clear conflicts, and preserve valid findings. Check each finding's location and claim against the code; investigate further when it is unclear, disputed, or high-risk. Scale subagent count to context and risk, not file count. Check the full review surface once more before answering. Do not mention the review process unless it helps explain a finding.
 
