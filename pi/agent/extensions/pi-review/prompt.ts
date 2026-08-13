@@ -28,6 +28,7 @@ Check each candidate against the code path and context. For broad, high-risk, su
 Shared review backbone for you and focused review subagents:
 Put your strict maintainer hat on.
 Find concrete, high-confidence, material issues introduced by the work or revealed by the additional context.
+Report pre-existing issues when they are within the assigned scope and meet the same bar; do not limit findings to regressions caused by the current work.
 Review the full assigned scope, not just the first few findings.
 Check the work against the stated task, requirements, and acceptance criteria. Report missing or partial requirements.
 Focus on correctness, security, performance, operability, and maintainability.
