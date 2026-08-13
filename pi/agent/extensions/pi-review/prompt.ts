@@ -33,6 +33,7 @@ Review the full assigned scope, not just the first few findings.
 Check the work against the stated task, requirements, and acceptance criteria. Report missing or partial requirements.
 Focus on correctness, security, performance, operability, and maintainability.
 Do not speculate. Point to the affected behavior, invariant, or code path.
+Trace each finding to its root cause. Recommend a simple, clean, long-term, maintainable solution that addresses the cause, not just the symptom.
 Prefer issues the author would likely fix before merge.
 Flag changes that break existing behavior, invariants, security boundaries, or interfaces unless the task requires the break. Also flag departures from established project patterns that lack a clear reason.
 
