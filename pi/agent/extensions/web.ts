@@ -165,6 +165,11 @@ type WebResult = {
 
 type WebError = ParallelExtractResponse["errors"][number];
 type WebWarning = NonNullable<ParallelExtractResponse["warnings"]>[number];
+type WebToolDetails = {
+  results: WebResult[];
+  errors: WebError[];
+  warnings: WebWarning[];
+};
 
 function getResultTitle(result: WebResult): string {
   if (result.title?.trim()) return compactText(result.title);
@@ -179,6 +184,33 @@ function getResultText(result: { content: Array<{ type: string; text?: string }>
     .filter((block): block is { type: "text"; text: string } => block.type === "text" && typeof block.text === "string")
     .map((block) => block.text)
     .join("\n");
+}
+
+function getToolDetails(
+  results: WebResult[],
+  errors: WebError[] = [],
+  warnings: WebWarning[] = [],
+): WebToolDetails {
+  return {
+    results: results.map((result) => ({
+      url: result.url,
+      title: getResultTitle(result),
+      publish_date: result.publish_date,
+      excerpts: result.excerpts.slice(0, 1).map((excerpt) => compactText(excerpt, 500)),
+    })),
+    errors,
+    warnings,
+  };
+}
+
+function parseWebToolDetails(value: unknown): WebToolDetails | undefined {
+  if (!value || typeof value !== "object" || !("results" in value) || !Array.isArray(value.results)) {
+    return undefined;
+  }
+
+  const errors = "errors" in value && Array.isArray(value.errors) ? value.errors : [];
+  const warnings = "warnings" in value && Array.isArray(value.warnings) ? value.warnings : [];
+  return { results: value.results as WebResult[], errors, warnings };
 }
 
 function renderWebResult(
@@ -279,32 +311,41 @@ const fetchWebTool = defineTool({
       throw new Error("Parallel Extract returned an unexpected response.");
     }
 
-    const { results, errors, warnings } = result;
+    const { results, errors } = result;
+    const warnings = result.warnings ?? [];
     return {
       content: [{ type: "text", text: await formatResult({ results, errors, warnings }) }],
-      details: result,
+      details: getToolDetails(results, errors, warnings),
     };
   },
-  renderCall(args, theme) {
+  renderCall(args, theme, context) {
     const urls = args.urls ?? [];
     const urlCount = `${urls.length} ${urls.length === 1 ? "URL" : "URLs"}`;
     let text = theme.fg("toolTitle", theme.bold("fetch_web ")) + theme.fg("muted", urlCount);
+
+    if (!context.expanded) {
+      if (urls[0]) text += ` ${theme.fg("dim", compactText(urls[0], 80))}`;
+      if (urls.length > 1) text += theme.fg("dim", ` +${urls.length - 1}`);
+      return new Text(text, 0, 0);
+    }
+
     for (const url of urls) {
-      text += `\n${theme.fg("accent", url)}`;
+      text += `\n${theme.fg("dim", "• ")}${theme.fg("accent", url)}`;
     }
     if (args.objective) {
-      text += `\n${theme.fg("muted", "Objective: ")}${theme.fg("dim", args.objective)}`;
+      text += `\n${theme.fg("muted", "Objective: ")}${theme.fg("toolOutput", args.objective)}`;
     }
     return new Text(text, 0, 0);
   },
   renderResult(result, { expanded }, theme, context) {
-    if (!isExtractResponse(result.details)) {
+    const details = parseWebToolDetails(result.details);
+    if (!details) {
       const text = compactText(getResultText(result), 240) || "No output";
       return new Text(theme.fg(context.isError ? "error" : "toolOutput", text), 0, 0);
     }
 
-    const { results, errors, warnings = [] } = result.details;
-    return new Text(renderWebResult(results, errors, warnings, expanded, false, theme), 0, 0);
+    const { results, errors, warnings } = details;
+    return new Text(renderWebResult(results, errors, warnings, expanded, true, theme), 0, 0);
   },
 });
 
@@ -343,18 +384,19 @@ const searchWebTool = defineTool({
       throw new Error("Parallel Search returned an unexpected response.");
     }
 
-    const { results, warnings } = result;
+    const { results } = result;
+    const warnings = result.warnings ?? [];
     return {
       content: [{ type: "text", text: await formatResult({ results, warnings }) }],
-      details: result,
+      details: getToolDetails(results, [], warnings),
     };
   },
-  renderCall(args, theme) {
+  renderCall(args, theme, context) {
     let text = theme.fg("toolTitle", theme.bold("search_web"));
     if (args.objective) {
-      text += ` ${theme.fg("accent", args.objective)}`;
+      text += ` ${theme.fg("accent", compactText(args.objective, context.expanded ? 5000 : 120))}`;
     }
-    if (args.search_queries?.length) {
+    if (context.expanded && args.search_queries?.length) {
       text += `\n${theme.fg("muted", "Queries:")}`;
       for (const query of args.search_queries) {
         text += `\n${theme.fg("dim", `• ${query}`)}`;
@@ -363,12 +405,13 @@ const searchWebTool = defineTool({
     return new Text(text, 0, 0);
   },
   renderResult(result, { expanded }, theme, context) {
-    if (!isSearchResponse(result.details)) {
+    const details = parseWebToolDetails(result.details);
+    if (!details) {
       const text = compactText(getResultText(result), 240) || "No output";
       return new Text(theme.fg(context.isError ? "error" : "toolOutput", text), 0, 0);
     }
 
-    const { results, warnings = [] } = result.details;
+    const { results, warnings } = details;
     return new Text(renderWebResult(results, [], warnings, expanded, true, theme), 0, 0);
   },
 });
