@@ -7,6 +7,14 @@
 - Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
 - Path handling: Use cwd-relative paths by default and `~/...` for home-directory paths; use absolute paths only when needed to disambiguate.
 - Use `agent-browser` only when the user explicitly asks you to use it; first run `agent-browser skills get core`, then relevant specialized guidance.
-- Pre-installed CLI tools for you: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, herdr, imagemagick, ffmpeg
 - `AGENTS.md` and `AGENTS.override.md` may contain only durable, high-signal instructions; exclude project docs, long rationale, and speculative guidance.
 - `~/.pi/agent/**` symlinks to source-of-truth `~/.dotfiles/pi/agent/**`; edit the latter.
+
+## Installed CLI tools
+
+Pre-installed tools: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, imagemagick, and ffmpeg.
+
+- npx @firecrawl/anydoc — Convert documents to Markdown.
+- herdr — Manage terminal workspaces for AI coding agents.
+
+When unsure how a tool works, run its --help.
