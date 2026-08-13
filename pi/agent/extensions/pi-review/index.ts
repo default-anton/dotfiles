@@ -7,12 +7,6 @@ import {
   extractLatestAssistantText,
   formatConversation,
 } from "./lib/conversation-context.js";
-import {
-  DEFAULT_REVIEW_THINKING_LEVEL,
-  loadReviewConfig,
-  type ThinkingLevel,
-} from "./lib/review-config.js";
-
 const REVIEW_METADATA_TYPE = "pi-review";
 
 type ReviewMetadata = {
@@ -49,33 +43,6 @@ function buildReviewBackEditorText(reviewReport: string): string {
 }
 
 export default function reviewExtension(pi: ExtensionAPI) {
-  let originalThinkingLevel: ThinkingLevel | undefined;
-  let reviewThinkingLevel = DEFAULT_REVIEW_THINKING_LEVEL;
-
-  function restoreThinkingLevel(): void {
-    if (!originalThinkingLevel) return;
-
-    pi.setThinkingLevel(originalThinkingLevel);
-    originalThinkingLevel = undefined;
-  }
-
-  pi.on("session_start", (_event, ctx) => {
-    const config = loadReviewConfig(ctx.cwd);
-    reviewThinkingLevel = config.thinkingLevel;
-
-    for (const warning of config.warnings) {
-      if (ctx.hasUI) {
-        ctx.ui.notify(warning, "warning");
-      } else {
-        console.error(warning);
-      }
-    }
-  });
-
-  pi.on("agent_end", () => {
-    restoreThinkingLevel();
-  });
-
   pi.registerCommand("review", {
     description: "Review current work in new branch (optional focus text)",
     handler: async (args, ctx) => {
@@ -90,21 +57,10 @@ export default function reviewExtension(pi: ExtensionAPI) {
         extractedConversation.length === 0 ? undefined : formatConversation(extractedConversation);
       const reviewMessage = buildReviewMessage(args, conversationXml);
 
-      const currentThinkingLevel = pi.getThinkingLevel();
-      if (currentThinkingLevel !== reviewThinkingLevel) {
-        originalThinkingLevel = currentThinkingLevel;
-        pi.setThinkingLevel(reviewThinkingLevel);
-      }
-
-      let started = false;
-      try {
-        started = await sendMessageInNewBranch(pi, ctx, branch, reviewMessage, "review", () => {
-          if (!reviewedLeafId) return;
-          pi.appendEntry(REVIEW_METADATA_TYPE, { kind: "review", reviewedLeafId });
-        });
-      } finally {
-        if (!started) restoreThinkingLevel();
-      }
+      const started = await sendMessageInNewBranch(pi, ctx, branch, reviewMessage, "review", () => {
+        if (!reviewedLeafId) return;
+        pi.appendEntry(REVIEW_METADATA_TYPE, { kind: "review", reviewedLeafId });
+      });
       if (!started) return;
 
       if (ctx.hasUI) {
