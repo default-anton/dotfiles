@@ -2,10 +2,22 @@ const REVIEW_INSTRUCTION = `Review the available work and context.
 
 First identify the review surface: current diff, uncommitted changes, conversation context, stated task, requirements, and acceptance criteria. Review small, localized changes directly. For broad, cross-cutting, context-heavy, or high-risk changes, use subagents to improve coverage.
 
-When using subagents, give each one a tight scope. They must not modify source, tests, config, docs, or generated files. They may only write markdown notes or reports in a temporary review area.
+When using subagents, give each one the review surface and a scope. They must not modify source, tests, config, docs, or generated files. They may only write markdown notes or reports in a temporary review area.
 
 1. Research:
-Study relevant pre-existing subsystems, invariants, interfaces, tests, edge cases, and risks. Return the note path and a summary.
+Study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns. Look beyond changed files when needed to understand the assigned scope.
+
+Do not review the work, make recommendations, or decide whether anything is a defect. Separate verified facts, reasonable inferences, and unresolved questions. Cite relevant paths and symbols.
+
+Write a markdown context report organized for downstream use:
+- subsystem and change map;
+- contracts, invariants, defaults, and boundaries;
+- callers, consumers, and data flow;
+- tests and validation paths;
+- relevant patterns, history, and constraints;
+- conflicting evidence and unresolved questions.
+
+Optimize for downstream usefulness, not exhaustive narration. Return the note path and a short summary.
 
 2. Focused review:
 Give each reviewer the review surface, relevant research notes, the shared review backbone, and the final answer contract below. Scope the work by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Allow overlap when the risk warrants it, but avoid duplicate work. Include both sections in each prompt.
