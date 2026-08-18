@@ -44,7 +44,7 @@ const editSchema = Type.Object(
   {
     path: Type.String({
       minLength: 1,
-      description: "Path to the file. Prefer a path relative to the working directory; use an absolute path when needed.",
+      description: "Path to the file. Prefer a path relative to the working directory; absolute paths and ~/... are also supported.",
     }),
     edits: Type.Array(replacementSchema, {
       minItems: 1,
@@ -80,7 +80,13 @@ function throwIfAborted(signal?: AbortSignal): void {
 
 function resolvePath(path: string, cwd: string): string {
   const normalizedPath = path.startsWith("@") ? path.slice(1) : path;
-  return isAbsolute(normalizedPath) ? normalizedPath : resolve(cwd, normalizedPath);
+  const expandedPath = normalizedPath === "~"
+    ? homedir()
+    : normalizedPath.startsWith("~/")
+      ? resolve(homedir(), normalizedPath.slice(2))
+      : normalizedPath;
+
+  return isAbsolute(expandedPath) ? expandedPath : resolve(cwd, expandedPath);
 }
 
 function decodeText(buffer: Buffer, path: string): string {
