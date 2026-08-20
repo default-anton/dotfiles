@@ -1,3 +1,5 @@
 {
-  "app.session.toggleNamedFilter": ""
+  "app.session.toggleNamedFilter": "",
+  "tui.select.down": ["down", "ctrl+n"],
+  "tui.select.up": ["up", "ctrl+p"]
 }
