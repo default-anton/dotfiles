@@ -8,6 +8,7 @@
     "openai/gpt-5.6-terra",
     "openai/gpt-5.6-sol",
     "deepseek-v4-flash",
+    "deepseek-v4-flash-vision-exp",
     "deepseek-v4-pro"
   ],
   "compaction": {
