@@ -373,7 +373,7 @@ const searchWebTool = defineTool({
       "search",
       {
         ...input,
-        mode: "turbo",
+        mode: "fast",
         session_id: ctx.sessionManager.getSessionId(),
         client_model: ctx.model?.id,
       },
