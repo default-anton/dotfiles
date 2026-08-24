@@ -18,7 +18,6 @@ Cover:
 - How the affected flow works today, end to end: entry points → control/data flow → output or side effects.
 - Patterns and conventions the change must follow; similar existing code worth imitating.
 - Constraints and gotchas: edge cases, invariants, tests or workflows guarding this area.
-- Open questions and things not verified.
 
 Task:
 $ARGUMENTS
