@@ -2,7 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 
 const ENV_VAR = "OPENAI_SERVICE_TIER";
 const STATUS_KEY = "openai-service-tier";
-const VALID_TIERS = new Set(["auto", "default", "flex", "scale", "priority"]);
+const VALID_TIERS = new Set(["auto", "default", "flex", "scale", "priority", "fast"]);
 // service_tier is only valid on the OpenAI Responses API.
 const SUPPORTED_APIS = new Set(["openai-responses", "openai-codex-responses"]);
 
@@ -18,7 +18,7 @@ function isOpenAIResponsesModel(model: ExtensionContext["model"]): boolean {
 }
 
 function refreshStatus(ctx: ExtensionContext, tier: string | undefined): void {
-  if (tier === "priority" && isOpenAIResponsesModel(ctx.model)) {
+  if ((tier === "priority" || tier === "fast") && isOpenAIResponsesModel(ctx.model)) {
     ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("accent", "⚡fast"));
   } else {
     ctx.ui.setStatus(STATUS_KEY, undefined);
