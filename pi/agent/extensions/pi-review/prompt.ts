@@ -5,7 +5,8 @@ const CONTEXT_INSTRUCTION = `Review the code in five stages, one stage per turn:
 4. double-check each finding;
 5. recommend solutions and give the final review.
 
-Use subagents for stages 2-5: call run_subagent with fork_current_context=true. Start each call's instructions with \`Role: <role> subagent.\` Then state its bounded scope, specific questions, and expected result.
+Use subagents for stages 2-5: call run_subagent with fork_current_context=true. Start each call's instructions with \`You are a <role> subagent.\` Then state its bounded scope, specific questions, and expected result.
+Instructions to complete a stage or produce the final review apply only to the parent orchestrator. Subagents must return the result requested by their latest \`You are a ... subagent.\` task.
 
 This is stage 1 of 5: gather and understand the task context.
 
