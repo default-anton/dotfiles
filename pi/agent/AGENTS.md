@@ -2,7 +2,7 @@
 - Before creating a file, inspect ~2 files of the same type and mirror their structure and conventions. One-off artifacts (RCA, notes, plans, proposals, suggestions) may skip this.
 - Comment only non-obvious *why*; prefer clear naming and structure.
 - Commit only when explicitly asked, using mitchellh-style messages; do not run validation when committing or pushing.
-- For subagents, use `openai/gpt-5.6-luna:high` for research/reconnaissance/exploration/context gathering, `openai/gpt-5.6-sol:medium` for code/security review. If not specified, omit the model.
+- For subagents, use `openai/gpt-5.6-luna:high` for research/reconnaissance/exploration/context gathering, `openai/gpt-5.6-sol:medium` for code/security review. Otherwise, omit the model.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `fix:` markers with context via `rg -n -A 5 '\bfix:\b'` and address each match.
 - Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
 - Path handling: Use cwd-relative paths by default and `~/...` for home-directory paths; use absolute paths only when needed to disambiguate.
