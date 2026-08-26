@@ -43,13 +43,15 @@ Trace each finding to its root cause and cite the evidence that supports it.
 
 Read the subagent results and use more bounded reviewers to cover important gaps or settle conflicts if any.
 
-When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues. For each finding, give the priority, location, clear explanation, evidence, and root cause. Name the affected behavior, invariant, or code path.`;
+When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues. For each finding, give the priority, location, clear explanation, evidence, and root cause. Name the affected behavior, invariant, or code path.
+If no important findings remain, say \`looks good\`.`;
 
 const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
 
 Double-check each finding. Is it a real issue worth fixing? Is the state reachable? Try to disprove them. Drop false positives, duplicates, unsupported assumptions, and issues outside the assigned scope. Keep only material findings with a concrete effect and supported root cause.
 
-Run more validation when a claim remains unclear, disputed, or high-risk.`;
+Run more validation when a claim remains unclear, disputed, or high-risk.
+If no important findings remain, say \`looks good\`.`;
 
 const RECOMMENDATION_INSTRUCTION = `This is stage 5 of 5: recommend solutions and give the final review.
 
