@@ -45,6 +45,8 @@ export type SpawnSubagentRunInput = {
   instructions: string;
   taskTitle: string;
   sessionId?: string;
+  forkCurrentContext?: boolean;
+  parentSessionFile?: string;
   model?: string;
   cwd: string;
   currentModel?: ChildModel;
@@ -328,6 +330,7 @@ function writeLauncherScript(
   childPrompt: string,
   childModel: string,
   requestedSessionId: string | undefined,
+  parentSessionFile: string | undefined,
   ipcDir: string,
 ): string {
   const childExtensionPath = fileURLToPath(new URL("./subagent.ts", import.meta.url));
@@ -335,7 +338,9 @@ function writeLauncherScript(
   const exitPath = join(ipcDir, EXIT_FILE_NAME);
 
   const childArgs: string[] = [];
-  if (requestedSessionId) {
+  if (parentSessionFile) {
+    childArgs.push("--fork", parentSessionFile);
+  } else if (requestedSessionId) {
     childArgs.push("--session", requestedSessionId);
   }
   childArgs.push("--model", childModel, ...buildChildToolArgs(input.activeTools), "-e", childExtensionPath, childPrompt);
@@ -550,7 +555,16 @@ async function sleep(ms: number): Promise<void> {
 export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<SpawnSubagentRunResult> {
   const childModel = resolveModelArg(input);
   const requestedSessionId = input.sessionId?.trim() || undefined;
-  const childPrompt = requestedSessionId ? input.instructions : buildFreshChildPrompt(input.instructions);
+  const parentSessionFile = input.forkCurrentContext ? input.parentSessionFile?.trim() || undefined : undefined;
+  if (input.forkCurrentContext && requestedSessionId) {
+    throw new Error("run_subagent cannot combine fork_current_context with session_id.");
+  }
+  if (input.forkCurrentContext && !parentSessionFile) {
+    throw new Error("run_subagent fork_current_context requires a persisted parent session.");
+  }
+
+  const hasPriorContext = parentSessionFile || requestedSessionId;
+  const childPrompt = hasPriorContext ? input.instructions : buildFreshChildPrompt(input.instructions);
   const details: SpawnSubagentDetails = {
     status: "running",
     taskTitle: input.taskTitle,
@@ -581,11 +595,11 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
 
   ensureTerminalAvailable();
 
+  const terminalContext = resolveHerdrContext();
   const ipcDir = mkdtempSync(join(tmpdir(), "pi-run-subagent-"));
   const statePath = join(ipcDir, STATE_FILE_NAME);
   const resultPath = join(ipcDir, RESULT_FILE_NAME);
   const exitPath = join(ipcDir, EXIT_FILE_NAME);
-  const terminalContext = resolveHerdrContext();
   incrementActiveSubagent(terminalContext.groupId);
 
   let layout: TerminalLayout | undefined;
@@ -672,7 +686,14 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       };
     }
 
-    const scriptPath = writeLauncherScript(input, childPrompt, childModel, requestedSessionId, ipcDir);
+    const scriptPath = writeLauncherScript(
+      input,
+      childPrompt,
+      childModel,
+      requestedSessionId,
+      parentSessionFile,
+      ipcDir,
+    );
     layout = await createTerminalLayout(input.cwd, input.taskTitle, terminalContext, input.signal);
 
     if (!layout) {

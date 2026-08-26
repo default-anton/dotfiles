@@ -24,6 +24,12 @@ const SpawnSubagentParams = Type.Object({
       minLength: 1,
     }),
   ),
+  fork_current_context: Type.Optional(
+    Type.Boolean({
+      description:
+        "Fork the parent’s current conversation into a new child session before running these instructions. Cannot be combined with session_id",
+    }),
+  ),
   model: Type.Optional(
     Type.String({
       description: "Optional child model override, passed exactly as pi --model accepts. Leave unset to inherit the current model and thinking level",
@@ -192,7 +198,7 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
     name: "run_subagent",
     label: "Run Subagent",
     description:
-      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same system prompt, extensions, and tools. run_subagent is disabled in the child to prevent recursion. If session_id is set, the child continues that prior subagent session with the provided instructions. Keep concurrent run_subagent calls to 8 or fewer; higher fan-out is not supported reliably.",
+      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same system prompt, extensions, and tools. run_subagent is disabled in the child to prevent recursion. If fork_current_context is true, the child forks the parent’s current conversation into a new session before running the instructions. If session_id is set, the child continues that prior subagent session instead. Keep concurrent run_subagent calls to 8 or fewer; higher fan-out is not supported reliably.",
     parameters: SpawnSubagentParams,
 
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
@@ -201,6 +207,8 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
         instructions: typedParams.instructions,
         taskTitle: typedParams.task_title,
         sessionId: typedParams.session_id,
+        forkCurrentContext: typedParams.fork_current_context === true,
+        parentSessionFile: typedParams.fork_current_context ? ctx.sessionManager.getSessionFile() : undefined,
         model: typedParams.model,
         cwd: ctx.cwd,
         currentModel: ctx.model
@@ -247,6 +255,9 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
         theme.fg("toolTitle", theme.bold("run_subagent ")) + theme.fg("accent", args.task_title || "(untitled)");
       if (args.session_id) {
         text += ` ${theme.fg("dim", `↻ ${args.session_id}`)}`;
+      }
+      if (args.fork_current_context) {
+        text += ` ${theme.fg("dim", "↳ context")}`;
       }
       if (args.model) {
         text += ` ${theme.fg("dim", args.model)}`;
