@@ -26,7 +26,7 @@ After research returns, fork focused reviewers from the updated context. Scope e
 Check each candidate against the code path and context. For broad, high-risk, subtle, or uncertain findings, fork a scoped validator after the candidate is present in the conversation. State the exact claim and ask the validator to try to disprove it using guards, call sites, defaults, tests, contracts, and invariants. Drop false positives, duplicates, unsupported assumptions, and issues outside the assigned scope. Keep only material findings with a concrete effect and supported root cause.
 
 4. Recommend solutions:
-For each validated finding, fork a separate solution subagent from the updated context. Use the research, validation evidence, and relevant project patterns to determine the best fix. Recommend a minimal, simple, clean, maintainable, long-term solution that follows an established project pattern; introduce a new pattern only when existing ones do not fit.
+For each validated finding, fork a separate solution subagent from the updated context. Use the research, validation evidence, and relevant project patterns to determine the best fix. Fit the solution to the application's current scale, maturity, and operational needs. Choose the least complex approach that solves the problem without assuming requirements the project does not show. Prefer a simple, clean, maintainable, long-term solution that follows an established project pattern; introduce a new pattern only when existing ones do not fit.
 
 Shared review backbone for you and focused review subagents:
 Apply a strict maintainer’s standard.
