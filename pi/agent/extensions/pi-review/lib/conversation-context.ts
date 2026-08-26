@@ -57,17 +57,6 @@ export function extractConversation(branch: SessionEntry[]): ExtractedMessage[] 
   });
 }
 
-export function extractLatestAssistantText(branch: SessionEntry[]): string {
-  for (const entry of [...branch].reverse()) {
-    if (entry.type !== "message" || entry.message.role !== "assistant") continue;
-
-    const text = extractText(entry.message.content, false);
-    if (text) return text;
-  }
-
-  return "";
-}
-
 export function formatConversation(messages: ExtractedMessage[]): string {
   return messages
     .map((message, index) => {

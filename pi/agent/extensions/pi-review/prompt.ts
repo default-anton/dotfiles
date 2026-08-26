@@ -1,15 +1,22 @@
-const REVIEW_INSTRUCTION = `Review the available work and context.
+const CONTEXT_INSTRUCTION = `Review the code in five stages, one stage per turn:
+1. gather and understand the task context;
+2. research the code around the changes;
+3. review the work;
+4. double-check each finding;
+5. recommend solutions and give the final review.
 
-First identify the review surface: current diff, uncommitted changes, conversation context, stated task, requirements, and acceptance criteria. Review small, localized changes directly. For broad, cross-cutting, context-heavy, or high-risk changes, use subagents to improve coverage.
+Use subagents for stages 2-5: call run_subagent with fork_current_context=true. Start each call's instructions with \`Role: <role> subagent.\` Then state its bounded scope, specific questions, and expected result.
 
-When using subagents, call run_subagent with fork_current_context=true. Start each call's instructions with \`Role: <role> subagent.\` Then state its bounded scope, specific questions, and expected result.
+This is stage 1 of 5: gather and understand the task context.
 
-Run dependent stages in order so each fork includes the prior stage's results:
+Identify the task and its requirements. If provided, read requirement sources like pull requests, task documents, and feature descriptions.
+When you understand the task and scope, reply only \`Task context gathered.\` and stop.`;
 
-1. Research:
+const RESEARCH_INSTRUCTION = `This is stage 2 of 5: research the code around the changes.
+
 Ask scoped research subagents to study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns. They should look beyond changed files when needed.
 
-Research must not review the work, recommend changes, or decide whether anything is a defect. It should separate verified facts, reasonable inferences, and unresolved questions; cite relevant paths and symbols; and return a concise context report covering:
+Research subagents must not review the work, recommend changes, or decide whether anything is a defect. It should separate verified facts, reasonable inferences, and unresolved questions; cite relevant paths and symbols; and return a concise context report covering:
 - subsystem and change map;
 - contracts, invariants, defaults, and boundaries;
 - callers, consumers, and data flow;
@@ -17,18 +24,13 @@ Research must not review the work, recommend changes, or decide whether anything
 - relevant patterns, history, and constraints;
 - conflicting evidence and unresolved questions.
 
-Finish research before starting focused review so reviewers inherit its results.
+Read the subagent results and run more bounded research if they leave an important gap. Do not restate the research. When the needed research is present, reply only \`Research complete.\` and stop.`;
 
-2. Focused review:
-After research returns, fork focused reviewers from the updated context. Scope each reviewer by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Tell it to apply the shared review backbone from the inherited review instruction. Allow overlap when the risk warrants it, but avoid duplicate work. Reviewers should report candidate findings with their evidence, impact, and likely root cause, but should not recommend fixes.
+const REVIEW_INSTRUCTION = `This is stage 3 of 5: review the work.
 
-3. Validate findings:
-Check each candidate against the code path and context. For broad, high-risk, subtle, or uncertain findings, fork a scoped validator after the candidate is present in the conversation. State the exact claim and ask the validator to try to disprove it using guards, call sites, defaults, tests, contracts, and invariants. Drop false positives, duplicates, unsupported assumptions, and issues outside the assigned scope. Keep only material findings with a concrete effect and supported root cause.
+Start focused reviewers. Give each the review surface and tell to apply the shared review backbone. Scope each reviewer by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Allow overlap when the risk warrants it, but avoid duplicate work. Reviewers should report candidate findings with their evidence, impact, and likely root cause, but should not recommend fixes.
 
-4. Recommend solutions:
-For each validated finding, fork a separate solution subagent from the updated context. Use the research, validation evidence, and relevant project patterns to determine the best fix. Fit the solution to the application's current scale, maturity, and operational needs. Choose the least complex approach that solves the problem without assuming requirements the project does not show. Prefer a simple, clean, maintainable, long-term solution that follows an established project pattern; introduce a new pattern only when existing ones do not fit.
-
-Shared review backbone for you and focused review subagents:
+Shared review backbone for you and review subagents:
 Apply a strict maintainer’s standard.
 Review the full assigned scope, not just the first few findings.
 Check the work against the stated task, requirements, and acceptance criteria. Report missing or partial requirements.
@@ -39,33 +41,55 @@ Prefer issues the author would likely fix before merge.
 Do not speculate. Point to the affected behavior, invariant, or code path.
 Trace each finding to its root cause and cite the evidence that supports it.
 
-After subagents return, read their reports, remove duplicates, resolve clear conflicts, and preserve valid findings. Check each finding's location and claim against the code; investigate further when it is unclear, disputed, or high-risk. Scale subagent count to context and risk, not file count. Check the full review surface once more before answering. Do not mention the review process unless it helps explain a finding.
+Read the subagent results and use more bounded reviewers to cover important gaps or settle conflicts if any.
 
-Final answer contract:
-If nothing material stands out, say \`looks good\`. Otherwise, return numbered findings sorted by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for limited-scope correctness, performance, or maintainability issues; and [P3] for minor but real issues. For each finding, include the priority, location, summary, affected behavior, invariant, or code path, and \`Recommendation\`.`;
+When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues. For each finding, give the priority, location, clear explanation, evidence, and root cause. Name the affected behavior, invariant, or code path.`;
 
-function buildReviewInstruction(args: string): string {
-  const focusText = args.trim();
-  if (!focusText) {
-    return REVIEW_INSTRUCTION;
+const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
+
+Double-check each finding. Is it a real issue worth fixing? Is the state reachable? Try to disprove them. Drop false positives, duplicates, unsupported assumptions, and issues outside the assigned scope. Keep only material findings with a concrete effect and supported root cause.
+
+Run more validation when a claim remains unclear, disputed, or high-risk.`;
+
+const RECOMMENDATION_INSTRUCTION = `This is stage 5 of 5: recommend solutions and give the final review.
+
+Fit solutions to the application's current scale, maturity, and operational needs. We need minimal, simple, clean, maintainable, and long-term solutions that follow established project patterns; introduce new patterns only when existing ones do not fit.
+
+Final answer rules:
+If no important findings remain, say \`looks good\`. Otherwise, use the format from stage 3, with a recommendation for each finding.`;
+
+function buildContextMessage(args: string, conversationXml?: string): string {
+  const sections: string[] = [CONTEXT_INSTRUCTION];
+
+  if (conversationXml) {
+    sections.push(
+      [
+        "Conversation from the current branch (only user and assistant messages; no thinking or tool calls):",
+        "",
+        "````xml",
+        conversationXml,
+        "````",
+      ].join("\n"),
+    );
   }
 
-  return [REVIEW_INSTRUCTION, "Additional review context:", focusText].join("\n\n");
+  const focusText = args.trim();
+  if (focusText) {
+    sections.push(["Additional review context:", focusText].join("\n\n"));
+  }
+
+  return sections.join("\n\n");
 }
 
-export function buildReviewMessage(args: string, conversationXml?: string): string {
-  const reviewInstruction = buildReviewInstruction(args);
-  if (!conversationXml) {
-    return reviewInstruction;
-  }
-
+export function buildReviewMessages(
+  args: string,
+  conversationXml?: string,
+): [string, string, string, string, string] {
   return [
-    "Conversation context copied from the current branch (user + assistant messages only; thinking and tool calls removed):",
-    "",
-    "````xml",
-    conversationXml,
-    "````",
-    "",
-    reviewInstruction,
-  ].join("\n");
+    buildContextMessage(args, conversationXml),
+    RESEARCH_INSTRUCTION,
+    REVIEW_INSTRUCTION,
+    VALIDATION_INSTRUCTION,
+    RECOMMENDATION_INSTRUCTION,
+  ];
 }
