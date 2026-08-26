@@ -2,14 +2,14 @@ const REVIEW_INSTRUCTION = `Review the available work and context.
 
 First identify the review surface: current diff, uncommitted changes, conversation context, stated task, requirements, and acceptance criteria. Review small, localized changes directly. For broad, cross-cutting, context-heavy, or high-risk changes, use subagents to improve coverage.
 
-When using subagents, give each one the review surface and a scope. They must not modify source, tests, config, docs, or generated files. They may only write markdown notes or reports in a temporary review area.
+When using subagents, call run_subagent with fork_current_context=true. Start each call's instructions with \`Role: <role> subagent.\` Then state its bounded scope, specific questions, and expected result.
+
+Run dependent stages in order so each fork includes the prior stage's results:
 
 1. Research:
-Study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns. Look beyond changed files when needed to understand the assigned scope.
+Ask scoped research subagents to study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns. They should look beyond changed files when needed.
 
-Do not review the work, make recommendations, or decide whether anything is a defect. Separate verified facts, reasonable inferences, and unresolved questions. Cite relevant paths and symbols.
-
-Write a markdown context report organized for downstream use:
+Research must not review the work, recommend changes, or decide whether anything is a defect. It should separate verified facts, reasonable inferences, and unresolved questions; cite relevant paths and symbols; and return a concise context report covering:
 - subsystem and change map;
 - contracts, invariants, defaults, and boundaries;
 - callers, consumers, and data flow;
@@ -17,13 +17,13 @@ Write a markdown context report organized for downstream use:
 - relevant patterns, history, and constraints;
 - conflicting evidence and unresolved questions.
 
-Optimize for downstream usefulness, not exhaustive narration. Return the note path and a short summary.
+Finish research before starting focused review so reviewers inherit its results.
 
 2. Focused review:
-Give each reviewer the review surface, relevant research notes, the shared review backbone, and the final answer contract below. Scope the work by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Allow overlap when the risk warrants it, but avoid duplicate work. Include both sections in each prompt.
+After research returns, fork focused reviewers from the updated context. Scope each reviewer by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Tell it to apply the shared review backbone and final answer contract from the inherited review instruction. Allow overlap when the risk warrants it, but avoid duplicate work.
 
 3. Validate findings:
-Check each candidate against the code path and context. For broad, high-risk, subtle, or uncertain findings, ask a scoped validator to try to disprove the claim using guards, call sites, defaults, tests, contracts, and invariants. Drop false positives, duplicates, unsupported assumptions, and issues outside the assigned scope. Keep only material findings with a concrete effect and fix.
+Check each candidate against the code path and context. For broad, high-risk, subtle, or uncertain findings, fork a scoped validator after the candidate is present in the conversation. State the exact claim and ask the validator to try to disprove it using guards, call sites, defaults, tests, contracts, and invariants. Drop false positives, duplicates, unsupported assumptions, and issues outside the assigned scope. Keep only material findings with a concrete effect and fix.
 
 Shared review backbone for you and focused review subagents:
 Apply a strict maintainer’s standard.
@@ -34,7 +34,7 @@ Flag changes that break existing behavior, invariants, security boundaries, or i
 Report concrete, high-confidence, material issues within the assigned scope, including pre-existing issues that meet the same bar.
 Prefer issues the author would likely fix before merge.
 Do not speculate. Point to the affected behavior, invariant, or code path.
-Trace each finding to its root cause. Recommend a simple, clean, long-term, maintainable solution that addresses the cause, not just the symptom.
+Trace each finding to its root cause. Recommend a minimal, simple, clean, long-term, maintainable solution.
 
 After subagents return, read their reports, remove duplicates, resolve clear conflicts, and preserve valid findings. Check each finding's location and claim against the code; investigate further when it is unclear, disputed, or high-risk. Scale subagent count to context and risk, not file count. Check the full review surface once more before answering. Do not mention the review process unless it helps explain a finding.
 
