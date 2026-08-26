@@ -14,6 +14,18 @@ local function decode_json(output)
   end
 end
 
+local function herdr_command(args)
+  local command = { "herdr" }
+  vim.list_extend(command, args)
+
+  local output = vim.fn.system(command)
+  if vim.v.shell_error ~= 0 then
+    return nil, vim.trim(output)
+  end
+
+  return output
+end
+
 local function current_herdr_tab()
   if not vim.env.HERDR_ENV then
     return nil
@@ -21,8 +33,8 @@ local function current_herdr_tab()
 
   local pane_id = vim.env.HERDR_PANE_ID
   if pane_id and pane_id ~= "" then
-    local output = vim.fn.system({ "herdr", "pane", "current", "--pane", pane_id })
-    if vim.v.shell_error == 0 then
+    local output = herdr_command({ "pane", "current", "--pane", pane_id })
+    if output then
       local response = decode_json(output)
       local pane = response and response.result and response.result.pane
       if pane and pane.tab_id then
@@ -38,8 +50,12 @@ local function current_herdr_tab()
 end
 
 local function herdr_targets(tab_id)
-  local output = vim.fn.system({ "herdr", "agent", "list" })
-  if vim.v.shell_error ~= 0 then
+  local output, error_message = herdr_command({ "agent", "list" })
+  if not output then
+    vim.notify(
+      "Herdr agent discovery failed: " .. (error_message ~= "" and error_message or "unknown error"),
+      vim.log.levels.ERROR
+    )
     return {}
   end
 
@@ -67,7 +83,16 @@ local function active_targets()
 end
 
 local function send_text(target, text)
-  vim.fn.system({ "herdr", "pane", "send-text", target.pane, text })
+  local output, error_message = herdr_command({ "pane", "send-text", target.pane, text })
+  if not output then
+    vim.notify(
+      "Herdr send-text failed: " .. (error_message ~= "" and error_message or "unknown error"),
+      vim.log.levels.ERROR
+    )
+    return false
+  end
+
+  return true
 end
 
 function M.send_file_references(paths)

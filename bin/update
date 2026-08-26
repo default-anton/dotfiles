@@ -2,6 +2,19 @@
 
 set -e
 
+check_herdr_server() {
+  local status
+
+  status=$(herdr status 2>&1 || true)
+  if [[ "$status" == *"compatible: no"* || "$status" == *"restart_needed: yes"* ]]; then
+    cat >&2 <<'EOF'
+Herdr was updated, but its running server still needs a restart.
+Run `herdr server stop`, then start Herdr again before using Herdr commands.
+Stopping the server exits its pane processes.
+EOF
+  fi
+}
+
 if [[ $# -eq 0 ]]; then
   for tool in claude pi herdr worktrunk codex; do
     "$0" "$tool"
@@ -25,6 +38,7 @@ case "$tool" in
   herdr)
     mise use --global "herdr@${version}"
     mise prune --tools herdr
+    check_herdr_server
     ;;
   worktrunk)
     mise use --global "worktrunk@${version}"

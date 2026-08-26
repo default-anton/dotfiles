@@ -3,7 +3,6 @@
 set -euo pipefail
 
 pane_id=${HERDR_ACTIVE_PANE_ID:-}
-herdr_bin=${HERDR_BIN_PATH:-}
 
 if [ -z "$pane_id" ]; then
   printf 'insert-files: HERDR_ACTIVE_PANE_ID is not set\n' >&2
@@ -26,10 +25,8 @@ require_command() {
 
 require_command fd
 
-if [ -z "$herdr_bin" ]; then
-  require_command herdr
-  herdr_bin=$(command -v herdr)
-fi
+require_command herdr
+herdr_bin=$(command -v herdr)
 
 file_command=(fd --type f --hidden --follow --exclude .git)
 dir_command=(fd --type d --hidden --follow --exclude .git)
@@ -88,4 +85,8 @@ if [ -z "$inserted" ]; then
   exit 0
 fi
 
-"$herdr_bin" pane send-text "$pane_id" "$inserted"
+response=$("$herdr_bin" pane send-text "$pane_id" "$inserted" 2>&1) || {
+  status=$?
+  printf 'insert-files: Herdr failed to send text:\n%s\n' "$response" >&2
+  exit "$status"
+}
