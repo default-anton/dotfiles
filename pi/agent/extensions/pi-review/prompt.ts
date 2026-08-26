@@ -35,6 +35,7 @@ Report concrete, high-confidence, material issues within the assigned scope, inc
 Prefer issues the author would likely fix before merge.
 Do not speculate. Point to the affected behavior, invariant, or code path.
 Trace each finding to its root cause. Recommend a minimal, simple, clean, long-term, maintainable solution.
+Recommend a minimal, simple, clean, maintainable, long-term solution that follows an established project pattern; introduce a new pattern only when existing ones do not fit.
 
 After subagents return, read their reports, remove duplicates, resolve clear conflicts, and preserve valid findings. Check each finding's location and claim against the code; investigate further when it is unclear, disputed, or high-risk. Scale subagent count to context and risk, not file count. Check the full review surface once more before answering. Do not mention the review process unless it helps explain a finding.
 
