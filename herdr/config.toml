@@ -137,6 +137,14 @@ description = "insert files or folders"
 width = "80%"
 height = "80%"
 
+[[keys.command]]
+key = "prefix+d"
+type = "popup"
+command = "$HOME/.dotfiles/herdr/insert-files.sh changed"
+description = "insert changed files"
+width = "80%"
+height = "80%"
+
 # Legacy indexed shortcut config is still parsed for compatibility.
 # Prefer switch_tab, switch_workspace, and focus_agent for new configs.
 # [keys.indexed]

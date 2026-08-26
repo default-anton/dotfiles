@@ -3,6 +3,7 @@
 set -euo pipefail
 
 pane_id=${HERDR_ACTIVE_PANE_ID:-}
+mode=${1:-files}
 
 if [ -z "$pane_id" ]; then
   printf 'insert-files: HERDR_ACTIVE_PANE_ID is not set\n' >&2
@@ -23,13 +24,48 @@ require_command() {
   exit 1
 }
 
-require_command fd
-
 require_command herdr
 herdr_bin=$(command -v herdr)
 
-file_command=(fd --type f --hidden --follow --exclude .git)
-dir_command=(fd --type d --hidden --follow --exclude .git)
+case $mode in
+  files)
+    require_command fd
+    file_command=(fd --type f --hidden --follow --exclude .git)
+    dir_command=(fd --type d --hidden --follow --exclude .git)
+    ;;
+  changed)
+    require_command git
+    if ! git_prefix=$(git rev-parse --show-prefix 2>/dev/null); then
+      printf 'insert-files: current directory is not inside a Git worktree\n' >&2
+      exit 1
+    fi
+    ;;
+  *)
+    printf 'insert-files: usage: %s [files|changed]\n' "$0" >&2
+    exit 2
+    ;;
+esac
+
+changed_files() {
+  local record status path
+
+  while IFS= read -r -d '' record; do
+    status=${record:0:2}
+    path=${record:3}
+
+    if [[ $status == *R* || $status == *C* ]]; then
+      IFS= read -r -d '' path || return 1
+    fi
+
+    if [ -n "$git_prefix" ]; then
+      case $path in
+        "$git_prefix"*) path=${path#"$git_prefix"} ;;
+      esac
+    fi
+
+    [[ $status == *D* ]] || printf '%s\0' "$path"
+  done < <(git status --porcelain=v1 --untracked-files=all -z)
+}
 
 if [ "${HERDR_INSERT_FILES_SELECTION+x}" = x ]; then
   selection=$HERDR_INSERT_FILES_SELECTION
@@ -37,14 +73,27 @@ else
   require_command fzf
 
   set +e
-  selection=$("${file_command[@]}" | fzf \
-    -m \
-    --border \
-    --layout=reverse-list \
-    --style=minimal \
-    --prompt 'files> ' \
-    --bind "ctrl-d:reload(${dir_command[*]})+change-prompt(dirs> )" \
-    --bind "ctrl-f:reload(${file_command[*]})+change-prompt(files> )")
+  case $mode in
+    files)
+      selection=$("${file_command[@]}" | fzf \
+        -m \
+        --border \
+        --layout=reverse-list \
+        --style=minimal \
+        --prompt 'files> ' \
+        --bind "ctrl-d:reload(${dir_command[*]})+change-prompt(dirs> )" \
+        --bind "ctrl-f:reload(${file_command[*]})+change-prompt(files> )")
+      ;;
+    changed)
+      selection=$(changed_files | fzf \
+        -m \
+        --read0 \
+        --border \
+        --layout=reverse-list \
+        --style=minimal \
+        --prompt 'changed> ')
+      ;;
+  esac
   status=$?
   set -e
 
