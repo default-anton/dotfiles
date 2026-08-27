@@ -65,10 +65,14 @@ If no important findings remain, say \`looks good\`.`;
 
 const RECOMMENDATION_INSTRUCTION = `This is stage 5 of 5: recommend solutions and give the final review.
 
-Use subagents with \`fork_current_context=true\` and \`You are a <role> subagent.\` at the beginning of instructions to recommend solutions. Fit solutions to the application's current scale, maturity, and operational needs. We need minimal, simple, clean, maintainable, and long-term solutions that follow established project patterns; introduce new patterns only when existing ones do not fit.
+Ask recommendation subagents with \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to their instructions.
 
-Final answer rules:
-If no important findings remain, say \`looks good\`. Otherwise, use the format from stage 3, with a recommendation for each finding.`;
+Instructions should include:
+\`\`\`
+Recommend a solution for the <finding> finding. Fit the solution to the application's current scale, maturity, and operational needs. We need a minimal, simple, clean, maintainable, and long-term solution that follows established project patterns; introduce new patterns only when existing ones do not fit.
+\`\`\`
+
+If no important findings remain, say \`looks good\`. Otherwise, use the format from stage 3 and add a recommendation for each finding.`;
 
 function buildContextMessage(args: string, conversationXml?: string): string {
   const sections: string[] = [CONTEXT_INSTRUCTION];
