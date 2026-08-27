@@ -48,7 +48,10 @@ Trace each finding to its root cause and cite the evidence that supports it.
 
 Read the subagent results and use more bounded reviewers to cover important gaps or settle conflicts if any.
 
-When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues. For each finding, give the priority, location, clear explanation, evidence, and root cause. Name the affected behavior, invariant, or code path.
+When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues.
+
+Explain each finding in clear, natural prose. Describe what is wrong, when it happens, and why it matters. Weave the supporting evidence, relevant paths or symbols, and likely root cause into the explanation. Do not force findings into a fixed template or add labels such as “Affected behavior,” “Evidence,” “Impact,” or “Root cause” unless a label makes the finding easier to understand.
+
 If no important findings remain, say \`looks good\`.`;
 
 const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
@@ -72,7 +75,7 @@ Instructions should include:
 Recommend a solution for the <finding> finding. Fit the solution to the application's current scale, maturity, and operational needs. We need a minimal, simple, clean, maintainable, and long-term solution that follows established project patterns; introduce new patterns only when existing ones do not fit.
 \`\`\`
 
-If no important findings remain, say \`looks good\`. Otherwise, use the format from stage 3 and add a recommendation for each finding.`;
+If no important findings remain, say \`looks good\`. Otherwise, use the format from stage 3 and add a recommendation for each finding. Do not shorten recommendations at the expense of clarity or completeness.`;
 
 function buildContextMessage(args: string, conversationXml?: string): string {
   const sections: string[] = [CONTEXT_INSTRUCTION];
