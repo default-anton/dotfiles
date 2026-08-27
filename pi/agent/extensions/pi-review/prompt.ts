@@ -5,9 +5,6 @@ const CONTEXT_INSTRUCTION = `Review the code in five stages, one stage per turn:
 4. double-check each finding;
 5. recommend solutions and give the final review.
 
-Use subagents for stages 2-5: call run_subagent with fork_current_context=true. Start each call's instructions with \`You are a <role> subagent.\` Then state its bounded scope, specific questions, and expected result.
-Instructions to complete a stage or produce the final review apply only to the parent orchestrator. Subagents must return the result requested by their latest \`You are a ... subagent.\` task.
-
 This is stage 1 of 5: gather and understand the task context.
 
 Identify the task and its requirements. If provided, read requirement sources like pull requests, task documents, and feature descriptions.
@@ -15,21 +12,28 @@ When you understand the task and scope, reply only \`Task context gathered.\` an
 
 const RESEARCH_INSTRUCTION = `This is stage 2 of 5: research the code around the changes.
 
-Ask scoped research subagents to study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns. They should look beyond changed files when needed.
+Ask research subagents with \`fork_current_context=false\` to study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns.
 
-Research subagents must not review the work, recommend changes, or decide whether anything is a defect. It should separate verified facts, reasonable inferences, and unresolved questions; cite relevant paths and symbols; and return a concise context report covering:
+Instructions should include this verbatim:
+\`\`\`
+Study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns. Look beyond changed files when needed.
+
+Don't run tests/linters/formatters, modify source, tests, config, docs, or generated files.
+
+Don't review the work, recommend changes, or decide whether anything is a defect. Separate verified facts, reasonable inferences, and unresolved questions; cite relevant paths and symbols; and return a context report covering:
 - subsystem and change map;
 - contracts, invariants, defaults, and boundaries;
 - callers, consumers, and data flow;
 - tests and validation paths;
 - relevant patterns, history, and constraints;
 - conflicting evidence and unresolved questions.
+\`\`\`
 
 Read the subagent results and run more bounded research if they leave an important gap. Do not restate the research. When the needed research is present, reply only \`Research complete.\` and stop.`;
 
 const REVIEW_INSTRUCTION = `This is stage 3 of 5: review the work.
 
-Start focused reviewers. Give each the review surface and tell to apply the shared review backbone. Scope each reviewer by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Allow overlap when the risk warrants it, but avoid duplicate work. Reviewers should report candidate findings with their evidence, impact, and likely root cause, but should not recommend fixes.
+Start focused reviewer subagents with \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to instructions. Give each the review surface and tell to apply the shared review backbone. Scope each reviewer by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Allow overlap when the risk warrants it, but avoid duplicate work. Reviewers should report candidate findings with their evidence, impact, and likely root cause, but should not recommend fixes.
 
 Shared review backbone for you and review subagents:
 Apply a strict maintainer’s standard.
@@ -37,7 +41,7 @@ Review the full assigned scope, not just the first few findings.
 Check the work against the stated task, requirements, and acceptance criteria. Report missing or partial requirements.
 Focus on correctness, security, performance, operability, and maintainability.
 Flag changes that break existing behavior, invariants, security boundaries, or interfaces unless the task requires the break. Also flag departures from established project patterns that lack a clear reason.
-Report concrete, high-confidence, material issues within the assigned scope, including pre-existing issues that meet the same bar.
+Report concrete, high-confidence, material issues, including pre-existing issues that meet the same bar.
 Prefer issues the author would likely fix before merge.
 Do not speculate. Point to the affected behavior, invariant, or code path.
 Trace each finding to its root cause and cite the evidence that supports it.
@@ -49,14 +53,19 @@ If no important findings remain, say \`looks good\`.`;
 
 const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
 
-Double-check each finding. Is it a real issue worth fixing? Is the state reachable? Try to disprove them. Drop false positives, duplicates, unsupported assumptions, and issues outside the assigned scope. Keep only material findings with a concrete effect and supported root cause.
+Double-check each finding with subagents. Set \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to their instructions.
 
-Run more validation when a claim remains unclear, disputed, or high-risk.
+Instructions should include:
+\`\`\`
+Double-check the <finding> finding. Is it a real issue worth fixing? Is the state reachable? Try to disprove it.
+\`\`\`
+
+Run more validation subagents when a claim remains unclear, disputed, or high-risk.
 If no important findings remain, say \`looks good\`.`;
 
 const RECOMMENDATION_INSTRUCTION = `This is stage 5 of 5: recommend solutions and give the final review.
 
-Fit solutions to the application's current scale, maturity, and operational needs. We need minimal, simple, clean, maintainable, and long-term solutions that follow established project patterns; introduce new patterns only when existing ones do not fit.
+Use subagents with \`fork_current_context=true\` and \`You are a <role> subagent.\` at the beginning of instructions to recommend solutions. Fit solutions to the application's current scale, maturity, and operational needs. We need minimal, simple, clean, maintainable, and long-term solutions that follow established project patterns; introduce new patterns only when existing ones do not fit.
 
 Final answer rules:
 If no important findings remain, say \`looks good\`. Otherwise, use the format from stage 3, with a recommendation for each finding.`;
