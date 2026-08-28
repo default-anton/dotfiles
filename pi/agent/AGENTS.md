@@ -14,7 +14,7 @@
 
 Pre-installed tools: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, imagemagick, and ffmpeg.
 
-- npx @firecrawl/anydoc — Convert documents to Markdown.
-- herdr — Manage terminal workspaces for AI coding agents.
+- `npx @firecrawl/anydoc` — extract text from office and pdf documents as Markdown.
+- `herdr` — manage terminal workspaces for AI coding agents like yourself.
 
 When unsure how a tool works, run its --help.
