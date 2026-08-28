@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.84.3",
+  "lastChangelogVersion": "0.84.4",
   "defaultThinkingLevel": "high",
   "defaultProvider": "openai",
   "defaultModel": "gpt-5.6-luna",
