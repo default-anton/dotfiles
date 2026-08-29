@@ -1,4 +1,6 @@
-const CONTEXT_INSTRUCTION = `Review the code in five stages, one stage per turn:
+const CONTEXT_INSTRUCTION = `Don't run validation commands at any stage—CI handles tests, linting, formatting, type checks, builds, and static analysis.
+
+Review the code in five stages, one stage per turn:
 1. gather and understand the task context;
 2. research the code around the changes;
 3. review the work;
