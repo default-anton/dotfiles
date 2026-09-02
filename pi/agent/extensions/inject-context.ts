@@ -9,8 +9,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 
 const AGENTS_CONTEXT_FILENAMES = ["AGENTS.override.md", "AGENTS.md", "CLAUDE.md"];
-const PI_DOCS_README_URL = "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md";
-const PI_DOCS_URL = "https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs";
+const PI_DOCS_INDEX = "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/index.md";
 const PI_EXAMPLES_URL = "https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples";
 
 type ContextFile = {
@@ -163,13 +162,8 @@ function formatPiDocumentationForPrompt(systemPrompt: string): string {
 
   return [
     "\n\nPi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):",
-    `- Main documentation: ${PI_DOCS_README_URL}`,
-    `- Additional docs: ${PI_DOCS_URL}`,
-    `- Examples: ${PI_EXAMPLES_URL} (extensions, custom tools, SDK)`,
-    "- Use `fetch_web` to read GitHub documentation pages.",
-    "- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)",
-    "- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing",
-    "- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)",
+    `- Documentation index: ${PI_DOCS_INDEX}. Read when asked about extensions, themes, skills, prompt templates, TUI components, keybindings, SDK integrations, custom providers, adding models, pi packages, environment variables, etc.`,
+    `- Examples: ${PI_EXAMPLES_URL}`,
   ].join("\n");
 }
 
