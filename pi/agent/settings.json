@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.84.4",
-  "defaultThinkingLevel": "medium",
-  "defaultProvider": "openai",
-  "defaultModel": "gpt-5.6-sol",
+  "defaultThinkingLevel": "high",
+  "defaultProvider": "google-vertex",
+  "defaultModel": "gemini-3.8-flash",
   "enabledModels": [
     "openai/gpt-5.6-luna",
     "openai/gpt-5.6-sol",
