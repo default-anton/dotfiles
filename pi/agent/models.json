@@ -42,8 +42,8 @@
             "minimal": null,
             "low": null,
             "medium": "medium",
-            "high": null,
-            "xhigh": null,
+            "high": "high",
+            "xhigh": "xhigh",
             "max": null
           }
         }

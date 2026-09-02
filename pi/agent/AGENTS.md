@@ -1,7 +1,7 @@
 # Rules You Must Follow
 - Add code comments only when explicitly asked; prefer clear naming and structure.
 - Commit only when explicitly asked, using mitchellh-style messages; do not run validation when committing or pushing.
-- For subagents, use `openai/gpt-5.6-luna:high` for research/reconnaissance/exploration/context gathering, `openai/gpt-5.6-sol:medium` for code/security review. Otherwise, omit the model.
+- For subagents, use `openai/gpt-5.6-luna:high` for research/reconnaissance/exploration/context gathering, `openai/gpt-5.6-sol:xhigh` for code/security review. Otherwise, omit the model.
 - If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `fix:` markers with context via `rg -n -A 5 '\bfix:\b'`.
 - Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
 - Use `agent-browser` only when the user explicitly asks you to use it. Start here `agent-browser skills get core --full`.
