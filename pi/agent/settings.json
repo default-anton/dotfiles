@@ -6,7 +6,6 @@
   "enabledModels": [
     "openai/gpt-5.6-luna",
     "openai/gpt-5.6-sol",
-    "google-vertex/gemini-3.8-flash",
     "deepseek-v4-flash-vision-exp"
   ],
   "defaultTools": [
