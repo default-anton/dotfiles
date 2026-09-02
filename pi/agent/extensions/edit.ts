@@ -483,6 +483,9 @@ function formatEditResult(
 }
 
 export default function editExtension(pi: ExtensionAPI) {
+  // disable the edit tool temporarily
+  return;
+
   pi.registerTool({
     name: "edit",
     label: "edit",
