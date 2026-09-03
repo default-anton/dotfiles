@@ -170,20 +170,13 @@ function renderDetails(details: SpawnSubagentDetails, theme: any, expanded: bool
 
   text += `\n${theme.fg("muted", "answer preview")} ${theme.fg("dim", details.answerPreview || "(none yet)")}`;
 
-  if (expanded) {
-    text += `\n${theme.fg("muted", "model")} ${theme.fg("dim", details.modelArg)}`;
-    if (details.childModel !== details.modelArg) {
-      text += `\n${theme.fg("muted", "resolved model")} ${theme.fg("dim", details.childModel)}`;
-    }
-    if (details.sessionId) {
-      text += `\n${theme.fg("muted", "session id")} ${theme.fg("dim", details.sessionId)}`;
-    }
-    if (details.stopReason) {
-      text += `\n${theme.fg("muted", "stop reason")} ${theme.fg("dim", details.stopReason)}`;
-    }
-    if (details.error) {
-      text += `\n${theme.fg("muted", "error")} ${theme.fg("error", details.error)}`;
-    }
+  text += `\n${theme.fg("muted", "model")} ${theme.fg("dim", details.modelArg)}`;
+  text += `\n${theme.fg("muted", "resolved model")} ${theme.fg("dim", details.childModel)}`;
+  text += `\n${theme.fg("muted", "session id")} ${theme.fg("dim", details.sessionId || "(pending)")}`;
+  text += `\n${theme.fg("muted", "stop reason")} ${theme.fg("dim", details.stopReason || "(pending)")}`;
+
+  if (expanded && details.error) {
+    text += `\n${theme.fg("muted", "error")} ${theme.fg("error", details.error)}`;
   }
 
   return text;
