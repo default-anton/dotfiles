@@ -148,6 +148,7 @@ function getApplyPatchHeaderBg(
 function buildApplyPatchCallComponent(
   component: ApplyPatchCallComponent,
   theme: Theme,
+  expanded: boolean,
 ): ApplyPatchCallComponent {
   component.setBgFn(
     getApplyPatchHeaderBg(
@@ -162,7 +163,10 @@ function buildApplyPatchCallComponent(
     new Text(formatApplyPatchCall(component.preview, theme), 0, 0),
   );
 
-  if (component.preview) {
+  if (
+    component.preview &&
+    ("error" in component.preview || expanded)
+  ) {
     const body = "error" in component.preview
       ? theme.fg("error", component.preview.error)
       : renderDiff(component.preview.diff);
@@ -226,6 +230,7 @@ function formatApplyPatchResult(
   result: ApplyPatchResult,
   theme: Theme,
   isError: boolean,
+  expanded: boolean,
 ): string | undefined {
   const previewDiff = preview && !("error" in preview)
     ? preview.diff
@@ -242,7 +247,9 @@ function formatApplyPatchResult(
 
   const resultDiff = result.details?.diff;
   if (typeof resultDiff === "string") {
-    return resultDiff !== previewDiff ? renderDiff(resultDiff) : undefined;
+    return expanded && resultDiff !== previewDiff
+      ? renderDiff(resultDiff)
+      : undefined;
   }
   return resultText ? theme.fg("toolOutput", resultText) : undefined;
 }
@@ -330,10 +337,14 @@ export default function applyPatchExtension(pi: ExtensionAPI) {
         });
       }
 
-      return buildApplyPatchCallComponent(component, theme);
+      return buildApplyPatchCallComponent(
+        component,
+        theme,
+        context.expanded,
+      );
     },
 
-    renderResult(result, _options, theme, context) {
+    renderResult(result, { expanded }, theme, context) {
       const state = context.state as ApplyPatchRenderState;
       const callComponent = state.callComponent;
       const input = context.args as ApplyPatchInput;
@@ -384,7 +395,13 @@ export default function applyPatchExtension(pi: ExtensionAPI) {
           callComponent.settledError = context.isError;
           changed = true;
         }
-        if (changed) buildApplyPatchCallComponent(callComponent, theme);
+        if (changed) {
+          buildApplyPatchCallComponent(
+            callComponent,
+            theme,
+            expanded,
+          );
+        }
       }
 
       const output = formatApplyPatchResult(
@@ -392,6 +409,7 @@ export default function applyPatchExtension(pi: ExtensionAPI) {
         typedResult,
         theme,
         context.isError,
+        expanded,
       );
       const component =
         (context.lastComponent as Container | undefined) ?? new Container();
