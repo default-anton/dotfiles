@@ -208,6 +208,9 @@ height = "80%"
 # Draw borders around split panes.
 # pane_borders = true
 
+# Draw interactive scrollbars beside terminal panes. Disable to reclaim the scrollbar column and keep it out of terminal-native selections.
+pane_scrollbars = false
+
 # Keep split panes visually separated instead of sharing divider borders.
 pane_gaps = false
 
