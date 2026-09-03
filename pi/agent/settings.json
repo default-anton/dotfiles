@@ -13,7 +13,7 @@
     "bash"
   ],
   "compaction": {
-    "enabled": true
+    "enabled": false
   },
   "hideThinkingBlock": false,
   "branchSummary": {
@@ -24,7 +24,7 @@
   "packages": [
     "npm:pi-subdir-context"
   ],
-  "transport": "websocket-cached",
+  "transport": "auto",
   "treeFilterMode": "no-tools",
   "theme": "dark",
   "enableSkillCommands": false,
@@ -34,5 +34,8 @@
   "warnings": {
     "anthropicExtraUsage": true
   },
-  "defaultProjectTrust": "ask"
+  "defaultProjectTrust": "ask",
+  "terminal": {
+    "showTerminalProgress": true
+  }
 }
