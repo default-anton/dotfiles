@@ -14,6 +14,8 @@ When you understand the task and scope, reply only \`Task context gathered.\` an
 
 const RESEARCH_INSTRUCTION = `This is stage 2 of 5: research the code around the changes.
 
+Set \`model="openai/gpt-5.6-luna:high"\` for all subagents in this stage.
+
 Ask research subagents with \`fork_current_context=false\` to study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns.
 
 Instructions should include this verbatim:
@@ -34,6 +36,8 @@ Don't review the work, recommend changes, or decide whether anything is a defect
 Read the subagent results and run more bounded research if they leave an important gap. Do not restate the research. When the needed research is present, reply only \`Research complete.\` and stop.`;
 
 const REVIEW_INSTRUCTION = `This is stage 3 of 5: review the work.
+
+Leave \`model\` unset for all subagents in this stage.
 
 Start focused reviewer subagents with \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to instructions. Give each the review surface and tell to apply the shared review backbone. Scope each reviewer by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Allow overlap when the risk warrants it, but avoid duplicate work. Reviewers should report candidate findings with their evidence, impact, and likely root cause, but should not recommend fixes.
 
@@ -58,6 +62,8 @@ If no important findings remain, say \`looks good\`.`;
 
 const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
 
+Leave \`model\` unset for all subagents in this stage.
+
 Double-check each finding with subagents. Set \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to their instructions.
 
 Instructions should include:
@@ -69,6 +75,8 @@ Run more validation subagents when a claim remains unclear, disputed, or high-ri
 If no important findings remain, say \`looks good\`.`;
 
 const RECOMMENDATION_INSTRUCTION = `This is stage 5 of 5: recommend solutions and give the final review.
+
+Leave \`model\` unset for all subagents in this stage.
 
 Ask recommendation subagents with \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to their instructions.
 
