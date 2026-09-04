@@ -4,11 +4,6 @@ Commit only when explicitly asked, using mitchellh-style messages; do not run va
 If asked to fix/resolve/find comments (open questions, bugs, or improvements), search `fix:` markers with context via `rg -n -A 5 '\bfix:\b'`.
 Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
 Use `agent-browser` only when the user explicitly asks you to use it. Start here `agent-browser skills get core --full`.
-`AGENTS.md` and `AGENTS.override.md` may contain only durable, high-signal instructions; exclude project docs, long rationale, and speculative guidance.
-`~/.pi/agent/**` symlinks to source-of-truth `~/.dotfiles/pi/agent/**`; edit the latter.
-
-## Installed CLI tools
-Pre-installed tools: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, imagemagick, and ffmpeg.
+Pre-installed CLI tools: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, imagemagick, herdr, and ffmpeg.
 `npx @firecrawl/anydoc` — extract text from office and pdf documents as Markdown.
 `herdr` — manage terminal workspaces for AI coding agents like yourself.
-When unsure how a tool works, run its --help.
