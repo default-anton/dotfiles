@@ -27,7 +27,7 @@ const SpawnSubagentParams = Type.Object({
   fork_current_context: Type.Optional(
     Type.Boolean({
       description:
-        "Fork the parent’s current conversation into a new child session before running these instructions. Cannot be combined with session_id",
+        "If true, the subagent receives the current conversation as context before running its instructions. Cannot be combined with session_id",
     }),
   ),
   model: Type.Optional(
@@ -191,7 +191,7 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
     name: "run_subagent",
     label: "Run Subagent",
     description:
-      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same system prompt, extensions, and tools. run_subagent is disabled in the child to prevent recursion. If fork_current_context is true, the child forks the parent’s current conversation into a new session before running the instructions. If session_id is set, the child continues that prior subagent session instead. Keep concurrent run_subagent calls to 8 or fewer; higher fan-out is not supported reliably.",
+      "Run a bounded subagent in a fresh pi subprocess. The child shares the current cwd/worktree and inherits the same system prompt, extensions, and tools. run_subagent is disabled in the child to prevent recursion. Keep concurrent run_subagent calls to 8 or fewer; higher fan-out is not supported reliably.",
     parameters: SpawnSubagentParams,
 
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
