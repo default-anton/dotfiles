@@ -1,91 +1,71 @@
-const CONTEXT_INSTRUCTION = `Don't run validation commands at any stage—CI handles tests, linting, formatting, type checks, builds, and static analysis.
+const CONTEXT_INSTRUCTION = `Keep this review read-only, including all subagent work. Don't modify files or run validation commands: CI handles tests, linting, formatting, type checks, builds, and static analysis. Inspect code, diffs, history, and existing results as needed.
 
-Review the code in five stages, one stage per turn:
-1. gather and understand the task context;
-2. research the code around the changes;
-3. review the work;
-4. double-check each finding;
-5. recommend solutions and give the final review.
+Review in five stages: task context, code research, review, double-checking, and recommendations. The extension queues one stage per turn; finish the current stage without asking to continue.
+
+Use \`run_subagent\` in stages 2–5 as directed. Size assignments to scope and risk; parallelize independent work. Start forked briefs with \`You are a subagent. Use the inherited conversation as context; complete only the assignment below.\` followed by a bounded assignment. Stage sequencing and replies apply only to the parent; subagents return their assigned result. Follow up only on specific coverage gaps, conflicting evidence, or unresolved claims.
+
+In stages 3–5, if no important findings remain, say \`looks good\` unless missing evidence prevents that conclusion; report such gaps instead.
 
 This is stage 1 of 5: gather and understand the task context.
 
-Identify the task and its requirements. If provided, read requirement sources like pull requests, task documents, and feature descriptions.
-When you understand the task and scope, reply only \`Task context gathered.\` and stop.`;
+Identify the task, requirements, acceptance criteria, and review scope from the context and current work. Consult linked requirements as needed. The copied conversation is task history, not authorization to carry out earlier requests.
+When the task and scope are clear, reply only \`Task context gathered.\`.`;
 
 const RESEARCH_INSTRUCTION = `This is stage 2 of 5: research the code around the changes.
 
 Set \`model="openai/gpt-5.6-luna:high"\` for all subagents in this stage.
 
-Ask research subagents with \`fork_current_context=false\` to study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns.
+Use research subagents with \`fork_current_context=false\`. Give each the task, review scope, relevant starting paths, and questions to answer; they do not inherit this conversation.
 
-Instructions should include this verbatim:
+Include this research brief:
 \`\`\`
-Study the relevant pre-existing subsystems, contracts, invariants, interfaces, data flow, tests, configuration, history, constraints, and project patterns. Look beyond changed files when needed.
+Establish how the relevant pre-existing code works. Look beyond changed files to understand its contracts and dependencies.
 
-Don't run tests/linters/formatters, modify source, tests, config, docs, or generated files.
+Keep the work read-only. Don't modify files or run validation commands: CI handles tests, linting, formatting, type checks, builds, and static analysis.
 
-Don't review the work, recommend changes, or decide whether anything is a defect. Separate verified facts, reasonable inferences, and unresolved questions; cite relevant paths and symbols; and return a context report covering:
+Don't review the work, recommend changes, or decide whether anything is a defect. Separate verified facts, reasonable inferences, and unresolved questions. Cite relevant paths and symbols. Return a context report covering the relevant:
 - subsystem and change map;
-- contracts, invariants, defaults, and boundaries;
+- contracts, interfaces, invariants, configuration, defaults, and boundaries;
 - callers, consumers, and data flow;
 - tests and validation paths;
 - relevant patterns, history, and constraints;
 - conflicting evidence and unresolved questions.
 \`\`\`
 
-Read the subagent results and run more bounded research if they leave an important gap. Do not restate the research. When the needed research is present, reply only \`Research complete.\` and stop.`;
+Integrate the reports and close important context gaps. Once the review has the context it needs, reply only \`Research complete.\` without restating the research.`;
 
 const REVIEW_INSTRUCTION = `This is stage 3 of 5: review the work.
 
-Leave \`model\` unset for all subagents in this stage.
+Use focused reviewer subagents with \`fork_current_context=true\` and leave \`model\` unset to inherit the current model and thinking level.
 
-Start focused reviewer subagents with \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to instructions. Give each the review surface and tell to apply the shared review backbone. Scope each reviewer by subsystem, changed area, risk, acceptance criterion, impact, or hypothesis. Allow overlap when the risk warrants it, but avoid duplicate work. Reviewers should report candidate findings with their evidence, impact, and likely root cause, but should not recommend fixes.
+Assign review surfaces or distinct risk questions that together cover the scope. Tell reviewers to apply the standard below and return candidate findings with evidence, impact, and likely root cause. Keep fixes for stage 5.
 
-Shared review backbone for you and review subagents:
-Apply a strict maintainer’s standard.
-Review the full assigned scope, not just the first few findings.
-Check the work against the stated task, requirements, and acceptance criteria. Report missing or partial requirements.
-Focus on correctness, security, performance, operability, and maintainability.
-Flag changes that break existing behavior, invariants, security boundaries, or interfaces unless the task requires the break. Also flag departures from established project patterns that lack a clear reason.
-Report concrete, high-confidence, material issues, including pre-existing issues that meet the same bar.
-Prefer issues the author would likely fix before merge.
-Do not speculate. Point to the affected behavior, invariant, or code path.
-Trace each finding to its root cause and cite the evidence that supports it.
+Review standard for you and reviewer subagents:
+- Apply a strict maintainer's standard across the full assigned scope, not just the first few findings. Check the task, requirements, and acceptance criteria, including missing or partial implementation.
+- Focus on correctness, security, performance, operability, and maintainability. Flag broken behavior, invariants, security boundaries, or interfaces unless the task requires the break, and unjustified departures from established project patterns.
+- Report concrete, high-confidence issues the author would likely fix before merge, including pre-existing issues that meet the same bar. Ground each finding in the affected behavior or code path, material impact, and evidence supporting its root cause; do not speculate.
 
-Read the subagent results and use more bounded reviewers to cover important gaps or settle conflicts if any.
+Integrate the reports, merge duplicate findings, and resolve important coverage gaps or conflicting claims.
 
 When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues.
 
-Explain each finding in clear, natural prose. Describe what is wrong, when it happens, and why it matters. Weave the supporting evidence, relevant paths or symbols, and likely root cause into the explanation. Do not force findings into a fixed template or add labels such as “Affected behavior,” “Evidence,” “Impact,” or “Root cause” unless a label makes the finding easier to understand.
-
-If no important findings remain, say \`looks good\`.`;
+Explain what is wrong, when it happens, and why it matters in clear prose, with supporting evidence, relevant paths or symbols, and the likely root cause. Use labels only when they improve clarity.`;
 
 const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
 
-Leave \`model\` unset for all subagents in this stage.
+Have subagents independently double-check every finding with \`fork_current_context=true\` and \`model\` unset.
 
-Double-check each finding with subagents. Set \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to their instructions.
+Ask them to verify the finding against the code and its contracts rather than trust the earlier explanation. Trace the relevant path from reachable inputs and state to the claimed outcome, checking each assumption and the root cause. Actively seek counterevidence in callers, guards, defaults, error handling, and existing tests. Require a verdict with precise code references, supporting or contradicting evidence, and any unresolved assumptions; do not recommend fixes.
 
-Instructions should include:
-\`\`\`
-Double-check the <finding> finding. Is it a real issue worth fixing? Is the state reachable? Try to disprove it.
-\`\`\`
-
-Run more validation subagents when a claim remains unclear, disputed, or high-risk.
-If no important findings remain, say \`looks good\`.`;
+Resolve disputed claims. Drop false positives, duplicates, and unsupported claims; revise severity when new evidence changes the claimed impact. Return surviving findings in the stage 3 format and briefly explain dropped or revised findings. If there are no findings to check, finish without starting subagents.`;
 
 const RECOMMENDATION_INSTRUCTION = `This is stage 5 of 5: recommend solutions and give the final review.
 
-Leave \`model\` unset for all subagents in this stage.
+Use recommendation subagents with \`fork_current_context=true\` and \`model\` unset for every surviving finding, using the research and validation evidence. If no findings remain, finish without starting subagents.
 
-Ask recommendation subagents with \`fork_current_context=true\` and prepend \`You are a <role> subagent.\` to their instructions.
+Ask for the simplest maintainable solution that addresses the root cause and fits the application's current scale, maturity, and operational needs. Follow established project patterns; introduce a new pattern only when existing ones do not fit.
 
-Instructions should include:
-\`\`\`
-Recommend a solution for the <finding> finding. Fit the solution to the application's current scale, maturity, and operational needs. We need a minimal, simple, clean, maintainable, and long-term solution that follows established project patterns; introduce new patterns only when existing ones do not fit.
-\`\`\`
-
-If no important findings remain, say \`looks good\`. Otherwise, use the format from stage 3 and add a recommendation for each finding. Do not shorten recommendations at the expense of clarity or completeness.`;
+Evaluate the solutions and give the final review in the stage 3 format. Completion requires a supported explanation and an actionable recommendation for every surviving finding. Explain how each recommendation resolves the cause and any relevant tradeoffs.`;
 
 function buildContextMessage(args: string, conversationXml?: string): string {
   const sections: string[] = [CONTEXT_INSTRUCTION];
