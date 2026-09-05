@@ -118,7 +118,7 @@ function formatSkillsForPrompt(skills: Skill[]): string {
 
   const lines = [
     "\n\nThe following skills provide specialized instructions for specific tasks.",
-    "Use the read tool to load a skill file when you're about to perform the kind of work the skill prescribes, not just mention it.",
+    "Read a skill file when you're about to perform the kind of work the skill prescribes, not just mention it.",
     "<available_skills>",
   ];
 

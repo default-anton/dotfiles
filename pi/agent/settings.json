@@ -10,7 +10,6 @@
     "deepseek-v4-flash-vision-exp"
   ],
   "defaultTools": [
-    "read",
     "bash"
   ],
   "compaction": {
@@ -22,9 +21,7 @@
   },
   "steeringMode": "all",
   "doubleEscapeAction": "tree",
-  "packages": [
-    "npm:pi-subdir-context"
-  ],
+  "packages": [],
   "transport": "auto",
   "treeFilterMode": "no-tools",
   "theme": "dark",
