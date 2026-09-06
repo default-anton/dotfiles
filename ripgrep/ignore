@@ -17,6 +17,7 @@ coverage-final.json
 junit.xml
 
 # Dependency and package-manager caches
+.git/
 node_modules/
 bower_components/
 vendor/bundle/
