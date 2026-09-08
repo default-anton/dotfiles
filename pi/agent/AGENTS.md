@@ -4,6 +4,5 @@ Commit only when explicitly asked, using mitchellh-style messages. Do not run va
 If asked to find or resolve comments, search for `tofix:`.
 Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
 Use `agent-browser` only when the user explicitly asks you to use it. Start here `agent-browser skills get core --full`.
-Pre-installed CLI tools: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, imagemagick, herdr, and ffmpeg.
+Pre-installed CLI tools: fd, rg, ast-grep, gh, jq, pnpm, git, mise, uv, imagemagick, and ffmpeg.
 `npx @firecrawl/anydoc` — extract text from office and pdf documents as Markdown.
-`herdr` — manage terminal workspaces for AI coding agents like yourself.
