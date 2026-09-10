@@ -1,8 +1,9 @@
 import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { HerdrTerminal, type HerdrLayout } from "./herdr.ts";
+import { isolatedEnvironmentArgs, shellEscape } from "./environment.ts";
 import {
   EXIT_FILE_NAME,
   RESULT_FILE_NAME,
@@ -26,9 +27,7 @@ const POLL_INTERVAL_MS = 250;
 const RESULT_GRACE_PERIOD_MS = 2_000;
 const ABORT_CLEANUP_GRACE_PERIOD_MS = 1_000;
 
-let terminalMutationQueue: Promise<void> = Promise.resolve();
-const activeSubagentsByGroupId = new Map<string, number>();
-const herdrSubagentTabsByCallerTabId = new Map<string, string>();
+const terminal = new HerdrTerminal();
 
 type ChildModel = {
   provider: string;
@@ -47,6 +46,9 @@ export type SpawnSubagentRunInput = {
   sessionId?: string;
   forkCurrentContext?: boolean;
   parentSessionFile?: string;
+  parentSessionId: string;
+  parentSessionName?: string;
+  onFallback?: (attachCommand: string) => void;
   model?: string;
   cwd: string;
   currentModel?: ChildModel;
@@ -60,31 +62,6 @@ export type SpawnSubagentRunInput = {
 export type SpawnSubagentRunResult = {
   contentText: string;
   details: SpawnSubagentDetails;
-};
-
-type TerminalLayout = {
-  childPaneId: string;
-  groupId: string;
-};
-
-type HerdrContext = {
-  callerPaneId: string;
-  callerTabId: string;
-  workspaceId: string;
-  groupId: string;
-};
-
-type HerdrPane = {
-  pane_id: string;
-  tab_id: string;
-};
-
-type HerdrLayoutPane = {
-  pane_id: string;
-  rect: {
-    width: number;
-    height: number;
-  };
 };
 
 export function shouldRegisterSpawnSubagent(env: NodeJS.ProcessEnv = process.env): boolean {
@@ -231,13 +208,10 @@ function buildFreshChildPrompt(instructions: string): string {
   ].join("\n");
 }
 
-function shellEscape(value: string): string {
-  return `'${value.replace(/'/g, `'\\''`)}'`;
-}
-
 function buildChildEnvAssignments(input: SpawnSubagentRunInput, ipcDir: string, childModel: string): string[] {
   const depth = String(getSubagentDepth(process.env) + 1);
   const assignments = [
+    ...(terminal.usesFallback ? isolatedEnvironmentArgs(process.env) : []),
     `${SUBAGENT_DEPTH_ENV}=${shellEscape(depth)}`,
     `${SUBAGENT_IPC_DIR_ENV}=${shellEscape(ipcDir)}`,
     `${SUBAGENT_TASK_TITLE_ENV}=${shellEscape(input.taskTitle)}`,
@@ -245,7 +219,7 @@ function buildChildEnvAssignments(input: SpawnSubagentRunInput, ipcDir: string, 
   ];
 
   const inheritedPath = process.env.PATH;
-  if (inheritedPath?.trim()) {
+  if (!terminal.usesFallback && inheritedPath?.trim()) {
     assignments.push(`PATH=${shellEscape(inheritedPath)}`);
   }
 
@@ -278,51 +252,6 @@ function getPiInvocation(args: string[]): { command: string; args: string[] } {
   }
 
   return { command: "pi", args };
-}
-
-function herdr<T>(args: string[]): T {
-  const output = execFileSync("herdr", args, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  }).trim();
-  return output ? JSON.parse(output) as T : undefined as T;
-}
-
-async function withTerminalMutationLock<T>(fn: () => Promise<T> | T): Promise<T> {
-  const run = terminalMutationQueue.then(() => fn(), () => fn());
-  terminalMutationQueue = run.then(
-    () => undefined,
-    () => undefined,
-  );
-  return run;
-}
-
-function incrementActiveSubagent(groupId: string): void {
-  activeSubagentsByGroupId.set(groupId, (activeSubagentsByGroupId.get(groupId) ?? 0) + 1);
-}
-
-function decrementActiveSubagent(context: HerdrContext): void {
-  const next = (activeSubagentsByGroupId.get(context.groupId) ?? 1) - 1;
-  if (next <= 0) {
-    activeSubagentsByGroupId.delete(context.groupId);
-    herdrSubagentTabsByCallerTabId.delete(context.callerTabId);
-    return;
-  }
-
-  activeSubagentsByGroupId.set(context.groupId, next);
-}
-
-function ensureTerminalAvailable(): void {
-  const paneId = process.env.HERDR_PANE_ID?.trim();
-  if (!paneId) {
-    throw new Error("run_subagent requires pi to be running inside herdr.");
-  }
-
-  try {
-    herdr(["pane", "current", "--pane", paneId]);
-  } catch (error: any) {
-    throw new Error(`run_subagent could not talk to herdr: ${error?.message ?? String(error)}`);
-  }
 }
 
 function writeLauncherScript(
@@ -367,183 +296,6 @@ function writeLauncherScript(
   writeFileSync(scriptPath, script, { encoding: "utf8", mode: 0o700 });
   chmodSync(scriptPath, 0o700);
   return scriptPath;
-}
-
-function resolveHerdrContext(): HerdrContext {
-  const callerPaneId = process.env.HERDR_PANE_ID?.trim();
-  if (!callerPaneId) {
-    throw new Error("run_subagent could not determine the calling herdr pane.");
-  }
-
-  try {
-    const response = herdr<{
-      result?: { pane?: HerdrPane & { workspace_id?: string } };
-    }>(["pane", "current", "--pane", callerPaneId]);
-    const pane = response.result?.pane;
-    const callerTabId = pane?.tab_id || process.env.HERDR_TAB_ID?.trim();
-    const workspaceId = pane?.workspace_id || process.env.HERDR_WORKSPACE_ID?.trim();
-    if (!pane?.pane_id || !callerTabId || !workspaceId) {
-      throw new Error("herdr returned incomplete pane metadata");
-    }
-
-    return {
-      callerPaneId: pane.pane_id,
-      callerTabId,
-      workspaceId,
-      groupId: `herdr:${callerTabId}`,
-    };
-  } catch (error: any) {
-    throw new Error(`run_subagent could not resolve the calling herdr pane: ${error?.message ?? String(error)}`);
-  }
-}
-
-function listHerdrTabPanes(context: HerdrContext, tabId: string): HerdrPane[] {
-  const response = herdr<{ result?: { panes?: HerdrPane[] } }>([
-    "pane",
-    "list",
-    "--workspace",
-    context.workspaceId,
-  ]);
-  return (response.result?.panes ?? []).filter((pane) => pane.tab_id === tabId);
-}
-
-function setHerdrPaneTitle(paneId: string, taskTitle: string): void {
-  try {
-    herdr(["pane", "rename", paneId, taskTitle]);
-  } catch {}
-}
-
-function getHerdrSplitTarget(paneId: string): { paneId: string; direction: "right" | "down" } {
-  const response = herdr<{
-    result?: { layout?: { panes?: HerdrLayoutPane[] } };
-  }>(["pane", "layout", "--pane", paneId]);
-  const panes = response.result?.layout?.panes ?? [];
-  const largest = [...panes].sort((a, b) =>
-    b.rect.width * b.rect.height - a.rect.width * a.rect.height
-  )[0];
-  if (!largest) {
-    return { paneId, direction: "right" };
-  }
-
-  return {
-    paneId: largest.pane_id,
-    direction: largest.rect.width >= largest.rect.height * 2 ? "right" : "down",
-  };
-}
-
-function createHerdrLayout(cwd: string, taskTitle: string, context: HerdrContext): TerminalLayout {
-  const existingTabId = herdrSubagentTabsByCallerTabId.get(context.callerTabId);
-  const existingPanes = existingTabId ? listHerdrTabPanes(context, existingTabId) : [];
-
-  let tabId = existingTabId;
-  let childPaneId: string;
-  if (tabId && existingPanes.length > 0) {
-    const splitTarget = getHerdrSplitTarget(existingPanes[0].pane_id);
-    const response = herdr<{ result?: { pane?: HerdrPane } }>([
-      "pane",
-      "split",
-      splitTarget.paneId,
-      "--direction",
-      splitTarget.direction,
-      "--cwd",
-      cwd,
-      "--no-focus",
-    ]);
-    childPaneId = response.result?.pane?.pane_id ?? "";
-  } else {
-    const response = herdr<{
-      result?: { root_pane?: HerdrPane; tab?: { tab_id?: string } };
-    }>([
-      "tab",
-      "create",
-      "--workspace",
-      context.workspaceId,
-      "--cwd",
-      cwd,
-      "--label",
-      "subagents",
-      "--no-focus",
-    ]);
-    tabId = response.result?.tab?.tab_id;
-    childPaneId = response.result?.root_pane?.pane_id ?? "";
-  }
-
-  if (!tabId || !childPaneId) {
-    throw new Error("run_subagent could not create the subagent herdr tab or pane.");
-  }
-
-  herdrSubagentTabsByCallerTabId.set(context.callerTabId, tabId);
-  setHerdrPaneTitle(childPaneId, taskTitle);
-  return {
-    childPaneId,
-    groupId: context.groupId,
-  };
-}
-
-async function createTerminalLayout(
-  cwd: string,
-  taskTitle: string,
-  context: HerdrContext,
-  signal?: AbortSignal,
-): Promise<TerminalLayout | undefined> {
-  return withTerminalMutationLock(() => {
-    if (signal?.aborted) {
-      return undefined;
-    }
-
-    const layout = createHerdrLayout(cwd, taskTitle, context);
-    if (signal?.aborted) {
-      try {
-        herdr(["pane", "close", layout.childPaneId]);
-      } catch {}
-      return undefined;
-    }
-
-    return layout;
-  });
-}
-
-async function startCommandInTerminalPane(
-  layout: TerminalLayout,
-  command: string,
-  signal?: AbortSignal,
-): Promise<void> {
-  await withTerminalMutationLock(() => {
-    if (signal?.aborted) {
-      throw new Error("Subagent was aborted before the subagent command was started.");
-    }
-    if (!isTerminalPaneAlive(layout)) {
-      throw new Error("Subagent pane exited before the subagent command was started.");
-    }
-    herdr(["pane", "run", layout.childPaneId, command]);
-  });
-}
-
-function isTerminalPaneAlive(layout: TerminalLayout): boolean {
-  if (!layout.childPaneId) {
-    return false;
-  }
-
-  try {
-    herdr(["pane", "get", layout.childPaneId]);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function cleanupTerminalLayout(layout: TerminalLayout | undefined): Promise<void> {
-  if (!layout) {
-    return;
-  }
-
-  await withTerminalMutationLock(() => {
-    try {
-      if (isTerminalPaneAlive(layout)) {
-        herdr(["pane", "close", layout.childPaneId]);
-      }
-    } catch {}
-  });
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -593,22 +345,17 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     };
   }
 
-  ensureTerminalAvailable();
-
-  const terminalContext = resolveHerdrContext();
   const ipcDir = mkdtempSync(join(tmpdir(), "pi-run-subagent-"));
   const statePath = join(ipcDir, STATE_FILE_NAME);
   const resultPath = join(ipcDir, RESULT_FILE_NAME);
   const exitPath = join(ipcDir, EXIT_FILE_NAME);
-  incrementActiveSubagent(terminalContext.groupId);
 
-  let layout: TerminalLayout | undefined;
+  let layout: HerdrLayout | undefined;
   let finalAnswer = "";
   let exitCode = 1;
   let aborted = false;
   let sawExit = false;
   let sawResult = false;
-  let cleanupAfterReturn = false;
   let successResultDeadline = 0;
   let deadPaneDeadline = 0;
   let abortCleanupDeadline = 0;
@@ -624,7 +371,6 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     }
 
     aborted = true;
-    cleanupAfterReturn = true;
     abortCleanupDeadline = Date.now() + ABORT_CLEANUP_GRACE_PERIOD_MS;
     details.stopReason = "aborted";
     details.status = "error";
@@ -635,7 +381,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
 
   const startCleanup = () => {
     if (!cleanupPromise) {
-      cleanupPromise = cleanupTerminalLayout(layout);
+      cleanupPromise = terminal.close(layout);
     }
 
     return cleanupPromise;
@@ -679,7 +425,6 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     await sleep(0);
     if (input.signal?.aborted) {
       markAborted("Subagent was aborted before the subagent started.");
-      cleanupAfterReturn = true;
       return {
         contentText: buildFailureText(details, "Parent request was aborted."),
         details: cloneDetails(details),
@@ -694,21 +439,11 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       parentSessionFile,
       ipcDir,
     );
-    layout = await createTerminalLayout(input.cwd, input.taskTitle, terminalContext, input.signal);
-
-    if (!layout) {
-      markAborted("Subagent was aborted before the terminal pane was created.");
-      cleanupAfterReturn = true;
-      return {
-        contentText: buildFailureText(details, "Parent request was aborted."),
-        details: cloneDetails(details),
-      };
-    }
+    layout = await terminal.createPane(input);
 
     try {
-      await startCommandInTerminalPane(layout, `${shellEscape(scriptPath)}; exit`, input.signal);
+      await terminal.run(layout, `${shellEscape(scriptPath)}; exit`, input.signal);
     } catch (error: any) {
-      cleanupAfterReturn = true;
       if (input.signal?.aborted) {
         markAborted("Subagent was aborted before the subagent command was started.");
         return {
@@ -757,22 +492,19 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
         const exitFile = readJsonFile<SpawnSubagentExitFile>(exitPath);
         exitCode = exitFile?.exitCode ?? 1;
         sawExit = true;
-        cleanupAfterReturn = true;
         break;
       }
 
-      const paneAlive = layout ? isTerminalPaneAlive(layout) : false;
+      const paneAlive = layout ? terminal.isAlive(layout) : false;
       if (!paneAlive) {
         if (aborted) {
           exitCode = 130;
           sawExit = true;
-          cleanupAfterReturn = true;
           break;
         }
 
         if (sawResult && details.stopReason === "stop") {
           exitCode = 0;
-          cleanupAfterReturn = true;
           break;
         }
 
@@ -781,7 +513,6 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
         } else if (Date.now() >= deadPaneDeadline) {
           exitCode = 1;
           sawExit = true;
-          cleanupAfterReturn = true;
           details.stopReason = details.stopReason ?? "error";
           details.error = details.error || "Subagent pane exited before writing a result.";
           break;
@@ -791,13 +522,11 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       }
 
       if (sawResult && details.stopReason !== "stop") {
-        cleanupAfterReturn = true;
         break;
       }
 
       if (sawResult && details.stopReason === "stop") {
         if (successResultDeadline > 0 && Date.now() >= successResultDeadline) {
-          cleanupAfterReturn = true;
           break;
         }
       }
@@ -852,14 +581,23 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       contentText: appendSessionId(finalAnswer || "Subagent finished without a text answer.", details.sessionId),
       details: cloneDetails(details),
     };
+  } catch (error) {
+    if (input.signal?.aborted) {
+      markAborted("Subagent was aborted.");
+    } else {
+      details.status = "error";
+      details.stopReason = "error";
+      details.error = error instanceof Error ? error.message : String(error);
+    }
+    return {
+      contentText: buildFailureText(details, "Subagent failed."),
+      details: cloneDetails(details),
+    };
   } finally {
     input.signal?.removeEventListener("abort", abortListener);
-    if (cleanupAfterReturn) {
-      await (cleanupPromise ?? cleanupTerminalLayout(layout));
-      try {
-        rmSync(ipcDir, { recursive: true, force: true });
-      } catch {}
-    }
-    decrementActiveSubagent(terminalContext);
+    await (cleanupPromise ?? terminal.close(layout));
+    try {
+      rmSync(ipcDir, { recursive: true, force: true });
+    } catch {}
   }
 }

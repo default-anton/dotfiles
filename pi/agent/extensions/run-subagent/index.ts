@@ -187,6 +187,13 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
     return;
   }
 
+  const shutdown = new AbortController();
+  const pending = new Set<Promise<unknown>>();
+  pi.on("session_shutdown", async () => {
+    shutdown.abort();
+    await Promise.allSettled(pending);
+  });
+
   pi.registerTool({
     name: "run_subagent",
     label: "Run Subagent",
@@ -196,12 +203,17 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
 
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
       const typedParams = params as SpawnSubagentParams;
-      const result = await runSpawnSubagent({
+      const run = runSpawnSubagent({
         instructions: typedParams.instructions,
         taskTitle: typedParams.task_title,
         sessionId: typedParams.session_id,
         forkCurrentContext: typedParams.fork_current_context === true,
         parentSessionFile: typedParams.fork_current_context ? ctx.sessionManager.getSessionFile() : undefined,
+        parentSessionId: ctx.sessionManager.getSessionId(),
+        parentSessionName: pi.getSessionName(),
+        onFallback: (attachCommand) => {
+          if (ctx.hasUI) ctx.ui.notify(`Subagents are running in background Herdr. Watch: ${attachCommand}`, "info");
+        },
         model: typedParams.model,
         cwd: ctx.cwd,
         currentModel: ctx.model
@@ -222,7 +234,7 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
         })),
         activeTools: pi.getActiveTools(),
         thinkingLevel: pi.getThinkingLevel(),
-        signal,
+        signal: signal ? AbortSignal.any([signal, shutdown.signal]) : shutdown.signal,
         onUpdate: onUpdate
           ? (details) => {
             onUpdate({
@@ -232,6 +244,13 @@ export default function spawnSubagentExtension(pi: ExtensionAPI) {
           }
           : undefined,
       });
+      pending.add(run);
+      let result: Awaited<typeof run>;
+      try {
+        result = await run;
+      } finally {
+        pending.delete(run);
+      }
 
       if (result.details.status === "error") {
         throw new Error(result.contentText);
