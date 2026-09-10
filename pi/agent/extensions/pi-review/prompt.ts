@@ -49,7 +49,7 @@ Integrate the reports, merge duplicate findings, and resolve important coverage 
 
 When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues.
 
-Explain what is wrong, when it happens, and why it matters in clear prose, with supporting evidence, relevant paths or symbols, and the likely root cause. Use labels only when they improve clarity.`;
+Explain what is wrong, when it happens, and why it matters in clear prose, with supporting evidence, relevant paths or symbols, and the likely root cause. Note which findings are pre-existing. Use labels only when they improve clarity.`;
 
 const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
 
