@@ -15,7 +15,7 @@
   "compaction": {
     "enabled": false
   },
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "branchSummary": {
     "skipPrompt": true
   },
