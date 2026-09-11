@@ -32,7 +32,7 @@
   "warnings": {
     "anthropicExtraUsage": true
   },
-  "defaultProjectTrust": "ask",
+  "defaultProjectTrust": "always",
   "terminal": {
     "showTerminalProgress": true
   }
