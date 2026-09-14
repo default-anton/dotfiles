@@ -55,7 +55,9 @@ function updateAssistantState(
   }
 
   if ("model" in message && typeof message.model === "string" && message.model.trim()) {
-    details.childModel = message.model;
+    if ("provider" in message && typeof message.provider === "string") {
+      details.childModel = `${message.provider}/${message.model}`;
+    }
   }
 
   if (options.includeUsage && "usage" in message && message.usage && typeof message.usage === "object") {
@@ -145,7 +147,8 @@ export default function runSubagentChildExtension(pi: ExtensionAPI) {
     }
 
     if (!details.stopReason) {
-      details.stopReason = details.error ? "error" : "aborted";
+      details.stopReason = "error";
+      details.error ||= "Subagent exited without a model result. Startup or prompt preparation failed; check the selected model, provider credentials, and session configuration.";
     }
 
     details.status = details.stopReason === "stop" ? "success" : "error";
@@ -169,7 +172,25 @@ export default function runSubagentChildExtension(pi: ExtensionAPI) {
 
   pi.on("session_start", async (_event, ctx) => {
     details.sessionId = ctx.sessionManager.getSessionId();
-    scheduleStateWrite();
+    try {
+      if (!ctx.model) {
+        throw new Error("No model selected for the subagent. Select a model or pass an explicit provider/model ID.");
+      }
+      details.childModel = `${ctx.model.provider}/${ctx.model.id}`;
+      if (details.childModel !== modelArg) {
+        throw new Error(`Subagent selected ${details.childModel} instead of ${modelArg}. Check the child model configuration.`);
+      }
+      const auth = await ctx.modelRegistry.getApiKeyAndHeaders(ctx.model);
+      if (!auth.ok) {
+        throw new Error(`Authentication failed for subagent model ${details.childModel}. ${auth.error}`);
+      }
+      scheduleStateWrite();
+    } catch (error) {
+      details.stopReason = "error";
+      details.error = error instanceof Error ? error.message : String(error);
+      finalize();
+      ctx.shutdown();
+    }
   });
 
   pi.on("tool_execution_start", async (event) => {

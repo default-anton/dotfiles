@@ -21,21 +21,13 @@ import {
   type SpawnSubagentResultFile,
   type SpawnSubagentStateFile,
 } from "./ipc.ts";
+import { resolveChildModel, type ChildModel } from "./model.ts";
 
-const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhigh"]);
 const POLL_INTERVAL_MS = 250;
 const RESULT_GRACE_PERIOD_MS = 2_000;
 const ABORT_CLEANUP_GRACE_PERIOD_MS = 1_000;
 
 const terminal = new HerdrTerminal();
-
-type ChildModel = {
-  provider: string;
-  id: string;
-  name?: string;
-  contextWindow?: number;
-  usingSubscription?: boolean;
-};
 
 export type { SpawnSubagentDetails } from "./ipc.ts";
 export type SpawnSubagentUsage = SpawnSubagentDetails["usage"];
@@ -74,55 +66,8 @@ function getSubagentDepth(env: NodeJS.ProcessEnv): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function stripThinkingSuffix(modelName: string): string {
-  const normalized = modelName.trim();
-  const separatorIndex = normalized.lastIndexOf(":");
-  if (separatorIndex === -1) {
-    return normalized;
-  }
-
-  const suffix = normalized.slice(separatorIndex + 1);
-  if (!THINKING_LEVELS.has(suffix)) {
-    return normalized;
-  }
-
-  return normalized.slice(0, separatorIndex);
-}
-
 function findModelInfo(modelName: string, availableModels: ChildModel[] | undefined): ChildModel | undefined {
-  if (!availableModels || availableModels.length === 0) {
-    return undefined;
-  }
-
-  const raw = modelName.trim();
-  if (!raw) {
-    return undefined;
-  }
-
-  const normalized = stripThinkingSuffix(raw);
-  const rawLower = raw.toLowerCase();
-  const normalizedLower = normalized.toLowerCase();
-
-  const exact = availableModels.find((model) => `${model.provider}/${model.id}` === normalized);
-  if (exact) {
-    return exact;
-  }
-
-  const matches = availableModels.filter((model) => {
-    const fullId = `${model.provider}/${model.id}`.toLowerCase();
-    const id = model.id.toLowerCase();
-    const name = model.name?.toLowerCase();
-    return (
-      fullId === normalizedLower ||
-      fullId === rawLower ||
-      id === normalizedLower ||
-      id === rawLower ||
-      name === normalizedLower ||
-      name === rawLower
-    );
-  });
-
-  return matches.length === 1 ? matches[0] : undefined;
+  return availableModels?.find((model) => `${model.provider}/${model.id}` === modelName);
 }
 
 function applyResolvedModel(details: SpawnSubagentDetails, model: ChildModel | undefined): void {
@@ -167,20 +112,6 @@ function mergeDetails(
   details.stopReason = merged.stopReason;
   details.error = merged.error;
   details.exitCode = merged.exitCode;
-}
-
-function resolveModelArg(input: SpawnSubagentRunInput): string {
-  if (input.model?.trim()) {
-    return input.model.trim();
-  }
-
-  if (!input.currentModel) {
-    throw new Error(
-      "run_subagent could not determine the current model. Pass model explicitly or select a model before delegating.",
-    );
-  }
-
-  return `${input.currentModel.provider}/${input.currentModel.id}:${input.thinkingLevel}`;
 }
 
 function appendSessionId(text: string, sessionId: string | undefined): string {
@@ -258,6 +189,7 @@ function writeLauncherScript(
   input: SpawnSubagentRunInput,
   childPrompt: string,
   childModel: string,
+  thinkingLevel: string | undefined,
   requestedSessionId: string | undefined,
   parentSessionFile: string | undefined,
   ipcDir: string,
@@ -272,6 +204,7 @@ function writeLauncherScript(
   } else if (requestedSessionId) {
     childArgs.push("--session", requestedSessionId);
   }
+  if (thinkingLevel) childArgs.push("--thinking", thinkingLevel);
   childArgs.push("--model", childModel, ...buildChildToolArgs(input.activeTools), "-e", childExtensionPath, childPrompt);
 
   const invocation = getPiInvocation(childArgs);
@@ -305,7 +238,8 @@ async function sleep(ms: number): Promise<void> {
 }
 
 export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<SpawnSubagentRunResult> {
-  const childModel = resolveModelArg(input);
+  const resolvedModel = resolveChildModel(input);
+  const childModel = resolvedModel.reference;
   const requestedSessionId = input.sessionId?.trim() || undefined;
   const parentSessionFile = input.forkCurrentContext ? input.parentSessionFile?.trim() || undefined : undefined;
   if (input.forkCurrentContext && requestedSessionId) {
@@ -329,10 +263,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
     usage: createEmptyUsage(),
   };
 
-  if (!input.model?.trim()) {
-    applyResolvedModel(details, input.currentModel);
-  }
-  applyResolvedModel(details, findModelInfo(childModel, input.availableModels));
+  applyResolvedModel(details, resolvedModel.model);
 
   if (input.signal?.aborted) {
     details.status = "error";
@@ -435,6 +366,7 @@ export async function runSpawnSubagent(input: SpawnSubagentRunInput): Promise<Sp
       input,
       childPrompt,
       childModel,
+      resolvedModel.thinkingLevel,
       requestedSessionId,
       parentSessionFile,
       ipcDir,

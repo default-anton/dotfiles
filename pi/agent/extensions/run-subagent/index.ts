@@ -32,7 +32,7 @@ const SpawnSubagentParams = Type.Object({
   ),
   model: Type.Optional(
     Type.String({
-      description: "Optional child model override, passed exactly as pi --model accepts. Leave unset to inherit the current model and thinking level",
+      description: "Optional exact available model ID or provider/model, with optional :thinking suffix. Ambiguous IDs require a provider; fuzzy names are not supported. Leave unset to inherit the current model and thinking level",
     }),
   ),
 });

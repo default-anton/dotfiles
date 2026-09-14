@@ -44,3 +44,25 @@ HERDR_SMOKE_TEST=1 node --test pi/agent/extensions/run-subagent/test/herdr-smoke
 The opt-in smoke test needs Herdr and Pi on `PATH`. It creates an isolated
 headless session, starts eight offline Pi processes without prompts or model
 requests, and removes its session data after stopping its server.
+
+## Model selection and failures
+
+Overrides accept an exact available model ID or `provider/model`, optionally
+followed by a thinking level such as `:high`. Bare IDs must identify one
+available model; ambiguous IDs require a provider. Fuzzy names and unavailable
+models fail before a pane opens. References containing `/` must include the
+provider (for example, `openrouter/openai/model`). Without an override, the child inherits the
+parent model and thinking level.
+
+Exact model IDs take precedence over thinking suffixes, including IDs that
+contain colons. The launcher passes the canonical model and `--thinking`
+separately to avoid Pi's fuzzy suffix resolution. Supported thinking levels are
+`off`, `minimal`, `low`, `medium`, `high`, `xhigh`, and `max`.
+
+The child checks model selection and authentication before its initial prompt
+and writes failures to the parent result before requesting shutdown. A shutdown
+without a model result reports a startup/prompt-preparation failure rather than
+claiming cancellation. Errors outside that preflight may lack their original
+TUI diagnostic; model-reported and parent-requested cancellation remain aborted.
+
+Reload extensions with `/reload` in an existing parent Pi session after updates.
