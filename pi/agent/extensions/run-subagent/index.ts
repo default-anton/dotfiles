@@ -32,7 +32,7 @@ const SpawnSubagentParams = Type.Object({
   ),
   model: Type.Optional(
     Type.String({
-      description: "Optional exact available model ID or provider/model, with optional :thinking suffix. Ambiguous IDs require a provider; fuzzy names are not supported. Leave unset to inherit the current model and thinking level",
+      description: "Optional exact available model ID or provider/model, with optional :thinking suffix. Omitted provider and thinking level inherit the current session values. Fuzzy names are not supported. Leave unset to inherit the current provider, model, and thinking level",
     }),
   ),
 });

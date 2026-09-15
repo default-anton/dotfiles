@@ -1,22 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { ThinkingLevel } from "@earendil-works/pi-ai";
-
-const THINKING_LEVELS = new Set<ThinkingLevel>([
-  "off",
-  "minimal",
-  "low",
-  "medium",
-  "high",
-  "xhigh",
-  "max",
-]);
-
-type ModelSelection = {
-  provider: string;
-  modelId: string;
-  thinkingLevel?: ThinkingLevel;
-};
+import { resolveModelSelection } from "./lib/model-selection.ts";
 
 function readFrontmatterModel(filePath: string): string | undefined {
   const content = readFileSync(filePath, "utf-8").replace(/^\uFEFF/, "");
@@ -34,29 +19,11 @@ function readFrontmatterModel(filePath: string): string | undefined {
   return value;
 }
 
-function parseModelSelection(value: string): ModelSelection | undefined {
-  const separator = value.indexOf("/");
-  if (separator <= 0 || separator === value.length - 1) return undefined;
-
-  const provider = value.slice(0, separator);
-  let modelId = value.slice(separator + 1);
-  let thinkingLevel: ThinkingLevel | undefined;
-  const thinkingSeparator = modelId.lastIndexOf(":");
-  const suffix = modelId.slice(thinkingSeparator + 1) as ThinkingLevel;
-
-  if (thinkingSeparator > 0 && THINKING_LEVELS.has(suffix)) {
-    modelId = modelId.slice(0, thinkingSeparator);
-    thinkingLevel = suffix;
-  }
-
-  return { provider, modelId, thinkingLevel };
-}
-
 function promptCommandName(text: string): string | undefined {
   return text.match(/^\/([^\s]+)(?:\s|$)/)?.[1];
 }
 
-async function selectTemplateModel(
+export async function selectTemplateModel(
   pi: ExtensionAPI,
   ctx: ExtensionContext,
   commandName: string,
@@ -72,26 +39,25 @@ async function selectTemplateModel(
 
   if (!configuredModel) return true;
 
-  const selection = parseModelSelection(configuredModel);
-  if (!selection) {
-    ctx.ui.notify(`Invalid model for /${commandName}: ${configuredModel}`, "error");
-    return false;
-  }
-
-  const model = ctx.modelRegistry.find(selection.provider, selection.modelId);
-  if (!model) {
+  let selection;
+  try {
+    selection = resolveModelSelection({
+      reference: configuredModel,
+      currentProvider: ctx.model?.provider,
+      availableModels: ctx.modelRegistry.getAll(),
+      inheritedThinkingLevel: pi.getThinkingLevel(),
+    });
+  } catch {
     ctx.ui.notify(`Model not found for /${commandName}: ${configuredModel}`, "error");
     return false;
   }
 
-  if (!(await pi.setModel(model))) {
+  if (!(await pi.setModel(selection.model))) {
     ctx.ui.notify(`No credentials for /${commandName} model: ${configuredModel}`, "error");
     return false;
   }
 
-  if (selection.thinkingLevel) {
-    pi.setThinkingLevel(selection.thinkingLevel);
-  }
+  pi.setThinkingLevel(selection.thinkingLevel as ThinkingLevel);
   return true;
 }
 

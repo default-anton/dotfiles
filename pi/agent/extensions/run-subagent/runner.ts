@@ -189,7 +189,7 @@ function writeLauncherScript(
   input: SpawnSubagentRunInput,
   childPrompt: string,
   childModel: string,
-  thinkingLevel: string | undefined,
+  thinkingLevel: string,
   requestedSessionId: string | undefined,
   parentSessionFile: string | undefined,
   ipcDir: string,
@@ -204,7 +204,7 @@ function writeLauncherScript(
   } else if (requestedSessionId) {
     childArgs.push("--session", requestedSessionId);
   }
-  if (thinkingLevel) childArgs.push("--thinking", thinkingLevel);
+  childArgs.push("--thinking", thinkingLevel);
   childArgs.push("--model", childModel, ...buildChildToolArgs(input.activeTools), "-e", childExtensionPath, childPrompt);
 
   const invocation = getPiInvocation(childArgs);

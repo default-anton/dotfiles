@@ -12,27 +12,44 @@ test("bare ID with thinking resolves exactly against authenticated models", () =
   });
 });
 
-test("explicit provider and inherited thinking are preserved", () => {
-  assert.equal(resolveChildModel({ ...input, model: "openrouter/openai/gpt-5.6-luna:batch:high" }).reference,
-    "openrouter/openai/gpt-5.6-luna:batch");
+test("model overrides inherit omitted provider and thinking level", () => {
+  assert.deepEqual(resolveChildModel({ ...input, model: "gpt-5.6-luna" }), {
+    model: openai, reference: "openai/gpt-5.6-luna", thinkingLevel: "medium",
+  });
+  assert.deepEqual(resolveChildModel({ ...input, model: "openai/gpt-5.6-luna" }), {
+    model: openai, reference: "openai/gpt-5.6-luna", thinkingLevel: "medium",
+  });
+  assert.deepEqual(resolveChildModel({ ...input, model: "openrouter/openai/gpt-5.6-luna:batch:high" }), {
+    model: router, reference: "openrouter/openai/gpt-5.6-luna:batch", thinkingLevel: "high",
+  });
   assert.deepEqual(resolveChildModel(input), {
     model: openai, reference: "openai/gpt-5.6-luna", thinkingLevel: "medium",
   });
 });
 
-test("ambiguous bare IDs require a provider, not a fuzzy preference", () => {
+test("bare IDs use the current provider", () => {
   const availableModels = [openai, { ...openai, provider: "other" }];
-  assert.throws(() => resolveChildModel({ ...input, availableModels, model: "gpt-5.6-luna:high" }), /Ambiguous.*openai\/gpt-5.6-luna.*other\/gpt-5.6-luna/);
+  assert.equal(resolveChildModel({ ...input, availableModels, model: "gpt-5.6-luna:high" }).reference, "openai/gpt-5.6-luna");
   assert.equal(resolveChildModel({ ...input, availableModels, model: "other/gpt-5.6-luna:high" }).reference, "other/gpt-5.6-luna");
 });
 
 test("exact colon IDs take precedence over thinking suffixes", () => {
   const colon = { provider: "other", id: "model:high" };
   const availableModels = [colon, { provider: "other", id: "model" }];
-  assert.deepEqual(resolveChildModel({ ...input, availableModels, model: "model:high" }), {
-    model: colon, reference: "other/model:high", thinkingLevel: undefined,
+  assert.deepEqual(resolveChildModel({
+    ...input,
+    currentModel: colon,
+    availableModels,
+    model: "model:high",
+  }), {
+    model: colon, reference: "other/model:high", thinkingLevel: "medium",
   });
-  assert.equal(resolveChildModel({ ...input, availableModels, model: "model:high:max" }).thinkingLevel, "max");
+  assert.equal(resolveChildModel({
+    ...input,
+    currentModel: colon,
+    availableModels,
+    model: "model:high:max",
+  }).thinkingLevel, "max");
 });
 
 test("unknown providers, fuzzy names and invalid suffixes fail with guidance", () => {

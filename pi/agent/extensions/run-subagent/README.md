@@ -48,11 +48,12 @@ requests, and removes its session data after stopping its server.
 ## Model selection and failures
 
 Overrides accept an exact available model ID or `provider/model`, optionally
-followed by a thinking level such as `:high`. Bare IDs must identify one
-available model; ambiguous IDs require a provider. Fuzzy names and unavailable
-models fail before a pane opens. References containing `/` must include the
-provider (for example, `openrouter/openai/model`). Without an override, the child inherits the
-parent model and thinking level.
+followed by a thinking level such as `:high`. Bare IDs inherit the current
+provider. Overrides without a thinking level inherit the current thinking
+level. Fuzzy names and unavailable models fail before a pane opens. References
+containing `/` must include the provider (for example,
+`openrouter/openai/model`). Without an override, the child inherits the parent
+provider, model, and thinking level.
 
 Exact model IDs take precedence over thinking suffixes, including IDs that
 contain colons. The launcher passes the canonical model and `--thinking`
