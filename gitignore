@@ -22,3 +22,6 @@ x_custom_*.env
 /chrome/
 /.pi
 venv/
+
+.tort.local.toml
+.tort/
