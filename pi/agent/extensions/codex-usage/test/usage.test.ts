@@ -3,6 +3,10 @@ import test from "node:test";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import codexUsageExtension from "../index.ts";
 
+async function flushRequests() {
+	await new Promise<void>((resolve) => setImmediate(resolve));
+}
+
 function setup() {
 	const handlers = new Map<string, (event: unknown, ctx: ExtensionContext) => unknown>();
 	let status: string | undefined;
@@ -11,6 +15,7 @@ function setup() {
 	})).toString("base64url")}.signature`;
 	const ctx = {
 		hasUI: true,
+		isIdle: () => true,
 		model: { provider: "openai-codex" },
 		modelRegistry: { getApiKeyForProvider: async () => token },
 		ui: {
@@ -27,7 +32,10 @@ function setup() {
 		ctx,
 		token,
 		status: () => status,
-		emit: async (name: string) => handlers.get(name)?.({}, ctx),
+		emit: async (name: string) => {
+			await handlers.get(name)?.({}, ctx);
+			await flushRequests();
+		},
 	};
 }
 
@@ -103,8 +111,80 @@ test("discards an in-flight result after switching models", async (t) => {
 	});
 	const pending = extension.emit("agent_settled");
 	await fetching;
+	extension.ctx.model = { provider: "anthropic" } as ExtensionContext["model"];
 	await extension.emit("model_select");
 	finish(Response.json({ rate_limit: { primary_window: { used_percent: 20 } } }));
 	await pending;
+	assert.equal(extension.status(), undefined);
+});
+
+test("loads usage on startup and when selecting Codex", async (t) => {
+	const extension = setup();
+	extension.ctx.model = { provider: "anthropic" } as ExtensionContext["model"];
+	const fetch = t.mock.method(globalThis, "fetch", async () =>
+		Response.json({ rate_limit: { primary_window: { used_percent: 20 } } }));
+	await extension.emit("session_start");
+	assert.equal(fetch.mock.callCount(), 0);
+	extension.ctx.model = { provider: "openai-codex" } as ExtensionContext["model"];
+	await extension.emit("model_select");
+	assert.equal(extension.status(), "Codex 80%");
+	await extension.emit("session_start");
+	assert.equal(fetch.mock.callCount(), 2);
+});
+
+test("polls during work and stops after the final refresh", async (t) => {
+	t.mock.timers.enable({ apis: ["setInterval"] });
+	const extension = setup();
+	const fetch = t.mock.method(globalThis, "fetch", async () =>
+		Response.json({ rate_limit: { primary_window: { used_percent: 20 } } }));
+	await extension.emit("agent_start");
+	assert.equal(fetch.mock.callCount(), 1);
+	t.mock.timers.tick(30_000);
+	await flushRequests();
+	assert.equal(fetch.mock.callCount(), 2);
+	await extension.emit("agent_settled");
+	assert.equal(fetch.mock.callCount(), 3);
+	t.mock.timers.tick(60_000);
+	await flushRequests();
+	assert.equal(fetch.mock.callCount(), 3);
+});
+
+test("keeps usage visible, skips overlapping polls, and queues the final refresh", async (t) => {
+	t.mock.timers.enable({ apis: ["setInterval"] });
+	const extension = setup();
+	let finish!: (response: Response) => void;
+	const fetch = t.mock.method(globalThis, "fetch", async () =>
+		Response.json({ rate_limit: { primary_window: { used_percent: 20 } } }));
+	await extension.emit("session_start");
+	fetch.mock.mockImplementationOnce(() => new Promise<Response>((resolve) => { finish = resolve; }));
+	await extension.emit("agent_start");
+	assert.equal(extension.status(), "Codex 80%");
+	t.mock.timers.tick(60_000);
+	await flushRequests();
+	assert.equal(fetch.mock.callCount(), 2);
+	await extension.emit("agent_settled");
+	assert.equal(fetch.mock.callCount(), 2);
+	finish(Response.json({ rate_limit: { primary_window: { used_percent: 30 } } }));
+	await flushRequests();
+	assert.equal(fetch.mock.callCount(), 3);
+});
+
+test("shutdown cancels requests and polling without restoring status", async (t) => {
+	t.mock.timers.enable({ apis: ["setInterval"] });
+	const extension = setup();
+	let finish!: (response: Response) => void;
+	let signal!: AbortSignal;
+	const fetch = t.mock.method(globalThis, "fetch", (_url: string, init: RequestInit) => {
+		signal = init.signal!;
+		return new Promise<Response>((resolve) => { finish = resolve; });
+	});
+	await extension.emit("agent_start");
+	await extension.emit("session_shutdown");
+	assert.equal(signal.aborted, true);
+	finish(Response.json({ rate_limit: { primary_window: { used_percent: 20 } } }));
+	await flushRequests();
+	t.mock.timers.tick(60_000);
+	await flushRequests();
+	assert.equal(fetch.mock.callCount(), 1);
 	assert.equal(extension.status(), undefined);
 });
