@@ -130,7 +130,7 @@ navigate_workspace_down = "j"
 # height = "80%"
 
 [[keys.command]]
-key = "prefix+m"
+key = "prefix+,"
 type = "popup"
 command = "$HOME/.dotfiles/herdr/insert-files.sh"
 description = "insert files or folders"
@@ -144,6 +144,25 @@ command = "$HOME/.dotfiles/herdr/insert-files.sh changed"
 description = "insert changed files"
 width = "80%"
 height = "80%"
+
+# Terminal annotations
+[[keys.command]]
+key = "prefix+a"
+type = "plugin_action"
+command = "annotate.capture"
+description = "annotate text"
+
+[[keys.command]]
+key = "prefix+m"
+type = "plugin_action"
+command = "annotate.manage"
+description = "manage annotations"
+
+[[keys.command]]
+key = "prefix+shift+o"
+type = "plugin_action"
+command = "annotate.last"
+description = "review the agent's last reply"
 
 # Legacy indexed shortcut config is still parsed for compatibility.
 # Prefer switch_tab, switch_workspace, and focus_agent for new configs.

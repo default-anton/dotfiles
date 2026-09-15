@@ -1,6 +1,7 @@
 require "user.options"
 require "user.plugins"
 require "user.autocmd"
+require "user.annotate"
 require "user.ai-coders"
 require "user.cmp"
 require "user.colors"
