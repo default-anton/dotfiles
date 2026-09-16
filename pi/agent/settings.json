@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.85.1",
-  "defaultThinkingLevel": "low",
+  "defaultThinkingLevel": "medium",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-astra",
   "enabledModels": [
