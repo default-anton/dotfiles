@@ -36,7 +36,7 @@ function formatUsage(value: unknown): string {
 		formatWindow(value.rate_limit.primary_window, now),
 		formatWindow(value.rate_limit.secondary_window, now),
 	].filter(Boolean);
-	return windows.length ? `Codex ${windows.join(" ")}` : "Codex: unavailable";
+	return windows.length ? `${windows.join(" ")}` : "Codex: unavailable";
 }
 
 export default function codexUsageExtension(pi: ExtensionAPI) {
