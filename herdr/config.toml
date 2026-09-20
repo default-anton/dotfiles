@@ -70,9 +70,9 @@ prefix = "ctrl+s"
 # detach = "prefix+q"
 # reload_config = "prefix+shift+r"
 # open_notification_target = "prefix+o"
-# workspace_picker = "prefix+w"
+workspace_picker = ""
 # goto = "prefix+g"
-# new_workspace = "prefix+shift+n"
+new_workspace = "prefix+shift+n"
 # new_worktree = "prefix+shift+g"
 # open_worktree = ""    # optional, unset by default
 # remove_worktree = ""  # optional, unset by default; opens confirmation
@@ -128,6 +128,22 @@ navigate_workspace_down = "j"
 # command = "lazygit"
 # width = "80%"
 # height = "80%"
+
+[[keys.command]]
+key = "prefix+w"
+type = "popup"
+command = "\"$HOME/.dotfiles/herdr/spaces.sh\" switch"
+description = "find a space"
+width = "80%"
+height = "80%"
+
+[[keys.command]]
+key = "prefix+n"
+type = "popup"
+command = "\"$HOME/.dotfiles/herdr/spaces.sh\" new"
+description = "add a project space"
+width = "80%"
+height = "80%"
 
 [[keys.command]]
 key = "prefix+,"
