@@ -72,7 +72,7 @@ prefix = "ctrl+s"
 # open_notification_target = "prefix+o"
 workspace_picker = ""
 # goto = "prefix+g"
-new_workspace = "prefix+shift+n"
+new_workspace = ""
 # new_worktree = "prefix+shift+g"
 # open_worktree = ""    # optional, unset by default
 # remove_worktree = ""  # optional, unset by default; opens confirmation
@@ -138,7 +138,7 @@ width = "80%"
 height = "80%"
 
 [[keys.command]]
-key = "prefix+n"
+key = "prefix+shift+n"
 type = "popup"
 command = "\"$HOME/.dotfiles/herdr/spaces.sh\" new"
 description = "add a project space"
