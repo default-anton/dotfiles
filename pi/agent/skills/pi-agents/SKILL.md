@@ -11,7 +11,7 @@ Use Herdr through bash; read `herdr --skill` once for usage and safety rules. Ap
 
 ## Launch and context
 
-- Default to one background tab per agent in the current workspace and cwd, without changing focus. Use other layouts or locations when requested; a workspace alone does not isolate files.
+- Default to one background tab per agent in the current workspace and cwd, without changing focus. For `herdr tab create`, pass `--workspace "$HERDR_WORKSPACE_ID" --cwd "$PWD" --no-focus` and verify the returned workspace ID. Use other layouts or locations when requested; a workspace alone does not isolate files.
 - Start `--kind pi` with `--provider "${PI_PROVIDER:?}" --model "${PI_MODEL:?}" --thinking "${PI_REASONING_LEVEL:?}"` after `--` to match the parent, unless instructed otherwise.
 - Shared configuration loads normally; forward any required temporary tool restrictions, CLI extensions, or process-only credentials.
 - Default to fresh sessions with self-contained briefs. For inherited conversation, add `--fork "$PI_SESSION_FILE"`; require a persisted session and treat history as context, not authorization to resume earlier tasks.
