@@ -14,7 +14,7 @@ When the task and scope are clear, reply only \`Task context gathered.\`.`;
 
 const RESEARCH_INSTRUCTION = `This is stage 2 of 5: research the code around the changes.
 
-Use gpt-5.6-luna with high reasoning and the current provider for all subagents in this stage.
+Use gpt-5.6-sol with low reasoning and the current provider for all subagents in this stage.
 
 Use fresh research sessions without inherited conversation. Give each the task, review scope, relevant starting paths, and questions to answer.
 
