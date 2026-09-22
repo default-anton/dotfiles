@@ -30,6 +30,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.pi/agent/models.json", "pi/agent/models.json"),
     ("~/.pi/agent/AGENTS.md", "pi/agent/AGENTS.md"),
     ("~/.pi/agent/prompts", "pi/agent/prompts"),
+    ("~/.pi/agent/skills", "pi/agent/skills"),
     ("~/.pi/agent/extensions", "pi/agent/extensions"),
     ("~/.pi/agent/SYSTEM.md", "pi/agent/SYSTEM.md"),
     ("~/Library/Application Support/com.mitchellh.ghostty/config", "ghostty/config"),

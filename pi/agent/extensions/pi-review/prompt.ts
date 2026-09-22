@@ -2,7 +2,7 @@ const CONTEXT_INSTRUCTION = `Keep this review read-only, including all subagent 
 
 Review in five stages: task context, code research, review, double-checking, and recommendations. The extension queues one stage per turn; finish the current stage without asking to continue.
 
-Use \`run_subagent\` in stages 2–5 as directed. Size assignments to scope and risk; parallelize independent work. Start forked briefs with \`You are a subagent. Use the inherited conversation as context; complete only the assignment below.\` followed by a bounded assignment. Stage sequencing and replies apply only to the parent; subagents return their assigned result. Follow up only on specific coverage gaps, conflicting evidence, or unresolved claims.
+Delegate work in stages 2–5 as directed. Size assignments to scope and risk; parallelize independent work. Give each subagent a bounded assignment. Stage sequencing and replies apply only to the parent; subagents use any inherited conversation as context and return only their assigned result. Follow up only on specific coverage gaps, conflicting evidence, or unresolved claims.
 
 In stages 3–5, if no important findings remain, say \`looks good\` unless missing evidence prevents that conclusion; report such gaps instead.
 
@@ -14,9 +14,9 @@ When the task and scope are clear, reply only \`Task context gathered.\`.`;
 
 const RESEARCH_INSTRUCTION = `This is stage 2 of 5: research the code around the changes.
 
-Set \`model="openai/gpt-5.6-luna:high"\` for all subagents in this stage.
+Use gpt-5.6-luna with high reasoning and the current provider for all subagents in this stage.
 
-Use research subagents with \`fork_current_context=false\`. Give each the task, review scope, relevant starting paths, and questions to answer; they do not inherit this conversation.
+Use fresh research sessions without inherited conversation. Give each the task, review scope, relevant starting paths, and questions to answer.
 
 Include this research brief:
 \`\`\`
@@ -37,7 +37,7 @@ Integrate the reports and close important context gaps. Once the review has the 
 
 const REVIEW_INSTRUCTION = `This is stage 3 of 5: review the work.
 
-Use focused reviewer subagents with \`fork_current_context=true\` and leave \`model\` unset to inherit the current model and thinking level.
+Use focused reviewer subagents with the current conversation, provider, model, and reasoning level.
 
 Assign review surfaces or distinct risk questions that together cover the scope. Tell reviewers to apply the standard below and return candidate findings with evidence, impact, and likely root cause. Keep fixes for stage 5.
 
@@ -54,7 +54,7 @@ Explain what is wrong, when it happens, and why it matters in clear prose, with 
 
 const VALIDATION_INSTRUCTION = `This is stage 4 of 5: double-check each finding.
 
-Have subagents independently double-check every finding with \`fork_current_context=true\` and \`model\` unset.
+Have subagents independently double-check every finding, inheriting the current conversation, provider, model, and reasoning level.
 
 Ask them to verify the finding against the code and its contracts rather than trust the earlier explanation. Trace the relevant path from reachable inputs and state to the claimed outcome, checking each assumption and the root cause. Actively seek counterevidence in callers, guards, defaults, error handling, and existing tests. Require a verdict with precise code references, supporting or contradicting evidence, and any unresolved assumptions; do not recommend fixes.
 
@@ -62,7 +62,7 @@ Resolve disputed claims. Drop false positives, duplicates, and unsupported claim
 
 const RECOMMENDATION_INSTRUCTION = `This is stage 5 of 5: recommend solutions and give the final review.
 
-Use recommendation subagents with \`fork_current_context=true\` and \`model\` unset for every surviving finding, using the research and validation evidence. If no findings remain, finish without starting subagents.
+Use recommendation subagents for every surviving finding, inheriting the current conversation, provider, model, and reasoning level and using the research and validation evidence. If no findings remain, finish without starting subagents.
 
 Ask for the simplest maintainable solution that addresses the root cause and fits the application's current scale, maturity, and operational needs. Follow established project patterns; introduce a new pattern only when existing ones do not fit.
 
