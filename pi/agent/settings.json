@@ -1,12 +1,12 @@
 {
   "lastChangelogVersion": "0.87.0",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "high",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-astra",
+  "defaultModel": "gpt-6-sol",
   "enabledModels": [
     "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-5.6-sol",
-    "openai-codex/gpt-5.6-luna",
+    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6-luna",
     "deepseek/deepseek-flash"
   ],
   "defaultTools": [
