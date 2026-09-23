@@ -27,7 +27,7 @@ OUTPUT_PRIORITY=(
 # 3. Save that number below for the device name.
 declare -A INPUT_VOLUME_PRESETS=(
   ["External Microphone"]=63
-  ["RØDE VideoMic GO II"]=42
+  ["RØDE VideoMic GO II"]=83
   ["MacBook Pro Microphone"]=88
 )
 
