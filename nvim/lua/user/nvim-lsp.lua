@@ -82,7 +82,15 @@ local servers = {
     },
   },
   cssls = {},
-  ruby_lsp = {},
+  ruby_lsp = {
+    init_options = {
+      addonSettings = {
+        ['Ruby LSP Rails'] = {
+          enablePendingMigrationsPrompt = false,
+        },
+      },
+    },
+  },
   bashls = {},
   dockerls = {},
   gopls = {
