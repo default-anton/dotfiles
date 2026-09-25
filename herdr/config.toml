@@ -149,7 +149,7 @@ height = "80%"
 key = "prefix+f"
 type = "popup"
 command = "\"$HOME/.dotfiles/herdr/feature-space.sh\""
-description = "create an Aha! feature space"
+description = "open an Aha! feature or GitHub PR space"
 width = "80%"
 height = "60%"
 
