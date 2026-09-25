@@ -83,7 +83,8 @@ if [ "$background" = false ]; then
   log_directory="${XDG_STATE_HOME:-$HOME/.local/state}/herdr"
   mkdir -p "$log_directory"
   log_file=$(mktemp "$log_directory/feature-space.XXXXXX")
-  nohup bash "$0" --background "$log_file" "$record_url" >"$log_file" 2>&1 </dev/null &
+  trap '' HUP
+  bash "$0" --background "$log_file" "$record_url" >"$log_file" 2>&1 </dev/null &
   exit 0
 fi
 
@@ -106,7 +107,9 @@ worktree_path=$(git worktree list --porcelain -z | jq -Rrs --arg branch "refs/he
     | .[0] | ltrimstr("worktree ")][0] // empty
 ')
 
+workspace_focus=--no-focus
 if [ -n "$worktree_path" ]; then
+  workspace_focus=--focus
   panes=$(herdr pane list)
   workspace_id=$(jq -r --arg path "$worktree_path" '
     [.result.panes[]
@@ -115,7 +118,8 @@ if [ -n "$worktree_path" ]; then
       | .workspace_id][0] // empty
   ' <<< "$panes")
   if [ -n "$workspace_id" ]; then
-    printf '\nWorktree: %s\nExisting workspace: %s (focus unchanged)\n' "$worktree_path" "$workspace_id"
+    herdr workspace focus "$workspace_id" >/dev/null
+    printf '\nWorktree: %s\nFocused workspace: %s\n' "$worktree_path" "$workspace_id"
     exit 0
   fi
 else
@@ -132,7 +136,7 @@ else
 fi
 
 printf 'Creating workspace...\n'
-workspace_result=$(herdr workspace create --cwd "$worktree_path" --label "$branch" --no-focus)
+workspace_result=$(herdr workspace create --cwd "$worktree_path" --label "$branch" "$workspace_focus")
 jq -e '.result.workspace' <<< "$workspace_result" >/dev/null
 
 printf '\nWorktree: %s\nWorkspace: %s\n' "$worktree_path" "$branch"
