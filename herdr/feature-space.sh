@@ -2,14 +2,6 @@
 
 set -euo pipefail
 
-background=false
-log_file=
-if [ "${1:-}" = --background ]; then
-  background=true
-  log_file=$2
-  shift 2
-fi
-
 if [ "$#" -gt 1 ]; then
   printf 'Usage: %s [feature-or-pr-url]\n' "$0" >&2
   exit 2
@@ -25,15 +17,6 @@ fi
 finish() {
   local status=$?
 
-  if [ "$background" = true ]; then
-    if [ "$status" -eq 0 ]; then
-      herdr notification show 'Space ready' --body "${branch:-$record_url}" --sound none || true
-    else
-      printf '\nSpace creation failed (exit %s).\n' "$status" >&2
-      herdr notification show 'Space creation failed' --body "See $log_file" --sound none || true
-    fi
-    exit "$status"
-  fi
   if [ "$status" -eq 130 ]; then
     exit "$status"
   fi
@@ -58,20 +41,26 @@ if [ "${HERDR_ENV:-}" != 1 ]; then
   exit 1
 fi
 
-case "$record_url" in
-  https://big.aha.io/*) url_kind=feature ;;
-  https://github.com/*/*/pull/[0-9]*) url_kind=pr ;;
-  *)
-    printf 'Expected an Aha! feature URL or GitHub pull request URL.\n' >&2
-    exit 2
-    ;;
-esac
+record_url=${record_url%%\?*}
+record_url=${record_url%%\#*}
+record_url=${record_url%/}
+if [[ "$record_url" =~ ^https://github.com/([^/]+)/([^/]+)/pull/([0-9]+)(/.*)?$ ]]; then
+  url_kind=pr
+  repository=$(printf '%s/%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" | tr '[:upper:]' '[:lower:]')
+  pr_number=${BASH_REMATCH[3]}
+  record_url="https://github.com/$repository/pull/$pr_number"
+elif [[ "$record_url" == https://big.aha.io/* ]] &&
+  [[ "${record_url##*/}" =~ ^([A-Za-z]+-[A-Za-z0-9]+-[0-9]+|[A-Za-z]+-[0-9]+(-[0-9]+)?|[0-9]+)$ ]]; then
+  url_kind=feature
+else
+  printf 'Expected an Aha! feature URL or GitHub pull request URL.\n' >&2
+  exit 2
+fi
 
-dependencies=(git wt jq herdr)
+dependencies=(git jq herdr)
 if [ "$url_kind" = pr ]; then
   dependencies+=(gh)
 fi
-
 for dependency in "${dependencies[@]}"; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
     printf 'Required command not found on PATH: %s\n' "$dependency" >&2
@@ -79,18 +68,8 @@ for dependency in "${dependencies[@]}"; do
   fi
 done
 
-if [ "$background" = false ]; then
-  log_directory="${XDG_STATE_HOME:-$HOME/.local/state}/herdr"
-  mkdir -p "$log_directory"
-  log_file=$(mktemp "$log_directory/feature-space.XXXXXX")
-  trap '' HUP
-  bash "$0" --background "$log_file" "$record_url" >"$log_file" 2>&1 </dev/null &
-  exit 0
-fi
-
 repo_root="$HOME/code/aha-app"
 cd "$repo_root"
-printf '\nResolving branch...\n'
 if [ "$url_kind" = pr ]; then
   branch=$(gh pr view "$record_url" --json headRefName --jq .headRefName)
 else
@@ -106,10 +85,7 @@ worktree_path=$(git worktree list --porcelain -z | jq -Rrs --arg branch "refs/he
     | select(index("branch " + $branch))
     | .[0] | ltrimstr("worktree ")][0] // empty
 ')
-
-workspace_focus=--no-focus
 if [ -n "$worktree_path" ]; then
-  workspace_focus=--focus
   panes=$(herdr pane list)
   workspace_id=$(jq -r --arg path "$worktree_path" '
     [.result.panes[]
@@ -119,24 +95,19 @@ if [ -n "$worktree_path" ]; then
   ' <<< "$panes")
   if [ -n "$workspace_id" ]; then
     herdr workspace focus "$workspace_id" >/dev/null
-    printf '\nWorktree: %s\nFocused workspace: %s\n' "$worktree_path" "$workspace_id"
     exit 0
   fi
-else
-  printf 'Preparing worktree for %s...\n' "$branch"
-  if [ "$url_kind" = pr ]; then
-    switch_result=$(wt -C "$repo_root" --yes switch --format json --no-cd "$record_url")
-  elif git show-ref --verify --quiet "refs/heads/$branch" ||
-    git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-    switch_result=$(wt -C "$repo_root" --yes switch --format json --no-cd "$branch")
-  else
-    switch_result=$(wt -C "$repo_root" --yes switch --create --base master --format json --no-cd "$branch")
-  fi
-  worktree_path=$(jq -er '.path' <<< "$switch_result")
 fi
 
-printf 'Creating workspace...\n'
-workspace_result=$(herdr workspace create --cwd "$worktree_path" --label "$branch" "$workspace_focus")
-jq -e '.result.workspace' <<< "$workspace_result" >/dev/null
+if [ "$url_kind" = pr ]; then
+  printf -v setup_command 'wt switch %q' "$record_url"
+elif git show-ref --verify --quiet "refs/heads/$branch" ||
+  git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+  printf -v setup_command 'wt switch %q' "$branch"
+else
+  printf -v setup_command 'wt switch --create --base master %q' "$branch"
+fi
 
-printf '\nWorktree: %s\nWorkspace: %s\n' "$worktree_path" "$branch"
+workspace_result=$(herdr workspace create --cwd "$repo_root" --focus)
+pane_id=$(jq -er '.result.root_pane.pane_id' <<< "$workspace_result")
+herdr pane run "$pane_id" "$setup_command" >/dev/null
