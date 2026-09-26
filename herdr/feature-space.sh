@@ -2,17 +2,16 @@
 
 set -euo pipefail
 
-if [ "$#" -gt 1 ]; then
-  printf 'Usage: %s [feature-or-pr-url]\n' "$0" >&2
-  exit 2
-fi
-
-record_url=${1:-}
 if [ "$#" -eq 0 ]; then
-  printf 'Create an Aha! feature or GitHub PR space\n\nPaste the feature or pull request URL. Leave blank or press Ctrl+C to cancel.\n\n'
-  IFS= read -e -r -p 'Feature or PR URL: ' record_url || exit 0
+  printf 'Create Aha! feature or GitHub PR spaces\n\nSeparate URLs with spaces or commas. Use all features or all PRs.\nLeave blank or press Ctrl+C to cancel.\n\n' >&2
+  IFS= read -e -r -p 'Feature or PR URLs: ' input || exit 0
+else
+  input="$*"
 fi
-[ -n "$record_url" ] || exit 0
+input=${input//,/ }
+record_urls=()
+read -r -a record_urls <<< "$input" || true
+[ "${#record_urls[@]}" -gt 0 ] || exit 0
 
 finish() {
   local status=$?
@@ -20,11 +19,8 @@ finish() {
   if [ "$status" -eq 130 ]; then
     exit "$status"
   fi
-  if [ "$status" -ne 0 ]; then
-    printf '\nSpace creation failed. See the error above.\n' >&2
-  fi
   if [ "$status" -ne 0 ] && [ -t 0 ]; then
-    printf '\nPress Enter to close.'
+    printf '\nPress Enter to close.' >&2
     IFS= read -r _ || true
   fi
   exit "$status"
@@ -41,21 +37,37 @@ if [ "${HERDR_ENV:-}" != 1 ]; then
   exit 1
 fi
 
-record_url=${record_url%%\?*}
-record_url=${record_url%%\#*}
-record_url=${record_url%/}
-if [[ "$record_url" =~ ^https://github.com/([^/]+)/([^/]+)/pull/([0-9]+)(/.*)?$ ]]; then
-  url_kind=pr
-  repository=$(printf '%s/%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" | tr '[:upper:]' '[:lower:]')
-  pr_number=${BASH_REMATCH[3]}
-  record_url="https://github.com/$repository/pull/$pr_number"
-elif [[ "$record_url" == https://big.aha.io/* ]] &&
-  [[ "${record_url##*/}" =~ ^([A-Za-z]+-[A-Za-z0-9]+-[0-9]+|[A-Za-z]+-[0-9]+(-[0-9]+)?|[0-9]+)$ ]]; then
-  url_kind=feature
-else
-  printf 'Expected an Aha! feature URL or GitHub pull request URL.\n' >&2
-  exit 2
-fi
+url_kind=
+normalized_urls=()
+for record_url in "${record_urls[@]}"; do
+  original_url=$record_url
+  record_url=${record_url%%\?*}
+  record_url=${record_url%%\#*}
+  record_url=${record_url%/}
+  if [[ "$record_url" =~ ^https://github.com/([^/]+)/([^/]+)/pull/([0-9]+)(/.*)?$ ]]; then
+    kind=pr
+    repository=$(printf '%s/%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" | tr '[:upper:]' '[:lower:]')
+    record_url="https://github.com/$repository/pull/${BASH_REMATCH[3]}"
+  elif [[ "$record_url" == https://big.aha.io/* ]] &&
+    [[ "${record_url##*/}" =~ ^([A-Za-z]+-[A-Za-z0-9]+-[0-9]+|[A-Za-z]+-[0-9]+(-[0-9]+)?|[0-9]+)$ ]]; then
+    kind=feature
+  else
+    printf 'Expected an Aha! feature URL or GitHub pull request URL: %s\n' "$original_url" >&2
+    exit 2
+  fi
+  if [ -n "$url_kind" ] && [ "$url_kind" != "$kind" ]; then
+    printf 'Use all feature URLs or all GitHub PR URLs, not both.\n' >&2
+    exit 2
+  fi
+  url_kind=$kind
+  duplicate=0
+  for previous_url in "${normalized_urls[@]+"${normalized_urls[@]}"}"; do
+    [ "$previous_url" != "$record_url" ] || duplicate=1
+  done
+  if [ "$duplicate" -eq 0 ]; then
+    normalized_urls+=("$record_url")
+  fi
+done
 
 dependencies=(git jq herdr)
 if [ "$url_kind" = pr ]; then
@@ -70,44 +82,99 @@ done
 
 repo_root="$HOME/code/aha-app"
 cd "$repo_root"
-if [ "$url_kind" = pr ]; then
-  branch=$(gh pr view "$record_url" --json headRefName --jq .headRefName)
-else
-  branch=$(./script/branch_name_for_aha_record.sh "$record_url")
-fi
-if [[ "$branch" == -* ]] || ! git check-ref-format --branch "$branch" >/dev/null; then
-  printf 'Could not resolve a branch from this URL. Check the URL and your credentials.\n' >&2
-  exit 2
-fi
+branches=()
+urls=()
+for record_url in "${normalized_urls[@]}"; do
+  if [ "$url_kind" = pr ]; then
+    branch=$(gh pr view "$record_url" --json headRefName --jq .headRefName) || branch=
+  else
+    branch=$(./script/branch_name_for_aha_record.sh "$record_url") || branch=
+  fi
+  if [[ "$branch" == -* ]] || ! git check-ref-format --branch "$branch" >/dev/null 2>&1; then
+    printf 'Could not resolve a branch for %s. Check the URL and your credentials.\n' "$record_url" >&2
+    exit 2
+  fi
+  duplicate=0
+  for previous_branch in "${branches[@]+"${branches[@]}"}"; do
+    [ "$previous_branch" != "$branch" ] || duplicate=1
+  done
+  if [ "$duplicate" -eq 0 ]; then
+    branches+=("$branch")
+    urls+=("$record_url")
+  fi
+done
 
-worktree_path=$(git worktree list --porcelain -z | jq -Rrs --arg branch "refs/heads/$branch" '
-  [split("\u0000\u0000")[] | split("\u0000")
-    | select(index("branch " + $branch))
-    | .[0] | ltrimstr("worktree ")][0] // empty
-')
-if [ -n "$worktree_path" ]; then
-  panes=$(herdr pane list)
-  workspace_id=$(jq -r --arg path "$worktree_path" '
-    [.result.panes[]
-      | (.foreground_cwd // .cwd // "") as $cwd
-      | select($cwd == $path or ($cwd | startswith($path + "/")))
-      | .workspace_id][0] // empty
-  ' <<< "$panes")
+open_space() {
+  local branch=$1 record_url=$2
+  local worktrees worktree_path panes workspace_id pending_key pending_file pending_pane
+  local setup_command workspace_result pane_id
+
+  worktrees=$(git worktree list --porcelain -z | jq -Rrs 'split("\u0000\u0000") | map(split("\u0000"))') || return
+  worktree_path=$(jq -r --arg branch "refs/heads/$branch" '
+    [ .[] | select(index("branch " + $branch))
+      | .[0] | ltrimstr("worktree ")][0] // empty
+  ' <<< "$worktrees") || return
+  panes=$(herdr pane list) || return
+  workspace_id=
+  if [ -n "$worktree_path" ]; then
+    workspace_id=$(jq -r --arg path "$worktree_path" '
+      [.result.panes[]
+        | (.foreground_cwd // .cwd // "") as $cwd
+        | select($cwd == $path or ($cwd | startswith($path + "/")))
+        | .workspace_id][0] // empty
+    ' <<< "$panes") || return
+  fi
+
+  pending_key=$(printf '%s\n' "${HERDR_SOCKET_PATH:-}" "$repo_root" "$branch" | git hash-object --stdin) || return
+  pending_file="${XDG_CACHE_HOME:-$HOME/.cache}/herdr/feature-space/$pending_key"
+  if [ -z "$workspace_id" ] && [ -f "$pending_file" ]; then
+    pending_pane=$(cat "$pending_file") || return
+    workspace_id=$(jq -r --arg pane "$pending_pane" --arg path "$repo_root" '
+      [.result.panes[] | select(.pane_id == $pane)
+        | select((.foreground_cwd // .cwd // "") == $path)
+        | .workspace_id][0] // empty
+    ' <<< "$panes") || return
+  fi
   if [ -n "$workspace_id" ]; then
-    herdr workspace focus "$workspace_id" >/dev/null
-    exit 0
+    printf '%s\n' "$workspace_id"
+    [ -n "$first_space" ] || first_space=$workspace_id
+    return 0
+  fi
+
+  if [ "$url_kind" = pr ]; then
+    printf -v setup_command 'wt switch %q' "$record_url"
+  elif git show-ref --verify --quiet "refs/heads/$branch" ||
+    git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    printf -v setup_command 'wt switch %q' "$branch"
+  else
+    printf -v setup_command 'wt switch --create --base master %q' "$branch"
+  fi
+  mkdir -p "${pending_file%/*}" || return
+  workspace_result=$(herdr workspace create --cwd "$repo_root" --no-focus) || return
+  workspace_id=$(jq -er '.result.workspace.workspace_id' <<< "$workspace_result") || return
+  pane_id=$(jq -er '.result.root_pane.pane_id' <<< "$workspace_result") || return
+  printf '%s\n' "$workspace_id"
+  [ -n "$first_space" ] || first_space=$workspace_id
+  [ -n "$first_new_space" ] || first_new_space=$workspace_id
+  printf '%s\n' "$pane_id" > "$pending_file" || return
+  printf -v setup_command '%s && rm -f %q' "$setup_command" "$pending_file"
+  herdr pane run "$pane_id" "$setup_command" >/dev/null || return
+}
+
+first_space=
+first_new_space=
+status=0
+for index in "${!branches[@]}"; do
+  if ! open_space "${branches[$index]}" "${urls[$index]}"; then
+    printf 'Could not open space for %s. Other spaces will still be opened.\n' "${urls[$index]}" >&2
+    status=1
+  fi
+done
+focus_space=${first_new_space:-$first_space}
+if [ -n "$focus_space" ]; then
+  if ! herdr workspace focus "$focus_space" >/dev/null; then
+    printf 'Could not focus workspace %s.\n' "$focus_space" >&2
+    status=1
   fi
 fi
-
-if [ "$url_kind" = pr ]; then
-  printf -v setup_command 'wt switch %q' "$record_url"
-elif git show-ref --verify --quiet "refs/heads/$branch" ||
-  git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-  printf -v setup_command 'wt switch %q' "$branch"
-else
-  printf -v setup_command 'wt switch --create --base master %q' "$branch"
-fi
-
-workspace_result=$(herdr workspace create --cwd "$repo_root" --focus)
-pane_id=$(jq -er '.result.root_pane.pane_id' <<< "$workspace_result")
-herdr pane run "$pane_id" "$setup_command" >/dev/null
+exit "$status"
