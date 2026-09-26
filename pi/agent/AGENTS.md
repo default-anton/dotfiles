@@ -1,5 +1,5 @@
 # Rules You Must Follow
-Add code comments only when explicitly asked; prefer clear naming and structure.
+Add comments only when asked. Keep existing comments unless outdated.
 When asked to find or act on comments left for you, search for `hey seb` case-insensitively; no punctuation is required.
 Commit only when explicitly asked. Use short, imperative commit subjects with a component prefix when useful (for example, `agent: clarify permission rules`). Explain why in the body when needed. Do not run validation as part of a commit or push task.
 For PR or change reviews, do not run tests, linters, or other validation; CI handles validation.
