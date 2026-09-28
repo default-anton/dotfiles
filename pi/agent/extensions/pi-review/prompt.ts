@@ -1,4 +1,4 @@
-const CONTEXT_INSTRUCTION = `Keep this review read-only, including all subagent work. The only permitted writes are the task brief and research reports in a unique temporary directory outside the worktree. Don't modify other files or run validation commands: CI handles tests, linting, formatting, type checks, builds, and static analysis. Inspect code, diffs, history, and existing results as needed.
+const CONTEXT_INSTRUCTION = `Keep this review read-only, including all subagent work. The only permitted writes are the task brief and research reports in a unique temporary directory outside the worktree. Internal agent bookkeeping is exempt from write restrictions. Don't modify other files or run validation commands: CI handles tests, linting, formatting, type checks, builds, and static analysis. Inspect code, diffs, history, and existing results as needed.
 
 Review in five stages: task context, code research, review, double-checking, and recommendations. The extension queues one stage per turn; finish the current stage without asking to continue.
 
@@ -23,7 +23,7 @@ Include this research brief:
 \`\`\`
 Establish how the relevant pre-existing code works. Look beyond changed files to understand its contracts and dependencies.
 
-Keep the work read-only except for writing your assigned research report. Don't modify other files or run validation commands: CI handles tests, linting, formatting, type checks, builds, and static analysis.
+Keep the work read-only except for writing your assigned research report. Internal agent bookkeeping is exempt from write restrictions. Don't modify other files or run validation commands: CI handles tests, linting, formatting, type checks, builds, and static analysis.
 
 Don't review the work, recommend changes, or decide whether anything is a defect. Separate verified facts, reasonable inferences, and unresolved questions. Cite relevant paths and symbols. Write a concise context report to your assigned path covering the relevant:
 - subsystem and change map;

@@ -30,7 +30,7 @@ without a time limit, print its final response, and close the created tab.
 wait waits for completion, prints the response, and closes the tab unless
 focused or --keep is set. read prints a completed response without waiting or closing.
 Both reject unfinished, failed, or unrelated responses. Errors leave the
-agent open. Handles are retained in XDG_STATE_HOME/pi-agents (or ~/.local/state/pi-agents).
+agent open.
 `;
 
 export function promptHash(text) {

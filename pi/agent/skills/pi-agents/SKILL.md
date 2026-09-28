@@ -15,7 +15,7 @@ Use the script directly; no Herdr help or launch recipe is needed:
 ~/.pi/agent/skills/pi-agents/agent.mjs "Review the authentication changes. Do not edit files."
 ```
 
-Default: fresh Pi session, unfocused tab, current workspace/cwd, inherited provider/model/thinking. Waits for completion without a time limit, prints the complete final assistant text from Pi's native session API, then closes the created tab unless focused. Session files remain. The script instructs the agent not to delegate further.
+Default: fresh Pi session, unfocused tab, current workspace/cwd, inherited provider/model/thinking. Waits for completion without a time limit, prints the complete final assistant text from Pi's native session API, then closes the created tab unless focused. The script instructs the agent not to delegate further.
 
 Use `--stdin` for multiline prompts. Overrides: `--workspace ID`, `--cwd PATH`, `--provider NAME`, `--model NAME`, `--thinking LEVEL`.
 
