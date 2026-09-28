@@ -8,7 +8,6 @@
             "minimal": null,
             "low": null,
             "medium": null,
-            "high": "high",
             "xhigh": null,
             "max": null
           }
@@ -18,8 +17,6 @@
             "off": null,
             "minimal": null,
             "low": null,
-            "medium": "medium",
-            "high": null,
             "xhigh": null,
             "max": null
           }
@@ -28,10 +25,7 @@
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
+            "xhigh": null,
             "max": null
           }
         }
@@ -45,7 +39,6 @@
             "minimal": null,
             "low": null,
             "medium": null,
-            "high": "high",
             "xhigh": null,
             "max": null
           }
@@ -55,8 +48,6 @@
             "off": null,
             "minimal": null,
             "low": null,
-            "medium": "medium",
-            "high": null,
             "xhigh": null,
             "max": null
           }
@@ -65,10 +56,7 @@
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
+            "xhigh": null,
             "max": null
           }
         }
