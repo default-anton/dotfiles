@@ -6,8 +6,14 @@ mode=${1:-switch}
 
 case $mode in
   switch|new) ;;
+  open)
+    if [ "$#" -ne 2 ] || [ ! -d "$2" ]; then
+      printf 'spaces: open requires a project directory\n' >&2
+      exit 2
+    fi
+    ;;
   *)
-    printf 'spaces: usage: %s [switch|new]\n' "$0" >&2
+    printf 'spaces: usage: %s [switch|new|open DIRECTORY]\n' "$0" >&2
     exit 2
     ;;
 esac
@@ -15,12 +21,33 @@ esac
 PATH="${PATH:-}:/opt/homebrew/bin:/usr/local/bin:${HOME}/.dotfiles/bin:${HOME}/bin:${HOME}/.local/bin"
 export PATH
 
-for dependency in herdr fzf jq; do
+dependencies=(herdr jq)
+[ "$mode" = open ] || dependencies+=(fzf)
+
+for dependency in "${dependencies[@]}"; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
     printf 'spaces: %s not found on PATH\n' "$dependency" >&2
     exit 1
   fi
 done
+
+if [ "$mode" = open ]; then
+  project_path=$(cd "$2" && pwd -P)
+  panes=$(herdr pane list)
+  workspace_id=$(jq -r --arg path "$project_path" '
+    [.result.panes[]
+      | (.foreground_cwd // .cwd // "") as $cwd
+      | select($cwd == $path or ($cwd | startswith($path + "/")))
+      | .workspace_id][0] // empty
+  ' <<< "$panes")
+
+  if [ -n "$workspace_id" ]; then
+    herdr workspace focus "$workspace_id" >/dev/null
+  else
+    herdr workspace create --cwd "$project_path" --label "${project_path##*/}" --focus >/dev/null
+  fi
+  exit 0
+fi
 
 project_directories() {
   local path

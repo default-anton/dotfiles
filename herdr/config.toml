@@ -146,6 +146,12 @@ width = "80%"
 height = "80%"
 
 [[keys.command]]
+key = "prefix+a"
+type = "shell"
+command = "\"$HOME/.dotfiles/herdr/spaces.sh\" open \"$HOME/code/aha-app\""
+description = "open the aha-app space"
+
+[[keys.command]]
 key = "prefix+f"
 type = "popup"
 command = "\"$HOME/.dotfiles/herdr/feature-space.sh\""
