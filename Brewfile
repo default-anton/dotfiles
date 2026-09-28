@@ -41,4 +41,12 @@ brew 'lua-language-server'
 brew 'switchaudio-osx'
 brew 'mole'
 
+# Native build and codec dependencies for fframes video rendering.
+brew 'pkg-config'
+brew 'x264'
+brew 'x265'
+brew 'opus'
+brew 'nasm'
+brew 'ninja'
+
 cask 'font-fira-code-nerd-font'
