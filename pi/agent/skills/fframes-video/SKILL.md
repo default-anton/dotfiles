@@ -46,7 +46,7 @@ fframes README.
 
 On this laptop, create projects under `~/code/videos` and run Cargo inside each project.
 The parent's `.cargo/config.toml` shares `~/.cache/fframes/target` and selects the working
-Command Line Tools for Skia (Xcode currently hits a bindgen `_Traits` error).
+Command Line Tools for source-build fallbacks; normal macOS Metal builds use prebuilt Skia.
 Matching dependencies reuse the cache; toolchain, version, feature or profile changes may
 rebuild them. `cargo clean` clears the shared cache. Use `mise exec -- cargo` if needed.
 
@@ -72,15 +72,16 @@ fonts and decorations with a design made for the video the user asked for.
 
 **Use the Skia GPU backend (the default).** `cargo fframes new` picks Skia on Metal (macOS) or
 Vulkan (Linux, Windows). It renders about 10x faster than the CPU backend and gives you the
-real-time `preview` window. The first build compiles Skia and ffmpeg from source and takes
-about 20 minutes, so start it right away and write the video while it runs:
+real-time `preview` window. On macOS and Linux the first build downloads prebuilt Skia and ffmpeg
+and only compiles the Rust dependencies (about a minute; other targets, or `metal` and `vulkan`
+together, compile Skia from source for ~20 minutes). Start it right away and write the video
+while it runs:
 
 ```bash
-cd my-video && cargo build --release        # run in the background; warms the build cache
+cd my-video && cargo build --release        # run in the background, the first build is the slow one
 ```
 
-`--backend cpu` needs no Skia build but has no preview window; pick it only when there is no
-GPU or no time for the first build.
+`--backend cpu` needs no Skia but has no preview window; pick it only when there is no GPU.
 
 The project renders as generated:
 
@@ -93,36 +94,37 @@ my-video/
   README.md         # the commands below
 ```
 
-Every command below is `cargo run --release -- <command>`. Define a short alias:
+Every command below is `cargo run --release -- <command>`. Define a short shell function (a
+variable like `R="cargo run --release --"` does not split into words in zsh, the macOS shell):
 
 ```bash
-R="cargo run --release --"
+R() { cargo run --release -- "$@"; }
 ```
 
 ## 3. The loop
 
 After every change:
 
-1. `$R timeline` lists the scenes with their frame and second ranges, and every audio track.
+1. `R timeline` lists the scenes with their frame and second ranges, and every audio track.
    Check structure and pacing here before looking at pixels.
-2. `$R inspect` checks a frame every 0.25 s plus the first and last frame of every scene. It
+2. `R inspect` checks a frame every 0.25 s plus the first and last frame of every scene. It
    reports missing images, fonts or glyphs, text cut off by the edge of the canvas, invalid
    SVG (zero-sized rectangles, bad radii), broken transforms and panics, each with its time
    and scene. It exits with code 2 on errors. Fix everything it reports. A warning that only
    appears on a scene's first frames is usually an entrance; check it with a strip.
-3. `$R strip <scene or range> -n 12` writes a contact sheet (`strip.png`): evenly spaced frames
+3. `R strip <scene or range> -n 12` writes a contact sheet (`strip.png`): evenly spaced frames
    in one labelled image. Open it with your image tool. It is the fastest way to judge layout,
    rhythm and motion.
-4. `$R frame Intro@end,Outro@50%` writes full-size PNGs into `frames/` for detail checks
+4. `R frame Intro@end,Outro@50%` writes full-size PNGs into `frames/` for detail checks
    (typography, alignment, contrast) and prints problems found in those frames.
-5. `$R onion "Intro@0..Intro@1s" -n 6` blends frames into one image (`onion.png`) to show the
+5. `R onion "Intro@0..Intro@1s" -n 6` blends frames into one image (`onion.png`) to show the
    path and spacing of a movement: easing, overshoot, stagger.
-6. `$R preview Intro` opens a real-time window with sound for the user to watch (space
+6. `R preview Intro` opens a real-time window with sound for the user to watch (space
    play/pause, h/l seek a second, j/k step a frame, q quit). It blocks until closed, so start
    it in the background or ask the user to run it. Offer it whenever the user wants to see
    the video; you review with strips and frames, the user watches in the preview.
-7. `$R render Intro --draft` encodes one scene at half resolution in about a second;
-   `$R render` writes the final `out.mp4`.
+7. `R render Intro --draft` encodes one scene at half resolution in about a second;
+   `R render` writes the final `out.mp4`.
 
 Rules:
 - Look at the PNGs before saying anything looks good.
@@ -233,16 +235,16 @@ AudioMap::from([
 ```
 
 Time sound effects from the same constants that drive the animation. Check levels with
-`$R audio analyze --waveform w.png` (about -14 LUFS integrated for web video, true peak below
--1 dBTP, no unintended silence) and `$R audio at 3.1s` for what plays at an event. Then let
-the user listen in `$R preview`.
+`R audio analyze --waveform w.png` (about -14 LUFS integrated for web video, true peak below
+-1 dBTP, no unintended silence) and `R audio at 3.1s` for what plays at an event. Then let
+the user listen in `R preview`.
 
 ## 7. Finish
 
-1. `$R inspect --fail-on warning` passes, or the remaining warnings are understood entrances.
+1. `R inspect --fail-on warning` passes, or the remaining warnings are understood entrances.
 2. A strip of every scene looks right and key frames are checked at full size.
-3. `$R audio analyze` shows sensible levels.
-4. `$R render -o out.mp4`, then confirm size, frame count and audio with
+3. `R audio analyze` shows sensible levels.
+4. `R render -o out.mp4`, then confirm size, frame count and audio with
    `ffprobe -v error -show_entries stream=codec_type,width,height,nb_frames,duration out.mp4`.
 5. Run `cargo test` if the project keeps snapshots, and commit `_frame_snapshots/*.png`.
 
@@ -251,10 +253,21 @@ command to watch it.
 
 ## Troubleshooting
 
-- Build fails in `ffmpeg-sys-next`: a system library from step 1 is missing (`nasm`,
+- Build fails in `ffmpeg-sys-fframes`: a system library from step 1 is missing (`nasm`,
   `pkg-config`, the codec `-dev` packages).
-- Build fails in the Skia bindings (`fframes-skia-bindings`) with bindgen or libclang errors: point `LIBCLANG_PATH` at a
+- Build fails in the Skia bindings (`skia-bindings`) with bindgen or libclang errors (Skia
+  is only compiled from source when no prebuilt matches, e.g. `metal` and `vulkan` together): point `LIBCLANG_PATH` at a
   working libclang (on macOS Xcode's:
   `export LIBCLANG_PATH=$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib`).
+- Skia bindings fail to compile on macOS 27 / Xcode 27 with ``cannot find type `_Traits` ``
+  in `std___hash_table___node_allocator`: only happens when Skia is compiled from source (the
+  prebuilt binaries ship their bindings). `skia-bindings` 0.153.3 lacks the bindgen rule
+  (rust-skia [#1335](https://github.com/rust-skia/rust-skia/pull/1335)); use one GPU backend so
+  the prebuilt download matches, or patch a copy of `skia-bindings-0.153.3` (add
+  `"std::__hash_table.*",` after `"std::__tree.*",` in `OPAQUE_TYPES` in
+  `build_support/skia_bindgen.rs`) through `[patch.crates-io]`.
+- ``can't find crate for `fframes_media_dir_macro` `` on macOS 27 while the file exists: the
+  proc macro was linked by an older Rust whose output the macOS 27 loader rejects (a "LINKEDIT
+  string pool" error). Update Rust (`rustup update`; 1.98 works) and rebuild.
 - Text renders in the wrong font or not at all: `inspect` shows "No match for ... font-family";
   add the font file to `media/` and use its exact family name.
