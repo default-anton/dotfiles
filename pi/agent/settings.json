@@ -2,7 +2,7 @@
   "lastChangelogVersion": "0.87.1",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-astra",
+  "defaultModel": "gpt-6-sol",
   "enabledModels": [
     "openai-codex/gpt-6-astra",
     "openai-codex/gpt-6-sol",
