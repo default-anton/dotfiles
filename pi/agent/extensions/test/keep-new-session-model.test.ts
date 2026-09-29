@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import keepNewSessionModel from "../keep-new-session-model.ts";
 
-const selectedModel = { provider: "openai-codex", id: "gpt-6-sol" };
+const selectedModel = { provider: "openai-codex", id: "gpt-6.1-sol" };
 
 function loadExtension(actions: string[], model = selectedModel) {
   const handlers = new Map<

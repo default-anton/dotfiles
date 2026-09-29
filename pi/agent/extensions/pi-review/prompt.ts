@@ -15,7 +15,7 @@ When the task and scope are clear, reply only \`Task context gathered.\`.`;
 
 const RESEARCH_INSTRUCTION = `This is stage 2 of 5: research the code around the changes.
 
-Use gpt-6-sol with medium reasoning and the current provider for all subagents in this stage.
+Use gpt-6.1-sol with medium reasoning and the current provider for all subagents in this stage.
 
 Give each researcher relevant starting paths, questions to answer, and its own report path in the temporary directory.
 

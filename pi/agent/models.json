@@ -12,7 +12,7 @@
             "max": null
           }
         },
-        "gpt-6-sol": {
+        "gpt-6.1-sol": {
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
@@ -43,7 +43,7 @@
             "max": null
           }
         },
-        "gpt-6-sol": {
+        "gpt-6.1-sol": {
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
