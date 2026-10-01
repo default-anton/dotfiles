@@ -98,7 +98,6 @@ function formatPiDocumentationForPrompt(systemPrompt: string): string {
   return [
     "Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):",
     `- Documentation: ${PI_DOCS_URL}. Read when asked about extensions, themes, skills, prompt templates, TUI components, keybindings, SDK integrations, custom providers, adding models, pi packages, environment variables, MCP servers, or other Pi features. Use gh to list the Markdown files and locate relevant documentation.`,
-    "- For codemode scripts, classifiers, and image generation, read https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/codemode.md.",
     `- Examples: ${PI_EXAMPLES_URL}`,
   ].join("\n");
 }
