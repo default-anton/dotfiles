@@ -26,7 +26,7 @@
   "transport": "auto",
   "treeFilterMode": "no-tools",
   "theme": "dark",
-  "enableSkillCommands": false,
+  "enableSkillCommands": true,
   "showCacheMissNotices": true,
   "quietStartup": false,
   "enableInstallTelemetry": false,
