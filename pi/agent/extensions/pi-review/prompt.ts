@@ -21,7 +21,7 @@ Give each researcher relevant starting paths, questions to answer, and its own r
 
 Include this research brief:
 \`\`\`
-Establish how the relevant pre-existing code works. Look beyond changed files to understand its contracts and dependencies.
+Establish how the existing code supports or interacts with the changes. Trace affected contracts and dependencies beyond changed files, but don't audit unrelated code.
 
 Keep the work read-only except for writing your assigned research report. Internal agent bookkeeping is exempt from write restrictions. Don't modify other files or run validation commands: CI handles tests, linting, formatting, type checks, builds, and static analysis.
 
@@ -45,14 +45,15 @@ Assign review surfaces or distinct risk questions that together cover the scope.
 
 Review standard for you and reviewer subagents:
 - Apply a strict maintainer's standard across the full assigned scope, not just the first few findings. Check the task, requirements, and acceptance criteria, including missing or partial implementation.
-- Focus on correctness, security, performance, operability, and maintainability. Flag broken behavior, invariants, security boundaries, or interfaces unless the task requires the break, and unjustified departures from established project patterns.
-- Report concrete, high-confidence issues the author would likely fix before merge, including pre-existing issues that meet the same bar. Ground each finding in the affected behavior or code path, material impact, and evidence supporting its root cause; do not speculate.
+- Focus on correctness, security, performance, operability, and maintainability issues introduced or worsened directly or indirectly by the changes, including effects outside changed files. Flag unjustified breaks and departures from established project patterns.
+- Report concrete, high-confidence issues the author would likely fix before merge. Ground each finding in the affected behavior or code path, material impact, and evidence supporting its root cause and connection to the changes; do not speculate.
+- Don't hunt for unrelated pre-existing issues or expand research around them. Report serious ones encountered incidentally as secondary findings.
 
 Integrate the reports, merge duplicate findings, and resolve important coverage gaps or conflicting claims.
 
 When the review is complete, number the findings and sort them by priority. Use [P0] for certain severe breakage, data loss, or security issues; [P1] for likely user-facing breakage or major regressions; [P2] for correctness, performance, or maintenance issues with limited impact; and [P3] for minor but real issues.
 
-Explain what is wrong, when it happens, and why it matters in clear prose, with supporting evidence, relevant paths or symbols, and the likely root cause. Note which findings are pre-existing. Use labels only when they improve clarity.`;
+Explain what is wrong, when it happens, and why it matters in clear prose, with supporting evidence, relevant paths or symbols, and the likely root cause. Distinguish introduced or worsened issues from unrelated pre-existing findings. Use labels only when they improve clarity.`;
 
 const RECOMMENDATION_INSTRUCTION = `This is stage 4 of 4: recommend solutions and give the final review.
 
