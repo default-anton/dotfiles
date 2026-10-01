@@ -9,14 +9,15 @@ import { parseArgs } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const help = `Usage:
-  agent.mjs [options] "prompt"
-  agent.mjs [options] --stdin
+  agent.mjs --name NAME [options] "prompt"
+  agent.mjs --name NAME [options] --stdin
   agent.mjs wait AGENT [--keep]
   agent.mjs read AGENT
 
 Launch one fresh Pi agent in an unfocused Herdr tab. By default, wait,
 without a time limit, print its final response, and close the created tab.
 
+  --name NAME         Required: short, task-specific tab name
   --detach            Return a JSON handle after submitting, without waiting
   --stdin             Read the prompt from stdin
   --workspace ID      Default: HERDR_WORKSPACE_ID
@@ -147,6 +148,7 @@ async function main() {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
+      name: { type: "string" },
       detach: { type: "boolean" },
       keep: { type: "boolean" },
       stdin: { type: "boolean" },
@@ -184,6 +186,8 @@ async function main() {
       return;
     }
     if (values.stdin ? positionals.length !== 0 : positionals.length !== 1) throw new Error(help);
+    const name = values.name?.trim();
+    if (!name) throw new Error("--name is required and must not be blank.");
     const task = values.stdin ? readFileSync(0, "utf8") : positionals[0];
     if (!task.trim()) throw new Error("The prompt must not be empty.");
     const workspace = values.workspace ?? process.env.HERDR_WORKSPACE_ID;
@@ -199,7 +203,7 @@ async function main() {
     const prompt = `${task}\n\nDo not delegate further.`;
     record = { agent: `worker-${randomUUID().replaceAll("-", "").slice(0, 24)}`, workspace, promptHash: promptHash(prompt) };
     save(record);
-    const created = herdr("tab", "create", "--workspace", workspace, "--cwd", cwd, "--no-focus");
+    const created = herdr("tab", "create", "--workspace", workspace, "--cwd", cwd, "--label", name, "--no-focus");
     record.tab = created.tab?.tab_id;
     record.pane = created.root_pane?.pane_id;
     save(record);

@@ -12,10 +12,12 @@ Delegate bounded tasks with sufficient context, clear ownership, and expected va
 Use the script directly; no Herdr help or launch recipe is needed:
 
 ```bash
-~/.pi/agent/skills/pi-agents/agent.mjs "Review the authentication changes. Do not edit files."
+~/.pi/agent/skills/pi-agents/agent.mjs --name "Auth review" "Review the authentication changes. Do not edit files."
 ```
 
 Default: fresh Pi session, unfocused tab, current workspace/cwd, inherited provider/model/thinking. Waits for completion without a time limit, prints the complete final assistant text from Pi's native session API, then closes the created tab unless focused. The script instructs the agent not to delegate further.
+
+Every launch requires `--name` with a short, task-specific name for the visible Herdr tab label. Missing or blank names are rejected before creating a tab. `wait` and `read` do not require a name.
 
 Use `--stdin` for multiline prompts. Overrides: `--workspace ID`, `--cwd PATH`, `--provider NAME`, `--model NAME`, `--thinking LEVEL`.
 
@@ -24,7 +26,7 @@ For launches that wait and for `wait`, omit the bash tool timeout when supported
 For independent assignments, call the script once per agent through parallel tool calls. Do not build a batch launcher or background a waiting script just to detach:
 
 ```bash
-~/.pi/agent/skills/pi-agents/agent.mjs --detach "Implement the assigned change and report validation."
+~/.pi/agent/skills/pi-agents/agent.mjs --name "Fix parser" --detach "Implement the assigned parser fix and report validation."
 ```
 
 Detached mode returns a compact JSON handle after submission, leaving the agent running. Keep the handle. stderr also carries recovery information.
