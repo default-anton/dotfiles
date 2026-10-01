@@ -7,7 +7,7 @@ import {
   type Skill,
 } from "@earendil-works/pi-coding-agent";
 
-const PI_DOCS_INDEX = "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/index.md";
+const PI_DOCS_URL = "https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs";
 const PI_EXAMPLES_URL = "https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples";
 
 type ContextFile = {
@@ -97,7 +97,7 @@ function formatPiDocumentationForPrompt(systemPrompt: string): string {
 
   return [
     "Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):",
-    `- Documentation index: ${PI_DOCS_INDEX}. Read when asked about extensions, themes, skills, prompt templates, TUI components, keybindings, SDK integrations, custom providers, adding models, pi packages, environment variables, etc.`,
+    `- Documentation: ${PI_DOCS_URL}. Read when asked about extensions, themes, skills, prompt templates, TUI components, keybindings, SDK integrations, custom providers, adding models, pi packages, environment variables, MCP servers, codemode scripts, classifiers, image models, or other Pi features. Use gh to list the Markdown files and locate relevant documentation.`,
     `- Examples: ${PI_EXAMPLES_URL}`,
   ].join("\n");
 }
