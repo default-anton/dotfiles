@@ -51,15 +51,16 @@ test("applies add, update, move, and delete operations", async () => {
   await assert.rejects(readFile(join(root, "delete.txt")), { code: "ENOENT" });
 });
 
-test("rejects symbolic links", async () => {
+test("adds files through symbolic links", async () => {
   const root = await mkdtemp(join(tmpdir(), "pi-apply-patch-"));
   const outside = await mkdtemp(join(tmpdir(), "pi-apply-patch-outside-"));
   await symlink(outside, join(root, "linked"));
   const patch = parsePatch(`*** Begin Patch
 *** Add File: linked/file.txt
-+no
++new
 *** End Patch`);
-  await assert.rejects(verifyPatch(patch, root), /symbolic links/);
+  await applyVerifiedPatch(await verifyPatch(patch, root));
+  assert.equal(await readFile(join(outside, "file.txt"), "utf8"), "new\n");
 });
 
 test("does not mutate when a file changes after verification", async () => {

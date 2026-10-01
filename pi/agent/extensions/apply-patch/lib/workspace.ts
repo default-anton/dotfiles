@@ -1,5 +1,5 @@
-import { lstat, mkdir, readFile, realpath, unlink, writeFile } from "node:fs/promises";
-import { dirname, relative, resolve, sep } from "node:path";
+import { lstat, mkdir, readFile, readlink, realpath, unlink, writeFile } from "node:fs/promises";
+import { basename, dirname, relative, resolve } from "node:path";
 import { addedFileContent, applyUpdate, type Patch } from "./patch.ts";
 
 export type PlannedChange = {
@@ -11,7 +11,8 @@ export type PlannedChange = {
 export type VerifiedPatch = {
   root: string;
   mutations: Mutation[];
-  expected: Map<string, Buffer | null>;
+  expected: Map<string, ExpectedEntry>;
+  resolutions: PathResolution[];
   changes: PlannedChange[];
   summary: string[];
 };
@@ -20,6 +21,14 @@ type Mutation =
   | { type: "write"; path: string; content: Buffer }
   | { type: "delete"; path: string }
   | { type: "move"; source: string; destination: string; content: Buffer };
+
+type ExpectedEntry = Buffer | { linkTarget: string } | null;
+
+type PathResolution = {
+  path: string;
+  resolvedPath: string;
+  followFinalSymlink: boolean;
+};
 
 type TextFile = {
   raw: Buffer;
@@ -49,23 +58,43 @@ function encodeText(text: string, source?: TextFile): Buffer {
   return Buffer.from(`${source?.bom ?? ""}${restored}`, "utf8");
 }
 
-async function assertSafePath(root: string, path: string): Promise<void> {
-  const parts = relative(root, path).split(sep);
-  let current = root;
-  for (const part of parts) {
-    current = resolve(current, part);
-    try {
-      const stat = await lstat(current);
-      if (stat.isSymbolicLink()) throw new Error(`Patch paths cannot contain symbolic links: ${current}.`);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") continue;
-      throw error;
+async function resolvePath(path: string, followFinalSymlink = true, depth = 0): Promise<string> {
+  if (depth > 40) throw new Error(`Too many symbolic links in patch path: ${path}.`);
+  const parent = dirname(path);
+  if (!followFinalSymlink && parent !== path) {
+    return resolve(await resolvePath(parent, true, depth), basename(path));
+  }
+  try {
+    return await realpath(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT" || parent === path) throw error;
+  }
+
+  const resolvedParent = await resolvePath(parent, true, depth);
+  const resolvedPath = resolve(resolvedParent, basename(path));
+  try {
+    const stat = await lstat(resolvedPath);
+    if (stat.isSymbolicLink()) {
+      const target = resolve(resolvedParent, await readlink(resolvedPath));
+      return resolvePath(target, true, depth + 1);
     }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  return resolvedPath;
+}
+
+async function assertResolutionUnchanged(resolution: PathResolution): Promise<void> {
+  if (await resolvePath(resolution.path, resolution.followFinalSymlink) !== resolution.resolvedPath) {
+    throw new Error(`Path changed while the patch was being prepared: ${resolution.path}.`);
   }
 }
 
-async function readExistingText(root: string, path: string, displayPath: string): Promise<TextFile> {
-  await assertSafePath(root, path);
+async function assertCanonicalPath(path: string, followFinalSymlink = true): Promise<void> {
+  await assertResolutionUnchanged({ path, resolvedPath: path, followFinalSymlink });
+}
+
+async function readExistingText(path: string, displayPath: string): Promise<TextFile> {
   let stat;
   try {
     stat = await lstat(path);
@@ -79,8 +108,7 @@ async function readExistingText(root: string, path: string, displayPath: string)
   return decodeText(await readFile(path), displayPath);
 }
 
-async function readOptionalText(root: string, path: string, displayPath: string): Promise<TextFile | undefined> {
-  await assertSafePath(root, path);
+async function readOptionalText(path: string, displayPath: string): Promise<TextFile | undefined> {
   try {
     const stat = await lstat(path);
     if (!stat.isFile()) throw new Error(`Patch target is not a file: ${displayPath}.`);
@@ -91,7 +119,7 @@ async function readOptionalText(root: string, path: string, displayPath: string)
   }
 }
 
-function addExpected(expected: Map<string, Buffer | null>, path: string, value: Buffer | null): void {
+function addExpected(expected: Map<string, ExpectedEntry>, path: string, value: ExpectedEntry): void {
   if (expected.has(path)) throw new Error(`Patch changes the same path more than once: ${path}.`);
   expected.set(path, value);
 }
@@ -99,15 +127,37 @@ function addExpected(expected: Map<string, Buffer | null>, path: string, value: 
 export async function verifyPatch(patch: Patch, cwd: string): Promise<VerifiedPatch> {
   const root = await realpath(cwd);
   const mutations: Mutation[] = [];
-  const expected = new Map<string, Buffer | null>();
+  const expected = new Map<string, ExpectedEntry>();
+  const resolutions: PathResolution[] = [];
   const changes: PlannedChange[] = [];
   const summary: string[] = [];
 
+  async function planPath(path: string, followFinalSymlink = true): Promise<string> {
+    const absolutePath = resolve(root, path);
+    const resolvedPath = await resolvePath(absolutePath, followFinalSymlink);
+    resolutions.push({ path: absolutePath, resolvedPath, followFinalSymlink });
+    return resolvedPath;
+  }
+
   for (const operation of patch.operations) {
-    const sourcePath = resolve(root, operation.path);
+    if (operation.type === "delete") {
+      const entryPath = await planPath(operation.path, false);
+      const entry = await currentEntry(entryPath);
+      if (entry === null) throw new Error(`File not found: ${operation.path}.`);
+      const oldContent = Buffer.isBuffer(entry)
+        ? decodeText(entry, operation.path).text
+        : `${entry.linkTarget}\n`;
+      addExpected(expected, entryPath, entry);
+      mutations.push({ type: "delete", path: entryPath });
+      changes.push({ path: operation.path, oldContent, newContent: "" });
+      summary.push(`D ${operation.path}`);
+      continue;
+    }
+
+    const sourcePath = await planPath(operation.path);
 
     if (operation.type === "add") {
-      const existing = await readOptionalText(root, sourcePath, operation.path);
+      const existing = await readOptionalText(sourcePath, operation.path);
       addExpected(expected, sourcePath, existing?.raw ?? null);
       const newContent = addedFileContent(operation.lines);
       mutations.push({ type: "write", path: sourcePath, content: encodeText(newContent, existing) });
@@ -116,27 +166,24 @@ export async function verifyPatch(patch: Patch, cwd: string): Promise<VerifiedPa
       continue;
     }
 
-    const source = await readExistingText(root, sourcePath, operation.path);
+    const source = await readExistingText(sourcePath, operation.path);
     addExpected(expected, sourcePath, source.raw);
-
-    if (operation.type === "delete") {
-      mutations.push({ type: "delete", path: sourcePath });
-      changes.push({ path: operation.path, oldContent: source.text, newContent: "" });
-      summary.push(`D ${operation.path}`);
-      continue;
-    }
 
     const newContent = applyUpdate(source.text, operation.chunks, operation.path);
     if (!operation.movePath && newContent === source.text) {
       throw new Error(`Patch makes no changes to ${operation.path}.`);
     }
     if (operation.movePath) {
-      const destinationPath = resolve(root, operation.movePath);
-      const destination = await readOptionalText(root, destinationPath, operation.movePath);
+      const entryPath = await planPath(operation.path, false);
+      if (entryPath !== sourcePath) {
+        addExpected(expected, entryPath, await currentEntry(entryPath));
+      }
+      const destinationPath = await planPath(operation.movePath);
+      const destination = await readOptionalText(destinationPath, operation.movePath);
       addExpected(expected, destinationPath, destination?.raw ?? null);
       mutations.push({
         type: "move",
-        source: sourcePath,
+        source: entryPath,
         destination: destinationPath,
         content: encodeText(newContent, source),
       });
@@ -150,11 +197,14 @@ export async function verifyPatch(patch: Patch, cwd: string): Promise<VerifiedPa
     }
   }
 
-  return { root, mutations, expected, changes, summary };
+  return { root, mutations, expected, resolutions, changes, summary };
 }
 
-async function currentRaw(path: string): Promise<Buffer | null> {
+async function currentEntry(path: string): Promise<ExpectedEntry> {
   try {
+    const stat = await lstat(path);
+    if (stat.isSymbolicLink()) return { linkTarget: await readlink(path) };
+    if (!stat.isFile()) throw new Error(`Patch target is not a file: ${path}.`);
     return await readFile(path);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
@@ -162,9 +212,11 @@ async function currentRaw(path: string): Promise<Buffer | null> {
   }
 }
 
-function sameBuffer(left: Buffer | null, right: Buffer | null): boolean {
+function sameEntry(left: ExpectedEntry, right: ExpectedEntry): boolean {
   if (left === null || right === null) return left === right;
-  return left.equals(right);
+  if (Buffer.isBuffer(left) && Buffer.isBuffer(right)) return left.equals(right);
+  if (!Buffer.isBuffer(left) && !Buffer.isBuffer(right)) return left.linkTarget === right.linkTarget;
+  return false;
 }
 
 function throwIfAborted(signal?: AbortSignal): void {
@@ -173,9 +225,12 @@ function throwIfAborted(signal?: AbortSignal): void {
 
 export async function applyVerifiedPatch(verified: VerifiedPatch, signal?: AbortSignal): Promise<void> {
   throwIfAborted(signal);
+  for (const resolution of verified.resolutions) {
+    await assertResolutionUnchanged(resolution);
+  }
   for (const [path, expected] of verified.expected) {
-    await assertSafePath(verified.root, path);
-    if (!sameBuffer(await currentRaw(path), expected)) {
+    await assertCanonicalPath(path, false);
+    if (!sameEntry(await currentEntry(path), expected)) {
       throw new Error(`File changed while the patch was being prepared: ${relative(verified.root, path)}.`);
     }
   }
@@ -183,22 +238,22 @@ export async function applyVerifiedPatch(verified: VerifiedPatch, signal?: Abort
   for (const mutation of verified.mutations) {
     throwIfAborted(signal);
     if (mutation.type === "delete") {
-      await assertSafePath(verified.root, mutation.path);
+      await assertCanonicalPath(mutation.path, false);
       await unlink(mutation.path);
       continue;
     }
     if (mutation.type === "move") {
-      await assertSafePath(verified.root, mutation.destination);
+      await assertCanonicalPath(mutation.destination);
       await mkdir(dirname(mutation.destination), { recursive: true });
-      await assertSafePath(verified.root, mutation.destination);
+      await assertCanonicalPath(mutation.destination);
       await writeFile(mutation.destination, mutation.content);
-      await assertSafePath(verified.root, mutation.source);
+      await assertCanonicalPath(mutation.source, false);
       await unlink(mutation.source);
       continue;
     }
-    await assertSafePath(verified.root, mutation.path);
+    await assertCanonicalPath(mutation.path);
     await mkdir(dirname(mutation.path), { recursive: true });
-    await assertSafePath(verified.root, mutation.path);
+    await assertCanonicalPath(mutation.path);
     await writeFile(mutation.path, mutation.content);
   }
   throwIfAborted(signal);
