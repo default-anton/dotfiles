@@ -1,14 +1,12 @@
-import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import {
-  DefaultResourceLoader,
-  SettingsManager,
   getAgentDir,
   type ExtensionAPI,
+  type NormalizedBuildSystemPromptOptions,
+  type Skill,
 } from "@earendil-works/pi-coding-agent";
 
-const AGENTS_CONTEXT_FILENAMES = ["AGENTS.override.md", "AGENTS.md", "CLAUDE.md"];
 const PI_DOCS_INDEX = "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/index.md";
 const PI_EXAMPLES_URL = "https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples";
 
@@ -16,70 +14,6 @@ type ContextFile = {
   path: string;
   content: string;
 };
-
-type Skill = {
-  name: string;
-  filePath: string;
-  description: string;
-  disableModelInvocation?: boolean;
-};
-
-function discoverContextFileFromDir(dir: string): ContextFile | null {
-  for (const filename of AGENTS_CONTEXT_FILENAMES) {
-    const filePath = path.join(dir, filename);
-    if (!fs.existsSync(filePath)) {
-      continue;
-    }
-
-    try {
-      return {
-        path: filePath,
-        content: fs.readFileSync(filePath, "utf-8"),
-      };
-    } catch {
-      continue;
-    }
-  }
-
-  return null;
-}
-
-function discoverAgentsFiles(cwd: string, agentDir: string): ContextFile[] {
-  const agentsFiles: ContextFile[] = [];
-  const seenPaths = new Set<string>();
-
-  const globalContext = discoverContextFileFromDir(agentDir);
-  if (globalContext) {
-    agentsFiles.push(globalContext);
-    seenPaths.add(globalContext.path);
-  }
-
-  const ancestorContexts: ContextFile[] = [];
-  let currentDir = path.resolve(cwd);
-  const rootDir = path.parse(currentDir).root;
-
-  while (true) {
-    const contextFile = discoverContextFileFromDir(currentDir);
-    if (contextFile && !seenPaths.has(contextFile.path)) {
-      ancestorContexts.unshift(contextFile);
-      seenPaths.add(contextFile.path);
-    }
-
-    if (currentDir === rootDir) {
-      break;
-    }
-
-    const parentDir = path.dirname(currentDir);
-    if (parentDir === currentDir) {
-      break;
-    }
-    currentDir = parentDir;
-  }
-
-  agentsFiles.push(...ancestorContexts);
-
-  return agentsFiles;
-}
 
 function escapeXml(str: string): string {
   return str
@@ -117,8 +51,9 @@ function formatSkillsForPrompt(skills: Skill[]): string {
   }
 
   const lines = [
-    "\n\nThe following skills provide specialized instructions for specific tasks.",
+    "The following skills provide specialized instructions for specific tasks.",
     "Read a skill file when you're about to perform the kind of work the skill prescribes, not just mention it.",
+    "Resolve relative paths in a skill against the directory containing its SKILL.md, not the working directory.",
     "<available_skills>",
   ];
 
@@ -142,7 +77,7 @@ function formatAgentFilesForPrompt(agentFiles: ContextFile[], cwd: string): stri
     return "";
   }
 
-  const lines = ["\n\nAGENTS.md files:", "<agents_files>"];
+  const lines = ["AGENTS.md files:", "<agents_files>"];
 
   for (const { path: filePath, content } of agentFiles) {
     lines.push(`<agent_file path="${escapeXml(formatPathForPrompt(filePath, cwd))}">`);
@@ -161,33 +96,48 @@ function formatPiDocumentationForPrompt(systemPrompt: string): string {
   }
 
   return [
-    "\n\nPi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):",
+    "Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):",
     `- Documentation index: ${PI_DOCS_INDEX}. Read when asked about extensions, themes, skills, prompt templates, TUI components, keybindings, SDK integrations, custom providers, adding models, pi packages, environment variables, etc.`,
     `- Examples: ${PI_EXAMPLES_URL}`,
   ].join("\n");
 }
 
+function formatToolGuidelines(options: NormalizedBuildSystemPromptOptions): string {
+  const guidelines = [
+    ...options.selectedTools.flatMap((name) => options.toolGuidelines[name] ?? []),
+    ...options.promptGuidelines,
+  ];
+  const uniqueGuidelines = new Set(
+    guidelines.map((guideline) => guideline.trim()).filter(Boolean),
+  );
+
+  return [...uniqueGuidelines].map((guideline) => `- ${guideline}`).join("\n");
+}
+
 export default function injectContextExtension(pi: ExtensionAPI) {
-  pi.on("before_agent_start", async (event, ctx) => {
-    const agentDir = getAgentDir();
-    const settingsManager = SettingsManager.create(ctx.cwd, agentDir);
+  pi.on("before_agent_start", (event, ctx) => {
+    const options = event.systemPromptOptions;
+    const { sections } = options;
+    const piDocs = formatPiDocumentationForPrompt(options.customPrompt ?? event.systemPrompt);
+    if (piDocs) {
+      sections.docs = piDocs;
+    }
 
-    const resourceLoader = new DefaultResourceLoader({
-      cwd: ctx.cwd,
-      agentDir,
-      settingsManager,
-      noExtensions: true,
-      noPromptTemplates: true,
-      noThemes: true,
-    });
-    await resourceLoader.reload();
+    if (options.contextFiles.length > 0) {
+      sections.project_context = formatAgentFilesForPrompt(options.contextFiles, ctx.cwd);
+    }
 
-    const systemPromptPath = path.join(agentDir, "SYSTEM.md");
-    const hasSystemPromptOverride = fs.existsSync(systemPromptPath);
+    const canReadSkills = options.selectedTools.some((name) => name === "read" || name === "bash");
+    const visibleSkills = options.skills.filter((skill) => !skill.disableModelInvocation);
+    if (canReadSkills && visibleSkills.length > 0) {
+      sections.skills = formatSkillsForPrompt(visibleSkills);
+    }
 
-    let baseSystemPrompt = event.systemPrompt;
-    if (hasSystemPromptOverride) {
-      baseSystemPrompt = fs.readFileSync(systemPromptPath, "utf-8");
+    if (options.customPrompt) {
+      const toolGuidelines = formatToolGuidelines(options);
+      if (toolGuidelines) {
+        sections.tool_guidelines = toolGuidelines;
+      }
     }
 
     const now = new Date();
@@ -199,29 +149,8 @@ export default function injectContextExtension(pi: ExtensionAPI) {
       timeZoneName: "short",
     });
 
-    const { skills } = resourceLoader.getSkills() as { skills: Skill[] };
-    const filteredSkills = skills.filter((skill) => !skill.disableModelInvocation);
-
-    const agentsFiles = discoverAgentsFiles(ctx.cwd, agentDir);
-
-    const piDocs = formatPiDocumentationForPrompt(baseSystemPrompt);
-
-    if (!hasSystemPromptOverride && piDocs === "" && filteredSkills.length === 0 && agentsFiles.length === 0) {
-      return;
-    }
-
-    const prompt = [
-      "\n\n---",
-      piDocs,
-      formatAgentFilesForPrompt(agentsFiles, ctx.cwd),
-      formatSkillsForPrompt(filteredSkills),
-      `\n\nCurrent date: ${dateTime}`,
-      `\nCurrent working directory: ${formatPathForPrompt(ctx.cwd)}`,
-      `\nGlobal AGENTS.md: ${formatPathForPrompt(path.join(agentDir, "AGENTS.md"))} (applies to all projects)`,
-    ].join("");
-
-    return {
-      systemPrompt: baseSystemPrompt.trim() + prompt,
-    };
+    sections.date = `Current date: ${dateTime}`;
+    sections.cwd = `Current working directory: ${formatPathForPrompt(ctx.cwd)}`;
+    sections.global_context = `Global AGENTS.md: ${formatPathForPrompt(path.join(getAgentDir(), "AGENTS.md"))} (applies to all projects)`;
   });
 }
