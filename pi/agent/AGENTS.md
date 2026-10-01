@@ -1,4 +1,5 @@
 # Rules You Must Follow
+For classification tasks, use code mode’s `models.classify` with provider `typesafe` and model `jev-latest`.
 Add comments only when asked. Keep existing comments unless outdated.
 When asked to find or act on comments left for you, search for `hey seb` case-insensitively; no punctuation is required.
 Commit only when explicitly asked. Do not run validation as part of a commit or push task.

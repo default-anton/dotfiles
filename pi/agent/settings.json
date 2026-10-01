@@ -10,7 +10,8 @@
     "deepseek/deepseek-flash"
   ],
   "defaultTools": [
-    "bash"
+    "bash",
+    "codemode"
   ],
   "compaction": {
     "enabled": false
