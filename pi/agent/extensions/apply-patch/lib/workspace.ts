@@ -1,5 +1,5 @@
 import { lstat, mkdir, readFile, realpath, unlink, writeFile } from "node:fs/promises";
-import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
+import { dirname, relative, resolve, sep } from "node:path";
 import { addedFileContent, applyUpdate, type Patch } from "./patch.ts";
 
 export type PlannedChange = {
@@ -49,20 +49,7 @@ function encodeText(text: string, source?: TextFile): Buffer {
   return Buffer.from(`${source?.bom ?? ""}${restored}`, "utf8");
 }
 
-function isWithin(root: string, path: string): boolean {
-  const rel = relative(root, path);
-  return rel !== "" && rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
-}
-
-function resolvePatchPath(root: string, path: string): string {
-  if (isAbsolute(path)) throw new Error(`Patch paths must be relative to the working directory: ${path}.`);
-  const absolutePath = resolve(root, path);
-  if (!isWithin(root, absolutePath)) throw new Error(`Patch path escapes the working directory: ${path}.`);
-  return absolutePath;
-}
-
 async function assertSafePath(root: string, path: string): Promise<void> {
-  if (!isWithin(root, path)) throw new Error(`Patch path escapes the working directory: ${path}.`);
   const parts = relative(root, path).split(sep);
   let current = root;
   for (const part of parts) {
@@ -117,7 +104,7 @@ export async function verifyPatch(patch: Patch, cwd: string): Promise<VerifiedPa
   const summary: string[] = [];
 
   for (const operation of patch.operations) {
-    const sourcePath = resolvePatchPath(root, operation.path);
+    const sourcePath = resolve(root, operation.path);
 
     if (operation.type === "add") {
       const existing = await readOptionalText(root, sourcePath, operation.path);
@@ -144,7 +131,7 @@ export async function verifyPatch(patch: Patch, cwd: string): Promise<VerifiedPa
       throw new Error(`Patch makes no changes to ${operation.path}.`);
     }
     if (operation.movePath) {
-      const destinationPath = resolvePatchPath(root, operation.movePath);
+      const destinationPath = resolve(root, operation.movePath);
       const destination = await readOptionalText(root, destinationPath, operation.movePath);
       addExpected(expected, destinationPath, destination?.raw ?? null);
       mutations.push({

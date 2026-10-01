@@ -51,15 +51,6 @@ test("applies add, update, move, and delete operations", async () => {
   await assert.rejects(readFile(join(root, "delete.txt")), { code: "ENOENT" });
 });
 
-test("rejects paths outside the working directory", async () => {
-  const root = await mkdtemp(join(tmpdir(), "pi-apply-patch-"));
-  const patch = parsePatch(`*** Begin Patch
-*** Add File: ../outside.txt
-+no
-*** End Patch`);
-  await assert.rejects(verifyPatch(patch, root), /escapes the working directory/);
-});
-
 test("rejects symbolic links", async () => {
   const root = await mkdtemp(join(tmpdir(), "pi-apply-patch-"));
   const outside = await mkdtemp(join(tmpdir(), "pi-apply-patch-outside-"));

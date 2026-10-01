@@ -265,11 +265,11 @@ export default function applyPatchExtension(pi: ExtensionAPI) {
     name: TOOL_NAME,
     label: "apply_patch",
     description:
-      "Apply a patch to files in the working directory. This is a freeform tool: send raw patch text with *** Begin Patch and *** End Patch. Use *** Add File, *** Delete File, or *** Update File headers; prefix update lines with +, -, or a space.",
+      "Apply a patch to files using absolute paths or paths relative to the working directory, including paths outside it. This is a freeform tool: send raw patch text with *** Begin Patch and *** End Patch. Use *** Add File, *** Delete File, or *** Update File headers; prefix update lines with +, -, or a space.",
     promptSnippet: "Apply multi-file patches with context-based edits",
     promptGuidelines: [
       "Use apply_patch for file edits, additions, deletions, and moves.",
-      "Keep patch paths relative to the working directory and include enough unchanged context for updates to match.",
+      "Patch paths may be absolute or relative to the working directory, including paths outside it. Include enough unchanged context for updates to match.",
     ],
     parameters: applyPatchSchema,
     constrainedSampling: {
