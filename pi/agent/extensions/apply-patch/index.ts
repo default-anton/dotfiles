@@ -266,7 +266,7 @@ export default function applyPatchExtension(pi: ExtensionAPI) {
     exposure: "model-only",
     label: "apply_patch",
     description:
-      "Apply a patch to files using relative or absolute paths, including symlinks. This is a freeform tool: send raw patch text with *** Begin Patch and *** End Patch. Use *** Add File, *** Delete File, or *** Update File headers; prefix update lines with +, -, or a space.",
+      "Apply a patch to files using relative or absolute paths, including symlinks. Call directly; unavailable in code mode. This is a freeform tool: send raw patch text with *** Begin Patch and *** End Patch. Use *** Add File, *** Delete File, or *** Update File headers; prefix update lines with +, -, or a space.",
     promptSnippet: "Apply multi-file patches with context-based edits",
     promptGuidelines: [
       "Use apply_patch for file edits, additions, deletions, and moves.",
