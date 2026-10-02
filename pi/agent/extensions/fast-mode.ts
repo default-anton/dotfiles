@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { getAgentDir, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 
-const STATUS_KEY = "openai-service-tier";
+const STATUS_KEY = "fast-mode";
 // service_tier is only valid on the OpenAI Responses API.
 const SUPPORTED_APIS = new Set(["openai-responses", "openai-codex-responses"]);
 
@@ -12,13 +12,13 @@ function isOpenAIResponsesModel(model: ExtensionContext["model"]): boolean {
 
 function refreshStatus(ctx: ExtensionContext, enabled: boolean): void {
   if (enabled && isOpenAIResponsesModel(ctx.model)) {
-    ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("accent", "⚡fast"));
+    ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("accent", "🚀"));
   } else {
     ctx.ui.setStatus(STATUS_KEY, undefined);
   }
 }
 
-export default function openaiServiceTierExtension(pi: ExtensionAPI) {
+export default function fastModeExtension(pi: ExtensionAPI) {
   const agentDir = getAgentDir();
   const statePath = join(agentDir, "openai-service-tier.json");
   let enabled = false;
