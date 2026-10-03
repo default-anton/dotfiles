@@ -51,11 +51,12 @@ Matching dependencies reuse the cache; toolchain, version, feature or profile ch
 rebuild them. `cargo clean` clears the shared cache. Use `mise exec -- cargo` if needed.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dmtrKovalenko/fframes/main/scripts/new-video.sh | bash -s -- my-video --yes
-# or install the generator once and use it directly:
-cargo install --locked cargo-fframes
+cargo install --locked cargo-fframes --version 1.2.0
 cargo fframes new my-video --format landscape --fps 30 --yes
 ```
+
+This setup uses fframes 1.2.0. Keep the generator version explicit so new projects use the
+reviewed release rather than whichever version is newest.
 
 Options: `--template single-scene|multi-scene`, `--format landscape|portrait|square|uhd`,
 `--fps`, `--title`, `--backend`, `--dir`. The project depends on the fframes release that
