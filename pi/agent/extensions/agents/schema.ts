@@ -8,6 +8,7 @@ export const parameters = Type.Object({
   name: Type.Optional(Type.String({ description: "Short tab label; required for start." })),
   message: Type.Optional(Type.String({ description: "Task or message; required for start/send." })),
   cwd: Type.Optional(Type.String({ description: "Start only; defaults to the current directory." })),
+  model: Type.Optional(Type.String({ description: "Start only; model ID, model:thinking, or provider/model:thinking. Omitted parts inherit the parent's settings; thinking is clamped to model capabilities." })),
   mode: Type.Optional(StringEnum(["steer", "followUp"], { description: "Send only; defaults to followUp. Steer runs at the next boundary." })),
   wait: Type.Optional(Type.Boolean({ description: "Start/send only; default false." })),
   run: Type.Optional(Type.String({ description: "Wait only; defaults to the latest run at call time." })),
@@ -35,7 +36,7 @@ export const uuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4
 export function validateArguments(args: Arguments) {
   if (!Value.Check(parameters, args)) throw new Error("Invalid agents arguments.");
   const fields = {
-    start: ["action", "name", "message", "cwd", "wait", "timeout"],
+    start: ["action", "name", "message", "cwd", "model", "wait", "timeout"],
     send: ["action", "session", "message", "mode", "wait", "timeout"],
     wait: ["action", "session", "run", "timeout"],
     stop: ["action", "session"],
@@ -50,6 +51,7 @@ export function validateArguments(args: Arguments) {
   if (args.action === "start" && (!args.name?.trim() || args.name.length > 100 || /[\r\n\x00-\x1f]/.test(args.name))) {
     throw new Error("name must be a nonblank, single-line label of at most 100 characters.");
   }
+  if (args.model !== undefined && !args.model.trim()) throw new Error("model must not be blank.");
   if (["start", "send"].includes(args.action) && !args.message?.trim()) throw new Error("message must not be blank.");
   if (args.message && Buffer.byteLength(JSON.stringify(args.message), "utf8") > 262144) {
     throw new Error("message exceeds the 256 KiB encoded control limit.");

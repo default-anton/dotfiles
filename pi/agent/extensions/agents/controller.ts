@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
+import { clampThinkingLevel, type ThinkingLevel } from "@earendil-works/pi-ai";
 import { getAgentDir, SessionManager, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { ModelSelectionError, resolveModelSelection } from "../lib/model-selection";
 import { endpoints, request, sameIdentity, type Endpoint, type Identity, type Owner, type Snapshot } from "./bridge";
 import { currentPane, herdr, inventory, type Pane } from "./herdr";
 import { ControlError, failure, validateArguments, type AgentsResult, type Arguments } from "./schema";
@@ -203,11 +205,11 @@ export class Controller {
     cwd: string,
     ctx: ExtensionContext,
     generation: number,
-    file?: string,
+    options: { file?: string; model?: string } = {},
   ): Promise<Endpoint> {
     this.checkGeneration(generation);
     cwd = resolveCwd(cwd, ctx.cwd);
-    const parentPane = await currentPane();
+    const { file } = options;
     const args: string[] = [];
     let selection: Snapshot["selection"];
     if (file) {
@@ -225,13 +227,35 @@ export class Controller {
       if (selection) args.push("--provider", selection.provider, "--model", selection.model, "--thinking", selection.thinking);
     }
     else {
-      if (!ctx.model || !ctx.modelRegistry.getAvailable().some((model) => model.provider === ctx.model!.provider && model.id === ctx.model!.id)) {
-        throw new ControlError("model_unavailable", "The parent's current model is unavailable.");
+      const availableModels = ctx.modelRegistry.getAvailable();
+      const inheritedThinking = ctx.thinkingLevel ?? this.pi.getThinkingLevel();
+      if (options.model !== undefined) {
+        try {
+          const resolved = resolveModelSelection({
+            reference: options.model,
+            currentProvider: ctx.model?.provider,
+            availableModels,
+            inheritedThinkingLevel: inheritedThinking,
+          });
+          selection = {
+            provider: resolved.model.provider,
+            model: resolved.model.id,
+            thinking: clampThinkingLevel(resolved.model, resolved.thinkingLevel as ThinkingLevel),
+          };
+        } catch (error) {
+          if (!(error instanceof ModelSelectionError)) throw error;
+          throw new ControlError(error.reason === "unavailable" ? "model_unavailable" : "invalid_model", error.message);
+        }
+      } else {
+        if (!ctx.model || !availableModels.some((model) => model.provider === ctx.model!.provider && model.id === ctx.model!.id)) {
+          throw new ControlError("model_unavailable", "The parent's current model is unavailable.");
+        }
+        selection = { provider: ctx.model.provider, model: ctx.model.id, thinking: inheritedThinking };
       }
-      selection = { provider: ctx.model.provider, model: ctx.model.id, thinking: ctx.thinkingLevel ?? this.pi.getThinkingLevel() };
       args.push("--session-id", session, "--name", name, "--provider", selection.provider, "--model", selection.model,
         "--thinking", selection.thinking);
     }
+    const parentPane = await currentPane();
     const id = randomUUID();
     const launch: Launch = {
       id, session, file, cwd, workspace: parentPane.workspace_id,
@@ -321,7 +345,7 @@ export class Controller {
       const target = await queue.run(async () => {
         let live = args.action === "start" ? undefined : await this.live(key);
         if (args.action === "start") {
-          live = { endpoint: await this.launch(key, args.name!.trim(), cwd!, ctx, generation) } as Snapshot;
+          live = { endpoint: await this.launch(key, args.name!.trim(), cwd!, ctx, generation, { model: args.model }) } as Snapshot;
         } else if (!live) {
           const saved = await this.saved(key, ctx);
           if (args.action === "stop") return { result: { session: key, status: "idle" } as AgentsResult };
@@ -338,7 +362,7 @@ export class Controller {
           const release = this.state.lock(`launch:${saved.file}`, this.endpoint.incarnation);
           try {
             live = await this.live(key, saved.file);
-            if (!live) live = { endpoint: await this.launch(key, saved.name, saved.cwd, ctx, generation, saved.file) } as Snapshot;
+            if (!live) live = { endpoint: await this.launch(key, saved.name, saved.cwd, ctx, generation, { file: saved.file }) } as Snapshot;
           } finally {
             release();
           }
