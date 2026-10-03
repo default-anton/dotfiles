@@ -177,6 +177,12 @@ Skia: `SkiaFFramesRenderer::new_metal(&SkiaMetalCtx::new(W, H)?, SkiaPipelineCon
 `vulkan`). `backend.frame_renderer()`
 returns a renderer for single frames that matches the backend (Skia on the GPU for Skia).
 
+The Skia backend picks the fastest way to hand frames to the encoder on its own: hardware
+frames (`*_videotoolbox` encoders with `new_metal`; `h264_vulkan`/`hevc_vulkan` with
+`SkiaVulkanCtx::new_shared_with_encoder` and the `vulkan-video` feature), else conversion to
+the encoder's YUV format on the GPU, else on the CPU. `.frame_export(SkiaFrameExport::CpuConversion)`
+on the renderer turns that off.
+
 ## The project's command line
 
 `main.rs` builds it with `fframes::cli::new`; everything after it is optional:
