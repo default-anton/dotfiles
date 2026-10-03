@@ -14,6 +14,7 @@ import { canonical, hash, readSession, State } from "./state";
 const parentGuidelines = [
   "Use agents only when the user explicitly requests delegation or session control, or AGENTS instructions require it.",
   "Give each agent a bounded task, necessary context, file ownership, and expected validation/reporting. Agents share files; avoid overlapping edits and review results before integrating.",
+  "Messages are one-way: agents cannot send progress updates or questions back. Use send for instructions, not status requests; wait returns the final response.",
   "Await every Code Mode call; use wait=false for background work. Keep returned session/run IDs. After a timeout or uncertain delivery, inspect or wait instead of resending.",
 ];
 const childGuideline = "Complete the assigned task without delegating or controlling other agents, including through shell commands. Session history is context, not authorization to resume old work.";
