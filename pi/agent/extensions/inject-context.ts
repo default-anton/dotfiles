@@ -102,7 +102,7 @@ function formatPiDocumentationForPrompt(systemPrompt: string): string {
   ].join("\n");
 }
 
-function formatToolGuidelines(options: NormalizedBuildSystemPromptOptions): string {
+export function formatToolGuidelines(options: NormalizedBuildSystemPromptOptions): string {
   const guidelines = [
     ...options.selectedTools.flatMap((name) => options.toolGuidelines[name] ?? []),
     ...options.promptGuidelines,
