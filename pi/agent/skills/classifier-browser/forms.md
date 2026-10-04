@@ -2,11 +2,10 @@
 
 ## Run the local example
 
-form.html is a disposable local UI: no backend, login, save or send.
-form.js prepares an unsaved draft using one batched text classification,
-direct dropdown/interval bindings, and classifier-chosen checkbox actions.
-It preserves Billing Email, timezone and First run; captures four checkpoints;
-cancels, reopens, verifies reset and cancels again.
+form.html is disposable: no backend, login, save or send. form.js demonstrates
+batched text classification, direct dropdown/interval bindings and classified
+checkbox actions. Its four checkpoints preserve Billing Email, timezone and
+First run through draft preparation, cancellation and reset.
 
 After reading `agent-browser skills get core`, run in Code Mode:
 
@@ -25,12 +24,12 @@ text(report);
 ```
 
 Alternate installation: change the load path and pass the resolved `skillDir`
-as in the Wikipedia example. The runner loads its adjacent `choose.js`/`form.html`.
+as in SKILL.md. The runner loads adjacent choose.js and form.html.
 Review captures using visual-review.md; `outcome: "verified"` covers effects, not pixels.
 
-Read `form.js` to adapt to another app. Replace its URL, probes, field mapping,
-allowed controls, defaults and outcome predicates. Do not inject this fixture
-into a real app or infer real-app coverage from it.
+To adapt form.js, replace its URL, probes, field mapping, allowed controls,
+defaults and outcome predicates. Never inject the fixture into a real app
+or infer real-app coverage from it.
 
 ## Batched independent fills
 
@@ -44,17 +43,16 @@ See the `fields → questions → batch` block in form.js:
    and `keep` for an unsatisfied field.
 4. Fill serially, then verify each actual value and unchanged unrelated controls.
 
-Use small independent batches (the example uses three fields). Do not batch
-autosaving, conditional, submitting or remounting inputs. Re-observe those after
-each action instead. When the task already binds every field/value uniquely,
-direct fills are simpler; this example deliberately exercises classification.
+Use small independent batches (here, three fields). For autosaving, conditional,
+submitting or remounting inputs, act and re-observe individually.
+Fill directly when field/value bindings are unique; this example deliberately
+exercises classification.
 
 ## One probe, small classifier state
 
-The example's `probe` reads actual values, visibility, disabled/checked state,
-`aria-selected`/`aria-pressed`, focus and framing in one read-only browser `eval`.
-For other apps extend that same probe with relevant readiness facts and field
-identity/group metadata. Do not ask Jev to generate JavaScript.
+Use one read-only browser `eval` probe for values, visibility, disabled/checked state,
+`aria-selected`/`aria-pressed`, focus and framing. Add app-specific readiness and
+field identity/group metadata to that probe. Never ask Jev to generate JavaScript.
 
 Keep full values host-side. Build classifier-facing fields with only
 identity, context, permitted value keys and comparisons:
@@ -71,15 +69,13 @@ const fields = bindings.map(binding => ({
 }));
 ```
 
-Here `bindings`, `actual` and `values` are task-local host data, not invented refs.
-Send this projection, not the raw probe or snapshot. Excluding literals only
-from `pool.values` is insufficient: also exclude
-them from snapshot descendants, `currentValue`, history and other metadata.
+`bindings`, `actual` and `values` are task-local host data. Use observed refs.
+Send this projection, not raw probes/snapshots. Strip literals not just from
+`pool.values`, but snapshot descendants, `currentValue`, history and other metadata.
 Opaque keys reduce exposure/context; they are not credential protection.
 
-Shrink routing observations, not verification. A tablist can choose a page;
-it cannot prove the selected panel has loaded or preserved values. Keep full
-task-specific effect checks host-side even when Jev sees only a small region.
+Shrink routing observations, not host-side verification. A tablist can choose
+a page, not prove its panel loaded or preserved values.
 
 ## Take over and resume without restarting
 
@@ -95,10 +91,9 @@ The session stays open. Before practicing Cancel-and-resume, require
 `evidence.prepared === true`, two captures, and `reason === "checkpoint_pause"`.
 Diagnose any other failure without assuming preparation finished.
 
-Inspect that exact session, its URL and a fresh snapshot. For this fixture only,
-you may directly click the observed Cancel button and check that `#draft` is
-hidden; leave all other controls alone. Or simply inspect without changing it.
-Use the returned session on every command and the same launch configuration:
+Inspect that session's URL and fresh snapshot. For this fixture only, optionally
+click the observed Cancel button and verify `#draft` is hidden; leave other
+controls alone. Keep the returned session and launch configuration:
 
 ```js
 const report = load("formRun");
@@ -122,12 +117,11 @@ store("formRun", report);
 text(report);
 ```
 
-The runner does not reopen the starting URL. It checks live identity and
-untouched values, retains prior captures/evidence, skips completed preparation,
-observes cancellation (including a parent-performed Cancel), and checks reset.
-That task-specific logic is the pattern to copy—not blind replay or a generic
-“resume everything” flag. For an alternate installation pass the same `skillDir`.
-Evidence contains historical facts; recheck any state needed by the next action.
+Resume checks live identity and untouched values without navigating, retaining
+captures/evidence and skipping completed work. It handles a parent-performed
+Cancel and verifies reset. Copy this task-specific logic, not blind replay or
+a generic resume flag. Alternate installations need the same `skillDir`.
+Evidence is historical; recheck state needed by the next action.
 
 If the session is gone, URL is wrong, or effects are unknown, stop. Code Mode
 stores commit only on successful script completion, so a stored report may lag

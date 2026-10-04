@@ -1,17 +1,12 @@
 # Interaction checks
 
-Use these only when relevant. They are lessons from bounded experiments, not
-proof that every site or browser version behaves the same.
+Use when relevant. These experiments may not generalize to other sites or versions.
 
 Search/navigation:
 Search may be a textbox, searchbox or combobox. After Enter, wait for article
 or results; do not seek another link if already at the destination. Check URL
 predicates against URLs alone, not URL+label strings. Require destination identity
 and content readiness: URLs can change before old content disappears.
-
-Forms:
-See forms.md for grouped bindings, actual-value checks, preserved defaults,
-cancellation/reset and independent fill batches.
 
 Keyboard/contenteditable:
 Verify focus and actual selection/Range before destructive edits, then text/HTML
@@ -42,19 +37,15 @@ Use approved account scope and safe vault transport. Never put secrets in classi
 state, shell arguments or reports. Opaque keys do not protect DOM, screenshots,
 traces or saved browser state.
 
-Unknown submission:
-A missing receipt does not justify retrying. Require a trustworthy correlated
-effect record; otherwise hand off.
-
 ## Navigation-only adaptation
 
-Reuse the example's checked `browser` wrapper, chooser loader, budgets and
-handoff reporting. Replace its search-specific block with this pattern.
+Reuse example.js's checked `browser` wrapper, chooser loader, budgets and
+handoff reporting. Replace its search block with the pattern below.
 Inspect actual DOM before writing probes: an accessibility `region` may be a
 semantic `<section>`, not an element with a literal `role="region"` attribute.
 
-Here `scope`, `task`, `allowedHrefs`, `destinationReady`, `evidence` and
-`remaining` are host-defined for your task, not classifier output.
+`scope`, `task`, `allowedHrefs`, `destinationReady`, `evidence` and
+`remaining` are host-defined, not classifier output.
 `allowedHrefs` is a Set of exact permitted hrefs observed during site inspection;
 for dynamic destinations, derive it from an independently verified container
 (for example the release carrying GitHub's Latest badge), not the first link.
@@ -88,6 +79,6 @@ then independently read back identity/content and update evidence. Capture and
 return are separate remaining obligations. If only one uniquely authorized
 target can advance the task, bind it directly instead of classifying.
 
-Parallel classification is fine; parallel browser mutations are not.
+Classification may run in parallel; browser actions stay serial (SKILL.md).
 Native deltas reduce CLI text, not necessarily reconstructed classifier tokens.
 A confidence critic is not an independent security gate.

@@ -1,13 +1,9 @@
 # Capture checkpoints, then review sheets
 
-The parent reviews contact sheets after classifier-guided capture.
-DOM verification, capture and visual verification are separate facts.
-
 ## Capture contract
 
-Use forms.md as a runnable example:
-empty → prepared → cancelled → reopened/reset. For navigation, use the same
-pattern with selected view, URL/content identity and unchanged fields.
+Runnable example: forms.md (empty → prepared → cancelled → reopened/reset).
+For navigation, check selected view, URL/content identity and unchanged fields.
 
 For every checkpoint, code:
 1. Waits for the required state and verifies its actual values/content.
@@ -15,17 +11,16 @@ For every checkpoint, code:
 3. Captures a new source PNG and rechecks the state.
 4. Appends `{id, expected, path}` to `captures` only after both checks pass.
 
-Keep every required checkpoint even when two DOM states look the same.
-For long content, make deliberate scroll checkpoints. Do not make a single
-enormous full-page screenshot and shrink it until the content is illegible.
-`form.js` implements this sequence in `capture()`, with separate durable evidence
-for cancellation and reset. Capture is deterministic host work, not a Jev question.
+Keep every required checkpoint even when DOM states look identical; cancellation
+and reset need separate evidence. For long content, use scroll checkpoints,
+not one enormous full-page screenshot shrunk to illegibility.
+Capture is deterministic host work, not a Jev question.
 
 ## Build a sheet
 
-sheet.py needs Python 3, ImageMagick (`magick`) and an installed font
-file. It composes 1–4 panels from a JSON manifest. Source paths are relative to
-the manifest or absolute. Output must be a new PNG path.
+sheet.py requires Python 3, ImageMagick (`magick`) and an installed font file.
+It composes 1–4 panels from a JSON manifest with absolute or manifest-relative
+source paths. Output must be a new PNG path.
 
 ```json
 [
@@ -56,9 +51,8 @@ python3 ~/.pi/agent/skills/classifier-browser/sheet.py \
   --columns 2 --width 1600 --height 1200
 ```
 
-On other platforms, pass an installed font file (on fontconfig systems,
-`fc-match -f '%{file}' sans` prints one). Shorten any label that the script rejects
-as too wide; it will not silently clip labels or shrink their text.
+Elsewhere, pass an installed font file (`fc-match -f '%{file}' sans` on fontconfig
+systems). Shorten rejected labels; the script never silently clips or shrinks them.
 
 ## Review and refine
 
@@ -87,11 +81,9 @@ Optional `crop` is `[x, y, width, height]` in source pixels:
 ]
 ```
 
-Those coordinates illustrate the format, not universal selectors. Choose them
-from your actual capture geometry, keeping the section heading and nearby labels.
-For example use `--columns 1 --width 1200 --height 1600`; a one-panel sheet can
-use a shorter canvas. Do not enlarge tiny source text as a substitute for a
-better-framed source capture.
+Choose crop coordinates from actual captures, not these examples; retain section
+headings and nearby labels. Try `--columns 1 --width 1200 --height 1600`, or a
+shorter canvas for one panel. Reframe source captures rather than enlarging tiny text.
 
 ## Report and optional timing
 
@@ -100,7 +92,7 @@ and which visual obligations are verified or still unreadable. Say
 “automation verified; visual review pending” until required panels are reviewed.
 
 For end-to-end timing, store `Date.now()` before loading/running the workflow.
-In the first Code Mode call **after** sheet review:
+In the first Code Mode call after sheet review:
 
 ```js
 text({ captureThroughReviewMs: Date.now() - load("formStarted") });
