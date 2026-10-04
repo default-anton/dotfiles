@@ -13,6 +13,7 @@ def main() -> int:
 
     encoding = tiktoken.encoding_for_model("gpt-5")
     total = 0
+    file_count = 0
     exit_code = 0
     seen = set()
 
@@ -44,9 +45,11 @@ def main() -> int:
 
             count = len(encoding.encode_ordinary(text))
             total += count
+            file_count += 1
             print(f"{count}  {path}")
 
-    print(f"{total}  TOTAL")
+    if file_count > 1:
+        print(f"{total}  TOTAL")
     return exit_code
 
 
