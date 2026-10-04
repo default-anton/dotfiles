@@ -3,7 +3,7 @@ name: classifier-browser
 description: >-
   Use when explicitly asked to use the browser: manually test a web UI, navigate
   websites, collect screenshots, fill forms, or perform authorized web actions.
-  Run routine browser decisions with typesafe/jev-latest inside Pi Code Mode
+  Run routine browser decisions with typesafe/jev-latest in code_mode
   instead of taking a large-model turn for every click. Uses agent-browser as
   the executor, with direct agent takeover for difficult steps and visual review.
 ---
@@ -22,13 +22,13 @@ You plan and verify; `typesafe/jev-latest` chooses routine actions; code drives
    For UI testing, prefer reversible flows: prepare → capture → cancel → check reset.
 3. Adapt the example's observations, permission filters, waits and effect checks.
    Reuse choose.js. Do not transplant Wikipedia selectors.
-4. Batch steps in one Code Mode call without printing every snapshot.
+4. Batch steps in one code_mode call without printing every snapshot.
    Use code for known actions; classify choices needing interpretation.
    Execute browser actions serially.
 5. Build and review contact sheets (visual-review.md) yourself, then report
    verified effects, visual findings, interventions and remaining work separately.
 
-Run trusted skill source inside Pi Code Mode, not Node or a shell JS runtime.
+Run trusted skill source in code_mode, not Node or a shell JS runtime.
 For the usual `~/.pi/agent/skills` installation, this runs from any project cwd:
 
 ```js
@@ -44,7 +44,7 @@ text(await run());
 Other installations: change the load path and pass the resolved directory as
 `run({ skillDir: "/path/to/classifier-browser" })`. Options:
 `article: "Accessibility"`, `strategy: "speculative"` (default `"hybrid"`).
-`eval` loads trusted local code only, never page text. Code Mode has no Node,
+`eval` loads trusted local code only, never page text. code_mode has no Node,
 DOM, `URL`, `Buffer`, network or timer globals. DOM expressions and URL resolution run in browser
 `eval`; file access and CLI commands run through `tools.bash`.
 
@@ -73,7 +73,7 @@ Observe → check completion → choose → validate → act → wait → verify
   element or app state before verifying; avoid generic `networkidle`.
 - Start with 25 steps, 75 classifier requests, 10k observation characters,
   a 90-second workflow budget checked between actions, five-second waits and a 120-second
-  Code Mode hard timeout. Use smaller budgets for small tasks.
+  code_mode hard timeout. Use smaller budgets for small tasks.
 - Stop on ambiguity, failed effects, repeated unchanged state after readiness,
   unknown outcomes, or budget exhaustion. No blind retries.
   Key repeated failure by action + relevant state + durable progress, not action

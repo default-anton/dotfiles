@@ -7,7 +7,7 @@ batched text classification, direct dropdown/interval bindings and classified
 checkbox actions. Its four checkpoints preserve Billing Email, timezone and
 First run through draft preparation, cancellation and reset.
 
-After reading `agent-browser skills get core`, run in Code Mode:
+After reading `agent-browser skills get core`, run in code_mode:
 
 ```js
 // @options: {"timeout_ms": 120000}
@@ -107,7 +107,7 @@ if (!response.success) throw new Error(JSON.stringify(response.error));
 text(response.data);
 ```
 
-Then resume in Code Mode, with fresh local budgets and no old ref pool:
+Then resume in code_mode, with fresh local budgets and no old ref pool:
 
 ```js
 // @options: {"timeout_ms": 120000}
@@ -123,6 +123,6 @@ Cancel and verifies reset. Copy this task-specific logic, not blind replay or
 a generic resume flag. Alternate installations need the same `skillDir`.
 Evidence is historical; recheck state needed by the next action.
 
-If the session is gone, URL is wrong, or effects are unknown, stop. Code Mode
+If the session is gone, URL is wrong, or effects are unknown, stop. code_mode
 stores commit only on successful script completion, so a stored report may lag
 the browser after a hard timeout. Follow SKILL.md's timeout and cleanup rules.

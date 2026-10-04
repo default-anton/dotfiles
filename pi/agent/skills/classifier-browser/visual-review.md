@@ -92,7 +92,7 @@ and which visual obligations are verified or still unreadable. Say
 “automation verified; visual review pending” until required panels are reviewed.
 
 For end-to-end timing, store `Date.now()` before loading/running the workflow.
-In the first Code Mode call after sheet review:
+In the first code_mode call after sheet review:
 
 ```js
 text({ captureThroughReviewMs: Date.now() - load("formStarted") });
