@@ -1,0 +1,54 @@
+#!/usr/bin/env -S uv run --no-project --with tiktoken python
+
+import sys
+from pathlib import Path
+
+import tiktoken
+
+
+def main() -> int:
+    if not sys.argv[1:]:
+        print("Usage: count-tokens <file-or-directory> ...", file=sys.stderr)
+        return 2
+
+    encoding = tiktoken.encoding_for_model("gpt-5")
+    total = 0
+    exit_code = 0
+    seen = set()
+
+    for argument in sys.argv[1:]:
+        root = Path(argument).expanduser()
+        try:
+            if root.is_file():
+                paths = [root]
+            elif root.is_dir():
+                paths = sorted(path for path in root.rglob("*") if path.is_file())
+            else:
+                raise OSError("not a file or directory")
+        except OSError as error:
+            print(f"Error: {root}: {error}", file=sys.stderr)
+            exit_code = 1
+            continue
+
+        for path in paths:
+            try:
+                resolved = path.resolve()
+                if resolved in seen:
+                    continue
+                seen.add(resolved)
+                text = path.read_bytes().decode("utf-8")
+            except (OSError, UnicodeError) as error:
+                print(f"Error: {path}: {error}", file=sys.stderr)
+                exit_code = 1
+                continue
+
+            count = len(encoding.encode_ordinary(text))
+            total += count
+            print(f"{count}  {path}")
+
+    print(f"{total}  TOTAL")
+    return exit_code
+
+
+if __name__ == "__main__":
+    sys.exit(main())
