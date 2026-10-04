@@ -1,11 +1,8 @@
 ---
 name: classifier-browser
 description: >-
-  Use when explicitly asked to use the browser: manually test a web UI, navigate
-  websites, collect screenshots, fill forms, or perform authorized web actions.
-  Run routine browser decisions with typesafe/jev-latest in code_mode
-  instead of taking a large-model turn for every click. Uses agent-browser as
-  the executor, with direct agent takeover for difficult steps and visual review.
+  Use when explicitly asked to use the browser: test web UIs, navigate sites,
+  capture screenshots, fill forms, or perform authorized web actions.
 ---
 
 # Classifier-guided browsing

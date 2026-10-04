@@ -18,7 +18,8 @@ Capture is deterministic host work, not a Jev question.
 
 ## Build a sheet
 
-Run sheet.py directly; its uv shebang manages Python and Pillow. No ImageMagick or system
+Run sheet.py directly without reading its source unless debugging or modifying it.
+Its uv shebang manages Python and Pillow. No ImageMagick or system
 font setup is needed. Supply a JSON manifest with absolute or manifest-relative
 PNG paths and expected states; omitted IDs become numbered checkpoints.
 Output must be a new PNG path.
