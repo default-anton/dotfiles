@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Classifier browser practice form</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 32px auto; max-width: 1000px; padding: 0 24px; font: 18px/1.4 system-ui, sans-serif; color: #182033; background: #f4f6fa; }
+  h1 { margin-bottom: 8px; }
+  main, aside { padding: 20px; margin: 16px 0; background: white; border: 1px solid #ccd3df; border-radius: 10px; }
+  fieldset { margin: 14px 0; padding: 14px; border: 1px solid #ccd3df; }
+  label { display: block; margin: 10px 0; }
+  input:not([type=checkbox]), textarea, select { display: block; width: 100%; padding: 7px; font: inherit; }
+  textarea { height: 72px; }
+  button { padding: 8px 18px; font: inherit; }
+  .row { display: flex; gap: 24px; }
+  .row > * { flex: 1; }
+  [hidden] { display: none !important; }
+</style>
+<h1>Delivery drafts</h1>
+<p>Local practice only. Nothing is sent or saved.</p>
+<aside>
+  <div class="row">
+    <label>Timezone <input id="timezone" value="UTC" readonly></label>
+    <fieldset><legend>Billing</legend><label>Email <input id="billing" value="billing@example.test" readonly></label></fieldset>
+  </div>
+</aside>
+<main>
+  <button id="open" type="button">New draft</button>
+  <form id="draft" hidden>
+    <div class="row">
+      <label>Name <input id="name" autocomplete="off"></label>
+      <fieldset><legend>Shipping</legend><label>Email <input id="email" type="email" autocomplete="off"></label></fieldset>
+    </div>
+    <label>Prompt <textarea id="prompt"></textarea></label>
+    <div class="row">
+      <label>Repeat <select id="repeat"><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+      <label>First run <input id="first-run" type="time" value="09:00"></label>
+    </div>
+    <fieldset id="weekly" hidden>
+      <legend>Weekly recurrence</legend>
+      <label>Every N weeks <input id="interval" type="number" min="1" value="1"></label>
+      <div class="row">
+        <label><input id="mon" type="checkbox" checked> Mon</label>
+        <label><input id="tue" type="checkbox"> Tue</label>
+        <label><input id="fri" type="checkbox"> Fri</label>
+      </div>
+    </fieldset>
+    <button id="cancel" type="button">Cancel</button>
+  </form>
+</main>
+<script>
+  const form = document.querySelector("#draft");
+  const opener = document.querySelector("#open");
+  const weekly = document.querySelector("#weekly");
+  opener.addEventListener("click", () => {
+    form.hidden = false;
+    opener.hidden = true;
+  });
+  document.querySelector("#repeat").addEventListener("change", event => {
+    weekly.hidden = event.target.value !== "weekly";
+  });
+  document.querySelector("#cancel").addEventListener("click", () => {
+    form.reset();
+    weekly.hidden = true;
+    form.hidden = true;
+    opener.hidden = false;
+  });
+  form.addEventListener("submit", event => event.preventDefault());
+</script>
+</html>
