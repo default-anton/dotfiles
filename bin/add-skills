@@ -1,0 +1,433 @@
+#!/usr/bin/env python3
+
+import fcntl
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
+
+
+HELP = """Usage: add-skills REPO_OR_SKILL_URL [...]
+       add-skills --sync [REPO_OR_SKILL_URL ...]
+
+Install GitHub skills into ~/.pi/agent/skills/OWNER/REPO/SKILL/.
+Accepts owner/repo, repository URLs, or /tree/<ref>/<skill-path> URLs.
+Separate sources with spaces or commas.
+
+Examples:
+  add-skills emilkowalski/skills
+  add-skills https://github.com/emilkowalski/skills
+  add-skills https://github.com/emilkowalski/skills/tree/main/skills/animate-expo
+  add-skills --sync
+
+fzf: Tab toggles one, Ctrl+A toggles all, Enter applies, Esc cancels.
+--sync selects tracked skills to update; sources narrow the selection.
+Without a foreground terminal and fzf, sync requires explicit skill URLs.
+Sync refuses local edits. Untracked copies are never overwritten.
+Requires Python 3 and Git; fzf for interactive multi-selection.
+"""
+
+
+METADATA_FILE = ".add-skills.json"
+
+
+@dataclass(frozen=True)
+class Source:
+    repository: str
+    ref: str | None = None
+    path: str | None = None
+
+    def label(self) -> str:
+        return f"{self.repository}{f' ({self.ref})' if self.ref else ''}"
+
+    def folder_name(self) -> str:
+        if self.path in (None, "."):
+            return self.repository.split("/")[1]
+        return Path(self.path).name
+
+
+@dataclass(frozen=True)
+class InstalledSkill:
+    source: Source
+    directory: Path
+    content_hash: str
+
+
+def parse_source(source: str) -> Source:
+    url = urlsplit(source if "://" in source else f"https://github.com/{source}")
+    path = unquote(url.path)
+    parts = path.strip("/").split("/")
+    if (
+        url.scheme != "https"
+        or url.netloc != "github.com"
+        or url.query
+        or url.fragment
+        or len(parts) < 2
+        or any(part in ("", ".", "..") for part in parts)
+        or any(character.isspace() or ord(character) < 32 for character in path)
+    ):
+        raise ValueError(f"Invalid GitHub source: {source}")
+
+    owner, repo = parts[:2]
+    repo = repo.removesuffix(".git")
+    if (
+        not re.fullmatch(r"[A-Za-z0-9_-]+", owner)
+        or not re.fullmatch(r"[A-Za-z0-9_.-]+", repo)
+        or repo in (".", "..")
+    ):
+        raise ValueError(f"Invalid GitHub repository: {source}")
+
+    if len(parts) == 2:
+        return Source(f"{owner}/{repo}")
+    if len(parts) >= 5 and parts[2] == "tree":
+        return Source(f"{owner}/{repo}", parts[3], "/".join(parts[4:]))
+    raise ValueError(f"Expected a repository or /tree/<ref>/<skill-path> URL: {source}")
+
+
+def has_interactive_terminal() -> bool:
+    if not all(stream.isatty() for stream in (sys.stdin, sys.stdout, sys.stderr)):
+        return False
+    if os.environ.get("TERM", "dumb") in ("", "dumb"):
+        return False
+    try:
+        return os.tcgetpgrp(sys.stdin.fileno()) == os.getpgrp()
+    except OSError:
+        return False
+
+
+def discover_skills(repository: Path) -> list[Path]:
+    skills = []
+    for directory, directories, files in os.walk(repository):
+        directories[:] = sorted(
+            name
+            for name in directories
+            if name != ".git" and not (Path(directory) / name).is_symlink()
+        )
+        if "SKILL.md" in files:
+            skills.append(Path(directory))
+            directories.clear()
+    return sorted(skills)
+
+
+def select_items(items: list[str], prompt: str, action: str) -> list[str]:
+    if not items:
+        raise ValueError(f"No skills found: {prompt}")
+    if len(items) == 1:
+        return items
+
+    if not has_interactive_terminal() or not shutil.which("fzf"):
+        available = "\n".join(f"  {item}" for item in items)
+        raise ValueError(
+            f"{prompt} contains multiple skills:\n{available}\n"
+            "Use explicit /tree/<ref>/<skill-path> URLs, or run in a terminal with fzf."
+        )
+
+    environment = os.environ.copy()
+    environment.pop("FZF_DEFAULT_OPTS", None)
+    environment.pop("FZF_DEFAULT_OPTS_FILE", None)
+    result = subprocess.run(
+        [
+            "fzf",
+            "--multi",
+            "--bind=ctrl-a:toggle-all",
+            f"--prompt={prompt}> ",
+            f"--header=Tab: toggle one | Ctrl+A: toggle all | Enter: {action} | Esc: cancel",
+        ],
+        input="\n".join(items) + "\n",
+        text=True,
+        stdout=subprocess.PIPE,
+        env=environment,
+    )
+    if result.returncode in (1, 130):
+        raise KeyboardInterrupt
+    if result.returncode != 0:
+        raise ValueError(f"fzf failed (exit {result.returncode})")
+    selected = result.stdout.splitlines()
+    if not selected:
+        raise ValueError("No skills selected.")
+    return selected
+
+
+def clone_repository(source: Source, destination: Path) -> str:
+    command = ["git", "clone", "--quiet", "--depth=1"]
+    if source.ref:
+        command.extend(["--branch", source.ref])
+    command.extend(["--", f"https://github.com/{source.repository}.git", str(destination)])
+    environment = os.environ.copy()
+    if not has_interactive_terminal():
+        environment["GIT_TERMINAL_PROMPT"] = "0"
+    result = subprocess.run(
+        command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment
+    )
+    if result.returncode != 0:
+        raise ValueError(f"Could not fetch {source.label()}: {result.stderr.strip()}")
+    if source.ref:
+        return source.ref
+    return subprocess.check_output(
+        ["git", "-C", str(destination), "symbolic-ref", "--short", "HEAD"], text=True
+    ).strip()
+
+
+def fetch_repository(
+    source: Source, temporary: Path, repositories: dict
+) -> tuple[Path, str]:
+    key = (source.repository, source.ref)
+    if key not in repositories:
+        repository = temporary / str(len(repositories))
+        print(f"Fetching {source.label()}…", file=sys.stderr)
+        ref = clone_repository(source, repository)
+        repositories[key] = (repository, ref)
+    return repositories[key]
+
+
+def skill_directory(repository: Path, source: Source) -> Path:
+    skill = repository / (source.path or ".")
+    if not skill.resolve().is_relative_to(repository.resolve()):
+        raise ValueError(f"Skill path escapes repository: {source.path}")
+    if not (skill / "SKILL.md").is_file():
+        raise ValueError(f"No SKILL.md at {source.repository}/{source.path}")
+    return skill
+
+
+def install_target(root: Path, source: Source) -> Path:
+    namespace = root / source.repository
+    for directory in (namespace.parent, namespace):
+        if directory.is_symlink() or (directory / "SKILL.md").exists():
+            raise ValueError(f"Cannot use a symlink or skill as a namespace: {directory}")
+    return namespace / source.folder_name()
+
+
+def content_hash(directory: Path) -> str:
+    if directory.is_symlink() or not (directory / "SKILL.md").is_file():
+        raise ValueError(f"Not a regular skill directory: {directory}")
+    digest = hashlib.sha256()
+    for path in sorted(directory.rglob("*")):
+        relative = path.relative_to(directory)
+        if ".git" in relative.parts:
+            continue
+        if path.is_symlink():
+            raise ValueError(f"Refusing a skill containing symlinks: {path}")
+        if str(relative) == METADATA_FILE:
+            continue
+        digest.update(str(relative).encode() + b"\0")
+        if path.is_dir():
+            digest.update(b"directory\0")
+        elif path.is_file():
+            digest.update(f"file:{path.stat().st_mode & 0o111}\0".encode())
+            file_digest = hashlib.sha256()
+            with path.open("rb") as file:
+                for chunk in iter(lambda: file.read(65536), b""):
+                    file_digest.update(chunk)
+            digest.update(file_digest.digest())
+        else:
+            raise ValueError(f"Not a regular file: {path}")
+    return digest.hexdigest()
+
+
+def upstream_hash(directory: Path) -> str:
+    metadata = directory / METADATA_FILE
+    if metadata.exists() or metadata.is_symlink():
+        raise ValueError(f"Upstream uses reserved metadata filename: {metadata}")
+    return content_hash(directory)
+
+
+def read_installed(root: Path) -> list[InstalledSkill]:
+    installed = []
+    for metadata in sorted(root.glob(f"*/*/*/{METADATA_FILE}")):
+        data = json.loads(metadata.read_text())
+        if not isinstance(data, dict):
+            raise ValueError(f"Invalid tracking metadata: {metadata}")
+        repository = data.get("repository")
+        ref = data.get("ref")
+        path = data.get("path")
+        digest = data.get("hash")
+        if (
+            not all(
+                isinstance(value, str) and value
+                for value in (repository, ref, path, digest)
+            )
+            or not re.fullmatch(r"[a-f0-9]{64}", digest)
+            or Path(path).is_absolute()
+            or ".." in Path(path).parts
+        ):
+            raise ValueError(f"Invalid tracking metadata: {metadata}")
+        parsed = parse_source(repository)
+        source = Source(parsed.repository, ref, path)
+        target = install_target(root, source)
+        if parsed.path or target != metadata.parent or metadata.is_symlink():
+            raise ValueError(f"Tracking metadata does not match its directory: {metadata}")
+        installed.append(InstalledSkill(source, target, digest))
+    return installed
+
+
+def verify_local(skill: InstalledSkill) -> None:
+    if content_hash(skill.directory) != skill.content_hash:
+        raise ValueError(f"Local edits detected; not syncing: {skill.directory}")
+
+
+def write_snapshot(
+    target: Path,
+    directory: Path,
+    source: Source,
+    digest: str,
+    previous: InstalledSkill | None = None,
+) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".add-skills-", dir=target.parent) as temporary:
+        staging = Path(temporary) / "new"
+        backup = Path(temporary) / "previous"
+        shutil.copytree(directory, staging, ignore=shutil.ignore_patterns(".git"))
+        metadata = {
+            "repository": source.repository,
+            "ref": source.ref,
+            "path": source.path,
+            "hash": digest,
+        }
+        (staging / METADATA_FILE).write_text(json.dumps(metadata, indent=2) + "\n")
+        if previous:
+            verify_local(previous)
+            target.rename(backup)
+        elif target.exists() or target.is_symlink():
+            raise ValueError(f"Already exists; use --sync for tracked skills: {target}")
+        try:
+            staging.rename(target)
+        except BaseException:
+            if backup.exists():
+                backup.rename(target)
+            raise
+
+
+def install(sources: list[Source], root: Path, temporary: Path) -> None:
+    repositories = {}
+    selected = {}
+    for source in sources:
+        repository, ref = fetch_repository(source, temporary, repositories)
+        if source.path:
+            skills = [skill_directory(repository, source)]
+        else:
+            paths = {
+                str(skill.relative_to(repository)): skill
+                for skill in discover_skills(repository)
+            }
+            skills = [
+                paths[path] for path in select_items(list(paths), source.repository, "install")
+            ]
+        for skill in skills:
+            resolved = Source(source.repository, ref, str(skill.relative_to(repository)))
+            target = install_target(root, resolved)
+            if target in selected and selected[target][1] != resolved:
+                raise ValueError(f"Different skills map to the same directory: {target}")
+            selected[target] = (skill, resolved)
+
+    snapshots = []
+    for target, (skill, source) in selected.items():
+        if target.exists() or target.is_symlink():
+            raise ValueError(f"Already exists; use --sync for tracked skills: {target}")
+        snapshots.append((target, skill, source, upstream_hash(skill)))
+    for target, skill, source, digest in snapshots:
+        write_snapshot(target, skill, source, digest)
+        print(f"Installed {source.repository}/{source.folder_name()} → {target}")
+
+
+def sync(sources: list[Source], root: Path, temporary: Path) -> None:
+    installed = read_installed(root)
+    if not installed:
+        raise ValueError("No tracked skills installed. Add a repository or skill URL first.")
+    interactive = has_interactive_terminal() and shutil.which("fzf")
+    explicit = bool(sources) and all(source.path is not None for source in sources)
+    if not interactive and not explicit:
+        raise ValueError("Noninteractive sync requires explicit /tree/<ref>/<skill-path> URLs.")
+
+    candidates = {}
+    for requested in sources:
+        matches = [
+            skill
+            for skill in installed
+            if skill.source.repository == requested.repository
+            and (requested.ref is None or skill.source.ref == requested.ref)
+            and (requested.path is None or skill.source.path == requested.path)
+        ]
+        if not matches:
+            raise ValueError(
+                f"No tracked install matches {requested.label()}/{requested.path or ''}"
+            )
+        for skill in matches:
+            candidates[str(skill.directory.relative_to(root))] = skill
+    if not sources:
+        candidates = {str(skill.directory.relative_to(root)): skill for skill in installed}
+
+    if explicit:
+        names = list(candidates)
+    else:
+        names = select_items(sorted(candidates), "Installed skills", "sync")
+    selected = [candidates[name] for name in names]
+    for skill in selected:
+        verify_local(skill)
+
+    repositories = {}
+    snapshots = []
+    for skill in selected:
+        repository, _ = fetch_repository(skill.source, temporary, repositories)
+        directory = skill_directory(repository, skill.source)
+        digest = upstream_hash(directory)
+        snapshots.append((skill, directory, digest))
+    for skill, directory, digest in snapshots:
+        verify_local(skill)
+        name = str(skill.directory.relative_to(root))
+        if digest == skill.content_hash:
+            print(f"Up to date: {name}")
+        else:
+            write_snapshot(skill.directory, directory, skill.source, digest, previous=skill)
+            print(f"Synced {name}")
+
+
+def main() -> int:
+    arguments = sys.argv[1:]
+    if not arguments or arguments in (["-h"], ["--help"]):
+        print(HELP, end="")
+        return 0
+
+    try:
+        syncing = arguments[0] == "--sync"
+        if syncing:
+            arguments = arguments[1:]
+        sources = [
+            parse_source(source)
+            for argument in arguments
+            for source in re.split(r"[,\s]+", argument)
+            if source
+        ]
+        if not sources and not syncing:
+            raise ValueError("Provide a repository or skill URL.")
+        if not shutil.which("git"):
+            raise ValueError("Git is required.")
+        root = Path.home() / ".pi" / "agent" / "skills"
+        root.mkdir(parents=True, exist_ok=True)
+        with (root / ".add-skills.lock").open("a") as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise ValueError("Another add-skills command is running.") from None
+            with tempfile.TemporaryDirectory(prefix="add-skills-") as temporary:
+                if syncing:
+                    sync(sources, root, Path(temporary))
+                else:
+                    install(sources, root, Path(temporary))
+        return 0
+    except KeyboardInterrupt:
+        print("Cancelled; no further skills installed.", file=sys.stderr)
+        return 130
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        print(f"add-skills: {error}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
