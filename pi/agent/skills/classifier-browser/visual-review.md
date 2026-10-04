@@ -18,9 +18,10 @@ Capture is deterministic host work, not a Jev question.
 
 ## Build a sheet
 
-sheet.py requires Python 3, ImageMagick (`magick`) and an installed font file.
-It composes 1–4 panels from a JSON manifest with absolute or manifest-relative
-source paths. Output must be a new PNG path.
+Run sheet.py directly; its uv shebang manages Python and Pillow. No ImageMagick or system
+font setup is needed. Supply a JSON manifest with absolute or manifest-relative
+PNG paths and expected states; omitted IDs become numbered checkpoints.
+Output must be a new PNG path.
 
 ```json
 [
@@ -42,26 +43,25 @@ if (saved.exit_code !== 0) throw new Error("manifest_write");
 text({ manifest });
 ```
 
-For example on macOS, substitute your reported run directory:
+Substitute your reported run directory:
 
 ```bash
-python3 ~/.pi/agent/skills/classifier-browser/sheet.py \
-  /tmp/YOUR-RUN/captures.json /tmp/YOUR-RUN/overview.png \
-  --font /System/Library/Fonts/Supplemental/Arial.ttf \
-  --columns 2 --width 1600 --height 1200
+~/.pi/agent/skills/classifier-browser/sheet.py \
+  /tmp/YOUR-RUN/captures.json /tmp/YOUR-RUN/contact-sheet.png
 ```
 
-Elsewhere, pass an installed font file (`fc-match -f '%{file}' sans` on fontconfig
-systems). Shorten rejected labels; the script never silently clips or shrinks them.
+The script wraps labels and chooses one or two columns to maximize displayed
+image area without upscaling. Canvas dimensions follow the content, capped at
+2000 × 2000 including labels and gutters. More than four captures produce
+contact-sheet-01.png, contact-sheet-02.png, etc.; JSON output lists every sheet.
+Labels are literal text, not ImageMagick expressions. Extremely long labels
+that cannot fit still require shortening.
 
 ## Review and refine
 
-- Maximum entire canvas: 2000 × 2000 px, including labels and gutters.
-  Use smaller, task-shaped dimensions when appropriate.
-- Start with 2 × 2 panels for layout/state checks. Use fewer panels or
-  focused crops for text and fine details.
-- Preserve aspect ratio. Resize once from source captures, never from an
-  earlier sheet. Prefer PNG; do not use aggressive lossy compression.
+- Start with the automatic layout. Use fewer panels or focused crops for fine details.
+- Use original PNG captures, never earlier sheets or lossy derivatives.
+  The script preserves aspect ratio and resizes once.
 - Label each panel with its checkpoint ID and expected state. Keep enough
   surrounding context to establish which control/view the detail belongs to.
 - Review every panel using the image tool. If any required detail is
@@ -82,8 +82,8 @@ Optional `crop` is `[x, y, width, height]` in source pixels:
 ```
 
 Choose crop coordinates from actual captures, not these examples; retain section
-headings and nearby labels. Try `--columns 1 --width 1200 --height 1600`, or a
-shorter canvas for one panel. Reframe source captures rather than enlarging tiny text.
+headings and nearby labels. Layout is automatic, cropping is not.
+Reframe source captures rather than enlarging tiny text.
 
 ## Report and optional timing
 
