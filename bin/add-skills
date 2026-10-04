@@ -5,10 +5,12 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -28,6 +30,7 @@ Examples:
   add-skills --sync
 
 fzf: Tab toggles one, Ctrl+A toggles all, Enter applies, Esc cancels.
+The preview shows the highlighted skill's description and opening instructions.
 --sync selects tracked skills to update; sources narrow the selection.
 Without a foreground terminal and fzf, sync requires explicit skill URLs.
 Sync refuses local edits. Untracked copies are never overwritten.
@@ -116,11 +119,55 @@ def discover_skills(repository: Path) -> list[Path]:
     return sorted(skills)
 
 
-def select_items(items: list[str], prompt: str, action: str) -> list[str]:
+def skill_preview(path: Path) -> str:
+    try:
+        content = path.read_text(encoding="utf-8-sig", errors="replace")
+    except OSError as error:
+        return f"Could not read SKILL.md: {error}\n"
+
+    frontmatter = re.match(
+        r"\A---[ \t]*\n(.*?)^---[ \t]*(?:\n|$)(.*)\Z", content, re.S | re.M
+    )
+    description = "No description provided."
+    body = content
+    if frontmatter:
+        body = frontmatter.group(2)
+        field = re.search(
+            r"^description:[ \t]*(.*(?:\n(?:[ \t]+[^\n]*|[ \t]*))*)",
+            frontmatter.group(1),
+            re.M,
+        )
+        if field:
+            value = field.group(1).strip()
+            lines = value.splitlines()
+            if lines and re.fullmatch(r"[|>][1-9+-]*(?:[ \t]+#.*)?", lines[0]):
+                description = textwrap.dedent("\n".join(lines[1:])).strip()
+                if lines[0].startswith(">"):
+                    description = re.sub(r"(?<!\n)\n(?!\n)", " ", description)
+            else:
+                value = " ".join(line.strip() for line in lines)
+                if value.startswith('"'):
+                    try:
+                        description = json.JSONDecoder().raw_decode(value)[0]
+                    except ValueError:
+                        description = value.strip('"')
+                elif value.startswith("'"):
+                    quoted = re.fullmatch(r"'((?:[^']|'')*)'(?:[ \t]+#.*)?", value)
+                    description = quoted.group(1).replace("''", "'") if quoted else value
+                else:
+                    description = re.split(r"[ \t]+#", value, maxsplit=1)[0]
+    elif re.match(r"\A---[ \t]*\n", content):
+        body = ""
+
+    excerpt = "\n".join(body.strip().splitlines()[:30])[:3000]
+    return f"Description\n{description or 'No description provided.'}\n\n{excerpt}\n"
+
+
+def select_items(items: dict[str, Path], prompt: str, action: str) -> list[str]:
     if not items:
         raise ValueError(f"No skills found: {prompt}")
     if len(items) == 1:
-        return items
+        return list(items)
 
     if not has_interactive_terminal() or not shutil.which("fzf"):
         available = "\n".join(f"  {item}" for item in items)
@@ -132,19 +179,26 @@ def select_items(items: list[str], prompt: str, action: str) -> list[str]:
     environment = os.environ.copy()
     environment.pop("FZF_DEFAULT_OPTS", None)
     environment.pop("FZF_DEFAULT_OPTS_FILE", None)
-    result = subprocess.run(
-        [
-            "fzf",
-            "--multi",
-            "--bind=ctrl-a:toggle-all",
-            f"--prompt={prompt}> ",
-            f"--header=Tab: toggle one | Ctrl+A: toggle all | Enter: {action} | Esc: cancel",
-        ],
-        input="\n".join(items) + "\n",
-        text=True,
-        stdout=subprocess.PIPE,
-        env=environment,
-    )
+    with tempfile.TemporaryDirectory(prefix="add-skills-preview-") as temporary:
+        for index, directory in enumerate(items.values()):
+            (Path(temporary) / str(index)).write_text(
+                skill_preview(directory / "SKILL.md"), encoding="utf-8"
+            )
+        result = subprocess.run(
+            [
+                "fzf",
+                "--multi",
+                "--bind=ctrl-a:toggle-all",
+                f"--prompt={prompt}> ",
+                f"--header=Tab: toggle one | Ctrl+A: toggle all | Enter: {action} | Esc: cancel",
+                f"--preview=cat -- {shlex.quote(temporary)}/{{n}}",
+                "--preview-window=right,60%,wrap-word,<100(up,60%,wrap-word)",
+            ],
+            input="\n".join(items) + "\n",
+            text=True,
+            stdout=subprocess.PIPE,
+            env=environment,
+        )
     if result.returncode in (1, 130):
         raise KeyboardInterrupt
     if result.returncode != 0:
@@ -317,7 +371,7 @@ def install(sources: list[Source], root: Path, temporary: Path) -> None:
                 for skill in discover_skills(repository)
             }
             skills = [
-                paths[path] for path in select_items(list(paths), source.repository, "install")
+                paths[path] for path in select_items(paths, source.repository, "install")
             ]
         for skill in skills:
             resolved = Source(source.repository, ref, str(skill.relative_to(repository)))
@@ -366,7 +420,11 @@ def sync(sources: list[Source], root: Path, temporary: Path) -> None:
     if explicit:
         names = list(candidates)
     else:
-        names = select_items(sorted(candidates), "Installed skills", "sync")
+        names = select_items(
+            {name: candidates[name].directory for name in sorted(candidates)},
+            "Installed skills",
+            "sync",
+        )
     selected = [candidates[name] for name in names]
     for skill in selected:
         verify_local(skill)
