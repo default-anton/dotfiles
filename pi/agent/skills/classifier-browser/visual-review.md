@@ -1,19 +1,18 @@
 # Capture checkpoints, then review sheets
 
-Jev cannot see images. Run classifier-guided capture first; the parent agent
-reviews **contact sheets**, not a routine sequence of individual originals.
-DOM verification, successful capture and visual verification are separate facts.
+The parent reviews contact sheets after classifier-guided capture.
+DOM verification, capture and visual verification are separate facts.
 
 ## Capture contract
 
-Use the four-checkpoint [form recipe](forms.md) as a runnable example:
+Use forms.md as a runnable example:
 empty → prepared → cancelled → reopened/reset. For navigation, use the same
 pattern with selected view, URL/content identity and unchanged fields.
 
 For every checkpoint, code:
 1. Waits for the required state and verifies its actual values/content.
 2. Frames the relevant region, including header clearance and surrounding context.
-3. Captures a **new source PNG** and rechecks the state.
+3. Captures a new source PNG and rechecks the state.
 4. Appends `{id, expected, path}` to `captures` only after both checks pass.
 
 Keep every required checkpoint even when two DOM states look the same.
@@ -24,20 +23,17 @@ for cancellation and reset. Capture is deterministic host work, not a Jev questi
 
 ## Build a sheet
 
-[sheet.py](sheet.py) needs Python 3, ImageMagick (`magick`) and an installed font
+sheet.py needs Python 3, ImageMagick (`magick`) and an installed font
 file. It composes 1–4 panels from a JSON manifest. Source paths are relative to
 the manifest or absolute. Output must be a new PNG path.
 
 ```json
 [
-  {"id":"01-empty","expected":"Empty draft; defaults preserved","path":"01-empty.png"},
-  {"id":"02-prepared","expected":"Weekly / 2 weeks / Tue + Fri only","path":"02-prepared.png"},
-  {"id":"03-cancelled","expected":"Draft closed; fields unchanged","path":"03-cancelled.png"},
-  {"id":"04-reset","expected":"Reopened empty; defaults restored","path":"04-reset.png"}
+  {"id":"01-empty","expected":"Empty draft; defaults preserved","path":"01-empty.png"}
 ]
 ```
 
-Starting from the form report stored by the next recipe, write its small manifest:
+Write the manifest from the report stored by forms.md:
 
 ```js
 const report = load("formRun");
@@ -66,24 +62,22 @@ as too wide; it will not silently clip labels or shrink their text.
 
 ## Review and refine
 
-- **Maximum entire canvas: 2000 × 2000 px**, including labels and gutters.
+- Maximum entire canvas: 2000 × 2000 px, including labels and gutters.
   Use smaller, task-shaped dimensions when appropriate.
-- Start with **2 × 2 panels** for layout/state checks. Use fewer panels or
+- Start with 2 × 2 panels for layout/state checks. Use fewer panels or
   focused crops for text and fine details.
-- Preserve aspect ratio. Resize **once from source captures**, never from an
+- Preserve aspect ratio. Resize once from source captures, never from an
   earlier sheet. Prefer PNG; do not use aggressive lossy compression.
 - Label each panel with its checkpoint ID and expected state. Keep enough
   surrounding context to establish which control/view the detail belongs to.
-- **Review every panel** using the image tool. If any required detail is
+- Review every panel using the image tool. If any required detail is
   unreadable, leave that obligation pending and build another sheet with fewer
   panels or larger contextual crops. Never infer visual verification from DOM.
-- Keep source captures for rebuilding sheets, **not mandatory individual review**.
+- Keep source captures for rebuilding sheets, not mandatory individual review.
 
-The script enforces the canvas bound, preserves aspect ratio, rejects out-of-bounds
-crops, and does one resize per source/crop. It does not assess readability or
-choose meaningful crop boundaries; that is the parent's job.
+The script enforces dimensions and crop bounds, not readability or meaningful framing.
 
-For a detail sheet, create a second manifest referencing the **original** PNGs.
+For a detail sheet, create a second manifest referencing the original PNGs.
 Optional `crop` is `[x, y, width, height]` in source pixels:
 
 ```json
@@ -114,5 +108,4 @@ text({ captureThroughReviewMs: Date.now() - load("formStarted") });
 
 This includes loading, capture, sheet generation, parent turns and review.
 Report it separately from `workflowMs` (before close), `wallMs` (including close),
-and classifier usage. Sheet dimensions or zero reported classifier cost do not
-establish visual-token savings, actual billing or a speed advantage.
+and classifier usage. Follow SKILL.md's reporting and benchmarking rules.
