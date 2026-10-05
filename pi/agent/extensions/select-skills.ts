@@ -1,6 +1,7 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ClassifierQuestion, SystemMessage } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext, Skill } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 import { escapeXml, formatSkillsForPrompt } from "./inject-context";
 
 const SELECTION_ENTRY = "select-skills";
@@ -191,8 +192,29 @@ function skillMessage(skills: SelectedSkill[], timestamp: number): SystemMessage
   };
 }
 
+function selectionLabel(skills: SelectedSkill[]): string {
+  return `Skill descriptions added: ${skills.map(({ name }) => name).join(", ")}`;
+}
+
+function labelSelection(pi: ExtensionAPI, ctx: ExtensionContext, entryId: string, selection: Selection): void {
+  if (selection.skills.length === 0 || ctx.sessionManager.getLabel(entryId)) return;
+  pi.setLabel(entryId, selectionLabel(selection.skills));
+}
+
 export default function selectSkillsExtension(pi: ExtensionAPI) {
   let availableSkills: SelectedSkill[] = [];
+
+  pi.registerEntryRenderer<Selection>(SELECTION_ENTRY, (entry, { expanded }, theme) => {
+    if (!entry.data || entry.data.skills.length === 0) return undefined;
+    const { skills } = entry.data;
+    const lines = [theme.fg("muted", selectionLabel(skills))];
+    if (expanded) {
+      for (const skill of skills) {
+        lines.push(theme.fg("dim", `${skill.name}: ${skill.description}\n${skill.filePath}`));
+      }
+    }
+    return new Text(lines.join("\n"), 1, 0);
+  });
 
   pi.on("before_agent_start", (event) => {
     const options = event.systemPromptOptions;
@@ -203,8 +225,13 @@ export default function selectSkillsExtension(pi: ExtensionAPI) {
     options.sections.skills = SKILL_INSTRUCTIONS;
   });
 
-  pi.on("session_start", () => {
+  pi.on("session_start", (_event, ctx) => {
     availableSkills = [];
+    for (const entry of ctx.sessionManager.getBranch()) {
+      if (entry.type === "custom" && entry.customType === SELECTION_ENTRY) {
+        labelSelection(pi, ctx, entry.id, entry.data as Selection);
+      }
+    }
   });
 
   pi.on("context_with_system", async (event, ctx) => {
@@ -243,6 +270,10 @@ export default function selectSkillsExtension(pi: ExtensionAPI) {
       if (ctx.signal?.aborted) return;
       const selection = { userEntryId, skills };
       pi.appendEntry(SELECTION_ENTRY, selection);
+      const selectionEntry = ctx.sessionManager.getLeafEntry();
+      if (selectionEntry?.type === "custom" && selectionEntry.customType === SELECTION_ENTRY) {
+        labelSelection(pi, ctx, selectionEntry.id, selection);
+      }
       selections.set(userEntryId, selection);
       for (const skill of skills) shown.add(skill.name);
     }
