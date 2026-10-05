@@ -46,7 +46,7 @@ export function createReadImageToolDefinition(
 export default function readImageExtension(pi: ExtensionAPI) {
   pi.registerTool({
     ...createReadImageToolDefinition(process.cwd()),
-    exposure: "model-only",
+    exposure: "direct",
     execute(toolCallId, args, signal, onUpdate, ctx) {
       const settings = SettingsManager.create(ctx.cwd, undefined, {
         projectTrusted: ctx.isProjectTrusted(),
