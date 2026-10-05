@@ -15,7 +15,7 @@ type ContextFile = {
   content: string;
 };
 
-function escapeXml(str: string): string {
+export function escapeXml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -45,15 +45,12 @@ function formatPathForPrompt(filePath: string, cwd = ""): string {
   return filePath;
 }
 
-function formatSkillsForPrompt(skills: Skill[]): string {
+export function formatSkillsForPrompt(skills: Pick<Skill, "name" | "description" | "filePath">[]): string {
   if (skills.length === 0) {
     return "";
   }
 
   const lines = [
-    "The following skills provide specialized instructions for specific tasks.",
-    "Read a skill file when you're about to perform the kind of work the skill prescribes, not just mention it.",
-    "Resolve relative paths in a skill against the directory containing its SKILL.md, not the working directory.",
     "<available_skills>",
   ];
 
@@ -125,12 +122,6 @@ export default function injectContextExtension(pi: ExtensionAPI) {
 
     if (options.contextFiles.length > 0) {
       sections.project_context = formatAgentFilesForPrompt(options.contextFiles, ctx.cwd);
-    }
-
-    const canReadSkills = options.selectedTools.some((name) => name === "read" || name === "bash");
-    const visibleSkills = options.skills.filter((skill) => !skill.disableModelInvocation);
-    if (canReadSkills && visibleSkills.length > 0) {
-      sections.skills = formatSkillsForPrompt(visibleSkills);
     }
 
     if (options.customPrompt) {
