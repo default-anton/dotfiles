@@ -17,14 +17,13 @@ const requestSchema = Type.Object({
   version: Type.Literal(1),
   id: identifier,
   target: identitySchema,
-  operation: Type.Union([Type.Literal("hello"), Type.Literal("submit"), Type.Literal("wait"), Type.Literal("abort")]),
+  operation: Type.Union([Type.Literal("hello"), Type.Literal("submit"), Type.Literal("status"), Type.Literal("abort")]),
   caller: Type.Optional(identitySchema),
   capability: Type.Optional(Type.String()),
   automatic: Type.Optional(Type.Boolean()),
   message: Type.Optional(Type.String({ minLength: 1, maxLength: 262144 })),
   mode: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("followUp")])),
   run: Type.Optional(identifier),
-  timeout: Type.Optional(Type.Number({ minimum: 0 })),
 }, { additionalProperties: false });
 
 export type Identity = Static<typeof identitySchema>;
@@ -113,11 +112,11 @@ export function request(
     if (signal?.aborted) abort();
     socket.on("connect", () => {
       cancelDeadline?.();
-      cancelDeadline = deadline > 0 ? scheduleDeadline(deadline, () => finish(new ControlError("bridge_timeout", "Control acknowledgement timed out; inspect or wait, do not resend."))) : undefined;
+      cancelDeadline = deadline > 0 ? scheduleDeadline(deadline, () => finish(new ControlError("bridge_timeout", "Control acknowledgement timed out; check status, do not resend."))) : undefined;
       socket.write(`${JSON.stringify(message)}\n`);
     });
     socket.on("error", () => finish(new ControlError("bridge_unavailable", "The session control endpoint is unavailable.")));
-    socket.on("close", () => finish(new ControlError("delivery_unknown", "The connection closed before acknowledgement; inspect or wait, do not resend.")));
+    socket.on("close", () => finish(new ControlError("delivery_unknown", "The connection closed before acknowledgement; check status, do not resend.")));
     readFrame(socket, (value) => {
       const reply = value as { version?: number; id?: string; value?: Reply; error?: { code: string; message: string } };
       if (reply.version !== 1 || reply.id !== message.id) return finish(new ControlError("protocol_error", "Unexpected control response."));
@@ -215,6 +214,5 @@ export async function verifyCaller(state: State, incoming: Request) {
   const caller = incoming.caller && endpoints(state).find((record) => sameIdentity(record, incoming.caller!));
   if (!caller) throw new ControlError("caller_unavailable", "The controlling Pi process is no longer registered.");
   const snapshot = await request(caller, { operation: "hello" }) as Snapshot;
-  if (snapshot.endpoint.worker) throw new ControlError("delegation_disabled", "Tool-launched agents cannot control other sessions.");
-  return caller;
+  return snapshot.endpoint;
 }

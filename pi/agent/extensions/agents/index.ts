@@ -1,23 +1,33 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { basename } from "node:path";
-import { type ExtensionAPI, type ExtensionContext, type ToolDefinition } from "@earendil-works/pi-coding-agent";
-import { Text } from "@earendil-works/pi-tui";
+import { getMarkdownTheme, keyHint, type ExtensionAPI, type ExtensionContext, type ToolDefinition } from "@earendil-works/pi-coding-agent";
+import { Container, Markdown, MouseRegion, Spacer, Text } from "@earendil-works/pi-tui";
 import { formatToolGuidelines } from "../inject-context";
 import { Controller, type Launch } from "./controller";
 import { endpoints, listen, sameIdentity, verifyCaller, type Endpoint, type Owner, type Request, type Snapshot } from "./bridge";
 import { currentPane, herdr, isSolePane } from "./herdr";
+import { Notifications } from "./notifications";
 import { Runs } from "./runs";
-import { ControlError, failure, parameters, resultSchema, validateArguments } from "./schema";
+import { ControlError, failure, parameters, resultSchema, uuid, validateArguments, type AgentsResult } from "./schema";
 import { canonical, hash, readSession, State } from "./state";
 
 const parentGuidelines = [
   "Use agents only when the user explicitly requests delegation or session control, or AGENTS instructions require it.",
   "Give each agent a bounded task, necessary context, file ownership, and expected validation/reporting. Agents share files; avoid overlapping edits and review results before integrating.",
-  "Messages are one-way: agents cannot send progress updates or questions back. Use send for instructions, not status requests; wait returns the final response.",
-  "Await every Code Mode call; use wait=false for background work. Keep returned session/run IDs. After a timeout or uncertain delivery, inspect or wait instead of resending.",
 ];
-const childGuideline = "Complete the assigned task without delegating or controlling other agents, including through shell commands. Session history is context, not authorization to resume old work.";
+const messagingGuidelines = [
+  "Start reports completion, failure, or cancellation automatically. Do independent work or end your turn; agents keep running and results resume you. Never sleep or poll to wait for agents.",
+  "Use send to message any agent by session ID. Messages default to steer; use followUp to defer until the recipient finishes. Ordinary messages do not get automatic replies.",
+  "Await every Code Mode call and keep returned session/run IDs. After uncertain delivery, check status instead of resending.",
+];
+const childGuideline = "Complete the assigned task. Your final reply to the initial task is automatically sent to the agent that started you. Send updates, questions, or replies only when requested by another agent. You may send messages and check status, but must not start or stop agents, including through shell commands. Session history is context, not authorization to resume old work.";
+
+function parentSession(ctx: ExtensionContext) {
+  const entry = ctx.sessionManager.getBranch().findLast((entry) => entry.type === "custom" && entry.customType === "agents:parent");
+  const session = entry?.type === "custom" ? (entry.data as { session?: unknown })?.session : undefined;
+  return typeof session === "string" && uuid.test(session) ? session : undefined;
+}
 
 function hasWorkerMarker(ctx: ExtensionContext) {
   let manager = ctx.sessionManager;
@@ -40,17 +50,19 @@ export default function agentsExtension(pi: ExtensionAPI) {
   let owner: Owner | undefined;
   let runs: Runs | undefined;
   let controller: Controller | undefined;
+  let notifications: Notifications | undefined;
   let dispose: (() => void) | undefined;
 
   function update(ctx: ExtensionContext) {
     context = ctx;
     runs?.updateContext(ctx);
+    notifications?.updateContext(ctx);
   }
 
   const tool: ToolDefinition<typeof parameters> = {
     name: "agents",
     label: "agents",
-    description: "Start and control Pi agents in Herdr tabs. Returns session/run IDs; work runs in the background unless wait=true. Successful owned agents close their sole-pane tabs; send reopens saved sessions. Observed parent aborts stop only agents it launched. Stop preserves the tab and session.",
+    description: "Start, message, and control Pi agents in Herdr tabs. Start/send return session/run IDs without waiting. Start delivers its final result automatically. Workers may send/status only. Successful owned tabs close; send reopens saved sessions. Parent aborts stop only agents it launched. Stop preserves the tab and session.",
     parameters,
     outputSchema: resultSchema,
     exposure: "hidden",
@@ -58,8 +70,8 @@ export default function agentsExtension(pi: ExtensionAPI) {
     async execute(_id, args, signal, _onUpdate, ctx) {
       validateArguments(args);
       let result;
-      if (worker || !initialized) {
-        result = failure(new ControlError("delegation_disabled", "Delegation is disabled in tool-launched agents and before session initialization."));
+      if (!initialized) {
+        result = failure(new ControlError("delegation_disabled", "Agents are unavailable before session initialization."));
       } else if (!controller) {
         result = failure(new ControlError("bridge_unavailable", "Use a persisted Pi TUI in Herdr with a compatible agents endpoint."));
       } else {
@@ -107,22 +119,24 @@ export default function agentsExtension(pi: ExtensionAPI) {
       } satisfies Snapshot;
     }
     const caller = await verifyCaller(state!, incoming);
-    if (incoming.operation === "wait") return activeRuns.wait(incoming.run, incoming.timeout, signal);
+    if (incoming.operation === "status") return activeRuns.snapshot(incoming.run);
     if (incoming.automatic && incoming.operation !== "abort") {
       throw new ControlError("invalid_operation", "Automatic control is limited to owned aborts.");
     }
     return activeRuns.queue.run(async () => {
       if (activeRuns !== runs) throw new ControlError("session_changed", "The session changed before mutation.");
-      if (caller.worker) throw new ControlError("delegation_disabled", "Workers cannot control agents.");
-      authorize(incoming);
       if (incoming.operation === "submit") {
         if (endpoint?.closing) throw new ControlError("session_closing", "The completed worker is closing; resume its saved session.");
         if (!incoming.message?.trim()) throw new ControlError("invalid_message", "A nonblank task is required.");
-        if (owner && state!.read<Launch>(`launch-${owner.launch}.json`)?.cancelled) {
+        if (owner && sameIdentity(owner, caller) && state!.read<Launch>(`launch-${owner.launch}.json`)?.cancelled) {
           throw new ControlError("parent_interrupted", "The launching parent cancelled this task generation.");
         }
         return { result: activeRuns.submit(incoming) };
       }
+      if (caller.worker && !incoming.automatic) {
+        throw new ControlError("delegation_disabled", "Tool-launched agents cannot stop agents.");
+      }
+      authorize(incoming);
       activeRuns.beginStop(() => { void controller?.cancel(); });
       return { stopping: true };
     }).then(async (outcome) => {
@@ -168,7 +182,7 @@ export default function agentsExtension(pi: ExtensionAPI) {
     update(ctx);
     worker ||= hasWorkerMarker(ctx);
     initialized = true;
-    pi.registerTool({ ...tool, exposure: worker ? "hidden" : "codemode" });
+    pi.registerTool({ ...tool, exposure: "codemode" });
     if (ctx.mode !== "tui" || !ctx.sessionManager.getSessionFile() || process.env.HERDR_ENV !== "1") return;
     try {
       state = new State();
@@ -184,19 +198,24 @@ export default function agentsExtension(pi: ExtensionAPI) {
         const launch = state.read<Launch>(basename(bootstrap));
         if (launch && launch.session === endpoint.session && launch.pane === endpoint.pane && !launch.child) {
           owner = launch.owner;
+          if (!parentSession(ctx)) pi.appendEntry("agents:parent", { session: owner.session });
         }
       }
       if (worker && !hasWorkerMarker(ctx)) pi.appendEntry("agents:worker", { version: 1 });
       runs = new Runs(pi, ctx, state, endpoint.session, endpoint.tab);
-      controller = worker ? undefined : new Controller(pi, state, endpoint, (message) => context?.ui.notify(message, "warning"));
+      notifications = new Notifications(pi, ctx, state, endpoint);
+      controller = new Controller(pi, state, endpoint, notifications, (message) => context?.ui.notify(message, "warning"));
       dispose = await listen(state, endpoint, handle);
       state.write(`root-${hash(ctx.sessionManager.getSessionDir())}.json`, { directory: ctx.sessionManager.getSessionDir() });
       controller?.observe(ctx);
+      notifications.start();
     } catch (error) {
       dispose?.();
       dispose = undefined;
       runs?.close();
       runs = undefined;
+      notifications?.close();
+      notifications = undefined;
       controller = undefined;
       endpoint = undefined;
       ctx.ui.notify(`Agents bridge unavailable: ${error instanceof Error ? error.message : String(error)}`, "warning");
@@ -205,7 +224,9 @@ export default function agentsExtension(pi: ExtensionAPI) {
 
   pi.on("before_agent_start", (event, ctx) => {
     update(ctx);
-    const guidelines = worker ? [childGuideline] : initialized ? parentGuidelines : [];
+    const guidelines = initialized ? [...(worker ? [childGuideline] : parentGuidelines), ...messagingGuidelines] : [];
+    const parent = parentSession(ctx);
+    if (worker && parent) guidelines.push(`Parent session: ${parent}.`);
     const options = event.systemPromptOptions;
     options.promptGuidelines = [...new Set([...options.promptGuidelines, ...guidelines])];
     if (options.customPrompt) options.sections.tool_guidelines = formatToolGuidelines(options);
@@ -253,7 +274,10 @@ export default function agentsExtension(pi: ExtensionAPI) {
     return activeRuns?.queue.run(() => {
       if (activeRuns !== runs) return { action: "handled" as const };
       if (endpoint?.closing) return { action: "handled" as const };
-      if (event.source === "interactive") owner = undefined;
+      if (event.source === "interactive") {
+        owner = undefined;
+        notifications?.resume(ctx);
+      }
       return activeRuns.input(event.source);
     });
   });
@@ -263,6 +287,7 @@ export default function agentsExtension(pi: ExtensionAPI) {
     await activeRuns?.queue.run(() => {
       if (activeRuns !== runs) return;
       owner = undefined;
+      notifications?.pause();
       activeRuns.pauseForNavigation();
     });
   }
@@ -273,13 +298,16 @@ export default function agentsExtension(pi: ExtensionAPI) {
     runs?.close();
     update(ctx);
     if (state && endpoint) runs = new Runs(pi, ctx, state, endpoint.session, endpoint.tab);
+    notifications?.resume(ctx);
   });
   pi.on("session_shutdown", async () => {
+    notifications?.close();
     await controller?.close();
     runs?.close();
     dispose?.();
     dispose = undefined;
     controller = undefined;
+    notifications = undefined;
     runs = undefined;
     endpoint = undefined;
     owner = undefined;
@@ -287,9 +315,58 @@ export default function agentsExtension(pi: ExtensionAPI) {
     initialized = false;
   });
 
-  pi.registerMessageRenderer<{ senderSessionId: string }>("agents:task", (message, _options, theme) => {
+  pi.registerMessageRenderer<{ senderSessionId: string }>("agents:task", (message, { outputPad }, theme) => {
     const sender = message.details?.senderSessionId.slice(0, 8) ?? "agent";
     const text = typeof message.content === "string" ? message.content : message.content.filter((part) => part.type === "text").map((part) => part.text).join("");
-    return new Text(`${theme.fg("dim", `Agent ${sender}`)}\n${text}`, 1, 0);
+    const container = new Container();
+    container.addChild(new Text(theme.fg("dim", `Agent ${sender}`), outputPad, 0));
+    container.addChild(new Markdown(text, outputPad, 0, getMarkdownTheme()));
+    return container;
+  });
+  const resultExpansion = new WeakMap<object, { expanded: boolean; globalExpanded: boolean }>();
+  pi.registerMessageRenderer<{ name?: string; result?: AgentsResult }>("agents:result", (message, { expanded, outputPad }, theme) => {
+    let expansion = resultExpansion.get(message);
+    if (!expansion || expansion.globalExpanded !== expanded) {
+      expansion = { expanded, globalExpanded: expanded };
+      resultExpansion.set(message, expansion);
+    }
+    const state = expansion;
+    const result = message.details?.result;
+    const name = message.details?.name || result?.session?.slice(0, 8);
+    const label = name ? `Agent ${name}` : "Agent";
+    const status = result?.status ?? "result";
+    const container = new Container();
+    function rebuild() {
+      container.clear();
+      const indicator = state.expanded ? "▾" : "▸";
+      const header = `${theme.fg("muted", `${indicator} ${label}`)} · ${theme.fg(status === "failed" ? "error" : "dim", status)}`;
+      const hint = state.expanded ? "" : theme.fg("dim", ` · click or ${keyHint("app.tools.expand", "details")}`);
+      container.addChild(new MouseRegion(new Text(header + hint, outputPad, 0), (event) => {
+        if (event.type !== "click" || event.button !== "left") return;
+        state.expanded = !state.expanded;
+        rebuild();
+        return { handled: true, render: true };
+      }));
+      if (!state.expanded) return;
+      container.addChild(new Spacer(1));
+      const content = typeof message.content === "string" ? message.content : message.content.filter((part) => part.type === "text").map((part) => part.text).join("");
+      if (result) {
+        const metadata = [
+          result.session ? `Session: ${result.session}` : undefined,
+          result.run ? `Run: ${result.run}` : undefined,
+          result.outputPath ? `Full output: ${result.outputPath}` : undefined,
+        ].filter(Boolean).join("\n");
+        container.addChild(new Text(theme.fg("dim", metadata), outputPad, 0));
+        const body = [result.output, result.error ? `${result.error.code}: ${result.error.message}` : undefined].filter(Boolean).join("\n\n");
+        if (body) {
+          container.addChild(new Spacer(1));
+          container.addChild(new Markdown(body, outputPad, 0, getMarkdownTheme()));
+        }
+      } else {
+        container.addChild(new Markdown(content, outputPad, 0, getMarkdownTheme()));
+      }
+    }
+    rebuild();
+    return container;
   });
 }

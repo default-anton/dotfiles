@@ -3,16 +3,15 @@ import { Type, type Static } from "typebox";
 import { Value } from "typebox/value";
 
 export const parameters = Type.Object({
-  action: StringEnum(["start", "send", "wait", "stop"], { description: "start: new; send: live or saved; wait: result; stop: abort." }),
-  session: Type.Optional(Type.String({ description: "Exact Pi session ID; required except for start." })),
+  action: StringEnum(["start", "send", "status", "stop"], { description: "start: new; send: message live or saved; status: inspect; stop: abort." }),
+  session: Type.Optional(Type.String({ description: "Target Pi session ID; required except for start." })),
   name: Type.Optional(Type.String({ description: "Short tab label; required for start." })),
   message: Type.Optional(Type.String({ description: "Task or message; required for start/send." })),
   cwd: Type.Optional(Type.String({ description: "Start only; defaults to the current directory." })),
   model: Type.Optional(Type.String({ description: "Start only; model ID, model:thinking, or provider/model:thinking. Omitted parts inherit the parent's settings; thinking is clamped to model capabilities." })),
-  mode: Type.Optional(StringEnum(["steer", "followUp"], { description: "Send only; defaults to followUp. Steer runs at the next boundary." })),
-  wait: Type.Optional(Type.Boolean({ description: "Start/send only; default false." })),
-  run: Type.Optional(Type.String({ description: "Wait only; defaults to the latest run at call time." })),
-  timeout: Type.Optional(Type.Number({ description: "Wait limit in seconds; 0 polls, omitted waits indefinitely. Does not stop work." })),
+  mode: Type.Optional(StringEnum(["steer", "followUp"], { description: "Send only; defaults to steer. Steer runs at the next boundary." })),
+  notify: Type.Optional(StringEnum(["steer", "followUp"], { description: "Start only; final result delivery. Defaults to steer." })),
+  run: Type.Optional(Type.String({ description: "Status only; defaults to the latest run." })),
 }, { additionalProperties: false });
 
 export const resultSchema = Type.Object({
@@ -22,7 +21,6 @@ export const resultSchema = Type.Object({
   tab: Type.Optional(Type.String()),
   output: Type.Optional(Type.String()),
   outputPath: Type.Optional(Type.String()),
-  timedOut: Type.Optional(Type.Literal(true)),
   error: Type.Optional(Type.Object({
     code: Type.String(),
     message: Type.String(),
@@ -36,9 +34,9 @@ export const uuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4
 export function validateArguments(args: Arguments) {
   if (!Value.Check(parameters, args)) throw new Error("Invalid agents arguments.");
   const fields = {
-    start: ["action", "name", "message", "cwd", "model", "wait", "timeout"],
-    send: ["action", "session", "message", "mode", "wait", "timeout"],
-    wait: ["action", "session", "run", "timeout"],
+    start: ["action", "name", "message", "cwd", "model", "notify"],
+    send: ["action", "session", "message", "mode"],
+    status: ["action", "session", "run"],
     stop: ["action", "session"],
   };
   if (!fields[args.action] || Object.keys(args).some((key) => !fields[args.action].includes(key))) {
@@ -55,10 +53,6 @@ export function validateArguments(args: Arguments) {
   if (["start", "send"].includes(args.action) && !args.message?.trim()) throw new Error("message must not be blank.");
   if (args.message && Buffer.byteLength(JSON.stringify(args.message), "utf8") > 262144) {
     throw new Error("message exceeds the 256 KiB encoded control limit.");
-  }
-  if (args.timeout !== undefined && (!Number.isFinite(args.timeout) || args.timeout < 0 ||
-    (args.action !== "wait" && args.wait !== true))) {
-    throw new Error("timeout must be finite and nonnegative, and requires wait.");
   }
 }
 

@@ -123,7 +123,7 @@ export class Runs {
     if (prior) return this.snapshot(prior.data.run);
     if (this.blocked) return { ...this.snapshot(), status: "blocked" };
     if (this.stopping) throw new ControlError("stop_in_progress", "Wait for the previous stop to settle.");
-    if (this.pending) throw new ControlError("admission_pending", "An idle submission is still being prepared; wait instead of resending.");
+    if (this.pending) throw new ControlError("admission_pending", "An idle submission is still being prepared; check status instead of resending.");
     const idle = this.ctx.isIdle();
     if (!incoming.run) throw new ControlError("invalid_run", "A proposed run ID is required.");
     if (idle ? this.saved(incoming.run) : this.current?.result.status === "running" && this.current.id !== incoming.run) {
@@ -138,6 +138,7 @@ export class Runs {
     this.state.write(`request-${this.session}-${incoming.id}.json`, { run: run.id });
     this.pi.appendEntry("agents:admission", admission);
     this.persist();
+    const content = `From agent session ${admission.sender}:\n\n${incoming.message!}`;
     if (idle) {
       this.pending = admission;
       this.inputCount = 0;
@@ -146,12 +147,12 @@ export class Runs {
           this.fail("admission_stalled", "No attributable user message was consumed before the startup deadline; delivery remains uncertain.");
         }
       }, 10000);
-      this.pi.sendUserMessage(incoming.message!, { expandPromptTemplates: false });
+      this.pi.sendUserMessage(content, { expandPromptTemplates: false });
     } else {
       this.pi.sendMessage({
-        customType: "agents:task", content: incoming.message!, display: true,
+        customType: "agents:task", content, display: true,
         details: { requestId: incoming.id, runId: run.id, senderSessionId: incoming.caller!.session },
-      }, { triggerTurn: true, deliverAs: incoming.mode ?? "followUp" });
+      }, { triggerTurn: true, deliverAs: incoming.mode ?? "steer" });
     }
     return this.snapshot(run.id);
   }
@@ -310,7 +311,7 @@ export class Runs {
   }
 
   async confirmStop(signal?: AbortSignal): Promise<AgentsResult> {
-    const result = await this.wait(this.current?.id, 3, signal, true);
+    const result = await this.waitForStop(signal);
     if (!this.stopping && this.ctx.isIdle() && !this.blocked) {
       if (result.status === "completed" || result.status === "failed") return { session: this.session, status: "idle", tab: this.tab };
       return result;
@@ -320,7 +321,8 @@ export class Runs {
     });
   }
 
-  wait(run = this.current?.id, timeout?: number, signal?: AbortSignal, stopping = false): Promise<AgentsResult> {
+  private waitForStop(signal?: AbortSignal): Promise<AgentsResult> {
+    const run = this.current?.id;
     return new Promise((resolve, reject) => {
       let cancelDeadline: (() => void) | undefined;
       let finished = false;
@@ -335,13 +337,13 @@ export class Runs {
       };
       const check = () => {
         const snapshot = this.snapshot(run);
-        if (this.closed || (stopping ? !this.stopping && !this.blocked : snapshot.status !== "running")) finish(snapshot);
+        if (this.closed || (!this.stopping && !this.blocked)) finish(snapshot);
       };
-      const abort = () => finish(undefined, new ControlError("observation_cancelled", "Waiting was cancelled; the task was not stopped.", { session: this.session, run, tab: this.tab }));
+      const abort = () => finish(undefined, new ControlError("observation_cancelled", "Stop confirmation was cancelled; abort may still be in progress.", { session: this.session, run, tab: this.tab }));
       this.changed.on("change", check);
       signal?.addEventListener("abort", abort, { once: true });
       if (signal?.aborted) return abort();
-      if (timeout !== undefined) cancelDeadline = scheduleDeadline(timeout * 1000, () => finish({ ...this.snapshot(run), timedOut: true }));
+      cancelDeadline = scheduleDeadline(3000, () => finish(this.snapshot(run)));
       check();
     });
   }

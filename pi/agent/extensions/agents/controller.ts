@@ -6,6 +6,7 @@ import { getAgentDir, SessionManager, type ExtensionAPI, type ExtensionContext }
 import { ModelSelectionError, resolveModelSelection } from "../lib/model-selection";
 import { endpoints, request, sameIdentity, type Endpoint, type Identity, type Owner, type Snapshot } from "./bridge";
 import { currentPane, herdr, inventory, type Pane } from "./herdr";
+import { Notifications } from "./notifications";
 import { ControlError, failure, validateArguments, type AgentsResult, type Arguments } from "./schema";
 import { canonical, MutationQueue, readSession, resolveCwd, State } from "./state";
 
@@ -37,6 +38,7 @@ export class Controller {
     private pi: ExtensionAPI,
     private state: State,
     readonly endpoint: Endpoint,
+    private notifications: Notifications,
     private warn: (message: string) => void,
   ) {}
 
@@ -333,6 +335,9 @@ export class Controller {
     let tab: string | undefined;
     let run: string | undefined;
     try {
+      if (this.endpoint.worker && (args.action === "start" || args.action === "stop")) {
+        throw new ControlError("delegation_disabled", "Tool-launched agents may send and check status, but cannot start or stop agents.");
+      }
       if (signal?.aborted) throw new ControlError("observation_cancelled", "The call was cancelled before it began.");
       if (args.action === "start" || args.action === "send") await this.cleanup;
       if (args.action === "start") {
@@ -349,7 +354,7 @@ export class Controller {
         } else if (!live) {
           const saved = await this.saved(key, ctx);
           if (args.action === "stop") return { result: { session: key, status: "idle" } as AgentsResult };
-          if (args.action === "wait") {
+          if (args.action === "status") {
             const branch = readSession(saved.file).getBranch();
             const latest = branch.findLast((entry) => entry.type === "custom" && ["agents:admission", "agents:interval"].includes(entry.customType));
             const selected = args.run ?? (latest?.type === "custom" ? (latest.data as { run: string }).run : undefined);
@@ -369,10 +374,11 @@ export class Controller {
         }
         const endpoint = live.endpoint;
         tab = endpoint.tab;
-        if (args.action === "wait") {
-          run = args.run ?? live.result?.run;
-          if (!run || (!args.run && live.result?.status === "blocked")) return { result: live.result };
-          return { endpoint };
+        if (args.action === "status") {
+          const result = await request(endpoint, {
+            operation: "status", caller: this.identity(), run: args.run,
+          }, signal) as AgentsResult;
+          return { result };
         }
         if (args.action === "send" && live.result?.status === "blocked") return { result: live.result };
         if (signal?.aborted) throw new ControlError("observation_cancelled", "The call ended before dispatch; no task was submitted.");
@@ -398,12 +404,13 @@ export class Controller {
         }
         let reply: AgentsResult;
         const requestId = randomUUID();
+        if (args.action === "start") this.notifications.track(requestId, endpoint, run!, args.notify ?? "steer", args.name!.trim());
         try {
           reply = await request(endpoint, {
             id: requestId,
             operation: args.action === "stop" ? "abort" : "submit",
             caller: this.identity(), capability: this.capability(endpoint),
-            ...(args.action === "stop" ? {} : { message: args.message, mode: args.mode ?? "followUp", run }),
+            ...(args.action === "stop" ? {} : { message: args.message, mode: args.mode ?? "steer", run }),
           }) as AgentsResult;
         } catch (error) {
           if (this.state.read<Endpoint>(`endpoint-${endpoint.incarnation}.json`)?.closing) {
@@ -417,23 +424,12 @@ export class Controller {
           if (error instanceof ControlError && ["owned_elsewhere", "run_changed", "parent_interrupted", "admission_pending", "stop_in_progress"].includes(error.code)) run = undefined;
           throw error;
         }
+        if (args.action === "start" && !this.state.read(`request-${key}-${requestId}.json`)) {
+          this.notifications.forget(requestId);
+        }
         run = reply.run;
         return { endpoint, result: reply };
       });
-      if (args.action === "wait" || (args.wait && target.result?.status === "running")) {
-        if (!target.endpoint) return target.result!;
-        const selectedRun = args.run ?? run;
-        try {
-          return await request(target.endpoint, {
-            operation: "wait", caller: this.identity(), run: selectedRun, timeout: args.timeout,
-          }, signal, args.timeout === undefined ? 0 : args.timeout * 1000 + 5000) as AgentsResult;
-        } catch (error) {
-          if (signal?.aborted) throw error;
-          const saved = selectedRun && this.state.read<AgentsResult>(`run-${key}-${selectedRun}.json`);
-          if (saved && !["running", "blocked"].includes(saved.status)) return { ...saved, tab: undefined };
-          throw error;
-        }
-      }
       return target.result!;
     } catch (error) {
       if (!(error instanceof ControlError)) throw error;
