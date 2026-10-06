@@ -11,7 +11,7 @@ const ASSISTANT_HISTORY_BYTE_BUDGET = 4_000;
 const CLASSIFIER_TIMEOUT_MS = 1_500;
 const SELECTION_POLICY = {
   context: "Use systemPrompt and recentConversation to interpret userMessage.",
-  relevance: "Select plausible usefulness, not just certainty; mentioning a domain alone is not enough.",
+  relevance: "Select plausible usefulness, including requests to read, review, or edit the skill itself; mentioning a domain alone is not enough.",
   history: [
     "History is a bounded recent excerpt.",
     "Messages marked truncated omit their middle.",
@@ -22,7 +22,7 @@ const SELECTION_POLICY = {
 const SKILL_INSTRUCTIONS = [
   "Skills provide specialized instructions and may be presented when relevant.",
   "Decide whether a presented skill applies to your task; selection does not require using it.",
-  "Read a skill file when you're about to perform the kind of work it prescribes, not just mention it.",
+  "Read a skill file when asked to read, review, or edit it, or before doing the work it prescribes; a mention alone is not enough.",
   "Resolve relative paths in a skill against the directory containing its SKILL.md, not the working directory.",
   "Do not discover or search for other skills unless the user asks.",
 ].join("\n");
@@ -117,12 +117,12 @@ async function selectSkills(
   const skillQuestions = skills.map((skill): ClassifierQuestion => ({
     type: "bool",
     instructions: [
-      "Under `selectionPolicy`, could this skill reasonably help with `userMessage`?",
+      "Under `selectionPolicy`, could this skill help with `userMessage`, or is the skill itself being requested?",
       `<skill name="${escapeXml(skill.name)}">\n${skill.description}\n</skill>`,
     ].join("\n"),
     criteria: {
-      true: "This skill's described work could plausibly be needed or useful for the current request.",
-      false: "The skill is unrelated, or its described work is not being requested.",
+      true: "The skill's described work could plausibly help, or the user asks to read, review, or change this skill.",
+      false: "Neither the skill itself nor its described work is relevant to the current request.",
     },
   }));
   const questionBytes = skillQuestions.map((question) => jsonBytes({
