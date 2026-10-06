@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Use when asked to create a PR
+description: Use when asked to create a pull request or share it in slack
 ---
 
 # Create a pull request
