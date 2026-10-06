@@ -1,5 +1,5 @@
 # Rules You Must Follow
-For classification tasks, use code mode’s `models.classify` with provider `typesafe` and model `jev-latest`.
+For classification tasks, use code mode’s `models.classify`, defaulting to `typesafe` / `jev-latest`.
 For image generation tasks, use code mode’s `models.generateImages` with provider `openai-codex` and model `gpt-image-2.5-sunburst`.
 Add comments only when asked. Keep existing comments unless outdated.
 When asked to find or act on comments left for you, search for `hey seb` case-insensitively; no punctuation is required.
