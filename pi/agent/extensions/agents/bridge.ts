@@ -4,26 +4,28 @@ import { createConnection, createServer, type Socket } from "node:net";
 import { join } from "node:path";
 import { Type, type Static } from "typebox";
 import { Value } from "typebox/value";
-import { ControlError, resultSchema, uuid, type AgentsResult } from "./schema";
+import { ControlError, eventSchema, resultSchema, uuid, type AgentsResult } from "./schema";
 import { State, hash, processAlive, scheduleDeadline } from "./state";
 
 const identifier = Type.String({ pattern: uuid.source });
+export const protocolVersion = 2;
 const identitySchema = Type.Object({
   session: identifier,
   incarnation: identifier,
   server: Type.String(),
 }, { additionalProperties: false });
 const requestSchema = Type.Object({
-  version: Type.Literal(1),
+  version: Type.Literal(protocolVersion),
   id: identifier,
   target: identitySchema,
-  operation: Type.Union([Type.Literal("hello"), Type.Literal("submit"), Type.Literal("status"), Type.Literal("abort")]),
+  operation: Type.Union([Type.Literal("hello"), Type.Literal("submit"), Type.Literal("message"), Type.Literal("status"), Type.Literal("abort")]),
   caller: Type.Optional(identitySchema),
   capability: Type.Optional(Type.String()),
   automatic: Type.Optional(Type.Boolean()),
   message: Type.Optional(Type.String({ minLength: 1, maxLength: 262144 })),
   mode: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("followUp")])),
   run: Type.Optional(identifier),
+  event: Type.Optional(eventSchema),
 }, { additionalProperties: false });
 
 export type Identity = Static<typeof identitySchema>;
@@ -31,6 +33,7 @@ export type Request = Static<typeof requestSchema>;
 export type Owner = Identity & { capability: string; launch: string };
 const endpointSchema = Type.Object({
   ...identitySchema.properties,
+  protocol: Type.Literal(protocolVersion),
   pid: Type.Integer({ minimum: 1 }),
   file: Type.String(),
   cwd: Type.String(),
@@ -88,7 +91,10 @@ export function request(
   signal?: AbortSignal,
   deadline = 5000,
 ): Promise<Reply> {
-  const message = { ...payload, version: 1, id: payload.id ?? randomUUID(), target: {
+  if (endpoint.protocol !== protocolVersion) {
+    throw new ControlError("bridge_incompatible", "Reload the target Pi session to use the inbox-based agents protocol.");
+  }
+  const message = { ...payload, version: protocolVersion, id: payload.id ?? randomUUID(), target: {
     session: endpoint.session, incarnation: endpoint.incarnation, server: endpoint.server,
   } };
   if (!Value.Check(requestSchema, message)) throw new Error("Invalid bridge request.");
@@ -119,7 +125,7 @@ export function request(
     socket.on("close", () => finish(new ControlError("delivery_unknown", "The connection closed before acknowledgement; check status, do not resend.")));
     readFrame(socket, (value) => {
       const reply = value as { version?: number; id?: string; value?: Reply; error?: { code: string; message: string } };
-      if (reply.version !== 1 || reply.id !== message.id) return finish(new ControlError("protocol_error", "Unexpected control response."));
+      if (reply.version !== protocolVersion || reply.id !== message.id) return finish(new ControlError("protocol_error", "Unexpected control response."));
       if (reply.error) return finish(new ControlError(reply.error.code, reply.error.message));
       if (payload.operation === "hello") {
         const snapshot = reply.value as Snapshot;
@@ -164,7 +170,7 @@ export async function listen(
       if (!Value.Check(requestSchema, value)) return socket.destroy();
       const incoming = value as Request;
       const respond = (body: object) => {
-        if (!socket.destroyed) socket.end(`${JSON.stringify({ version: 1, id: incoming.id, ...body })}\n`);
+        if (!socket.destroyed) socket.end(`${JSON.stringify({ version: protocolVersion, id: incoming.id, ...body })}\n`);
       };
       if (!sameIdentity(incoming.target, endpoint)) {
         respond({ error: { code: "identity_changed", message: "Target session/process/server changed." } });

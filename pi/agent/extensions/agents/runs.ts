@@ -75,7 +75,7 @@ export class Runs {
   }
 
   private persist() {
-    if (this.current) this.state.write(`run-${this.session}-${this.current.id}.json`, this.current.result);
+    if (this.current) this.state.write(`run-${this.session}-${this.current.id}.json`, this.snapshot());
     this.changed.emit("change");
   }
 
@@ -276,7 +276,7 @@ export class Runs {
 
   setBlocked(active: boolean) {
     this.blocked = Math.max(0, this.blocked + (active ? 1 : -1));
-    this.changed.emit("change");
+    this.persist();
   }
 
   beginStop(beforeAbort: () => void) {

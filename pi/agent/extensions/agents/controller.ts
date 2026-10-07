@@ -6,8 +6,8 @@ import { getAgentDir, SessionManager, type ExtensionAPI, type ExtensionContext }
 import { ModelSelectionError, resolveModelSelection } from "../lib/model-selection";
 import { endpoints, request, sameIdentity, type Endpoint, type Identity, type Owner, type Snapshot } from "./bridge";
 import { currentPane, herdr, inventory, type Pane } from "./herdr";
-import { Notifications } from "./notifications";
-import { ControlError, failure, validateArguments, type AgentsResult, type Arguments } from "./schema";
+import { Inbox } from "./inbox";
+import { ControlError, failure, validateArguments, type AgentsResult, type Arguments, type InboxEvent, type Lifetime } from "./schema";
 import { canonical, MutationQueue, readSession, resolveCwd, State } from "./state";
 
 export type Launch = {
@@ -22,6 +22,7 @@ export type Launch = {
   child?: Endpoint;
   cancelled?: boolean;
   outcome?: AgentsResult;
+  lifetime?: Lifetime;
 };
 
 export class Controller {
@@ -38,7 +39,7 @@ export class Controller {
     private pi: ExtensionAPI,
     private state: State,
     readonly endpoint: Endpoint,
-    private notifications: Notifications,
+    private inbox: Inbox,
     private warn: (message: string) => void,
   ) {}
 
@@ -80,6 +81,7 @@ export class Controller {
   private async stopOwned(launch: Launch) {
     if (!launch.child) return;
     if (this.state.read<Endpoint>(`endpoint-${launch.child.incarnation}.json`)?.closing) {
+      this.inbox.resolveQuestions(launch.session);
       this.owned.delete(launch.id);
       return;
     }
@@ -91,18 +93,23 @@ export class Controller {
     if (result.error) {
       throw new ControlError(result.error.code, result.error.message, result);
     }
+    this.inbox.resolveQuestions(launch.session);
   }
 
-  cancel(): Promise<void> {
-    if (!this.admissionOpen) return this.cleanup ?? Promise.resolve();
+  cancel(includeSession = false): Promise<void> {
+    if (!this.admissionOpen && !includeSession) return this.cleanup ?? Promise.resolve();
+    const launches = [...this.owned.values()].filter((launch) =>
+      !launch.cancelled && (includeSession || launch.lifetime !== "session"));
+    if (!this.admissionOpen && !launches.length) return this.cleanup ?? Promise.resolve();
     this.admissionOpen = false;
     this.generation++;
-    const launches = [...this.owned.values()];
     for (const launch of launches) {
       launch.cancelled = true;
       this.save(launch);
     }
+    const previousCleanup = this.cleanup;
     this.cleanup = (async () => {
+      await previousCleanup;
       const results = await Promise.allSettled(launches.map((launch) => this.stopOwned(launch)));
       const uncertain = results.flatMap((result, index) => {
         if (result.status === "fulfilled") return [];
@@ -125,7 +132,8 @@ export class Controller {
 
   async close() {
     this.unobserve();
-    await this.cancel();
+    await this.cleanup;
+    await this.cancel(true);
     this.closed = true;
   }
 
@@ -207,7 +215,7 @@ export class Controller {
     cwd: string,
     ctx: ExtensionContext,
     generation: number,
-    options: { file?: string; model?: string } = {},
+    options: { file?: string; model?: string; lifetime?: Lifetime } = {},
   ): Promise<Endpoint> {
     this.checkGeneration(generation);
     cwd = resolveCwd(cwd, ctx.cwd);
@@ -260,7 +268,7 @@ export class Controller {
     const parentPane = await currentPane();
     const id = randomUUID();
     const launch: Launch = {
-      id, session, file, cwd, workspace: parentPane.workspace_id,
+      id, session, file, cwd, workspace: parentPane.workspace_id, lifetime: options.lifetime ?? "turn",
       owner: { ...this.identity(), capability: randomUUID(), launch: id },
     };
     this.owned.set(id, launch);
@@ -335,22 +343,60 @@ export class Controller {
     let tab: string | undefined;
     let run: string | undefined;
     try {
+      if (args.action === "wait") return await this.inbox.wait(args, signal);
+      if (args.action === "configure") return this.inbox.configure(args);
       if (this.endpoint.worker && (args.action === "start" || args.action === "stop")) {
         throw new ControlError("delegation_disabled", "Tool-launched agents may send and check status, but cannot start or stop agents.");
       }
       if (signal?.aborted) throw new ControlError("observation_cancelled", "The call was cancelled before it began.");
+      const kind = args.kind ?? (this.endpoint.worker ? "message" : "task");
+      if (args.action === "send" && this.endpoint.worker && kind === "task") {
+        throw new ControlError("delegation_disabled", "Workers may send correspondence, not new task assignments.");
+      }
+      if (args.action === "send" && kind === "task" && args.run) {
+        throw new ControlError("invalid_options", "Tasks join the active run or start a new run; run is for correspondence.");
+      }
+      if (args.action === "send" && kind !== "task") {
+        if (args.delivery || args.notify || args.lifetime || args.mode) throw new ControlError("invalid_options", "Correspondence follows the recipient's inbox policy; mode, delivery, notify, and lifetime belong to tasks.");
+        const question = args.replyTo ? this.inbox.event(args.replyTo) : undefined;
+        if (kind === "answer" && (!question || question.type !== "needs_input" || question.from !== session)) {
+          throw new ControlError("question_not_found", "replyTo must identify a received question from the target session.");
+        }
+        if (question?.resolved) throw new ControlError("question_resolved", "This question is already resolved. Use a message or a new task for further instructions.");
+        const target = await this.live(session!);
+        if (!target) {
+          if (kind !== "answer") throw new ControlError("recipient_offline", "Correspondence requires a live recipient. Use kind: task to resume a saved session.");
+        }
+        const managedAnswer = kind === "answer" && !this.endpoint.worker && !!this.inbox.policy(session!);
+        if (!managedAnswer) {
+          if (!target) throw new ControlError("recipient_offline", "The answer recipient is offline.");
+          const own = await request(this.endpoint, { operation: "hello" }) as Snapshot;
+          const event: InboxEvent = {
+            id: randomUUID(), type: kind === "question" ? "needs_input" : "message",
+            session: this.endpoint.session, from: this.endpoint.session,
+            run: args.run ?? own.result.run, created: Date.now(), message: args.message!,
+            ...(args.replyTo ? { replyTo: args.replyTo } : {}),
+          };
+          const result = await request(target.endpoint, {
+            operation: "message", caller: this.identity(), event,
+          }, signal) as AgentsResult;
+          if (!result.error && args.replyTo) this.inbox.resolveQuestion(args.replyTo);
+          return result;
+        }
+      }
       if (args.action === "start" || args.action === "send") await this.cleanup;
       if (args.action === "start") {
         this.checkGeneration(generation);
         session = randomUUID();
       }
       const key = session!;
+      const lifetime = args.lifetime ?? [...this.owned.values()].findLast((launch) => launch.session === key)?.lifetime;
       const queue = this.queues.get(key) ?? new MutationQueue();
       this.queues.set(key, queue);
       const target = await queue.run(async () => {
         let live = args.action === "start" ? undefined : await this.live(key);
         if (args.action === "start") {
-          live = { endpoint: await this.launch(key, args.name!.trim(), cwd!, ctx, generation, { model: args.model }) } as Snapshot;
+          live = { endpoint: await this.launch(key, args.name!.trim(), cwd!, ctx, generation, { model: args.model, lifetime: args.lifetime }) } as Snapshot;
         } else if (!live) {
           const saved = await this.saved(key, ctx);
           if (args.action === "stop") return { result: { session: key, status: "idle" } as AgentsResult };
@@ -367,7 +413,7 @@ export class Controller {
           const release = this.state.lock(`launch:${saved.file}`, this.endpoint.incarnation);
           try {
             live = await this.live(key, saved.file);
-            if (!live) live = { endpoint: await this.launch(key, saved.name, saved.cwd, ctx, generation, { file: saved.file }) } as Snapshot;
+            if (!live) live = { endpoint: await this.launch(key, saved.name, saved.cwd, ctx, generation, { file: saved.file, lifetime }) } as Snapshot;
           } finally {
             release();
           }
@@ -397,6 +443,11 @@ export class Controller {
           run = snapshot.result.status === "running" ? snapshot.result.run ?? randomUUID() : randomUUID();
           this.checkGeneration(generation);
           const launch = [...this.owned.values()].find((record) => record.child && sameIdentity(record.child, endpoint));
+          if (args.lifetime && !launch) throw new ControlError("not_owned", "Lifetime can only be changed for workers launched by this parent.");
+          if (launch && args.lifetime) {
+            launch.lifetime = args.lifetime;
+            this.save(launch);
+          }
           if (launch?.cancelled) {
             launch.cancelled = false;
             this.save(launch);
@@ -404,17 +455,29 @@ export class Controller {
         }
         let reply: AgentsResult;
         const requestId = randomUUID();
-        if (args.action === "start") this.notifications.track(requestId, endpoint, run!, args.notify ?? "steer", args.name!.trim());
+        const track = args.action === "start" || (args.action === "send" && !this.endpoint.worker);
+        const policy = this.inbox.policy(key);
+        if (track) this.inbox.track(requestId, endpoint, run!, args.notify ?? policy?.mode ?? "steer",
+          args.name?.trim() ?? policy?.name ?? key.slice(0, 8), args.delivery ?? policy?.delivery ?? "automatic");
         try {
           reply = await request(endpoint, {
             id: requestId,
             operation: args.action === "stop" ? "abort" : "submit",
             caller: this.identity(), capability: this.capability(endpoint),
             ...(args.action === "stop" ? {} : { message: args.message, mode: args.mode ?? "steer", run }),
+            ...(args.replyTo ? { event: {
+              id: requestId, type: "message" as const, session: this.endpoint.session, from: this.endpoint.session,
+              created: Date.now(), message: args.message, replyTo: args.replyTo,
+            } } : {}),
           }) as AgentsResult;
         } catch (error) {
+          const admitted = this.state.read<{ run: string }>(`request-${key}-${requestId}.json`);
+          if (admitted && args.replyTo) this.inbox.resolveQuestion(args.replyTo);
+          if (track && !admitted && error instanceof ControlError &&
+            !["bridge_timeout", "bridge_unavailable", "delivery_unknown", "protocol_error", "identity_changed"].includes(error.code)) {
+            this.inbox.forget(requestId);
+          }
           if (this.state.read<Endpoint>(`endpoint-${endpoint.incarnation}.json`)?.closing) {
-            const admitted = this.state.read<{ run: string }>(`request-${key}-${requestId}.json`);
             if (args.action === "send" && !admitted) {
               throw new ControlError("session_closing", "The worker closed before accepting the message.");
             }
@@ -424,12 +487,14 @@ export class Controller {
           if (error instanceof ControlError && ["owned_elsewhere", "run_changed", "parent_interrupted", "admission_pending", "stop_in_progress"].includes(error.code)) run = undefined;
           throw error;
         }
-        if (args.action === "start" && !this.state.read(`request-${key}-${requestId}.json`)) {
-          this.notifications.forget(requestId);
+        if (track && !this.state.read(`request-${key}-${requestId}.json`)) {
+          this.inbox.forget(requestId);
         }
+        if (args.replyTo && !reply.error && reply.status !== "blocked") this.inbox.resolveQuestion(args.replyTo);
         run = reply.run;
         return { endpoint, result: reply };
       });
+      if (args.action === "stop" && !target.result?.error) this.inbox.resolveQuestions(key);
       return target.result!;
     } catch (error) {
       if (!(error instanceof ControlError)) throw error;
