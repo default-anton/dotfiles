@@ -1,4 +1,5 @@
 # Rules You Must Follow
+Most user messages are speech-to-text; tolerate transcription errors and infer intended meaning from context.
 For classification tasks, use code mode’s `models.classify`, defaulting to `typesafe` / `jev-latest`.
 For image generation tasks, use code mode’s `models.generateImages` with provider `openai-codex` and model `gpt-image-2.5-sunburst`.
 Add comments only when asked. Keep existing comments unless outdated.
