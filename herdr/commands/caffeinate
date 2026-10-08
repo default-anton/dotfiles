@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
+
+if [ "${HERDR_ENV:-}" != 1 ] || [ -z "$workspace_id" ]; then
+  printf 'Run this command inside Herdr.\n' >&2
+  exit 1
+fi
+
+tab=$(herdr tab create --workspace "$workspace_id" \
+  --cwd "${LAUNCH_CWD:-$PWD}" --label caffeinate --no-focus)
+pane_id=$(jq -er '.result.root_pane.pane_id' <<< "$tab")
+exec herdr pane run "$pane_id" 'caffeinate -dims' >/dev/null

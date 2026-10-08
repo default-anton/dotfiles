@@ -5,3 +5,7 @@ description = "Aha! feature or GitHub PR"
 [open-pr]
 name = "Open PR"
 description = "Current branch in browser"
+
+[caffeinate]
+name = "Start caffeinate"
+description = "Keep Mac awake in a new tab"
