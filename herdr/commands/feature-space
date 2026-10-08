@@ -13,20 +13,6 @@ record_urls=()
 read -r -a record_urls <<< "$input" || true
 [ "${#record_urls[@]}" -gt 0 ] || exit 0
 
-finish() {
-  local status=$?
-
-  if [ "$status" -eq 130 ]; then
-    exit "$status"
-  fi
-  if [ "$status" -ne 0 ] && [ -t 0 ]; then
-    printf '\nPress Enter to close.' >&2
-    IFS= read -r _ || true
-  fi
-  exit "$status"
-}
-
-trap finish EXIT
 trap 'exit 130' INT
 
 PATH="${PATH:-}:${HOME}/.local/share/mise/shims:/opt/homebrew/bin:/usr/local/bin:${HOME}/.dotfiles/bin:${HOME}/bin:${HOME}/.local/bin"

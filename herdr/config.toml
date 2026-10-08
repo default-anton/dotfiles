@@ -146,10 +146,10 @@ width = "80%"
 height = "80%"
 
 [[keys.command]]
-key = "prefix+f"
+key = "prefix+space"
 type = "popup"
-command = "\"$HOME/.dotfiles/herdr/feature-space.sh\""
-description = "open an Aha! feature or GitHub PR space"
+command = "\"$HOME/.dotfiles/herdr/launch.py\""
+description = "project commands"
 width = "80%"
 height = "60%"
 
