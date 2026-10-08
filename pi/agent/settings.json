@@ -34,6 +34,7 @@
   },
   "defaultProjectTrust": "always",
   "terminal": {
+    "images": "kitty",
     "showTerminalProgress": true
   },
   "deviceId": "1796af1c-8570-4236-aa7a-09f0b2487e23"
