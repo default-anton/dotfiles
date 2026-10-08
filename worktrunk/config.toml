@@ -1,0 +1,7 @@
+[pre-start]
+link-commands = """
+source={{ primary_worktree_path }}/.commands
+if [ -d "$source" ] && [ ! -e .commands ] && [ ! -L .commands ]; then
+  ln -s "$source" .commands
+fi
+"""
