@@ -8,6 +8,15 @@ import sys
 import tomllib
 
 
+NAME_WIDTH = 24
+
+
+def command_row(command_id, name, description):
+    if len(name) > NAME_WIDTH:
+        name = name[: NAME_WIDTH - 1] + "…"
+    return f"{command_id}\t{name:<{NAME_WIDTH}} │ {description}"
+
+
 def load_commands(directory):
     manifest = directory / "commands.toml"
     if not manifest.exists():
@@ -56,7 +65,7 @@ def launch():
         raise ValueError("No commands found")
 
     rows = [
-        f"{command_id}\t{name}\t{description}"
+        command_row(command_id, name, description)
         for command_id, (name, description, _) in sorted(
             commands.items(), key=lambda item: item[1][0].casefold()
         )

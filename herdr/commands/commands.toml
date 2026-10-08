@@ -1,3 +1,7 @@
 [feature-space]
-name = "Feature / PR space"
-description = "Create or focus an Aha! feature or GitHub PR worktree and Herdr space"
+name = "Open feature space"
+description = "Aha! feature or GitHub PR"
+
+[open-pr]
+name = "Open PR"
+description = "Current branch in browser"
