@@ -16,6 +16,7 @@ const usage = `Usage: start.mjs (--branch NAME | --feature REF_OR_URL) --prompt 
 
 Reuses the task's worktree and Herdr workspace. If Pi already exists there,
 returns its location without sending the prompt again or changing its model.
+Uses PI_PROVIDER for new sessions when set; otherwise Pi resolves the provider.
 Prints one JSON result. Does not wait for implementation to finish.`;
 
 function run(command, args, options = {}) {
@@ -196,10 +197,14 @@ function main() {
     }
     location = { ...location, pane: pane.pane_id, workspace: pane.workspace_id };
     const sessionName = `work-${key}`;
+    const piArgs = ["--model", model];
+    if (process.env.PI_PROVIDER) {
+      piArgs.push("--provider", process.env.PI_PROVIDER);
+    }
     let startupError;
     try {
       herdr("agent", "start", sessionName, "--kind", "pi", "--pane", pane.pane_id,
-        "--", "--model", model, prompt);
+        "--", ...piArgs, prompt);
     } catch (error) {
       startupError = error;
     }
