@@ -6,11 +6,11 @@ import { mkdirSync, readFileSync, realpathSync, rmdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 
-const usage = `Usage: start.mjs (--branch NAME | --feature REF_OR_URL) --prompt TEXT [options]
+const usage = `Usage: start.mjs (--branch NAME | --feature REF_OR_URL) --model MODEL --prompt TEXT [options]
 
   --repo PATH         Repository (default: current directory)
   --base REF          Base for a new branch (default: repository default branch)
-  --model MODEL       Pi model (default: gpt-6-astra:medium)
+  --model MODEL       Pi model (required; no default)
   --prompt-file PATH  Read the prompt from a file instead of --prompt
   --help              Print this usage
 
@@ -107,6 +107,9 @@ function parseOptions() {
   if (Boolean(options.prompt) === Boolean(options["prompt-file"])) {
     throw new Error("Specify exactly one of --prompt and --prompt-file.");
   }
+  if (!options.model) {
+    throw new Error("Specify --model; ask the user whether to use Astra or Sol.");
+  }
   return options;
 }
 
@@ -125,7 +128,7 @@ function main() {
     : options.branch;
   if (branch.startsWith("-")) throw new Error("Branch names cannot start with '-'.");
   git("check-ref-format", "--branch", branch);
-  const model = options.model || "gpt-6-astra:medium";
+  const model = options.model;
   const commonDir = realpathSync(git("rev-parse", "--git-common-dir"));
   const key = createHash("sha256")
     .update(JSON.stringify([process.env.HERDR_SOCKET_PATH || "", commonDir, branch]))
