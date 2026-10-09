@@ -9,8 +9,8 @@
     "openai-codex/gpt-6-luna"
   ],
   "defaultTools": [
-    "bash",
-    "codemode"
+    "-read",
+    "+codemode"
   ],
   "compaction": {
     "enabled": false
@@ -22,6 +22,9 @@
   "steeringMode": "all",
   "doubleEscapeAction": "tree",
   "packages": [],
+  "extensions": [
+    "-extensions/apply-patch/index.ts"
+  ],
   "transport": "auto",
   "treeFilterMode": "no-tools",
   "theme": "dark",
