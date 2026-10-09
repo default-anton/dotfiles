@@ -3,7 +3,6 @@ Most user messages are speech-to-text; tolerate transcription errors and infer i
 For classification tasks, use code mode’s `models.classify`, defaulting to `typesafe` / `jev-latest`.
 For image generation tasks, use code mode’s `models.generateImages` with provider `openai-codex` and model `gpt-image-2.5-sunburst`.
 Add comments only when asked. Keep existing comments unless outdated.
-When asked to find or act on comments left for you, search for `hey seb` case-insensitively; no punctuation is required.
 Commit only when explicitly asked. Do not run validation as part of a commit or push task.
 For PR or change reviews, do not run tests, linters, or other validation; CI handles validation.
 Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
