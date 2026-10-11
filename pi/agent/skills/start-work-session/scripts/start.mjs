@@ -16,7 +16,7 @@ const usage = `Usage: start.mjs (--branch NAME | --feature REF_OR_URL) --model M
 
 Reuses the task's worktree and Herdr workspace. If Pi already exists there,
 returns its location without sending the prompt again or changing its model.
-Uses PI_PROVIDER for new sessions when set; otherwise Pi resolves the provider.
+Qualifies bare models with PI_PROVIDER; requires it unless --model includes a provider.
 Prints one JSON result. Does not wait for implementation to finish.`;
 
 function run(command, args, options = {}) {
@@ -115,6 +115,14 @@ function parseOptions() {
 
 function main() {
   const options = parseOptions();
+  let model = options.model;
+  if (!model.includes("/")) {
+    const provider = process.env.PI_PROVIDER?.trim();
+    if (!provider) {
+      throw new Error("PI_PROVIDER is unset; specify --model as provider/model:thinking.");
+    }
+    model = `${provider}/${model}`;
+  }
   const prompt = options["prompt-file"]
     ? readFileSync(resolve(options["prompt-file"]), "utf8")
     : options.prompt;
@@ -128,7 +136,6 @@ function main() {
     : options.branch;
   if (branch.startsWith("-")) throw new Error("Branch names cannot start with '-'.");
   git("check-ref-format", "--branch", branch);
-  const model = options.model;
   const commonDir = realpathSync(git("rev-parse", "--git-common-dir"));
   const key = createHash("sha256")
     .update(JSON.stringify([process.env.HERDR_SOCKET_PATH || "", commonDir, branch]))
@@ -201,9 +208,6 @@ function main() {
     location = { ...location, pane: pane.pane_id, workspace: pane.workspace_id };
     const sessionName = `work-${key}`;
     const piArgs = ["--model", model];
-    if (process.env.PI_PROVIDER) {
-      piArgs.push("--provider", process.env.PI_PROVIDER);
-    }
     let startupError;
     try {
       herdr("agent", "start", sessionName, "--kind", "pi", "--pane", pane.pane_id,
