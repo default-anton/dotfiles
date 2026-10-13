@@ -1,4 +1,16 @@
 [pre-start]
+link-pi = """
+source='{{ primary_worktree_path }}/.pi'
+if [ -d "$source" ] && [ ! -e .pi ] && [ ! -L .pi ]; then
+  ln -s "$source" .pi
+fi
+"""
+link-agent-instructions = """
+source='{{ primary_worktree_path }}/AGENTS.override.md'
+if [ -f "$source" ] && [ ! -e AGENTS.override.md ] && [ ! -L AGENTS.override.md ]; then
+  ln -s "$source" AGENTS.override.md
+fi
+"""
 link-commands = """
 source={{ primary_worktree_path }}/.commands
 if [ -d "$source" ] && [ ! -e .commands ] && [ ! -L .commands ]; then

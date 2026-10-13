@@ -33,4 +33,4 @@ Use `--branch` for a plain-language task; `--feature` uses the repository's Aha!
 
 The launcher reuses or creates the worktree and space, then starts and checks the interactive Pi CLI. If status is `reused`, report that no prompt was sent or model changed. It prints JSON with the worktree, workspace, pane, and status; return without waiting for completion.
 
-On failure, use the reported location to inspect the problem; do not blindly retry, launch duplicates, answer unexpected approval dialogs, or implement in this session.
+On failure, inspect the cause, fix routine setup issues, and resume using the existing worktree/space. Avoid duplicate launches; ask only when recovery needs permission or is blocked. Keep task implementation in the new session.
