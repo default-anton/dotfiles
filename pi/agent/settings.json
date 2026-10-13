@@ -1,7 +1,7 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
   "lastChangelogVersion": "1.2.0",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "low",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6.1-sol",
   "enabledModels": [
