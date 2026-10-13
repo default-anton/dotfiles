@@ -260,7 +260,7 @@ export default function agentsExtension(pi: ExtensionAPI) {
     const options = event.systemPromptOptions;
     options.promptGuidelines = [...new Set([...options.promptGuidelines, ...guidelines])];
     if (options.customPrompt) options.sections.tool_guidelines = formatToolGuidelines(options);
-    runs?.beforeStart();
+    if (event.messageType === "user") runs?.beforeStart();
   });
 
   pi.on("agent_start", (_event, ctx) => {

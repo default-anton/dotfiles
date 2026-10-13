@@ -1,5 +1,6 @@
 {
-  "lastChangelogVersion": "1.1.0",
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "lastChangelogVersion": "1.2.0",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6.1-sol",

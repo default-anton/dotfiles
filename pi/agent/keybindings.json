@@ -1,5 +1,7 @@
 {
-  "app.session.toggleNamedFilter": "",
+  "$schema": "https://pi.dev/schemas/keybindings.schema.json",
+  "app.thinking.cycle": [],
+  "app.session.toggleNamedFilter": [],
   "tui.select.down": ["down", "ctrl+n"],
   "tui.select.up": ["up", "ctrl+p"]
 }
