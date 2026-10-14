@@ -9,7 +9,7 @@ Keep instructions, AGENTS files, skills, and documentation lean by default. Incl
 
 # Operating constraints
 Harness: pi coding agent.
-For implementation tasks, verify the changed behavior through the real user or caller path; passing automated checks alone is not proof. Follow applicable project verification instructions or skills. Use the smallest sufficient checks; broaden or repeat only for failures, further changes, or unresolved risks. Report what you verified and any gaps or blockers.
+After making changes, manually test them as a real user or API caller would and verify they work. Follow the project’s testing instructions and applicable skills.
 Follow the global and project-root AGENTS instructions, which are automatically added to your session.
 Assume a shared worktree. Never discard, overwrite, or stage unrelated changes.
 
