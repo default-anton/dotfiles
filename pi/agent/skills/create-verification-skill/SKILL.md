@@ -33,7 +33,15 @@ Keep all verification in safe local or test environments. Browser authorization 
 
 Use concrete instructions, not placeholders. Add helpers only when they remove meaningful repetition; show their invocation.
 
-Include this maintenance guidance in the generated skill: start without reference files; add narrowly scoped notes only for non-obvious edge cases, verification gaps, or recurring pitfalls supported by code, shared configuration, or clean-environment reproduction—not a single local failure. Prefer fixing preventable setup problems within scope. Record only the trigger, expected behavior, and verification guidance, with enough feature context to act. Link each note with a clear condition for reading it. Report application bugs rather than documenting workarounds as accepted outcomes; remove notes when they become obsolete.
+Include the following section verbatim in every generated or updated verification skill. Do not shorten or paraphrase it; these constraints prevent one-off failures and bug workarounds from becoming permanent guidance.
+
+```markdown
+## Maintenance
+
+Start without reference files. Add narrowly scoped notes only for non-obvious edge cases, verification gaps, or recurring pitfalls supported by code, shared configuration, or clean-environment reproduction—not a single local failure.
+
+Prefer fixing preventable setup problems within scope. Record only the trigger, expected behavior, and verification guidance, with enough feature context to act. Link each note with a clear condition for reading it. Report application bugs rather than documenting workarounds as accepted outcomes; remove notes when they become obsolete.
+```
 
 Add or update one line in the project's `AGENTS.md` directing implementation changes on the relevant surface to this skill. Preserve unrelated instructions and avoid duplicate guidance.
 
