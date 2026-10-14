@@ -14,7 +14,9 @@
     "+codemode"
   ],
   "compaction": {
-    "enabled": false
+    "enabled": true,
+    "reserveTokens": 27200,
+    "keepRecentTokens": 0
   },
   "hideThinkingBlock": false,
   "branchSummary": {
