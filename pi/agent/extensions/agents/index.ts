@@ -13,7 +13,7 @@ import { ControlError, failure, parameters, resultSchema, uuid, validateArgument
 import { canonical, hash, readSession, State } from "./state";
 
 const parentGuidelines = [
-  "Use agents only when the user explicitly requests delegation or session control, or AGENTS instructions require it.",
+  "Use agents only when the user explicitly requests delegation or session control, AGENTS instructions require it, or applicable project or global skills or relevant project documentation allow or request it.",
   "Give each agent a bounded task, necessary context, file ownership, and expected validation/reporting. Agents share files; avoid overlapping edits and review results before integrating.",
 ];
 const messagingGuidelines = [
