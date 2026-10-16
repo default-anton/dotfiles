@@ -1,11 +1,8 @@
 [feature-space]
-name = "Open feature space"
-description = "Aha! feature or GitHub PR"
+name = "Open work space"
 
 [open-pr]
-name = "Open PR"
-description = "Current branch in browser"
+name = "Open pr"
 
 [caffeinate]
-name = "Start caffeinate"
-description = "Keep Mac awake in a new tab"
+name = "caffeinate"

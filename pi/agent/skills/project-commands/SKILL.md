@@ -17,18 +17,15 @@ live in `<project>/.commands/`. Each directory has `commands.toml`:
 ```toml
 [review-pr]
 name = "Review PR"
-description = "Review queue with Pi"
 ```
 
 Add an executable named `review-pr` beside the manifest, with a shebang
 for any installed interpreter; use `chmod +x`. IDs are lowercase kebab-case.
-Name and description are required, nonempty, single-line text. Names longer
-than 24 characters are truncated in the picker.
+Name is required, nonempty, single-line text. Names longer than 24 characters
+are truncated in the picker. Legacy description fields are ignored.
 
-fzf matches both the visible name and description, not the command ID. Keep
-names clear and action-oriented (verb + object, e.g. "Open PR"). Use a short
-description to clarify the target or context. Shared words are fine; prioritize
-readability over unique search cues, and never make labels cryptic for fuzzy matching.
+fzf matches the visible name, not the command ID. Keep names clear and
+action-oriented (verb + object, e.g. "Open PR").
 
 `.commands` is already globally gitignored; no project `.gitignore` edit needed.
 New worktrees created with `wt` share the primary checkout's commands via symlink.

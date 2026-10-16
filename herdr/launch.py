@@ -11,10 +11,10 @@ import tomllib
 NAME_WIDTH = 24
 
 
-def command_row(command_id, name, description):
+def command_row(command_id, name):
     if len(name) > NAME_WIDTH:
         name = name[: NAME_WIDTH - 1] + "…"
-    return f"{command_id}\t{name:<{NAME_WIDTH}} │ {description}"
+    return f"{command_id}\t{name}"
 
 
 def load_commands(directory):
@@ -30,17 +30,20 @@ def load_commands(directory):
         executable = directory / command_id
         if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", command_id):
             raise ValueError(f"{manifest}: invalid command ID {command_id!r}")
-        if not isinstance(metadata, dict) or set(metadata) != {"name", "description"}:
-            raise ValueError(f"{manifest}: {command_id} needs name and description")
-        for field in ("name", "description"):
-            value = metadata[field]
-            if not isinstance(value, str) or not value.strip() or any(
-                ord(character) < 32 or ord(character) == 127 for character in value
-            ):
-                raise ValueError(f"{manifest}: {command_id}.{field} must be single-line text")
+        if (
+            not isinstance(metadata, dict)
+            or "name" not in metadata
+            or set(metadata) - {"name", "description"}
+        ):
+            raise ValueError(f"{manifest}: {command_id} needs a name")
+        name = metadata["name"]
+        if not isinstance(name, str) or not name.strip() or any(
+            ord(character) < 32 or ord(character) == 127 for character in name
+        ):
+            raise ValueError(f"{manifest}: {command_id}.name must be single-line text")
         if not executable.is_file() or not os.access(executable, os.X_OK):
             raise ValueError(f"{manifest}: {command_id} must be an executable file")
-        commands[command_id] = (metadata["name"], metadata["description"], executable)
+        commands[command_id] = (metadata["name"], executable)
     return commands
 
 
@@ -65,8 +68,8 @@ def launch():
         raise ValueError("No commands found")
 
     rows = [
-        command_row(command_id, name, description)
-        for command_id, (name, description, _) in sorted(
+        command_row(command_id, name)
+        for command_id, (name, _) in sorted(
             commands.items(), key=lambda item: item[1][0].casefold()
         )
     ]
@@ -92,7 +95,7 @@ def launch():
         raise RuntimeError(f"fzf exited with status {result.returncode}")
 
     command_id = result.stdout.split("\t", 1)[0]
-    executable = commands[command_id][2]
+    executable = commands[command_id][1]
     environment = os.environ | {"LAUNCH_CWD": str(cwd)}
     result = subprocess.run([str(executable)], cwd=root, env=environment)
     if result.returncode in (-2, 130):
