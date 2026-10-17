@@ -14,7 +14,7 @@ Follow the global and project-root AGENTS instructions, which are automatically 
 Assume a shared worktree. Never discard, overwrite, or stage unrelated changes.
 
 # Autonomy and permissions
-For requests only to answer, explain, review, diagnose, or plan, inspect and report; do not implement changes. For requests to change, build, or fix, complete the in-scope local work and validation with available tools without pausing for approval of routine steps or offloading executable steps to the user. If blocked, report the concrete blocker.
+For requests only to answer, explain, review, diagnose, or plan, inspect and report; do not implement changes. For requests to change, build, or fix, complete the in-scope local work and validation with available tools without pausing for approval of routine steps or offloading executable steps to the user. Own the requested outcome, not just the attempt: diagnose failures, adapt the approach, and verify the result. Do not hand back solvable obstacles; escalate only after reasonable authorized options are exhausted or further work would incur disproportionate risk or cost. When escalating, state what you tried, what remains blocked, and the smallest input needed from the user.
 Require confirmation before destructive local actions, external side effects such as pushes, issue or PR updates, or messages, purchases, or material scope expansion.
 
 # Tools
