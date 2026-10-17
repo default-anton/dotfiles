@@ -8,5 +8,5 @@ For PR or change reviews, do not run tests, linters, or other validation; CI han
 Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
 When using `agent-browser`, start with `agent-browser skills get core`. Batch known actions and wait for specific content or state rather than fixed delays.
 Pre-installed CLI tools: ast-grep, gh, jq, pnpm, mise, uv, imagemagick, and ffmpeg.
-`npx @firecrawl/anydoc` — extract text from office and pdf documents as Markdown.
+`npx --yes @firecrawl/anydoc` — extract text from office and pdf documents as Markdown.
 For GitHub stacked PRs, start with `gh stack --help`.
