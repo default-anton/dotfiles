@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import {
@@ -22,6 +23,24 @@ function escapeXml(str: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
+}
+
+function getOperatingSystem(): string {
+  switch (os.platform()) {
+    case "darwin":
+      return "macOS";
+    case "win32":
+      return "Windows";
+    case "linux":
+      try {
+        const release = readFileSync("/etc/os-release", "utf8");
+        return release.match(/^PRETTY_NAME=["']?(.+?)["']?$/m)?.[1] ?? "Linux";
+      } catch {
+        return "Linux";
+      }
+    default:
+      return os.type();
+  }
 }
 
 function formatPathForPrompt(filePath: string, cwd = ""): string {
@@ -149,18 +168,11 @@ export default function injectContextExtension(pi: ExtensionAPI) {
       timeZoneName: "short",
     });
 
+    sections.cwd = formatPathForPrompt(ctx.cwd);
     sections.environment = [
-      `Current working directory: ${formatPathForPrompt(ctx.cwd)}`,
       `Current date: ${dateTime}`,
+      `Operating system: ${getOperatingSystem()} (${os.arch()})`,
       `Global AGENTS.md: ${formatPathForPrompt(path.join(getAgentDir(), "AGENTS.md"))} (applies to all projects)`,
     ].join("\n");
   });
-
-  pi.on("context_with_system", (event) => ({
-    messages: event.messages.map((message) => {
-      if (message.role !== "system" || !message.sections?.cwd) return message;
-      const { cwd, ...sections } = message.sections;
-      return { ...message, sections };
-    }),
-  }));
 }
