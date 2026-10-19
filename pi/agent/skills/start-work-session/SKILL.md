@@ -13,8 +13,8 @@ Launch an interactive `pi` CLI, never an `agents` worker.
 - Pass the user's supplied or agreed prompt through unchanged where possible. “Implement FEATURE-123” is sufficient.
 - Carry forward agreed decisions needed to understand the request, but do not invent requirements, research extra context, or add planning or validation instructions. Prepare a fuller prompt only when requested.
 - Do not create a tracking record unless requested. Do not implement the task in this session.
-- Require the user to specify both the model and thinking/reasoning level before launching. If either is missing, ask for it. Offer Sol Low, Sol Medium, Astra Low, or Astra Medium.
-- Map Astra → `gpt-6-astra`; Sol/Soul/Sole/Seoul → `gpt-6.1-sol` (the alternatives are common transcription errors). Append the user's chosen level, `:low` or `:medium`. Honor explicit model or reasoning overrides. Pass the full identifier to `--model`; never silently substitute.
+- Require the user to specify both the model and thinking/reasoning level before launching. If either is missing, ask for it. Allow only Sol High, Astra Medium, or Astra High.
+- Map Astra → `gpt-6-astra`; Sol/Soul/Sole/Seoul → `gpt-6.1-sol` (the alternatives are common transcription errors). Append the user's chosen level, `:medium` or `:high`. Pass the full identifier to `--model`; never silently substitute.
 
 ## Launch
 
@@ -25,7 +25,7 @@ Assume you're running in Herdr. Run the bundled launcher directly; no need to re
   --feature ENGWORK-123 --model gpt-6-astra:medium --prompt 'Implement ENGWORK-123.'
 
 ~/.pi/agent/skills/start-work-session/scripts/start.mjs \
-  --repo ~/code/my-project --branch fix-timeout --model gpt-6.1-sol:low \
+  --repo ~/code/my-project --branch fix-timeout --model gpt-6.1-sol:high \
   --prompt-file /tmp/agreed-prompt.md
 ```
 
