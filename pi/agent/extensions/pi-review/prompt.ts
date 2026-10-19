@@ -34,6 +34,8 @@ Verify candidate findings against the code, merge duplicates, and resolve confli
 
 Number findings from most to least severe. For each, explain what goes wrong, under what conditions, why it matters, and the cause, with relevant paths or symbols.
 
+Use plain English, like a developer talking to a teammate. Keep technical identifiers when useful, but explain the problem in ordinary words.
+
 If no findings remain, say “looks good”. If missing evidence prevents that conclusion, explain the gap.`;
 
 const RECOMMENDATION_INSTRUCTION = `Stage 4: Give the final review with actionable recommendations.
@@ -45,6 +47,8 @@ Ask for the simplest change that addresses the cause and fits the system's curre
 Recheck the findings against the proposed solutions. Drop unsupported claims.
 
 Write the final review so the author can understand and evaluate each recommendation without reconstructing the subsystem themselves. Give just enough context to explain the problem, its impact, and why the proposed fix works. Order findings from most to least severe and ground them in code references. Keep obvious issues to a sentence; unpack subtle ones using whatever makes them clearest—for example, a concrete scenario, pseudocode, or a diagram. Avoid a fixed template.
+
+Use plain English, like a developer talking to a teammate. Keep technical identifiers when useful, but explain the problem in ordinary words.
 
 If no findings remain, say “looks good”, unless unresolved evidence gaps prevent that conclusion.`;
 
