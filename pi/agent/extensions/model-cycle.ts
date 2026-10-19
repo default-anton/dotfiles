@@ -3,10 +3,9 @@ import type { ThinkingLevel } from "@earendil-works/pi-ai";
 
 const provider = "openai-codex";
 const modelCycle: { modelId: string; thinkingLevel: ThinkingLevel }[] = [
-  { modelId: "gpt-6.1-sol", thinkingLevel: "low" },
-  { modelId: "gpt-6.1-sol", thinkingLevel: "medium" },
-  { modelId: "gpt-6-astra", thinkingLevel: "low" },
+  { modelId: "gpt-6.1-sol", thinkingLevel: "high" },
   { modelId: "gpt-6-astra", thinkingLevel: "medium" },
+  { modelId: "gpt-6-astra", thinkingLevel: "high" },
 ];
 
 export default function modelCycleExtension(pi: ExtensionAPI) {
