@@ -120,7 +120,7 @@ export default function injectContextExtension(pi: ExtensionAPI) {
     const { sections } = options;
     const piDocs = formatPiDocumentationForPrompt(options.customPrompt ?? event.systemPrompt);
     if (piDocs) {
-      sections.docs = piDocs;
+      sections.pi_docs = piDocs;
     }
 
     if (options.contextFiles.length > 0) {
@@ -149,8 +149,18 @@ export default function injectContextExtension(pi: ExtensionAPI) {
       timeZoneName: "short",
     });
 
-    sections.date = `Current date: ${dateTime}`;
-    sections.cwd = `Current working directory: ${formatPathForPrompt(ctx.cwd)}`;
-    sections.global_context = `Global AGENTS.md: ${formatPathForPrompt(path.join(getAgentDir(), "AGENTS.md"))} (applies to all projects)`;
+    sections.environment = [
+      `Current working directory: ${formatPathForPrompt(ctx.cwd)}`,
+      `Current date: ${dateTime}`,
+      `Global AGENTS.md: ${formatPathForPrompt(path.join(getAgentDir(), "AGENTS.md"))} (applies to all projects)`,
+    ].join("\n");
   });
+
+  pi.on("context_with_system", (event) => ({
+    messages: event.messages.map((message) => {
+      if (message.role !== "system" || !message.sections?.cwd) return message;
+      const { cwd, ...sections } = message.sections;
+      return { ...message, sections };
+    }),
+  }));
 }
