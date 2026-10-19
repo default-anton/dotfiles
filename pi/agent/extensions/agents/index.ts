@@ -17,13 +17,11 @@ const parentGuidelines = [
   "Give each agent a bounded task, necessary context, file ownership, and expected validation/reporting. Agents share files; avoid overlapping edits and review results before integrating.",
 ];
 const messagingGuidelines = [
-  "Start/task return a session UUID and an opaque run handle. Pass run handles directly in targets for wait/configure, or as run for status. Use delivery: manual for quiet delegation, then wait with until: all or any. Questions and UI blocks return early. Never sleep or poll to wait for agents.",
-  "Use delivery: steer for background delegation, then do independent work or end your turn. Configure switches delivery; already queued notifications cannot be recalled.",
-  "Use action: task for follow-on work, message for updates, question for decisions, and answer with replyTo for replies. Tasks always steer; correspondence follows the recipient inbox policy.",
-  "Wait timeouts and observation cancellation leave work running. Parent-turn abort stops turn-lifetime workers; lifetime: session survives turn abort but stops on parent shutdown. stop explicitly cancels work. Wait replay: true recovers previously received events after uncertain delivery.",
-  "Await every Code Mode call and keep returned session/run handles. After uncertain delivery, check status or replay instead of resending. Continue replay by passing the returned cursor as replay.",
+  "Never sleep or poll to wait for agents. After starting background work, do independent work or end your turn.",
+  "Correspondence follows the recipient's inbox policy. Already queued notifications cannot be recalled. Cancelling an observation leaves workers running.",
+  "Await every Code Mode call and retain returned handles. After uncertain delivery, check status or replay rather than resending.",
 ];
-const childGuideline = "Complete the assigned task. Your final reply is recorded in the parent's inbox; its delivery policy decides when the parent receives it. Workers cannot assign tasks. Use action: question when you need a decision, then wait with until: message and no targets for an answer. Answer received questions with action: answer and replyTo. You may message, question, answer, wait, and check status, but must not start or stop agents, including through shell commands. Session history is context, not authorization to resume old work.";
+const childGuideline = "Complete the assigned task; your final reply is recorded in the parent's inbox. When you need a decision, ask a question, then wait for an answer. Workers must not start, task, or stop agents, including through shell commands. Session history is context, not authorization to resume old work.";
 
 function parentSession(ctx: ExtensionContext) {
   const entry = ctx.sessionManager.getBranch().findLast((entry) => entry.type === "custom" && entry.customType === "agents:parent");
@@ -64,7 +62,7 @@ export default function agentsExtension(pi: ExtensionAPI) {
   const tool: ToolDefinition<typeof parameters> = {
     name: "agents",
     label: "agents",
-    description: "Delegate to Pi agents in Herdr tabs. Start/task return session UUIDs and opaque run handles. Wait receives results/messages; configure changes delivery. Tasks always steer and watch completion; messages do not. Answers require replyTo and can resume workers. Workers cannot start/task/stop. Successful tabs close; saved workers can resume. Use only fields belonging to the selected action.",
+    description: "Delegate to Pi agents in Herdr tabs. Start creates a worker; task assigns follow-on work. Both return a session UUID and opaque run handle. Tasks always steer and watch completion; messages only send updates. Question requests a decision; answer can resume a worker and watch completion. Status inspects; wait receives results/messages; stop aborts. Successful tabs close; saved workers can resume. Use only fields belonging to the selected action.",
     parameters,
     outputSchema: resultSchema,
     exposure: "hidden",
@@ -152,7 +150,7 @@ export default function agentsExtension(pi: ExtensionAPI) {
         if (owner && sameIdentity(owner, caller) && state!.read<Launch>(`launch-${owner.launch}.json`)?.cancelled) {
           throw new ControlError("parent_interrupted", "The launching parent cancelled this task generation.");
         }
-        if (incoming.event && inbox?.waitingFor(incoming.event)) {
+        if (incoming.event && inbox) {
           const snapshot = activeRuns.snapshot();
           if (snapshot.status === "running" && snapshot.run === incoming.run) {
             inbox.receive(incoming.event);
