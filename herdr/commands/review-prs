@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+for dependency in gh jq fzf; do
+  if ! command -v "$dependency" >/dev/null 2>&1; then
+    printf 'Required command not found on PATH: %s\n' "$dependency" >&2
+    exit 1
+  fi
+done
+
+[ ! -t 2 ] || printf 'Loading review requests…\r' >&2
+response=$(gh api graphql --cache 30s --paginate --slurp -f query='
+  query($endCursor: String) {
+    search(query: "is:pr review-requested:@me state:open archived:false",
+           type: ISSUE, first: 100, after: $endCursor) {
+      issueCount
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        ... on PullRequest {
+          number title url additions deletions changedFiles isDraft
+          author { login }
+          repository { nameWithOwner }
+        }
+      }
+    }
+  }
+')
+[ ! -t 2 ] || printf '\033[2K\r' >&2
+
+rows=$(jq -r '
+  def clean: gsub("[[:cntrl:]]"; " ");
+  def pad(width): tostring | . + (" " * ([0, width - length] | max));
+  def lpad(width): tostring | (" " * ([0, width - length] | max)) + .;
+  def dim: "\u001b[2m" + . + "\u001b[0m";
+  if any(.[]; .data.search.issueCount > 1000) then
+    error("GitHub search only returns 1,000 results; narrow the review query")
+  else . end
+  | [.[].data.search.nodes[] | select(. != null)]
+  | sort_by(.additions + .deletions, .repository.nameWithOwner, .number)
+  | map(. + {
+      reference: (.repository.nameWithOwner + "#" + (.number | tostring)),
+      author_label: ("@" + (.author.login // "deleted"))
+    })
+  | (map(.reference | length) | max // 0) as $reference_width
+  | (map(.author_label | length) | max // 0) as $author_width
+  | .[]
+  | [
+      .url,
+      ((.additions + .deletions | lpad(5)) + " lines"),
+      ((.changedFiles | lpad(3)) + "f" | dim),
+      (.reference | pad($reference_width) | dim),
+      ("\u001b[36m" + (.author_label | pad($author_width)) + "\u001b[0m"),
+      ((if .isDraft then "\u001b[33m[draft]\u001b[0m " else "" end) + (.title | clean))
+    ]
+  | join("\t")
+' <<< "$response")
+
+if [ -z "$rows" ]; then
+  printf 'No open pull requests need your review.\n'
+  exit 0
+fi
+
+status=0
+selection=$(FZF_DEFAULT_OPTS= FZF_DEFAULT_OPTS_FILE= fzf \
+  --ansi \
+  --no-sort \
+  --no-multi \
+  --delimiter=$'\t' \
+  --tabstop=2 \
+  --with-nth=2.. \
+  --nth=4..5 \
+  --layout=reverse \
+  --style=minimal \
+  --border=rounded \
+  --border-label=' Review requests ' \
+  --prompt='review> ' \
+  --header=$'Smallest first · lines = additions + deletions · f = files\nEnter open in browser · Esc close' \
+  <<< "$rows") || status=$?
+case "$status" in
+  0) ;;
+  1|130) exit 0 ;;
+  *) exit "$status" ;;
+esac
+
+exec open "${selection%%$'\t'*}"

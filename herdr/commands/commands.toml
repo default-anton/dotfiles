@@ -4,5 +4,8 @@ name = "Open work space"
 [open-pr]
 name = "Open pr"
 
+[review-prs]
+name = "Review PRs"
+
 [caffeinate]
 name = "caffeinate"
