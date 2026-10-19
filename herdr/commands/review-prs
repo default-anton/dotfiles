@@ -10,7 +10,7 @@ for dependency in gh jq fzf; do
 done
 
 [ ! -t 2 ] || printf 'Loading review requests…\r' >&2
-response=$(gh api graphql --cache 30s --paginate --slurp -f query='
+response=$(gh api graphql --paginate --slurp -f query='
   query($endCursor: String) {
     search(query: "is:pr review-requested:@me state:open archived:false",
            type: ISSUE, first: 100, after: $endCursor) {
