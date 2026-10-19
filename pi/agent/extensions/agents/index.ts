@@ -9,7 +9,7 @@ import { endpoints, listen, protocolVersion, sameIdentity, verifyCaller, type En
 import { currentPane, herdr, isSolePane } from "./herdr";
 import { Inbox } from "./inbox";
 import { Runs } from "./runs";
-import { ControlError, failure, parameters, resultSchema, uuid, validateArguments, type AgentsResult, type InboxEvent } from "./schema";
+import { ControlError, failure, parameters, publicResult, resultSchema, uuid, validateArguments, type AgentsResult, type InboxEvent } from "./schema";
 import { canonical, hash, readSession, State } from "./state";
 
 const parentGuidelines = [
@@ -17,13 +17,13 @@ const parentGuidelines = [
   "Give each agent a bounded task, necessary context, file ownership, and expected validation/reporting. Agents share files; avoid overlapping edits and review results before integrating.",
 ];
 const messagingGuidelines = [
-  "Start returns session/run handles. Use delivery: manual for quiet delegation, then wait with exact targets and until: all or any. Wait returns results and inbox messages; questions and UI blocks return early. Never sleep or poll to wait for agents.",
-  "Use automatic delivery for background delegation, then do independent work or end your turn. Configure switches delivery explicitly; already queued notifications cannot be recalled. notify controls automatic steer/followUp scheduling, not whether work continues.",
-  "Send kind: task assigns follow-on work and watches its result. Use kind: message for updates, question when an answer is needed, and answer with replyTo for replies. Recipient inbox policy controls correspondence; only task mode controls instruction scheduling.",
+  "Start/task return a session UUID and an opaque run handle. Pass run handles directly in targets for wait/configure, or as run for status. Use delivery: manual for quiet delegation, then wait with until: all or any. Questions and UI blocks return early. Never sleep or poll to wait for agents.",
+  "Use delivery: steer for background delegation, then do independent work or end your turn. Configure switches delivery; already queued notifications cannot be recalled.",
+  "Use action: task for follow-on work, message for updates, question for decisions, and answer with replyTo for replies. Tasks always steer; correspondence follows the recipient inbox policy.",
   "Wait timeouts and observation cancellation leave work running. Parent-turn abort stops turn-lifetime workers; lifetime: session survives turn abort but stops on parent shutdown. stop explicitly cancels work. Wait replay: true recovers previously received events after uncertain delivery.",
-  "Await every Code Mode call and keep returned session/run IDs. After uncertain delivery, check status instead of resending.",
+  "Await every Code Mode call and keep returned session/run handles. After uncertain delivery, check status or replay instead of resending. Continue replay by passing the returned cursor as replay.",
 ];
-const childGuideline = "Complete the assigned task. Your final reply is recorded in the parent's inbox; its delivery policy decides when the parent receives it. Send defaults to correspondence; workers cannot assign tasks. Use kind: question when you need a decision, then wait with until: message and no targets for an answer. Answer received questions with kind: answer and replyTo. You may send, wait, and check status, but must not start or stop agents, including through shell commands. Session history is context, not authorization to resume old work.";
+const childGuideline = "Complete the assigned task. Your final reply is recorded in the parent's inbox; its delivery policy decides when the parent receives it. Workers cannot assign tasks. Use action: question when you need a decision, then wait with until: message and no targets for an answer. Answer received questions with action: answer and replyTo. You may message, question, answer, wait, and check status, but must not start or stop agents, including through shell commands. Session history is context, not authorization to resume old work.";
 
 function parentSession(ctx: ExtensionContext) {
   const entry = ctx.sessionManager.getBranch().findLast((entry) => entry.type === "custom" && entry.customType === "agents:parent");
@@ -64,13 +64,13 @@ export default function agentsExtension(pi: ExtensionAPI) {
   const tool: ToolDefinition<typeof parameters> = {
     name: "agents",
     label: "agents",
-    description: "Delegate to Pi agents in Herdr tabs. Start/task return session/run handles; manual delivery buffers communication for wait, automatic delivery wakes the parent. Wait receives results/messages for exact runs, returning early for questions or blocks. Configure changes delivery. Send distinguishes tasks, messages, questions, and answers. Session-lifetime work survives parent-turn abort. Workers cannot start/stop agents. Successful tabs close; tasks and answers can resume saved workers.",
+    description: "Delegate to Pi agents in Herdr tabs. Start/task return session UUIDs and opaque run handles. Wait receives results/messages; configure changes delivery. Tasks always steer and watch completion; messages do not. Answers require replyTo and can resume workers. Workers cannot start/task/stop. Successful tabs close; saved workers can resume. Use only fields belonging to the selected action.",
     parameters,
     outputSchema: resultSchema,
     exposure: "hidden",
     executionMode: "parallel",
     async execute(_id, args, signal, _onUpdate, ctx) {
-      validateArguments(args);
+      const resolved = validateArguments(args);
       let result;
       if (!initialized) {
         result = failure(new ControlError("delegation_disabled", "Agents are unavailable before session initialization."));
@@ -78,8 +78,9 @@ export default function agentsExtension(pi: ExtensionAPI) {
         result = failure(new ControlError("bridge_unavailable", "Use a persisted Pi TUI in Herdr with a compatible agents endpoint."));
       } else {
         update(ctx);
-        result = await controller.execute(args, ctx, signal);
+        result = await controller.execute(resolved, ctx, signal);
       }
+      result = publicResult(result);
       return {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,

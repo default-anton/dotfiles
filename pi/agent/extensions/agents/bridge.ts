@@ -8,7 +8,7 @@ import { ControlError, eventSchema, resultSchema, uuid, type AgentsResult } from
 import { State, hash, processAlive, scheduleDeadline } from "./state";
 
 const identifier = Type.String({ pattern: uuid.source });
-export const protocolVersion = 2;
+export const protocolVersion = 3;
 const identitySchema = Type.Object({
   session: identifier,
   incarnation: identifier,
@@ -23,7 +23,6 @@ const requestSchema = Type.Object({
   capability: Type.Optional(Type.String()),
   automatic: Type.Optional(Type.Boolean()),
   message: Type.Optional(Type.String({ minLength: 1, maxLength: 262144 })),
-  mode: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("followUp")])),
   run: Type.Optional(identifier),
   event: Type.Optional(eventSchema),
 }, { additionalProperties: false });

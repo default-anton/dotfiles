@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { endpoints, sameIdentity, type Endpoint } from "./bridge";
-import { ControlError, failure, type AgentsResult, type Arguments, type Delivery, type InboxEvent, type Target } from "./schema";
+import { ControlError, failure, publicEvent, type AgentsResult, type Arguments, type Delivery, type InboxEvent, type Target } from "./schema";
 import { processAlive, State } from "./state";
 
 type Subscription = {
@@ -9,7 +9,6 @@ type Subscription = {
   child: Endpoint;
   name?: string;
   run: string;
-  mode: "steer" | "followUp";
   delivery?: Delivery;
   created: number;
 };
@@ -43,15 +42,16 @@ export class Inbox {
       entry.type === "custom" && entry.customType === "agents:watch"
         ? [(entry.data as { id: string }).id] : []));
     return this.state.records<Subscription>(`notification-${this.parent.session}-`)
-      .filter((subscription) => watches.has(subscription.id));
+      .filter((subscription) => watches.has(subscription.id))
+      .map((subscription) => ({ ...subscription, delivery: subscription.delivery === "manual" ? "manual" as const : "steer" as const }));
   }
 
   private subscriptionFile(id: string) {
     return `notification-${this.parent.session}-${id}.json`;
   }
 
-  track(id: string, child: Endpoint, run: string, mode: Subscription["mode"], name: string, delivery: Delivery = "automatic") {
-    const subscription: Subscription = { id, child, name, run, mode, delivery, created: Date.now() };
+  track(id: string, child: Endpoint, run: string, name: string, delivery: Delivery = "steer") {
+    const subscription: Subscription = { id, child, name, run, delivery, created: Date.now() };
     this.state.write(this.subscriptionFile(id), subscription);
     this.pi.appendEntry("agents:watch", { id });
   }
@@ -75,7 +75,6 @@ export class Inbox {
     }).flat();
     for (const subscription of selected) {
       if (args.delivery) subscription.delivery = args.delivery;
-      if (args.notify) subscription.mode = args.notify;
       this.state.write(this.subscriptionFile(subscription.id), subscription);
     }
     return { status: "idle", reason: "configured" };
@@ -256,9 +255,10 @@ export class Inbox {
         !this.waitingFor(event) && this.policy(event.session, event.run)?.delivery !== "manual");
       if (!event) return;
       const subscription = this.policy(event.session, event.run);
-      const result = event.result;
+      const exposed = publicEvent(event);
+      const result = exposed.result;
       const content = [
-        `Agent event ${event.id}: ${event.type}, from ${event.from}, session ${event.session}${event.run ? `, run ${event.run}` : ""}.`,
+        `Agent event ${event.id}: ${event.type}, from ${event.from}, session ${event.session}${exposed.run ? `, run ${exposed.run}` : ""}.`,
         event.replyTo ? `Reply to: ${event.replyTo}` : undefined,
         event.message,
         result?.output,
@@ -267,8 +267,8 @@ export class Inbox {
       ].filter(Boolean).join("\n\n");
       this.pi.sendMessage({
         customType: "agents:result", content, display: true,
-        details: { eventIds: [event.id], name: subscription?.name, result, event },
-      }, { triggerTurn: true, deliverAs: subscription?.mode ?? "steer" });
+        details: { eventIds: [event.id], name: subscription?.name, result, event: exposed },
+      }, { triggerTurn: true, deliverAs: "steer" });
       this.pending.add(event.id);
       this.warned = false;
     } catch (error) {
@@ -303,9 +303,9 @@ export class Inbox {
             if (finished) return;
             if (signal?.aborted || this.closed || this.paused) return cancelled();
             this.refresh();
-            let unread = this.unread(args.replay, true).filter(matches);
-            if (args.after) {
-              const index = unread.findIndex((event) => event.id === args.after);
+            let unread = this.unread(!!args.replay, true).filter(matches);
+            if (typeof args.replay === "string") {
+              const index = unread.findIndex((event) => event.id === args.replay);
               if (index < 0) throw new ControlError("invalid_cursor", "The replay cursor is not in the selected inbox history.");
               unread = unread.slice(index + 1);
             }

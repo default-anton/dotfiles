@@ -152,7 +152,7 @@ export class Runs {
       this.pi.sendMessage({
         customType: "agents:task", content, display: true,
         details: { requestId: incoming.id, runId: run.id, senderSessionId: incoming.caller!.session },
-      }, { triggerTurn: true, deliverAs: incoming.mode ?? "steer" });
+      }, { triggerTurn: true, deliverAs: "steer" });
     }
     return this.snapshot(run.id);
   }

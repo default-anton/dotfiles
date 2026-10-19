@@ -3,27 +3,20 @@ import { Type, type Static } from "typebox";
 import { Value } from "typebox/value";
 
 export const parameters = Type.Object({
-  action: StringEnum(["start", "send", "status", "wait", "configure", "stop"], { description: "start: assign new worker; send: task or correspondence; status: inspect; wait: receive inbox events; configure: delivery; stop: abort. Only fields documented for the selected action/kind are accepted. Configure requires targets and at least one of delivery or notify." }),
-  session: Type.Optional(Type.String({ description: "Required for send/status/stop; forbidden otherwise. Target Pi session UUID." })),
-  name: Type.Optional(Type.String({ description: "Required for start only. Short worker tab label." })),
-  message: Type.Optional(Type.String({ description: "Required for start/send only. Assignment or correspondence text." })),
-  cwd: Type.Optional(Type.String({ description: "Start only; defaults to the current directory." })),
-  model: Type.Optional(Type.String({ description: "Start only; model ID, model:thinking, or provider/model:thinking. Omitted parts inherit the parent's settings; thinking is clamped to model capabilities." })),
-  mode: Type.Optional(StringEnum(["steer", "followUp"], { description: "Send task only. Instruction scheduling: steer (default, at the next boundary) or followUp. Correspondence follows the recipient's inbox policy." })),
-  notify: Type.Optional(StringEnum(["steer", "followUp"], { description: "Start, send task, or configure only. Automatic delivery scheduling: steer or followUp. Start defaults to steer; follow-on tasks inherit. Does not enable automatic delivery." })),
-  delivery: Type.Optional(StringEnum(["automatic", "manual"], { description: "Start, send task, or configure only. automatic wakes the parent; manual buffers communication for wait. Start defaults to automatic; follow-on tasks inherit." })),
-  lifetime: Type.Optional(StringEnum(["turn", "session"], { description: "Start or send task only. turn stops work on parent-turn abort; session survives it but stops on parent shutdown. Start defaults to turn; follow-on tasks inherit." })),
-  kind: Type.Optional(StringEnum(["task", "message", "question", "answer"], { description: "Send only. Parents default to task; workers default to message and cannot assign tasks. Answer requires replyTo. Tasks and answers resuming managed workers watch completion." })),
-  replyTo: Type.Optional(Type.String({ description: "Required for send answer; forbidden otherwise. Event UUID of the received question." })),
-  run: Type.Optional(Type.String({ description: "Status or send correspondence only; forbidden for tasks. Status selects this exact run or defaults to latest. Correspondence defaults to the sender's current work interval." })),
-  targets: Type.Optional(Type.Array(Type.Object({
-    session: Type.String(),
-    run: Type.String(),
-  }, { additionalProperties: false }), { minItems: 1, maxItems: 32, description: "Wait/configure only. Required for configure and wait until any/all. Distinct exact session/run UUID pairs. Omit for wait to receive from the entire inbox." })),
-  until: Type.Optional(StringEnum(["any", "all", "message"], { description: "Wait only. any/all require targets. Defaults to all with targets, message otherwise. Questions and UI blocks return early." })),
-  timeoutMs: Type.Optional(Type.Integer({ minimum: 0, maximum: 3600000, description: "Wait only. Defaults to 60000 milliseconds; zero receives immediately. Timeout does not stop workers." })),
-  replay: Type.Optional(Type.Boolean({ description: "Wait only; defaults to false. Include previously received events for recovery after uncertain delivery." })),
-  after: Type.Optional(Type.String({ description: "Wait only; requires replay: true. Continue after the cursor returned by the previous replay batch." })),
+  action: StringEnum(["start", "task", "message", "question", "answer", "status", "wait", "configure", "stop"]),
+  session: Type.Optional(Type.String({ description: "Recipient UUID for task/message/question/answer/stop; status accepts session or run." })),
+  name: Type.Optional(Type.String({ description: "Required for start. Short tab label." })),
+  message: Type.Optional(Type.String({ description: "Required for start/task/message/question/answer." })),
+  cwd: Type.Optional(Type.String({ description: "Start only; defaults to current directory." })),
+  model: Type.Optional(Type.String({ description: "Start only: model, model:thinking, or provider/model:thinking. Omitted parts inherit." })),
+  delivery: Type.Optional(StringEnum(["manual", "steer"], { description: "Start/task/configure: buffer for wait or wake parent at next boundary. Start defaults to steer; tasks inherit. Required for configure." })),
+  lifetime: Type.Optional(StringEnum(["turn", "session"], { description: "Start/task: stop on parent-turn abort (default) or survive until parent shutdown. Tasks inherit." })),
+  replyTo: Type.Optional(Type.String({ description: "Required for answer: received question event ID." })),
+  run: Type.Optional(Type.String({ description: "Status: exact run handle. Message/question/answer: sender's run handle; defaults to current run." })),
+  targets: Type.Optional(Type.Array(Type.String(), { minItems: 1, maxItems: 32, description: "Wait/configure: distinct run handles. Required for configure; omit for wait on entire inbox." })),
+  until: Type.Optional(StringEnum(["any", "all", "message"], { description: "Wait: any/all require targets. Defaults to all with targets, message otherwise. Questions/blocks return early." })),
+  timeoutMs: Type.Optional(Type.Integer({ minimum: 0, maximum: 3600000, description: "Wait: milliseconds, default 60000; zero receives immediately. Never stops workers." })),
+  replay: Type.Optional(Type.Union([Type.Literal(true), Type.String()], { description: "Wait: true replays retained events; a returned cursor continues replay. Omit for unread events." })),
 }, { additionalProperties: false });
 
 const snapshotProperties = {
@@ -64,48 +57,89 @@ export const resultSchema = Type.Object({
 
 export type InboxEvent = Static<typeof eventSchema>;
 export type Target = { session: string; run: string };
-export type Delivery = "automatic" | "manual";
+export type Delivery = "steer" | "manual";
 export type Lifetime = "turn" | "session";
-export type Arguments = Static<typeof parameters>;
+export type ToolArguments = Static<typeof parameters>;
+export type Arguments = Omit<ToolArguments, "targets"> & { targets?: Target[] };
 export type AgentsResult = Static<typeof resultSchema>;
 export const uuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
-export function validateArguments(args: Arguments) {
+export function runHandle(session: string, run: string) {
+  return "run_" + Buffer.from((session + run).replaceAll("-", ""), "hex").toString("base64url");
+}
+
+export function resolveRun(handle: string): Target {
+  if (!/^run_[A-Za-z0-9_-]{43}$/.test(handle)) throw new Error("Expected a returned run handle.");
+  const bytes = Buffer.from(handle.slice(4), "base64url");
+  const ids = bytes.toString("hex").match(/.{32}/g)!;
+  const [session, run] = ids.map((id) => id.replace(/^(........)(....)(....)(....)(............)$/, "$1-$2-$3-$4-$5"));
+  if (runHandle(session, run) !== handle) throw new Error("Invalid run handle.");
+  return { session, run };
+}
+
+export function publicEvent(event: InboxEvent): InboxEvent {
+  return {
+    ...event,
+    ...(event.run ? { run: runHandle(event.session, event.run) } : {}),
+    ...(event.result ? { result: publicResult(event.result) } : {}),
+  };
+}
+
+export function publicResult(result: AgentsResult): AgentsResult {
+  return {
+    ...result,
+    ...(result.session && result.run ? { run: runHandle(result.session, result.run) } : {}),
+    ...(result.events ? { events: result.events.map(publicEvent) } : {}),
+    ...(result.runs ? { runs: result.runs.map(publicResult) } : {}),
+  };
+}
+
+export function validateArguments(args: ToolArguments): Arguments {
   if (!Value.Check(parameters, args)) throw new Error("Invalid agents arguments.");
   const fields = {
-    start: ["action", "name", "message", "cwd", "model", "notify", "delivery", "lifetime"],
-    send: ["action", "session", "message", "mode", "kind", "replyTo", "run", "notify", "delivery", "lifetime"],
+    start: ["action", "name", "message", "cwd", "model", "delivery", "lifetime"],
+    task: ["action", "session", "message", "delivery", "lifetime"],
+    message: ["action", "session", "message", "run"],
+    question: ["action", "session", "message", "run"],
+    answer: ["action", "session", "message", "run", "replyTo"],
     status: ["action", "session", "run"],
-    wait: ["action", "targets", "until", "timeoutMs", "replay", "after"],
-    configure: ["action", "targets", "delivery", "notify"],
+    wait: ["action", "targets", "until", "timeoutMs", "replay"],
+    configure: ["action", "targets", "delivery"],
     stop: ["action", "session"],
   };
-  if (!fields[args.action] || Object.keys(args).some((key) => !fields[args.action].includes(key))) {
+  if (Object.keys(args).some((key) => !fields[args.action].includes(key))) {
     throw new Error("Fields do not match the agents action.");
   }
-  if (["send", "status", "stop"].includes(args.action) && (!args.session || !uuid.test(args.session))) {
-    throw new Error("session must be a full Pi session UUID.");
+  if (args.session !== undefined && !uuid.test(args.session)) throw new Error("session must be a full Pi session UUID.");
+  if (["task", "message", "question", "answer", "stop"].includes(args.action) && !args.session) {
+    throw new Error("A recipient session is required.");
   }
-  if (args.run !== undefined && !uuid.test(args.run)) throw new Error("run must be a full UUID.");
-  if (args.targets?.some((target) => !uuid.test(target.session) || !uuid.test(target.run))) throw new Error("targets require full session and run UUIDs.");
-  if (args.targets && new Set(args.targets.map((target) => `${target.session}/${target.run}`)).size !== args.targets.length) throw new Error("targets must be distinct.");
-  if (args.action === "configure" && (!args.targets || (!args.delivery && !args.notify))) throw new Error("configure requires targets and delivery or notify.");
-  if (args.action === "wait" && args.until && args.until !== "message" && !args.targets) throw new Error("Waiting for completion requires exact targets.");
-  if (args.replyTo !== undefined && !uuid.test(args.replyTo)) throw new Error("replyTo must be a full event UUID.");
-  if (args.after !== undefined && (!args.replay || !uuid.test(args.after))) throw new Error("after requires replay: true and a full event UUID.");
-  if (args.action === "send") {
-    if (args.kind === "answer" ? !args.replyTo : args.replyTo !== undefined) throw new Error("Only answers require replyTo.");
-    if (args.kind && args.kind !== "task" && (args.mode || args.delivery || args.notify || args.lifetime)) throw new Error("Scheduling, delivery, and lifetime options belong to tasks, not correspondence.");
-    if (args.kind === "task" && args.run) throw new Error("Tasks join the active run or start a new run; run is for correspondence.");
+  const selected = args.run === undefined ? undefined : resolveRun(args.run);
+  if (args.action === "status" && !args.session && !selected) throw new Error("status requires session or run.");
+  if (args.action === "status" && selected && args.session && args.session.toLowerCase() !== selected.session) {
+    throw new Error("The run belongs to a different session.");
   }
+  const targets = args.targets?.map(resolveRun);
+  if (args.targets && new Set(args.targets).size !== args.targets.length) throw new Error("targets must be distinct.");
+  if (args.action === "configure" && (!targets || !args.delivery)) throw new Error("configure requires targets and delivery.");
+  if (args.action === "wait" && args.until && args.until !== "message" && !targets) throw new Error("Waiting for completion requires targets.");
+  if (args.action === "answer" && (!args.replyTo || !uuid.test(args.replyTo))) throw new Error("answer requires a question event UUID.");
+  if (typeof args.replay === "string" && !uuid.test(args.replay)) throw new Error("replay requires a returned cursor.");
   if (args.action === "start" && (!args.name?.trim() || args.name.length > 100 || /[\r\n\x00-\x1f]/.test(args.name))) {
     throw new Error("name must be a nonblank, single-line label of at most 100 characters.");
   }
   if (args.model !== undefined && !args.model.trim()) throw new Error("model must not be blank.");
-  if (["start", "send"].includes(args.action) && !args.message?.trim()) throw new Error("message must not be blank.");
+  if (["start", "task", "message", "question", "answer"].includes(args.action) && !args.message?.trim()) throw new Error("message must not be blank.");
   if (args.message && Buffer.byteLength(JSON.stringify(args.message), "utf8") > 262144) {
     throw new Error("message exceeds the 256 KiB encoded control limit.");
   }
+  const { targets: _targets, ...rest } = args;
+  return {
+    ...rest,
+    ...(args.session ? { session: args.session.toLowerCase() } : {}),
+    ...(targets ? { targets } : {}),
+    ...(selected && args.action === "status" ? { session: selected.session, run: selected.run } : {}),
+  };
 }
 
 export class ControlError extends Error {

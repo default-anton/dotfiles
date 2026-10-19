@@ -1,7 +1,7 @@
 # Agents
 
-The extension runs persisted Pi workers in Herdr tabs. Workers share the working
-tree; assign separate file ownership when running implementation tasks in parallel.
+Persisted Pi workers run in Herdr tabs and share the working tree. Assign separate
+file ownership when delegating parallel implementation work.
 
 ## Quiet delegation
 
@@ -15,139 +15,104 @@ const worker = await tools.agents({
 text(worker);
 ```
 
-Keep the returned session and run IDs. Do independent work, then collect the result:
+Keep the returned `session` UUID and opaque `run` handle. Pass handles unchanged:
 
 ```js
 text(await tools.agents({
   action: "wait",
-  targets: [{ session: worker.session, run: worker.run }],
+  targets: [worker.run],
   until: "all",
-  timeoutMs: 60000,
 }));
 ```
 
-`targets` accepts up to 32 exact session/run pairs. `until: "any"` waits for any
-terminal run; `all` waits for every run to finish, fail, or stop. Neither means
-“all successful.” Questions and UI blocks return early. Read `reason`, `events`,
-and each entry in `runs`, not just the aggregate `status`.
+`targets` accepts up to 32 distinct run handles. `all` waits for every run to
+finish, fail, or stop; `any` waits for one. Questions and UI blocks return early.
+Read `reason`, `events`, and individual `runs`, not just aggregate `status`.
 
-`until: "message"` receives the next available event. Omitting targets receives
-from the entire inbox and defaults to this condition. `timeoutMs: 0` receives
-immediately. Other waits default to 60 seconds and allow up to one hour. A wait
-does not hold the worker's mutation queue, so sending and stopping remain possible.
-Only one wait can be active in a recipient session.
+Without targets, wait defaults to `until: "message"` and receives from the entire
+inbox. With targets, it defaults to `all`. Routine updates stay buffered during
+completion waits. `timeoutMs` defaults to 60000, permits up to one hour, and can
+be zero for an immediate receive. A timeout or cancelled wait never stops workers.
+Only one wait can be active per session.
 
-Routine updates stay buffered during a completion wait. A return includes up to
-64 events with a 256 KiB event-batch budget (one oversized event can still be
-received); `more: true` means another receive can collect the remainder. Large
-worker results retain their existing `outputPath` references.
+## Background work and delivery
 
-## Background delegation
-
-```js
-text(await tools.agents({
-  action: "start",
-  name: "research",
-  message: "Research the assigned topic and report your findings.",
-  delivery: "automatic",
-  notify: "followUp",
-  lifetime: "session",
-}));
-```
-
-End the parent turn to stay available to the user. Automatic inbox delivery wakes
-the parent when communication arrives. `notify: "steer"` schedules at the next
-boundary; `followUp` defers until the current work finishes. It is not quiet mode.
-
-Existing start calls default to automatic delivery, steer scheduling, and turn
-lifetime. Ending a turn normally does not stop workers.
-
-Lifetime and delivery are independent:
-
-- `turn`: a parent-turn abort stops workers it launched with this lifetime.
-- `session`: work survives parent-turn aborts, but parent shutdown stops it.
-- `stop`: explicitly aborts the target and preserves its tab and saved session.
-- Wait timeout or cancellation of just the tool call does not stop workers.
-  Aborting the parent turn still applies its lifetime policy.
-
-## Switching delivery
+Use `delivery: "steer"` to wake the parent at the next boundary, then do independent
+work or end your turn. This is the default; `manual` buffers events for wait.
 
 ```js
 text(await tools.agents({
   action: "configure",
-  targets: [{ session, run }],
+  targets: [worker.run],
   delivery: "manual",
 }));
 ```
 
-Configuration applies to delegations tracked by the calling session. It controls
-both worker correspondence and final results. It can also change `notify`.
-An active wait receives matching unread events before automatic delivery, without
-changing the stored delivery policy. Automatic delivery resumes when the wait
-ends. Already queued or delivered notifications cannot be recalled; configure
-manual mode before waiting if duplicate observation of an already queued result
-would be inconvenient.
+Only the session tracking a delegation can configure it. Delivery controls both
+correspondence and final results. An active wait takes priority over new pushes;
+already queued notifications cannot be recalled.
+
+`lifetime: "turn"` (default) stops work when the parent turn is aborted.
+`lifetime: "session"` survives that abort but not parent shutdown. Ending a turn
+normally does not stop workers. `stop` explicitly aborts a session and preserves
+its tab and saved session.
 
 ## Tasks and correspondence
 
-`send` defaults to `kind: "task"` for parents and `kind: "message"` for workers.
+All four actions below require a recipient `session` and `message`:
 
-- `task`: assign follow-on work, reopening a saved worker when needed. Subscribe
-  to its result and inherit its previous delivery policy unless overridden.
-  Sending to a busy worker joins the current run; it does not create a separately
-  awaitable result for every message. Only tasks accept `mode`, `delivery`,
-  `notify`, and `lifetime`.
-- `message`: send an update through the recipient's inbox without subscribing to
-  the recipient's eventual final reply.
-- `question`: send an actionable request. Completion waits return
-  `reason: "needs_input"` with the question's event ID.
-- `answer`: reply with `replyTo` set to a received question's ID. An answer to a
-  managed worker resumes it if necessary and watches the resulting run. Keep
-  the returned run handle: it can differ from the original run.
+- `task`: assign more work and watch completion, reopening a saved worker if
+  needed. Always steers at the next boundary. A busy worker joins its current run;
+  the new instructions do not get a separately awaitable result. Delivery and
+  lifetime inherit unless overridden.
+- `message`: send an update without watching the recipient's eventual final reply.
+- `question`: request a decision. Completion waits return `needs_input` with the
+  question's event ID.
+- `answer`: requires `replyTo`, the received question's ID. Can resume a managed
+  worker and watch its result. Keep the returned run handle; it may change.
 
 ```js
 text(await tools.agents({
-  action: "send",
+  action: "answer",
   session: question.from,
-  kind: "answer",
   replyTo: question.id,
   message: "Preserve the existing API contract.",
 }));
 ```
 
-Unanswered questions remain actionable across receives until an answer is
-accepted or their run fails or stops. Workers waiting for an answer can use
-`wait` with `until: "message"` and no targets; answering wakes that receive rather
-than leaving the answer queued behind the worker's wait.
-Ordinary messages and questions require a live recipient. Their receipt
-returns an event ID, not a promise that the recipient has processed them.
-The recipient's inbox policy determines scheduling; a sender cannot override
-manual delivery with `mode: "steer"`.
+Messages and questions require a live recipient. Their returned event ID confirms
+receipt, not processing. Correspondence follows the recipient's delivery policy.
+Its optional `run` selects the sender's work interval, defaulting to the current
+one. Workers cannot start, task, or stop agents.
 
-Workers cannot start or stop agents or assign new tasks. They can correspond,
-inspect status, and receive inbox events.
+Unanswered questions remain actionable until answered or their run fails/stops.
+Workers awaiting an answer can wait without targets; answers wake that receive.
 
-## Persistence and recovery
+## Status and recovery
 
-A session identifies an agent; a run identifies a work interval; an event ID
-identifies communication. `status` is a non-consuming snapshot. `wait` receives
-unread events and includes run snapshots, even if completion was already received.
+`status` accepts `session` for its latest run, or `run` for an exact snapshot.
+It does not consume events. Successful tabs close, but results remain persisted.
 
-Events, subscriptions, and terminal results are persisted in private coordination
-state. Delivery receipts live on the recipient's session branch. Results remain
-available after successful worker tabs close. Push and wait share these receipts:
-collecting an event prevents it from being newly pushed later.
+After uncertain delivery, do not blindly resend work or answers. Check status or
+replay retained events:
 
-This is recoverable delivery, not a claim of exactly-once delivery across crashes.
-A wait can record receipt before its enclosing Code Mode call reports the result.
-After uncertain delivery, use `wait` with the same targets and `replay: true` to
-retrieve retained events, including previously received ones. Do not blindly
-resend an assignment or answer. Replay returns chronological batches; when
-`more` is true, pass its `cursor` as `after` on the next replay to continue.
+```js
+const batch = await tools.agents({
+  action: "wait",
+  targets: [worker.run],
+  replay: true,
+  timeoutMs: 0,
+});
+text(batch);
+```
 
-Session navigation pauses delivery. Receipts follow the active branch, so events
-may be received again after navigating to a branch without those receipts.
-Existing completion watches from the previous extension version are retained;
-previously delivered legacy result messages are recognized during migration.
-Live sessions using the previous control protocol must reload before accepting
-new tasks or correspondence; they are not silently reopened as duplicate writers.
+When `more` is true, continue with `replay: batch.cursor` and the same targets.
+Receives return at most 64 events within a 256 KiB batch budget, allowing one
+oversized event. Large results retain `outputPath` references.
+
+Push and wait share persisted receipts, but delivery is not exactly-once across
+crashes. Session navigation pauses delivery; receipts follow the active branch.
+Run handles encode the persisted session/run identity and survive reloads without
+an in-memory lookup. Existing subscriptions retain manual delivery; other legacy
+delivery policies become steer. Live sessions on an older bridge protocol must
+reload before accepting new tasks or correspondence.

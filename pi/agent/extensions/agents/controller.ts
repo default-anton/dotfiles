@@ -7,7 +7,7 @@ import { ModelSelectionError, resolveModelSelection } from "../lib/model-selecti
 import { endpoints, request, sameIdentity, type Endpoint, type Identity, type Owner, type Snapshot } from "./bridge";
 import { currentPane, herdr, inventory, type Pane } from "./herdr";
 import { Inbox } from "./inbox";
-import { ControlError, failure, validateArguments, type AgentsResult, type Arguments, type InboxEvent, type Lifetime } from "./schema";
+import { ControlError, failure, resolveRun, type AgentsResult, type Arguments, type InboxEvent, type Lifetime } from "./schema";
 import { canonical, MutationQueue, readSession, resolveCwd, State } from "./state";
 
 export type Launch = {
@@ -335,7 +335,6 @@ export class Controller {
   }
 
   async execute(args: Arguments, ctx: ExtensionContext, signal?: AbortSignal, retryClosing = true): Promise<AgentsResult> {
-    validateArguments(args);
     const cwd = args.action === "start" ? resolveCwd(args.cwd ?? ctx.cwd, ctx.cwd) : undefined;
     this.observe(ctx);
     const generation = this.generation;
@@ -349,15 +348,15 @@ export class Controller {
         throw new ControlError("delegation_disabled", "Tool-launched agents may send and check status, but cannot start or stop agents.");
       }
       if (signal?.aborted) throw new ControlError("observation_cancelled", "The call was cancelled before it began.");
-      const kind = args.kind ?? (this.endpoint.worker ? "message" : "task");
-      if (args.action === "send" && this.endpoint.worker && kind === "task") {
+      if (args.action === "task" && this.endpoint.worker) {
         throw new ControlError("delegation_disabled", "Workers may send correspondence, not new task assignments.");
       }
-      if (args.action === "send" && kind === "task" && args.run) {
-        throw new ControlError("invalid_options", "Tasks join the active run or start a new run; run is for correspondence.");
-      }
-      if (args.action === "send" && kind !== "task") {
-        if (args.delivery || args.notify || args.lifetime || args.mode) throw new ControlError("invalid_options", "Correspondence follows the recipient's inbox policy; mode, delivery, notify, and lifetime belong to tasks.");
+      if (["message", "question", "answer"].includes(args.action)) {
+        const kind = args.action;
+        const senderRun = args.run ? resolveRun(args.run) : undefined;
+        if (senderRun && senderRun.session !== this.endpoint.session) {
+          throw new ControlError("invalid_run", "Correspondence requires the sender's run handle.");
+        }
         const question = args.replyTo ? this.inbox.event(args.replyTo) : undefined;
         if (kind === "answer" && (!question || question.type !== "needs_input" || question.from !== session)) {
           throw new ControlError("question_not_found", "replyTo must identify a received question from the target session.");
@@ -365,7 +364,7 @@ export class Controller {
         if (question?.resolved) throw new ControlError("question_resolved", "This question is already resolved. Use a message or a new task for further instructions.");
         const target = await this.live(session!);
         if (!target) {
-          if (kind !== "answer") throw new ControlError("recipient_offline", "Correspondence requires a live recipient. Use kind: task to resume a saved session.");
+          if (kind !== "answer") throw new ControlError("recipient_offline", "Correspondence requires a live recipient. Use action: task to resume a saved session.");
         }
         const managedAnswer = kind === "answer" && !this.endpoint.worker && !!this.inbox.policy(session!);
         if (!managedAnswer) {
@@ -374,7 +373,7 @@ export class Controller {
           const event: InboxEvent = {
             id: randomUUID(), type: kind === "question" ? "needs_input" : "message",
             session: this.endpoint.session, from: this.endpoint.session,
-            run: args.run ?? own.result.run, created: Date.now(), message: args.message!,
+            run: senderRun?.run ?? own.result.run, created: Date.now(), message: args.message!,
             ...(args.replyTo ? { replyTo: args.replyTo } : {}),
           };
           const result = await request(target.endpoint, {
@@ -384,7 +383,7 @@ export class Controller {
           return result;
         }
       }
-      if (args.action === "start" || args.action === "send") await this.cleanup;
+      if (["start", "task", "answer"].includes(args.action)) await this.cleanup;
       if (args.action === "start") {
         this.checkGeneration(generation);
         session = randomUUID();
@@ -426,7 +425,7 @@ export class Controller {
           }, signal) as AgentsResult;
           return { result };
         }
-        if (args.action === "send" && live.result?.status === "blocked") return { result: live.result };
+        if (["task", "answer"].includes(args.action) && live.result?.status === "blocked") return { result: live.result };
         if (signal?.aborted) throw new ControlError("observation_cancelled", "The call ended before dispatch; no task was submitted.");
         this.checkGeneration(generation);
         if (args.action !== "stop") {
@@ -455,16 +454,16 @@ export class Controller {
         }
         let reply: AgentsResult;
         const requestId = randomUUID();
-        const track = args.action === "start" || (args.action === "send" && !this.endpoint.worker);
+        const track = args.action === "start" || (["task", "answer"].includes(args.action) && !this.endpoint.worker);
         const policy = this.inbox.policy(key);
-        if (track) this.inbox.track(requestId, endpoint, run!, args.notify ?? policy?.mode ?? "steer",
-          args.name?.trim() ?? policy?.name ?? key.slice(0, 8), args.delivery ?? policy?.delivery ?? "automatic");
+        if (track) this.inbox.track(requestId, endpoint, run!,
+          args.name?.trim() ?? policy?.name ?? key.slice(0, 8), args.delivery ?? policy?.delivery ?? "steer");
         try {
           reply = await request(endpoint, {
             id: requestId,
             operation: args.action === "stop" ? "abort" : "submit",
             caller: this.identity(), capability: this.capability(endpoint),
-            ...(args.action === "stop" ? {} : { message: args.message, mode: args.mode ?? "steer", run }),
+            ...(args.action === "stop" ? {} : { message: args.message, run }),
             ...(args.replyTo ? { event: {
               id: requestId, type: "message" as const, session: this.endpoint.session, from: this.endpoint.session,
               created: Date.now(), message: args.message, replyTo: args.replyTo,
@@ -478,7 +477,7 @@ export class Controller {
             this.inbox.forget(requestId);
           }
           if (this.state.read<Endpoint>(`endpoint-${endpoint.incarnation}.json`)?.closing) {
-            if (args.action === "send" && !admitted) {
+            if (["task", "answer"].includes(args.action) && !admitted) {
               throw new ControlError("session_closing", "The worker closed before accepting the message.");
             }
             const saved = admitted && this.state.read<AgentsResult>(`run-${key}-${admitted.run}.json`);
@@ -498,7 +497,7 @@ export class Controller {
       return target.result!;
     } catch (error) {
       if (!(error instanceof ControlError)) throw error;
-      if (error.code === "session_closing" && args.action === "send" && retryClosing && !signal?.aborted) {
+      if (error.code === "session_closing" && ["task", "answer"].includes(args.action) && retryClosing && !signal?.aborted) {
         return this.execute(args, ctx, signal, false);
       }
       return failure(error, { session, tab, run });
