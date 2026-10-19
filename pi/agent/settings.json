@@ -18,7 +18,7 @@
     "reserveTokens": 27200,
     "keepRecentTokens": 0
   },
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "branchSummary": {
     "skipPrompt": true
   },
