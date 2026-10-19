@@ -1,6 +1,6 @@
 ---
 name: start-work-session
-description: Start independent work in a standalone Pi CLI and task worktree/Herdr space. Run ~/.pi/agent/skills/start-work-session/scripts/start.mjs --branch NAME --prompt TEXT (or --feature REF_OR_URL). Use for work in a new space, separate/new session, or new worktree; not ordinary implementation or subagent delegation.
+description: Use when asked to start work in a separate session, new space, or new worktree—not for ordinary implementation or subagent delegation.
 ---
 
 # Start a work session
