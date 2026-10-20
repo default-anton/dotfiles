@@ -89,7 +89,10 @@ export class Runs {
     if (run !== this.current?.id && result && ["running", "blocked"].includes(result.status)) {
       return failure(new ControlError("delivery_unknown", "The earlier process never confirmed this run's settlement."), { session: this.session, run, tab: this.tab });
     }
-    const snapshot = result ?? { session: this.session, status: "idle" as const, tab: this.tab };
+    const snapshot: AgentsResult = { ...(result ?? { session: this.session, status: "idle", tab: this.tab }) };
+    if (run === this.current?.id && ["running", "idle", "blocked"].includes(snapshot.status)) {
+      snapshot.contextUsage = this.ctx.getContextUsage();
+    }
     if (this.blocked && (snapshot.status === "running" || snapshot.status === "idle")) return { ...snapshot, tab: this.tab, status: "blocked" };
     return { ...snapshot, tab: this.tab };
   }
@@ -97,7 +100,7 @@ export class Runs {
   private fail(code: string, message: string) {
     if (!this.current) return;
     this.current.result = failure(new ControlError(code, message), {
-      session: this.session, run: this.current.id, tab: this.tab,
+      session: this.session, run: this.current.id, tab: this.tab, contextUsage: this.ctx.getContextUsage(),
     });
     this.persist();
   }
@@ -237,7 +240,7 @@ export class Runs {
     const run = this.current;
     if (this.stopping) {
       for (const admission of run.admissions) if (!admission.entry) admission.cancelled = true;
-      run.result = { session: this.session, run: run.id, status: "stopped", tab: this.tab };
+      run.result = { session: this.session, run: run.id, status: "stopped", tab: this.tab, contextUsage: this.ctx.getContextUsage() };
     } else if (run.result.status === "running") {
       const branch = this.ctx.sessionManager.getBranch();
       const consumed = run.admissions.map((admission) => branch.findIndex((entry) => entry.id === admission.entry));
@@ -246,7 +249,7 @@ export class Runs {
       const final = branch.slice(Math.max(lastConsumption, anchor) + 1).findLast((entry) => entry.type === "message" && entry.message.role === "assistant");
       if (anchor >= 0 && final?.type === "message" && final.message.role === "assistant" && final.message.stopReason === "aborted") {
         for (const admission of run.admissions) if (!admission.entry) admission.cancelled = true;
-        run.result = { session: this.session, run: run.id, status: "stopped", tab: this.tab };
+        run.result = { session: this.session, run: run.id, status: "stopped", tab: this.tab, contextUsage: this.ctx.getContextUsage() };
       } else if (anchor < 0 || lastConsumption < 0 || consumed.some((index) => index < 0)) {
         this.fail("delivery_unknown", "Settlement did not consume every admitted message on the active branch.");
       } else if (!final || final.type !== "message" || final.message.role !== "assistant") {
@@ -259,7 +262,7 @@ export class Runs {
         } else {
           const truncated = truncateHead(text);
           run.result = {
-            session: this.session, run: run.id, status: "completed", tab: this.tab,
+            session: this.session, run: run.id, status: "completed", tab: this.tab, contextUsage: this.ctx.getContextUsage(),
             output: truncated.truncated ? `${truncated.content}\n[Output truncated; complete text is in outputPath.]` : text,
             ...(truncated.truncated ? { outputPath: this.state.writeText(`output-${this.session}-${run.id}.txt`, text) } : {}),
           };
@@ -313,7 +316,7 @@ export class Runs {
   async confirmStop(signal?: AbortSignal): Promise<AgentsResult> {
     const result = await this.waitForStop(signal);
     if (!this.stopping && this.ctx.isIdle() && !this.blocked) {
-      if (result.status === "completed" || result.status === "failed") return { session: this.session, status: "idle", tab: this.tab };
+      if (result.status === "completed" || result.status === "failed") return { session: this.session, status: "idle", tab: this.tab, contextUsage: this.ctx.getContextUsage() };
       return result;
     }
     return failure(new ControlError("stop_unconfirmed", "Abort was requested but settlement was not confirmed. Keep the tab and retry stop."), {

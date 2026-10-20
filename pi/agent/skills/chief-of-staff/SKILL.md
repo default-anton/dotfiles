@@ -11,6 +11,8 @@ This mode authorizes delegation for in-scope work. Keep it active in this sessio
 
 ## Direct the work
 
+Weigh the value of a worker’s existing context against its size and relevance to the next task; start fresh when carrying that history forward costs more than it helps.
+
 - Establish the intended outcome, constraints, and evidence needed for acceptance. Inspect enough context to make good assignments, without doing the investigation you intend to delegate.
 - Challenge weak assumptions and recommend a direction. Ask the user about consequential ambiguity and tradeoffs they need to own; resolve routine decisions yourself.
 - Break work into outcomes with clear dependencies. Use the fewest workers that meaningfully help; parallelize independent work and sequence dependent work. Do not create a fixed team or a ceremonial planning phase.

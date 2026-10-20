@@ -93,6 +93,10 @@ Workers awaiting an answer can wait without targets; answers wake that receive.
 `status` accepts `session` for its latest run, or `run` for an exact snapshot.
 It does not consume events. Successful tabs close, but results remain persisted.
 
+Snapshots may include `contextUsage` (`tokens`, `contextWindow`, `percent`): live
+estimates for active or idle sessions, saved estimates for terminal runs. Unknown
+usage is omitted, or has null `tokens` and `percent`.
+
 After uncertain delivery, do not blindly resend work or answers. Check status or
 replay retained events:
 

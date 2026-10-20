@@ -24,6 +24,11 @@ const snapshotProperties = {
   run: Type.Optional(Type.String()),
   status: StringEnum(["running", "blocked", "completed", "stopped", "idle", "failed"]),
   tab: Type.Optional(Type.String()),
+  contextUsage: Type.Optional(Type.Object({
+    tokens: Type.Union([Type.Number(), Type.Null()]),
+    contextWindow: Type.Number(),
+    percent: Type.Union([Type.Number(), Type.Null()]),
+  }, { additionalProperties: false })),
   output: Type.Optional(Type.String()),
   outputPath: Type.Optional(Type.String()),
   error: Type.Optional(Type.Object({
