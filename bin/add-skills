@@ -19,7 +19,7 @@ from urllib.parse import unquote, urlsplit
 HELP = """Usage: add-skills REPO_OR_SKILL_URL [...]
        add-skills --sync [REPO_OR_SKILL_URL ...]
 
-Install GitHub skills into ~/.pi/agent/skills/OWNER/REPO/SKILL/.
+Install GitHub skills into ~/.agents/skills/OWNER/REPO/SKILL/.
 Accepts owner/repo, repository URLs, or /tree/<ref>/<skill-path> URLs.
 Separate sources with spaces or commas.
 
@@ -466,7 +466,7 @@ def main() -> int:
             raise ValueError("Provide a repository or skill URL.")
         if not shutil.which("git"):
             raise ValueError("Git is required.")
-        root = Path.home() / ".pi" / "agent" / "skills"
+        root = Path.home() / ".agents" / "skills"
         root.mkdir(parents=True, exist_ok=True)
         with (root / ".add-skills.lock").open("a") as lock:
             try:

@@ -21,10 +21,10 @@ Launch an interactive `pi` CLI, never an `agents` worker.
 Assume you're running in Herdr. Run the bundled launcher directly; no need to read its source, Herdr's skill, or CLI help. Allow five minutes for worktree setup hooks.
 
 ```bash
-~/.pi/agent/skills/start-work-session/scripts/start.mjs \
+~/.agents/skills/start-work-session/scripts/start.mjs \
   --feature ENGWORK-123 --model gpt-6-astra:medium --prompt 'Implement ENGWORK-123.'
 
-~/.pi/agent/skills/start-work-session/scripts/start.mjs \
+~/.agents/skills/start-work-session/scripts/start.mjs \
   --repo ~/code/my-project --branch fix-timeout --model gpt-6.1-sol:high \
   --prompt-file /tmp/agreed-prompt.md
 ```
