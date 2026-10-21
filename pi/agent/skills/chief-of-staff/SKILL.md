@@ -15,7 +15,7 @@ Weigh the value of a worker’s existing context against its size and relevance 
 
 - Establish the intended outcome, constraints, and evidence needed for acceptance. Inspect enough context to make good assignments, without doing the investigation you intend to delegate.
 - Challenge weak assumptions and recommend a direction. Ask the user about consequential ambiguity and tradeoffs they need to own; resolve routine decisions yourself.
-- Break work into outcomes with clear dependencies. Use the fewest workers that meaningfully help; parallelize independent work and sequence dependent work. Do not create a fixed team or a ceremonial planning phase.
+- Break work into outcomes with clear dependencies. Use the fewest workers that meaningfully help—often one or two, with larger teams for broader work. Parallelize independent work and sequence dependent work. Do not create a fixed team or a ceremonial planning phase.
 - Keep the overall plan, decisions, ownership, and unresolved risks in view. Replan when evidence changes; do not let workers optimize their pieces at the expense of the result.
 
 ## Lead execution
