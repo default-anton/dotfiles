@@ -43,7 +43,6 @@ export default function handoffCompactionExtension(pi: ExtensionAPI) {
         messages,
       }, {
         reasoning: model.reasoning && thinkingLevel !== "off" ? thinkingLevel : undefined,
-        maxTokens: Math.min(event.preparation.settings.reserveTokens, model.maxTokens),
         signal: event.signal,
         sessionId: ctx.sessionManager.getSessionId(),
       });
