@@ -12,13 +12,13 @@ done
 [ ! -t 2 ] || printf 'Loading review requests…\r' >&2
 response=$(gh api graphql --paginate --slurp -f query='
   query($endCursor: String) {
-    search(query: "is:pr review-requested:@me state:open archived:false",
+    search(query: "is:pr review-requested:@me state:open archived:false draft:false",
            type: ISSUE, first: 100, after: $endCursor) {
       issueCount
       pageInfo { hasNextPage endCursor }
       nodes {
         ... on PullRequest {
-          number title url additions deletions changedFiles isDraft
+          number title url additions deletions changedFiles
           author { login }
           repository { nameWithOwner }
         }
@@ -51,7 +51,7 @@ rows=$(jq -r '
       ((.changedFiles | lpad(3)) + "f" | dim),
       (.reference | pad($reference_width) | dim),
       ("\u001b[36m" + (.author_label | pad($author_width)) + "\u001b[0m"),
-      ((if .isDraft then "\u001b[33m[draft]\u001b[0m " else "" end) + (.title | clean))
+      (.title | clean)
     ]
   | join("\t")
 ' <<< "$response")
