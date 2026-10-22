@@ -5,7 +5,7 @@ For classification tasks, use code mode’s models.classify, defaulting to types
 For image generation tasks, use code mode’s models.generateImages with provider openai-codex and model gpt-image-2.5-sunburst.
 Add comments only when asked. Keep existing comments unless outdated.
 Commit only when explicitly asked. Do not run validation as part of a commit or push task.
-For PR or change reviews, do not run tests, linters, or other validation; CI handles validation.
+For change reviews, do not run tests, linters, or other validation; CI handles validation.
 Never use the `find` and `grep` CLI tools. Use `fd` and `rg` instead.
 When using `agent-browser`, start with `agent-browser skills get core`. Batch known actions and wait for specific content or state rather than fixed delays.
 Pre-installed CLI tools: ast-grep, gh, jq, pnpm, mise, uv, imagemagick, and ffmpeg.
