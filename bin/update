@@ -16,7 +16,7 @@ EOF
 }
 
 if [[ $# -eq 0 ]]; then
-  for tool in claude pi herdr worktrunk codex; do
+  for tool in pi herdr worktrunk codex; do
     "$0" "$tool"
   done
   exit
@@ -26,10 +26,6 @@ tool="$1"
 version="${2:-latest}"
 
 case "$tool" in
-  claude)
-    mise use --global "claude-code@${version}"
-    mise prune --tools claude-code
-    ;;
   pi)
     # Source: https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent
     mise use --global "npm:@earendil-works/pi-coding-agent@${version}"
@@ -49,7 +45,7 @@ case "$tool" in
     mise prune --tools "npm:@openai/codex"
     ;;
   *)
-    echo "Usage: update {claude|pi|herdr|worktrunk|codex} [version]"
+    echo "Usage: update {pi|herdr|worktrunk|codex} [version]"
     exit 1
     ;;
 esac
