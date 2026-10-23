@@ -28,7 +28,7 @@ Create a draft pull request for the current branch. Treat the user's request to 
    ```md
    @here :emoji: PR title without ticket ID
    > :ticket: ISSUE_URL
-   > :pr: PR_URL code `+42/-18` · tests `+30/-8` · docs `+6/-2`
+   > :pr: PR_URL code `+42/-18` tests `+30/-8` docs `+6/-2`
    ```
 6. Report the PR URL and confirm that the Slack message is on the clipboard.
 
