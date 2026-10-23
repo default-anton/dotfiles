@@ -1,5 +1,6 @@
 ---
 name: fframes-video
+disable-model-invocation: true
 description: >-
   Create, animate, review and render videos in code with fframes (Rust, SVG scenes, ffmpeg
   encoding, Skia GPU rendering). Use whenever the user wants a video, animation, motion graphic,
