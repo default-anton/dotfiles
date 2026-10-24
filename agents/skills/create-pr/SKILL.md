@@ -24,7 +24,7 @@ Create a draft pull request for the current branch. Treat the user's request to 
      --title "$title" \
      --body-file /tmp/pr-<...>-body.md
    ```
-5. Get the PR URL and per-file line counts with `gh pr view --json url,files`. Group additions/deletions into mutually exclusive categories: `tests` for test files and fixtures, `docs` for documentation (including Markdown), and `code` for everything else. Use the repository's conventions to identify tests. Show lines added/deleted, not test counts; omit unchanged categories and never show a total. Copy this ready-to-send message with `pbcopy` (do not include a code fence). Choose one apt Slack emoji for `:emoji:`; omit the issue line if there is no linked issue:
+5. Get the PR URL with `gh pr view --json url`. Get per-file line counts that ignore whitespace-only changes with `git fetch origin <base> && git diff -w --numstat origin/<base>...HEAD`, so re-indentation does not inflate the counts. Group additions/deletions into mutually exclusive categories: `tests` for test files and fixtures, `docs` for documentation (including Markdown), and `code` for everything else. Use the repository's conventions to identify tests. Show lines added/deleted, not test counts; omit unchanged categories and never show a total. Copy this ready-to-send message with `pbcopy` (do not include a code fence). Choose one apt Slack emoji for `:emoji:`; omit the issue line if there is no linked issue:
    ```md
    @here :emoji: PR title without ticket ID
    > :ticket: ISSUE_URL
