@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+current=$(defaults read com.apple.universalaccess reduceMotion 2>/dev/null || printf '0')
+
+if [[ "$current" == 1 ]]; then
+  defaults write com.apple.universalaccess reduceMotion -bool false
+  printf 'Reduce Motion: off\n'
+else
+  defaults write com.apple.universalaccess reduceMotion -bool true
+  printf 'Reduce Motion: on\n'
+fi
