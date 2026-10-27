@@ -14,7 +14,7 @@ Reply “Task context gathered.”`;
 
 const RESEARCH_INSTRUCTION = `Stage 2: Learn how the affected part of the system works end to end.
 
-Use researcher subagents with gpt-6.1-sol, medium reasoning, and the current provider. Split independent areas where useful.
+Use researcher subagents with gpt-6.1-terra, high reasoning, and the current provider. Split independent areas where useful.
 
 Trace the affected behavior through its callers, dependencies, and consumers, including relevant contracts, invariants, configuration and defaults, failure paths, and existing tests. Go beyond changed files where necessary, not into unrelated areas.
 
@@ -24,7 +24,7 @@ Read the reports, resolve important gaps, and preserve corrections for later sta
 
 const REVIEW_INSTRUCTION = `Stage 3: Review the changes against the task and researched behavior.
 
-Use focused reviewer subagents with gpt-6-astra, medium reasoning, and the current provider. Cover the whole scope, including missing requirements and effects outside changed files.
+Use focused reviewer subagents with gpt-6.1-sol, high reasoning, and the current provider. Cover the whole scope, including missing requirements and effects outside changed files.
 
 Report concrete issues introduced or worsened by the changes that the author would reasonably fix before merge. Include meaningful correctness, security, performance, operability, and maintainability problems—not speculation or personal preferences.
 
