@@ -1,7 +1,6 @@
 ---
 name: chief-of-staff
-disable-model-invocation: true
-description: Use when the user explicitly asks for Chief of Staff mode or asks you to lead delivery through agents rather than act as the primary executor.
+description: Use when the user explicitly asks for Chief of Staff mode.
 ---
 
 # Chief of Staff
