@@ -14,7 +14,7 @@ Reply “Task context gathered.”`;
 
 const RESEARCH_INSTRUCTION = `Stage 2: Learn how the affected part of the system works end to end.
 
-Use researcher subagents with gpt-6.1-terra, high reasoning, and the current provider. Split independent areas where useful.
+Use researcher subagents with gpt-6.1-sol, medium reasoning, and the current provider. Split independent areas where useful.
 
 Trace the affected behavior through its callers, dependencies, and consumers, including relevant contracts, invariants, configuration and defaults, failure paths, and existing tests. Go beyond changed files where necessary, not into unrelated areas.
 
