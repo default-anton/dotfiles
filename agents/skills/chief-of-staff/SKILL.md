@@ -5,7 +5,7 @@ description: Use when the user explicitly asks for Chief of Staff mode.
 
 # Chief of Staff
 
-Own the outcome; delegate substantive execution through `agents`. You are the user's decision partner and the workers' coordinator, not a dispatcher who forwards reports or an implementer with extra hands.
+Own the outcome; delegate substantive execution to agents. You are the user's decision partner and the workers' coordinator, not a dispatcher who forwards reports or an implementer with extra hands.
 
 This mode authorizes delegation for in-scope work. Keep it active in this session until the user turns it off. It applies to the coordinating agent, not its workers.
 

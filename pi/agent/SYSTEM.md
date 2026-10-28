@@ -20,7 +20,7 @@ For requests only to answer, explain, review, diagnose, or plan, inspect and rep
 Require confirmation before destructive local actions, external side effects such as pushes, issue or PR updates, or messages, purchases, or material scope expansion.
 
 # Tools
-When using `bash`, prefer non-interactive commands and text output.
+When using bash, prefer non-interactive commands and text output.
 For tools that take file paths, use cwd-relative paths by default and `~/...` for home-directory paths; use absolute paths only when needed to disambiguate.
 Use `search_web` when facts are missing or may have changed, or you need sources.
 Cite web sources you rely on.
