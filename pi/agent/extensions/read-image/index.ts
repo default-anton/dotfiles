@@ -7,7 +7,7 @@ import {
   type ExtensionAPI,
   type ReadToolOptions,
 } from "@earendil-works/pi-coding-agent";
-import { Type } from "typebox";
+import { obj, str } from "@earendil-works/pi-schema";
 
 export function createReadImageToolDefinition(
   cwd: string,
@@ -39,7 +39,10 @@ export function createReadImageToolDefinition(
     promptGuidelines: [
       "Use read_image to examine images and bash to read text files.",
     ],
-    parameters: Type.Pick(read.parameters, ["path"]),
+    parameters: obj(
+      { path: str({ description: "Path to the file to read (relative or absolute)" }) },
+      { open: true },
+    ) as unknown as typeof read.parameters,
   };
 }
 

@@ -1,7 +1,7 @@
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { Type } from "@earendil-works/pi-ai";
+import { arr, obj, opt, str } from "@earendil-works/pi-schema";
 import { Text } from "@earendil-works/pi-tui";
 import {
   DEFAULT_MAX_BYTES,
@@ -279,22 +279,19 @@ const fetchWebTool = defineTool({
   name: "fetch_web",
   label: "Fetch Web",
   description: `Fetches content from specific web pages. Returns the full page when no objective is provided, or the content most relevant to an objective. ${outputLimit}`,
-  parameters: Type.Object(
-    {
-      urls: Type.Array(Type.String(), {
-        minItems: 1,
-        maxItems: 20,
-        description: "The public web page URLs to fetch.",
+  parameters: obj({
+    urls: arr(str(), {
+      minItems: 1,
+      maxItems: 20,
+      description: "The public web page URLs to fetch.",
+    }),
+    objective: opt(
+      str({
+        maxLength: 5000,
+        description: "Optional natural-language description of what to extract. Omit it to fetch each entire page.",
       }),
-      objective: Type.Optional(
-        Type.String({
-          maxLength: 5000,
-          description: "Optional natural-language description of what to extract. Omit it to fetch each entire page.",
-        }),
-      ),
-    },
-    { additionalProperties: false },
-  ),
+    ),
+  }),
   async execute(_toolCallId, args, signal, _onUpdate, ctx) {
     const input = args as FetchWebArgs;
     const result = await callParallel<ParallelExtractResponse>(
@@ -319,7 +316,8 @@ const fetchWebTool = defineTool({
     };
   },
   renderCall(args, theme, context) {
-    const urls = args.urls ?? [];
+    const input = args as Partial<FetchWebArgs>;
+    const urls = input.urls ?? [];
     const urlCount = `${urls.length} ${urls.length === 1 ? "URL" : "URLs"}`;
     let text = theme.fg("toolTitle", theme.bold("fetch_web ")) + theme.fg("muted", urlCount);
 
@@ -332,8 +330,8 @@ const fetchWebTool = defineTool({
     for (const url of urls) {
       text += `\n${theme.fg("dim", "• ")}${theme.fg("accent", url)}`;
     }
-    if (args.objective) {
-      text += `\n${theme.fg("muted", "Objective: ")}${theme.fg("toolOutput", args.objective)}`;
+    if (input.objective) {
+      text += `\n${theme.fg("muted", "Objective: ")}${theme.fg("toolOutput", input.objective)}`;
     }
     return new Text(text, 0, 0);
   },
@@ -353,20 +351,17 @@ const searchWebTool = defineTool({
   name: "search_web",
   label: "Search Web",
   description: `Search the web and return results with titles, URLs, and content excerpts. ${outputLimit}`,
-  parameters: Type.Object(
-    {
-      objective: Type.String({
-        maxLength: 5000,
-        description: "A concise, self-contained research goal. Include the key entity or topic, context, source preferences, and freshness needs.",
-      }),
-      search_queries: Type.Array(Type.String({ maxLength: 200 }), {
-        minItems: 1,
-        maxItems: 3,
-        description: "Exactly 3 keyword search queries of 3-6 words each. Must be diverse — vary entity names, synonyms, and angles. Each query must include the key entity or topic. NEVER write sentences, instructions, or use site: operators.",
-      }),
-    },
-    { additionalProperties: false },
-  ),
+  parameters: obj({
+    objective: str({
+      maxLength: 5000,
+      description: "A concise, self-contained research goal. Include the key entity or topic, context, source preferences, and freshness needs.",
+    }),
+    search_queries: arr(str({ maxLength: 200 }), {
+      minItems: 1,
+      maxItems: 3,
+      description: "Exactly 3 keyword search queries of 3-6 words each. Must be diverse — vary entity names, synonyms, and angles. Each query must include the key entity or topic. NEVER write sentences, instructions, or use site: operators.",
+    }),
+  }),
   async execute(_toolCallId, args, signal, _onUpdate, ctx) {
     const input = args as SearchWebArgs;
     const result = await callParallel<ParallelSearchResponse>(
@@ -392,13 +387,14 @@ const searchWebTool = defineTool({
     };
   },
   renderCall(args, theme, context) {
+    const input = args as Partial<SearchWebArgs>;
     let text = theme.fg("toolTitle", theme.bold("search_web"));
-    if (args.objective) {
-      text += ` ${theme.fg("accent", compactText(args.objective, context.expanded ? 5000 : 120))}`;
+    if (input.objective) {
+      text += ` ${theme.fg("accent", compactText(input.objective, context.expanded ? 5000 : 120))}`;
     }
-    if (context.expanded && args.search_queries?.length) {
+    if (context.expanded && input.search_queries?.length) {
       text += `\n${theme.fg("muted", "Queries:")}`;
-      for (const query of args.search_queries) {
+      for (const query of input.search_queries) {
         text += `\n${theme.fg("dim", `• ${query}`)}`;
       }
     }

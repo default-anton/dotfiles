@@ -50,6 +50,7 @@ SHELL_CMDS: Final[list[str]] = [
     "brew bundle --no-upgrade",
     "$(brew --prefix)/opt/fzf/install",
     f"$(brew --prefix)/bin/mise use --global node@{NODE} ruby@{RUBY} lua@{LUA} go@latest jherdr@latest worktrunk \"npm:@earendil-works/pi-coding-agent@latest\" \"npm:@openai/codex@latest\" claude-code@latest",
+    "$(brew --prefix)/bin/mise exec node -- npm ci --prefix ~/.dotfiles/pi/agent/extensions",
     "python3 -m venv ~/.local/share/nvim/python3-provider && ~/.local/share/nvim/python3-provider/bin/python -m pip install --upgrade pynvim",
 ]
 

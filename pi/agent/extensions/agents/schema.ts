@@ -1,64 +1,66 @@
-import { StringEnum } from "@earendil-works/pi-ai";
-import { Type, type Static } from "typebox";
-import { Value } from "typebox/value";
+import { arr, bool, compile, int, lit, nullable, num, obj, oneOf, opt, str, union, type Annotations, type Schema, type Static } from "@earendil-works/pi-schema";
 
-export const parameters = Type.Object({
-  action: StringEnum(["start", "task", "message", "question", "answer", "status", "wait", "configure", "stop"]),
-  session: Type.Optional(Type.String({ description: "Recipient UUID for task/message/question/answer/stop; status accepts session or run." })),
-  name: Type.Optional(Type.String({ description: "Required for start. Short tab label." })),
-  message: Type.Optional(Type.String({ description: "Required for start/task/message/question/answer." })),
-  cwd: Type.Optional(Type.String({ description: "Start only; defaults to current directory." })),
-  model: Type.Optional(Type.String({ description: "Start only: model, model:thinking, or provider/model:thinking. Omitted parts inherit." })),
-  delivery: Type.Optional(StringEnum(["manual", "steer"], { description: "Start/task/configure: buffer for wait or wake parent at next boundary. Start defaults to steer; tasks inherit. Required for configure." })),
-  lifetime: Type.Optional(StringEnum(["turn", "session"], { description: "Start/task: stop on parent-turn abort (default) or survive until parent shutdown. Tasks inherit." })),
-  replyTo: Type.Optional(Type.String({ description: "Required for answer: received question event ID." })),
-  run: Type.Optional(Type.String({ description: "Status: exact run handle. Message/question/answer: sender's run handle; defaults to current run." })),
-  targets: Type.Optional(Type.Array(Type.String(), { minItems: 1, maxItems: 32, description: "Wait/configure: distinct run handles. Required for configure; omit for wait on entire inbox." })),
-  until: Type.Optional(StringEnum(["any", "all", "message"], { description: "Wait: any/all require targets. Defaults to all with targets, message otherwise. Questions/blocks return early." })),
-  timeoutMs: Type.Optional(Type.Integer({ minimum: 0, maximum: 3600000, description: "Wait: milliseconds, default 60000; zero receives immediately. Never stops workers." })),
-  replay: Type.Optional(Type.Union([Type.Literal(true), Type.String()], { description: "Wait: true replays retained events; a returned cursor continues replay. Omit for unread events." })),
-}, { additionalProperties: false });
+function stringEnum<const V extends readonly string[]>(values: V, options?: Annotations<V[number]>): Schema<V[number]> {
+  return { type: "string", ...oneOf(values, options) };
+}
+
+export const parameters = obj({
+  action: stringEnum(["start", "task", "message", "question", "answer", "status", "wait", "configure", "stop"]),
+  session: opt(str({ description: "Recipient UUID for task/message/question/answer/stop; status accepts session or run." })),
+  name: opt(str({ description: "Required for start. Short tab label." })),
+  message: opt(str({ description: "Required for start/task/message/question/answer." })),
+  cwd: opt(str({ description: "Start only; defaults to current directory." })),
+  model: opt(str({ description: "Start only: model, model:thinking, or provider/model:thinking. Omitted parts inherit." })),
+  delivery: opt(stringEnum(["manual", "steer"], { description: "Start/task/configure: buffer for wait or wake parent at next boundary. Start defaults to steer; tasks inherit. Required for configure." })),
+  lifetime: opt(stringEnum(["turn", "session"], { description: "Start/task: stop on parent-turn abort (default) or survive until parent shutdown. Tasks inherit." })),
+  replyTo: opt(str({ description: "Required for answer: received question event ID." })),
+  run: opt(str({ description: "Status: exact run handle. Message/question/answer: sender's run handle; defaults to current run." })),
+  targets: opt(arr(str(), { minItems: 1, maxItems: 32, description: "Wait/configure: distinct run handles. Required for configure; omit for wait on entire inbox." })),
+  until: opt(stringEnum(["any", "all", "message"], { description: "Wait: any/all require targets. Defaults to all with targets, message otherwise. Questions/blocks return early." })),
+  timeoutMs: opt(int({ minimum: 0, maximum: 3600000, description: "Wait: milliseconds, default 60000; zero receives immediately. Never stops workers." })),
+  replay: opt(union([{ type: "boolean", ...lit(true) }, str()], { description: "Wait: true replays retained events; a returned cursor continues replay. Omit for unread events." })),
+});
 
 const snapshotProperties = {
-  session: Type.Optional(Type.String()),
-  run: Type.Optional(Type.String()),
-  status: StringEnum(["running", "blocked", "completed", "stopped", "idle", "failed"]),
-  tab: Type.Optional(Type.String()),
-  contextUsage: Type.Optional(Type.Object({
-    tokens: Type.Union([Type.Number(), Type.Null()]),
-    contextWindow: Type.Number(),
-    percent: Type.Union([Type.Number(), Type.Null()]),
-  }, { additionalProperties: false })),
-  output: Type.Optional(Type.String()),
-  outputPath: Type.Optional(Type.String()),
-  error: Type.Optional(Type.Object({
-    code: Type.String(),
-    message: Type.String(),
-  }, { additionalProperties: false })),
+  session: opt(str()),
+  run: opt(str()),
+  status: stringEnum(["running", "blocked", "completed", "stopped", "idle", "failed"]),
+  tab: opt(str()),
+  contextUsage: opt(obj({
+    tokens: nullable(num()),
+    contextWindow: num(),
+    percent: nullable(num()),
+  })),
+  output: opt(str()),
+  outputPath: opt(str()),
+  error: opt(obj({
+    code: str(),
+    message: str(),
+  })),
 };
 
-export const eventSchema = Type.Object({
-  id: Type.String(),
-  type: StringEnum(["message", "needs_input", "blocked", "completed", "failed", "stopped"]),
-  session: Type.String(),
-  run: Type.Optional(Type.String()),
-  from: Type.String(),
-  created: Type.Number(),
-  message: Type.Optional(Type.String()),
-  replyTo: Type.Optional(Type.String()),
-  resolved: Type.Optional(Type.Boolean()),
-  result: Type.Optional(Type.Object(snapshotProperties, { additionalProperties: false })),
-}, { additionalProperties: false });
+export const eventSchema = obj({
+  id: str(),
+  type: stringEnum(["message", "needs_input", "blocked", "completed", "failed", "stopped"]),
+  session: str(),
+  run: opt(str()),
+  from: str(),
+  created: num(),
+  message: opt(str()),
+  replyTo: opt(str()),
+  resolved: opt(bool()),
+  result: opt(obj(snapshotProperties)),
+});
 
-export const resultSchema = Type.Object({
+export const resultSchema = obj({
   ...snapshotProperties,
-  event: Type.Optional(Type.String()),
-  reason: Type.Optional(StringEnum(["completed", "message", "needs_input", "blocked", "timeout", "cancelled", "configured"])),
-  events: Type.Optional(Type.Array(eventSchema)),
-  runs: Type.Optional(Type.Array(Type.Object(snapshotProperties, { additionalProperties: false }))),
-  more: Type.Optional(Type.Boolean()),
-  cursor: Type.Optional(Type.String()),
-}, { additionalProperties: false });
+  event: opt(str()),
+  reason: opt(stringEnum(["completed", "message", "needs_input", "blocked", "timeout", "cancelled", "configured"])),
+  events: opt(arr(eventSchema)),
+  runs: opt(arr(obj(snapshotProperties))),
+  more: opt(bool()),
+  cursor: opt(str()),
+});
 
 export type InboxEvent = Static<typeof eventSchema>;
 export type Target = { session: string; run: string };
@@ -99,8 +101,10 @@ export function publicResult(result: AgentsResult): AgentsResult {
   };
 }
 
+const checkParameters = compile(parameters).check;
+
 export function validateArguments(args: ToolArguments): Arguments {
-  if (!Value.Check(parameters, args)) throw new Error("Invalid agents arguments.");
+  if (!checkParameters(args)) throw new Error("Invalid agents arguments.");
   const fields = {
     start: ["action", "name", "message", "cwd", "model", "delivery", "lifetime"],
     task: ["action", "session", "message", "delivery", "lifetime"],

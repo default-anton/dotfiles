@@ -2,60 +2,63 @@ import { randomUUID } from "node:crypto";
 import { chmodSync, unlinkSync } from "node:fs";
 import { createConnection, createServer, type Socket } from "node:net";
 import { join } from "node:path";
-import { Type, type Static } from "typebox";
-import { Value } from "typebox/value";
+import { bool, compile, int, lit, obj, oneOf, opt, str, type Static } from "@earendil-works/pi-schema";
 import { ControlError, eventSchema, resultSchema, uuid, type AgentsResult } from "./schema";
 import { State, hash, processAlive, scheduleDeadline } from "./state";
 
-const identifier = Type.String({ pattern: uuid.source });
+const identifier = str({ pattern: uuid.source });
 export const protocolVersion = 3;
-const identitySchema = Type.Object({
+const identityProperties = {
   session: identifier,
   incarnation: identifier,
-  server: Type.String(),
-}, { additionalProperties: false });
-const requestSchema = Type.Object({
-  version: Type.Literal(protocolVersion),
+  server: str(),
+};
+const identitySchema = obj(identityProperties);
+const requestSchema = obj({
+  version: lit(protocolVersion),
   id: identifier,
   target: identitySchema,
-  operation: Type.Union([Type.Literal("hello"), Type.Literal("submit"), Type.Literal("message"), Type.Literal("status"), Type.Literal("abort")]),
-  caller: Type.Optional(identitySchema),
-  capability: Type.Optional(Type.String()),
-  automatic: Type.Optional(Type.Boolean()),
-  message: Type.Optional(Type.String({ minLength: 1, maxLength: 262144 })),
-  run: Type.Optional(identifier),
-  event: Type.Optional(eventSchema),
-}, { additionalProperties: false });
+  operation: oneOf(["hello", "submit", "message", "status", "abort"]),
+  caller: opt(identitySchema),
+  capability: opt(str()),
+  automatic: opt(bool()),
+  message: opt(str({ minLength: 1, maxLength: 262144 })),
+  run: opt(identifier),
+  event: opt(eventSchema),
+});
+const checkRequest = compile(requestSchema).check;
 
 export type Identity = Static<typeof identitySchema>;
 export type Request = Static<typeof requestSchema>;
 export type Owner = Identity & { capability: string; launch: string };
-const endpointSchema = Type.Object({
-  ...identitySchema.properties,
-  protocol: Type.Literal(protocolVersion),
-  pid: Type.Integer({ minimum: 1 }),
-  file: Type.String(),
-  cwd: Type.String(),
-  socket: Type.String(),
-  pane: Type.String(),
-  tab: Type.String(),
-  workspace: Type.String(),
-  worker: Type.Boolean(),
-  closing: Type.Optional(Type.Boolean()),
-}, { additionalProperties: false });
-const snapshotSchema = Type.Object({
+const endpointSchema = obj({
+  ...identityProperties,
+  protocol: lit(protocolVersion),
+  pid: int({ minimum: 1 }),
+  file: str(),
+  cwd: str(),
+  socket: str(),
+  pane: str(),
+  tab: str(),
+  workspace: str(),
+  worker: bool(),
+  closing: opt(bool()),
+});
+const snapshotSchema = obj({
   endpoint: endpointSchema,
   result: resultSchema,
-  selection: Type.Optional(Type.Object({
-    provider: Type.String(),
-    model: Type.String(),
-    thinking: Type.String(),
-  }, { additionalProperties: false })),
-  owner: Type.Optional(Type.Object({
-    ...identitySchema.properties,
+  selection: opt(obj({
+    provider: str(),
+    model: str(),
+    thinking: str(),
+  })),
+  owner: opt(obj({
+    ...identityProperties,
     launch: identifier,
-  }, { additionalProperties: false })),
-}, { additionalProperties: false });
+  })),
+});
+const checkSnapshot = compile(snapshotSchema).check;
+const checkResult = compile(resultSchema).check;
 export type Endpoint = Static<typeof endpointSchema>;
 export type Snapshot = Static<typeof snapshotSchema>;
 export type Reply = AgentsResult | Snapshot;
@@ -96,7 +99,7 @@ export function request(
   const message = { ...payload, version: protocolVersion, id: payload.id ?? randomUUID(), target: {
     session: endpoint.session, incarnation: endpoint.incarnation, server: endpoint.server,
   } };
-  if (!Value.Check(requestSchema, message)) throw new Error("Invalid bridge request.");
+  if (!checkRequest(message)) throw new Error("Invalid bridge request.");
   return new Promise((resolve, reject) => {
     const socket = createConnection(endpoint.socket);
     let settled = false;
@@ -128,10 +131,10 @@ export function request(
       if (reply.error) return finish(new ControlError(reply.error.code, reply.error.message));
       if (payload.operation === "hello") {
         const snapshot = reply.value as Snapshot;
-        if (!Value.Check(snapshotSchema, snapshot) || !sameIdentity(snapshot.endpoint, endpoint)) {
+        if (!checkSnapshot(snapshot) || !sameIdentity(snapshot.endpoint, endpoint)) {
           return finish(new ControlError("identity_changed", "Endpoint identity changed."));
         }
-      } else if (!Value.Check(resultSchema, reply.value)) {
+      } else if (!checkResult(reply.value)) {
         return finish(new ControlError("protocol_error", "Invalid control result."));
       }
       finish(undefined, reply.value);
@@ -166,7 +169,7 @@ export async function listen(
     });
     readFrame(socket, (value) => {
       clearTimeout(timer);
-      if (!Value.Check(requestSchema, value)) return socket.destroy();
+      if (!checkRequest(value)) return socket.destroy();
       const incoming = value as Request;
       const respond = (body: object) => {
         if (!socket.destroyed) socket.end(`${JSON.stringify({ version: protocolVersion, id: incoming.id, ...body })}\n`);

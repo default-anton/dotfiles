@@ -12,7 +12,7 @@ import {
   Spacer,
   Text,
 } from "@earendil-works/pi-tui";
-import { Type, type Static } from "typebox";
+import { obj, str, type Static } from "@earendil-works/pi-schema";
 import {
   createApplyPatchAvailability,
   supportsApplyPatch,
@@ -24,15 +24,12 @@ import {
   type VerifiedPatch,
 } from "./lib/workspace.ts";
 
-const applyPatchSchema = Type.Object(
-  {
-    input: Type.String({
-      minLength: 1,
-      description: "Raw patch text beginning with *** Begin Patch and ending with *** End Patch.",
-    }),
-  },
-  { additionalProperties: false },
-);
+const applyPatchSchema = obj({
+  input: str({
+    minLength: 1,
+    description: "Raw patch text beginning with *** Begin Patch and ending with *** End Patch.",
+  }),
+});
 
 type ApplyPatchInput = Static<typeof applyPatchSchema>;
 

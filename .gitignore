@@ -1,4 +1,4 @@
 Brewfile.lock.json
 __pycache__/
 *.pyc
-pi/agent/extensions/*/node_modules/
+pi/agent/extensions/**/node_modules/

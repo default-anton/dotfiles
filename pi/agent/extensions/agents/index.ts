@@ -9,7 +9,7 @@ import { endpoints, listen, protocolVersion, sameIdentity, verifyCaller, type En
 import { currentPane, herdr, isSolePane } from "./herdr";
 import { Inbox } from "./inbox";
 import { Runs } from "./runs";
-import { ControlError, failure, parameters, publicResult, resultSchema, uuid, validateArguments, type AgentsResult, type InboxEvent } from "./schema";
+import { ControlError, failure, parameters, publicResult, resultSchema, uuid, validateArguments, type AgentsResult, type InboxEvent, type ToolArguments } from "./schema";
 import { canonical, hash, readSession, State } from "./state";
 
 const parentGuidelines = [
@@ -67,7 +67,7 @@ export default function agentsExtension(pi: ExtensionAPI) {
     outputSchema: resultSchema,
     exposure: "hidden",
     executionMode: "parallel",
-    async execute(_id, args, signal, _onUpdate, ctx) {
+    async execute(_id, args: ToolArguments, signal, _onUpdate, ctx) {
       const resolved = validateArguments(args);
       let result;
       if (!initialized) {
