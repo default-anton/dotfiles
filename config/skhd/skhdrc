@@ -77,7 +77,8 @@
 # ############################################################### #
 
 ctrl + cmd - a : open -a 'Ghostty'
-ctrl + cmd - c : open -a 'Google Chrome'
+ctrl + cmd - b : open -a 'Google Chrome'
+ctrl + cmd - c : open -a 'Claude'
 ctrl + cmd - g : open -a 'Gemini'
 ctrl + cmd - f : open -a 'Finder'
 ctrl + cmd - h : open -a 'Hey'
