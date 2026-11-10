@@ -1,4 +1,6 @@
 Brewfile.lock.json
 __pycache__/
 *.pyc
+agents/skills/.trash/
+agents/skills/synced/
 pi/agent/extensions/**/node_modules/
