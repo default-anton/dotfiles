@@ -31,6 +31,7 @@ SYM_LINKS: Final[list[tuple[str, str]]] = [
     ("~/.pi/agent/models.json", "pi/agent/models.json"),
     ("~/.pi/agent/AGENTS.md", "pi/agent/AGENTS.md"),
     ("~/.pi/agent/prompts", "pi/agent/prompts"),
+    ("~/.agents/AGENTS.md", "agents/AGENTS.md"),
     ("~/.agents/skills", "agents/skills"),
     ("~/.claude/skills", "agents/skills"),
     ("~/.pi/agent/extensions", "pi/agent/extensions"),
