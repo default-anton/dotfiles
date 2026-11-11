@@ -13,7 +13,7 @@ Create a draft pull request for the current branch. Treat the user's request to 
    - Start with why the change is needed. Match the context to the work: the failure and workaround for a bug, the use case for a feature, the limitation for an improvement, or the operational goal for scripts and configuration. Be concrete.
    - Show the outcome, not the sequence of code edits. Choose the clearest format: before/after behavior, a usage example, a request flow, pseudocode, or a small diagram. For multi-step workflows, show where one step's output becomes the next step's input. Use examples when they clarify the change, not as a mandatory template.
    - Explain surprising behavior, consequential tradeoffs, or operational constraints needed to judge the change. Do not inventory every boundary or invent review risks.
-   - Do not restate what is obvious from the diff, including tests added. Do not include test results or checks performed unless explicitly required.
+   - Do not restate what is obvious from the diff, including tests added. Include only verification that CI does not cover, such as manual browser or API checks, so reviewers know what was exercised beyond CI. Omit the verification section if there is nothing to report.
    - Let the complexity of the change determine the length. Include enough context to review the intent and outcome without reading the diff, then cut repetition and details the diff explains just as well.
 
    Include links or refs for applicable issues, support tickets, and Sentry errors.
