@@ -1,6 +1,6 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
-  "lastChangelogVersion": "1.5.2",
+  "lastChangelogVersion": "1.7.0",
   "defaultThinkingLevel": "medium",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-astra",
@@ -32,7 +32,6 @@
   "treeFilterMode": "no-tools",
   "theme": "dark",
   "enableSkillCommands": true,
-  "showCacheMissNotices": true,
   "quietStartup": false,
   "enableInstallTelemetry": false,
   "warnings": {
@@ -43,5 +42,11 @@
     "images": "kitty",
     "showTerminalProgress": true
   },
-  "deviceId": "1796af1c-8570-4236-aa7a-09f0b2487e23"
+  "deviceId": "1796af1c-8570-4236-aa7a-09f0b2487e23",
+  "notices": {
+    "cacheMisses": true,
+    "cacheWarming": true,
+    "compactionCosts": true,
+    "reasoningDrops": true
+  }
 }
